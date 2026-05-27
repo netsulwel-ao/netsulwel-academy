@@ -46,7 +46,7 @@ export function Hero() {
 
  <h1 className="mx-auto flex max-w-5xl flex-col items-center gap-2 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl md:gap-3 md:text-5xl lg:text-[3.5rem]">
  <span className="block text-balance">
- Leve sua carreira ao próximo{" "}
+ Leve sua carreira ao próximo Isidro Manuel {" "}
  <PixelText
  as="span"
  size="xl"
