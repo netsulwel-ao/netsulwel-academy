@@ -46,7 +46,7 @@ export function Hero() {
 
  <h1 className="mx-auto flex max-w-5xl flex-col items-center gap-2 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl md:gap-3 md:text-5xl lg:text-[3.5rem]">
  <span className="block text-balance">
- Leve sua carreira ao próximo Isidro Manuel {" "}
+ Leve sua carreira ao próximo {" "}
  <PixelText
  as="span"
  size="xl"
@@ -64,7 +64,7 @@ export function Hero() {
  <span className="text-purple-light">tech</span>,{" "}
  <span className="text-green-light">finanças</span> e{" "}
  <span className="text-amber-300">investimentos</span> — com projetos
- reais e uma comunidade que não te deixa parar no meio do caminho.
+ reais e uma comunidade que não te deixa parar no meio do caminho...
  </p>
 
  <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
