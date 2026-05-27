@@ -1,0 +1,154 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { 
+ LayoutDashboard, Users, Settings, LogOut, Search, 
+ PanelLeftClose, PanelLeft, Sun, Moon, Video, DollarSign, Folders, Layers, Megaphone, Radio
+} from "lucide-react";
+import { auth } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
+
+interface SidebarProps {
+ isCollapsed: boolean;
+ setIsCollapsed: (val: boolean) => void;
+}
+
+const navSections = [
+ {
+ title: "GESTÃO",
+ items: [
+ { icon: LayoutDashboard, label: "Visão Geral", href: "/admin" },
+ { icon: Folders, label: "Meus Cursos", href: "/admin/courses" },
+ { icon: Video, label: "Criar Curso", href: "/admin/courses/new" },
+ { icon: Layers, label: "Trilhas", href: "/admin/trails" },
+ { icon: Radio, label: "Aulas ao Vivo", href: "/admin/lives" },
+ { icon: Users, label: "Alunos", href: "/admin/users" },
+ { icon: DollarSign, label: "Vendas", href: "/admin/sales" },
+ ]
+ },
+ {
+ title: "SISTEMA",
+ items: [
+ { icon: Settings, label: "Configurações", href: "/admin/settings" },
+ { icon: Megaphone, label: "Anúncios", href: "/admin/announcements" },
+ ]
+ }
+];
+
+export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
+  const pathname = usePathname();
+
+  const handleLogout = async () => {
+  try {
+  await signOut(auth);
+  } catch (error) {
+  console.error("Erro ao fazer logout:", error);
+  }
+  };
+
+ return (
+ <aside 
+ className={`fixed left-0 top-0 z-40 h-screen bg-gray-950/80 backdrop-blur-2xl transition-all duration-300 flex flex-col ${
+ isCollapsed ? "w-20" : "w-[280px]"
+ } hidden lg:flex`}
+ >
+ <div className="flex h-20 items-center justify-between px-6 shrink-0">
+ <a href="/admin" className={`flex items-center gap-3 overflow-hidden transition-all duration-300 ${isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"}`}>
+ <img src="/Logo-Academy-White.svg" alt="Netsulwel" className="h-10 w-auto brightness-0 invert drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+ <span className="text-lg font-bold text-white tracking-wide">ADMIN</span>
+ </a>
+ 
+ <button 
+ onClick={() => setIsCollapsed(!isCollapsed)}
+ className={`flex h-8 w-8 items-center justify-center bg-gray-900 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors ${isCollapsed ? "mx-auto" : ""}`}
+ >
+ {isCollapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+ </button>
+ </div>
+
+ <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4 custom-scrollbar">
+ 
+ <div className={`px-4 mb-6 transition-all duration-300 ${isCollapsed ? "opacity-0 invisible h-0 mb-0" : "opacity-100 visible"}`}>
+ <div className="relative flex items-center">
+ <Search className="absolute left-3 h-4 w-4 text-gray-500" />
+ <input 
+ type="text" 
+ placeholder="Pesquisar..." 
+ className="w-full bg-gray-900 py-2.5 pl-10 pr-10 text-sm text-gray-200 placeholder-gray-500 focus:outline-none transition-all"
+ />
+ <div className="absolute right-3 flex items-center justify-center h-5 w-5 bg-gray-800 text-[10px] font-bold text-gray-400 ">
+ /
+ </div>
+ </div>
+ </div>
+
+ <div className="space-y-6 px-4">
+ {navSections.map((section, idx) => (
+ <div key={idx}>
+ {!isCollapsed && (
+ <h3 className="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+ {section.title}
+ </h3>
+ )}
+ 
+ <ul className="space-y-1">
+ {section.items.map((item) => {
+ const isActive = pathname === item.href;
+ return (
+ <li key={item.href}>
+ <Link
+ href={item.href}
+ title={isCollapsed ? item.label : ""}
+ className={`group flex items-center px-3 py-2.5 transition-all relative ${
+ isActive 
+ ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]" 
+ : "text-gray-400 hover:bg-gray-900 hover:text-gray-200"
+ }`}
+ >
+ <item.icon className={`h-5 w-5 shrink-0 ${isCollapsed ? "mx-auto" : "mr-3"} ${isActive ? "text-white drop-shadow-md" : "text-gray-500 group-hover:text-gray-300"}`} />
+ 
+ {!isCollapsed && (
+ <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>
+ )}
+
+ {isCollapsed && (
+ <div className="absolute left-14 hidden group-hover:block bg-gray-800 px-2 py-1 text-xs text-white whitespace-nowrap z-50 ">
+ {item.label}
+ </div>
+ )}
+ </Link>
+ </li>
+ );
+ })}
+ </ul>
+ </div>
+ ))}
+ </div>
+
+ </div>
+
+ <div className=" p-4 shrink-0 space-y-3">
+ <div className={`flex items-center justify-center p-1 bg-gray-900 ${isCollapsed ? "flex-col gap-2 py-3" : "gap-1"}`}>
+ <button className={`flex items-center justify-center text-gray-400 hover:text-white transition-all ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
+ <Sun className="w-4 h-4" />
+ </button>
+ <button className={`flex items-center justify-center bg-gray-800 text-blue-500 shadow-sm transition-all ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
+ <Moon className="w-4 h-4" />
+ </button>
+ </div>
+
+ <button
+ onClick={handleLogout}
+ className={`flex items-center transition-all text-gray-500 hover:bg-red-500/10 hover:text-red-400 group ${
+ isCollapsed ? "w-12 h-12 justify-center mx-auto" : "w-full px-3 py-2.5 gap-3"
+ }`}
+ title={isCollapsed ? "Terminar Sessão" : ""}
+ >
+ <LogOut className="h-5 w-5 shrink-0 group-hover:text-red-400" />
+ {!isCollapsed && <span className="text-sm font-medium">Sair do Admin</span>}
+ </button>
+ </div>
+ </aside>
+ );
+}

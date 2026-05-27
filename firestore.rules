@@ -1,0 +1,119 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      // Sem exists(), um user sem documento em `users` faz o get falhar e regras negam tudo.
+      return isAuth() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    }
+
+    function isOwner(uid) {
+      return isAuth() && request.auth.uid == uid;
+    }
+
+    // ── users ─────────────────────────────────────────────
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid);
+      allow update: if isAdmin() ||
+        (isOwner(uid) && !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(["role", "plan"]));
+      allow delete: if isAdmin();
+    }
+
+    // ── courses ───────────────────────────────────────────
+    match /courses/{courseId} {
+      allow read: if isAdmin() ||
+        (isAuth() && resource.data.status == "published");
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── trails ────────────────────────────────────────────
+    match /trails/{trailId} {
+      allow read: if isAdmin() ||
+        (isAuth() && resource.data.status == "published");
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── announcements ─────────────────────────────────────
+    match /announcements/{announcementId} {
+      allow read: if isAdmin() ||
+        (isAuth() && resource.data.active == true);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── countdownBanners ──────────────────────────────────
+    match /countdownBanners/{bannerId} {
+      allow read: if isAdmin() ||
+        (isAuth() && resource.data.active == true);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── lives ─────────────────────────────────────────────
+    match /lives/{liveId} {
+      // Alunos: agenda + ao vivo + histórico (a UI lista também "ended")
+      allow read: if isAdmin() ||
+        (isAuth() && (resource.data.status == "scheduled" || resource.data.status == "live" || resource.data.status == "ended"));
+      allow create, update, delete: if isAdmin();
+
+      // Chat — qualquer autenticado pode ler e escrever
+      match /chat/{msgId} {
+        allow read: if isAuth();
+        allow create: if isAuth() && (
+          request.resource.data.uid == request.auth.uid ||
+          (isAdmin() && request.resource.data.type == "system")
+        );
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    // ── enrollments (compras standalone) ──────────────────
+    match /enrollments/{enrollmentId} {
+      allow read: if isAdmin() ||
+        (isAuth() && resource.data.userId == request.auth.uid);
+      allow create: if isAuth() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // ── progress (progresso das aulas) ────────────────────
+    match /progress/{progressId} {
+      allow read: if isAdmin() ||
+        (isAuth() && resource.data.userId == request.auth.uid);
+      allow create: if isAuth() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin() ||
+        (isAuth() && resource.data.userId == request.auth.uid);
+    }
+
+    // ── certificates ──────────────────────────────────────
+    match /certificates/{certId} {
+      allow read: if isAdmin() ||
+        (isAuth() && resource.data.userId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── sales ─────────────────────────────────────────────
+    match /sales/{saleId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    // ── settings ──────────────────────────────────────────
+    match /settings/{docId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // Bloqueia tudo o resto
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
