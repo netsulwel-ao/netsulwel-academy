@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
  isCollapsed: boolean;
@@ -35,6 +36,7 @@ const navSections = [
 
 export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
   const pathname = usePathname();
+  const { plan, isAdmin } = useAuth();
 
   const handleLogout = async () => {
   try {
@@ -126,38 +128,48 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
  ))}
  </div>
 
- {/* 4. Card de Upgrade (Escondido se fechado) */}
- {!isCollapsed && (
- <div className="mx-4 mt-10 p-4 bg-gradient-to-br from-purple-900/80 to-purple-600/40 relative overflow-hidden group">
- {/* Efeito luminoso no fundo */}
- <div className="absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 bg-purple-300 blur-2xl opacity-40 group-hover:opacity-60 transition-opacity"></div>
+  {/* 4. Card de Plano / Upgrade (Escondido se fechado) */}
+  {!isCollapsed && (() => {
+  const planData = isAdmin ? { label: "Admin", color: "from-purple-900/80 to-purple-600/40", pct: 100, suffix: "acesso total" }
+  : plan === "golden" ? { label: "Golden", color: "from-yellow-900/80 to-yellow-600/40", pct: 100, suffix: "acesso completo" }
+  : plan === "smart" ? { label: "Smart", color: "from-green-900/80 to-green-600/40", pct: 60, suffix: "dos recursos usados" }
+  : { label: "Grátis", color: "from-gray-900/80 to-gray-600/40", pct: 20, suffix: "dos recursos usados" };
+  const showUpgrade = !isAdmin && plan !== "golden";
+  return (
+  <div className={`mx-4 mt-10 p-4 bg-gradient-to-br ${planData.color} relative overflow-hidden group`}>
+  <div className="absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 bg-white blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
 
- <div className="relative z-10 flex items-center justify-center w-10 h-10 bg-white/10 mb-3 backdrop-blur-sm">
- <img src="/logo.svg" alt="Icon" className="w-5 h-5 brightness-0 invert" />
- </div>
+  <div className="relative z-10 flex items-center justify-center w-10 h-10 bg-white/10 mb-3 backdrop-blur-sm">
+  <img src="/logo.svg" alt="Icon" className="w-5 h-5 brightness-0 invert" />
+  </div>
 
- <h4 className="text-white font-bold text-sm">Plano Netsulwel Pro</h4>
- <div className="mt-1 flex justify-between items-center text-xs text-purple-100/70">
- <span>75% dos recursos usados</span>
- </div>
+  <h4 className="text-white font-bold text-sm">Plano {planData.label}</h4>
+  <div className="mt-1 flex justify-between items-center text-xs text-white/70">
+  <span>{planData.pct}% — {planData.suffix}</span>
+  </div>
 
- <div className="mt-2 h-1.5 w-full bg-black/30 overflow-hidden">
- <div className="h-full bg-white w-[75%] relative">
- <div className="absolute right-0 top-0 bottom-0 w-1 bg-gray-900 shadow-[0_0_5px_white]"></div>
- </div>
- </div>
+  <div className="mt-2 h-1.5 w-full bg-black/30 overflow-hidden">
+  <div style={{ width: `${planData.pct}%` }} className="h-full bg-white relative">
+  <div className="absolute right-0 top-0 bottom-0 w-1 bg-gray-900 shadow-[0_0_5px_white]"></div>
+  </div>
+  </div>
 
- <div className="mt-4 space-y-2">
- <button className="w-full py-2 px-4 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-sm transition-colors">
- Saber mais
- </button>
- <button className="w-full py-2 px-4 bg-gray-950 text-white text-xs font-bold hover:bg-black transition-colors flex items-center justify-between">
- Fazer Upgrade
- <ChevronRight className="w-3 h-3" />
- </button>
- </div>
- </div>
- )}
+  <div className="mt-4 space-y-2">
+  <Link href="/dashboard/courses"
+    className="block w-full py-2 px-4 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-sm transition-colors text-center">
+  Saber mais
+  </Link>
+  {showUpgrade && (
+  <Link href="/dashboard/finances"
+    className="flex w-full py-2 px-4 bg-gray-950 text-white text-xs font-bold hover:bg-black transition-colors items-center justify-between">
+  Fazer Upgrade
+  <ChevronRight className="w-3 h-3" />
+  </Link>
+  )}
+  </div>
+  </div>
+  );
+  })()}
  </div>
 
  {/* 5. Footer da Sidebar (Temas + Logout) */}
