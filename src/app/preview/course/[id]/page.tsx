@@ -27,12 +27,11 @@ async function getCourse(id: string) {
       modulesCount: f.modulesCount?.integerValue ?? 0,
       lessonsCount: f.lessonsCount?.integerValue ?? 0,
       tags: f.tags?.arrayValue?.values?.map((v: { stringValue: string }) => v.stringValue) ?? [],
-      modules: f.modules?.arrayValue?.values?.map((m: { mapValue: { fields: { title: { stringValue: string }; videos: { arrayValue: { values: { mapValue: { fields: { title: { stringValue: string }; duration: { stringValue: string } } } } }[] } } } }) => ({
-        title: m.mapValue?.fields?.title?.stringValue ?? "",
-        videos: m.mapValue?.fields?.videos?.arrayValue?.values?.map((v: { mapValue: { fields: { title: { stringValue: string }; duration: { stringValue: string } } } }) => ({
-          title: v.mapValue?.fields?.title?.stringValue ?? "",
-          duration: v.mapValue?.fields?.duration?.stringValue ?? "",
-          // URL nunca exposta publicamente
+      modules: (f.modules?.arrayValue?.values as any[])?.map((m: any) => ({
+        title: m?.mapValue?.fields?.title?.stringValue ?? "",
+        videos: (m?.mapValue?.fields?.videos?.arrayValue?.values as any[])?.map((v: any) => ({
+          title: v?.mapValue?.fields?.title?.stringValue ?? "",
+          duration: v?.mapValue?.fields?.duration?.stringValue ?? "",
         })) ?? [],
       })) ?? [],
       status: f.status?.stringValue ?? "draft",
