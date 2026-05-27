@@ -1,23 +1,24 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { db } from "@/lib/firebase";
 import {
   doc, getDoc, onSnapshot, collection, addDoc,
-  query, orderBy, serverTimestamp,
+  query, orderBy, serverTimestamp, setDoc,
 } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   LiveKitRoom, VideoTrack, AudioTrack, useTracks, useParticipants,
+  useLocalParticipant,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
 import { Track } from "livekit-client";
 import {
   Send, Users, MessageSquare, Radio, Loader2,
   AlertTriangle, Hand, ArrowLeft, Eye, Volume2,
-  Maximize2, Settings, Pin, ChevronRight, Heart,
+  Maximize2, Settings, Pin, ChevronRight, Heart, Mic, MicOff,
 } from "lucide-react";
 import type { LiveSession, ChatMessage } from "@/types/live";
 
@@ -224,8 +225,26 @@ function ViewerStage({ live }: { live: LiveSession }) {
 
 // ── Viewer Interior ────────────────────────────────────────
 function ViewerInterior({ live }: { live: LiveSession }) {
+  const { user } = useAuth();
+  const { localParticipant } = useLocalParticipant();
   const [sidePanel, setSidePanel] = useState<"chat" | "participants">("chat");
+  const [canSpeak, setCanSpeak] = useState(false);
   const participants = useParticipants();
+
+  useEffect(() => {
+    if (!user || !live.id) return;
+    const unsub = onSnapshot(doc(db, "lives", live.id, "speakers", user.uid), (snap) => {
+      const allowed = snap.exists() && snap.data().canSpeak === true;
+      setCanSpeak(allowed);
+    });
+    return () => unsub();
+  }, [live.id, user]);
+
+  useEffect(() => {
+    if (localParticipant) {
+      localParticipant.setMicrophoneEnabled(canSpeak);
+    }
+  }, [canSpeak, localParticipant]);
 
   return (
     <div className="flex flex-col h-screen bg-[#0e0e10] overflow-hidden">
@@ -242,6 +261,12 @@ function ViewerInterior({ live }: { live: LiveSession }) {
         </div>
         <div className="flex-1" />
         <div className="flex border border-gray-700 overflow-hidden">
+          <div
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium ${canSpeak ? "bg-green-600/30 text-green-400" : "bg-gray-800 text-gray-500"}`}
+            title={canSpeak ? "Podes falar" : "Microfone desativado"}
+          >
+            {canSpeak ? <Mic className="h-3.5 w-3.5" /> : <MicOff className="h-3.5 w-3.5" />}
+          </div>
           <button onClick={() => setSidePanel("chat")}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${sidePanel === "chat" ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"}`}>
             <MessageSquare className="h-3.5 w-3.5" /> Chat
@@ -388,7 +413,7 @@ export default function ViewerPage() {
 
   return (
     <LiveKitRoom
-      video={false} audio={false} token={token}
+      video={false} audio={true} token={token}
       serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL}
       data-lk-theme="default"
       style={{ height: "100dvh" }}

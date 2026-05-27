@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import {
-  doc, getDoc, updateDoc, collection, addDoc,
+  doc, getDoc, updateDoc, collection, addDoc, setDoc,
   onSnapshot, query, orderBy, serverTimestamp,
 } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,7 +18,7 @@ import {
   Mic, MicOff, Video, VideoOff, MonitorUp, PhoneOff,
   Send, Users, Clock, Radio, MessageSquare, Loader2,
   AlertTriangle, Hand, Settings, Maximize2, Volume2,
-  Pin, ChevronRight, Eye, Award, BarChart2,
+  Pin, ChevronRight, Eye,
 } from "lucide-react";
 import type { LiveSession, ChatMessage } from "@/types/live";
 
@@ -153,7 +153,29 @@ function ChatPanel({ liveId, pinnedMsg, onPin }: {
 
 // ── Participants ───────────────────────────────────────────
 function ParticipantsPanel({ liveId }: { liveId: string }) {
+  const { user } = useAuth();
   const participants = useParticipants();
+  const [speakers, setSpeakers] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "lives", liveId, "speakers"), (snap) => {
+      const s = new Set<string>();
+      snap.docs.forEach((d) => {
+        if (d.data().canSpeak === true) s.add(d.id);
+      });
+      setSpeakers(s);
+    });
+    return () => unsub();
+  }, [liveId]);
+
+  const toggleSpeaker = async (uid: string, canSpeak: boolean) => {
+    try {
+      await setDoc(doc(db, "lives", liveId, "speakers", uid), { canSpeak }, { merge: true });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-[#0e0e10]">
       <div className="px-4 py-3 border-b border-gray-800 flex items-center gap-2">
@@ -162,16 +184,35 @@ function ParticipantsPanel({ liveId }: { liveId: string }) {
         <span className="ml-auto text-xs text-gray-500 bg-gray-800 px-2 py-0.5">{participants.length}</span>
       </div>
       <div className="flex-1 overflow-y-auto p-3 space-y-1">
-        {participants.map((p) => (
-          <div key={p.identity} className="flex items-center gap-3 px-3 py-2 hover:bg-white/5 transition-colors">
-            <div className="w-2 h-2 rounded-full bg-green-400 shrink-0" />
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
-              {(p.name || p.identity)?.[0]?.toUpperCase()}
+        {participants.map((p) => {
+          const isHost = p.isLocal;
+          const isSpeaker = speakers.has(p.identity);
+          return (
+            <div key={p.identity} className="flex items-center gap-3 px-3 py-2 hover:bg-white/5 transition-colors group">
+              <div className={`w-2 h-2 rounded-full shrink-0 ${isSpeaker ? "bg-green-400" : "bg-gray-600"}`} />
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+                {(p.name || p.identity)?.[0]?.toUpperCase()}
+              </div>
+              <span className="text-sm text-gray-300 truncate flex-1">{p.name || p.identity}</span>
+              {isHost ? (
+                <span className="text-[10px] text-purple-400 font-bold shrink-0">HOST</span>
+              ) : (
+                <button
+                  onClick={() => toggleSpeaker(p.identity, !isSpeaker)}
+                  className={`shrink-0 flex items-center gap-1 px-2 py-1 text-[10px] font-bold transition-colors opacity-0 group-hover:opacity-100 ${
+                    isSpeaker
+                      ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                      : "bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                  }`}
+                  title={isSpeaker ? "Silenciar" : "Permitir falar"}
+                >
+                  {isSpeaker ? <MicOff className="h-3 w-3" /> : <Mic className="h-3 w-3" />}
+                  {isSpeaker ? "Silenciar" : "Falar"}
+                </button>
+              )}
             </div>
-            <span className="text-sm text-gray-300 truncate flex-1">{p.name || p.identity}</span>
-            {p.isLocal && <span className="text-[10px] text-purple-400 font-bold shrink-0">HOST</span>}
-          </div>
-        ))}
+          );
+        })}
         {participants.length === 0 && (
           <p className="text-xs text-gray-600 text-center py-8">Nenhum participante ainda</p>
         )}

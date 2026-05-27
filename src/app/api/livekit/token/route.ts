@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { AccessToken } from "livekit-server-sdk";
+import { AccessToken, TrackSource } from "livekit-server-sdk";
 
 export async function POST(req: NextRequest) {
   try {
@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
       roomJoin: true,
       room: roomName,
       canPublish: !!isHost,
+      canPublishSources: isHost ? undefined : [TrackSource.MICROPHONE],
       canPublishData: true,
       canSubscribe: true,
     });
