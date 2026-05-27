@@ -28,6 +28,7 @@ export interface Course {
   level: CourseLevel;
   category: CourseCategory;
   hasCertificate: boolean;
+  featured: boolean;         // aparece na landing page
   trailId?: string;          // referência à trilha (opcional)
   trailOrder?: number;       // posição dentro da trilha
   tags: string[];

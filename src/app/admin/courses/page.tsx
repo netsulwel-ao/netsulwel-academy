@@ -10,7 +10,7 @@ import {
   orderBy,
   query,
 } from "firebase/firestore";
-import { Plus, Pencil, Trash2, Loader2, Video, BookOpen, AlertTriangle } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Video, BookOpen, AlertTriangle, Share2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
 interface Course {
@@ -29,6 +29,14 @@ export default function CoursesPage() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopyLink = (id: string) => {
+    const url = `${window.location.origin}/preview/course/${id}`;
+    navigator.clipboard.writeText(url);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const fetchCourses = async () => {
     try {

@@ -30,8 +30,7 @@ service cloud.firestore {
 
     // ── courses ───────────────────────────────────────────
     match /courses/{courseId} {
-      allow read: if isAdmin() ||
-        (isAuth() && resource.data.status == "published");
+      allow read: if isAdmin() || resource.data.status == "published";
       allow create, update, delete: if isAdmin();
     }
 

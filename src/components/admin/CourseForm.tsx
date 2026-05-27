@@ -85,6 +85,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
   const [level, setLevel] = useState<CourseLevel>(initialData?.level ?? "beginner");
   const [category, setCategory] = useState<CourseCategory>(initialData?.category ?? "tech");
   const [hasCertificate, setHasCertificate] = useState(initialData?.hasCertificate ?? false);
+  const [featured, setFeatured] = useState(initialData?.featured ?? false);
   const [trailId, setTrailId] = useState(initialData?.trailId ?? "");
   const [trailOrder, setTrailOrder] = useState(initialData?.trailOrder ? String(initialData.trailOrder) : "");
   const [tagInput, setTagInput] = useState("");
@@ -197,7 +198,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
     const courseData: Omit<Course, "id" | "createdAt" | "updatedAt"> = {
       title: title.trim(), description: description.trim(), thumbnail,
       price: price ? parseFloat(price) : 0,
-      type: courseType, level, category, hasCertificate,
+      type: courseType, level, category, hasCertificate, featured,
       tags, modules: cleanModules,
       modulesCount: cleanModules.length, lessonsCount, status,
     };
@@ -394,6 +395,26 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
             </button>
           </div>
 
+          {/* Destaque na landing page */}
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Landing Page</label>
+            <button type="button" onClick={() => setFeatured(!featured)}
+              className={`w-full flex items-center gap-3 px-4 py-3 border transition-all ${
+                featured ? "border-blue-500/50 bg-blue-500/10" : "border-gray-800 bg-gray-900 hover:border-gray-700"
+              }`}>
+              <Sparkles className={`h-5 w-5 shrink-0 ${featured ? "text-blue-400" : "text-gray-600"}`} />
+              <div className="text-left">
+                <p className={`text-sm font-bold ${featured ? "text-blue-400" : "text-gray-400"}`}>
+                  {featured ? "Em Destaque" : "Não em Destaque"}
+                </p>
+                <p className="text-xs text-gray-500">Aparece na secção "Cursos em destaque" da landing page</p>
+              </div>
+              <div className={`ml-auto h-5 w-9 rounded-full transition-colors relative shrink-0 ${featured ? "bg-blue-500" : "bg-gray-700"}`}>
+                <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${featured ? "translate-x-4" : "translate-x-0.5"}`} />
+              </div>
+            </button>
+          </div>
+
           {/* Trilha */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Trilha (opcional)</label>
@@ -446,6 +467,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
               <div className="flex justify-between text-sm"><span className="text-gray-400">Preço</span><span className="text-white font-medium">{price ? `${parseInt(price).toLocaleString("pt-AO")} Kz` : "Gratuito"}</span></div>
             )}
             <div className="flex justify-between text-sm"><span className="text-gray-400">Certificado</span><span className={`font-medium ${hasCertificate ? "text-amber-400" : "text-gray-500"}`}>{hasCertificate ? "Sim" : "Não"}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-gray-400">Destaque</span><span className={`font-medium ${featured ? "text-blue-400" : "text-gray-500"}`}>{featured ? "Sim" : "Não"}</span></div>
           </div>
         </div>
 
