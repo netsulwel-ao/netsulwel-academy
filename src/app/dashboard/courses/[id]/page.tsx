@@ -178,7 +178,7 @@ export default function CourseDetailPage() {
                   </div>
                   <div className="flex flex-col sm:flex-row gap-3">
                     {normalizedType === "standalone" ? (
-                      <Link href={`/dashboard/checkout/${course.id}`}
+                      <Link href={`/dashboard/finances?courseId=${course.id}`}
                         className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 font-bold transition-colors">
                         <Zap className="h-4 w-4" />
                         Comprar por {course.price ? `${course.price.toLocaleString("pt-AO")} Kz` : "Grátis"}
@@ -319,7 +319,7 @@ export default function CourseDetailPage() {
                   Requer <span className="text-white font-semibold">{requiredPlanLabel(normalizedType)}</span>
                 </p>
                 {normalizedType === "standalone" ? (
-                  <Link href={`/dashboard/checkout/${course.id}`}
+                  <Link href={`/dashboard/finances?courseId=${course.id}`}
                     className="flex w-full items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 font-bold transition-colors text-sm">
                     <Zap className="h-4 w-4" />
                     Comprar — {course.price ? `${course.price.toLocaleString("pt-AO")} Kz` : "Grátis"}

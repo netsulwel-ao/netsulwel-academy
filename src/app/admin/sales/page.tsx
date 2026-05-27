@@ -10,7 +10,7 @@ import {
   DollarSign, TrendingUp, Users, ShoppingCart, Plus,
   Search, Filter, XCircle, CheckCircle2, Clock, Pencil,
   Trash2, Loader2, X, Save, AlertCircle, ChevronDown,
-  Download, Eye,
+  Download, Eye, FileText, ExternalLink,
 } from "lucide-react";
 import type { Sale } from "@/types/settings";
 import { toast } from "sonner";
@@ -42,6 +42,7 @@ export default function SalesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...EMPTY_SALE });
+  const [viewReceipt, setViewReceipt] = useState<string | null>(null);
 
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | Sale["status"]>("all");
@@ -61,7 +62,7 @@ export default function SalesPage() {
     fetchSales();
   }, []);
 
-  const openCreate = () => { setForm({ ...EMPTY_SALE }); setEditingId(null); setError(""); setModalOpen(true); };
+  const openCreate = () => { setForm({ ...EMPTY_SALE }); setEditingId(null); setError(""); setModalOpen(true); setViewReceipt(null); };
   const openEdit = (s: Sale) => {
     setForm({
       userId: s.userId, userName: s.userName, userEmail: s.userEmail,
@@ -70,6 +71,7 @@ export default function SalesPage() {
       reference: s.reference ?? "", notes: s.notes ?? "",
     });
     setEditingId(s.id!); setError(""); setModalOpen(true);
+    setViewReceipt(s.receiptUrl ?? null);
   };
 
   const handleSave = async () => {
@@ -254,6 +256,12 @@ export default function SalesPage() {
                     </select>
                   </div>
                   <div className="flex items-center gap-1">
+                    {sale.receiptUrl && (
+                      <a href={sale.receiptUrl} target="_blank" rel="noopener noreferrer"
+                        className="p-1.5 text-gray-500 hover:text-blue-400 transition-colors" title="Ver comprovativo">
+                        <FileText className="h-3.5 w-3.5" />
+                      </a>
+                    )}
                     <button onClick={() => openEdit(sale)} className="p-1.5 text-gray-500 hover:text-white transition-colors">
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
@@ -274,7 +282,7 @@ export default function SalesPage() {
       {/* Modal */}
       {modalOpen && (
         <>
-          <div className="fixed inset-0 z-40 bg-gray-950/80 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
+          <div className="fixed inset-0 z-40 bg-gray-950/80 backdrop-blur-sm" onClick={() => { setModalOpen(false); setViewReceipt(null); }} />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="bg-gray-900 border border-gray-800 w-full max-w-lg shadow-2xl">
               <div className="flex items-center justify-between px-6 py-5 border-b border-gray-800">
@@ -352,6 +360,19 @@ export default function SalesPage() {
                     className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
                 </div>
 
+                {viewReceipt && (
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Comprovativo</label>
+                    <div className="border border-gray-800 bg-gray-950/50 p-2">
+                      <img src={viewReceipt} alt="Comprovativo" className="max-h-64 object-contain mx-auto cursor-pointer" onClick={() => window.open(viewReceipt, "_blank")} />
+                    </div>
+                    <a href={viewReceipt} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 mt-2 text-xs text-blue-400 hover:text-blue-300 transition-colors">
+                      <ExternalLink className="h-3 w-3" /> Abrir em nova aba
+                    </a>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Notas</label>
                   <textarea rows={2} value={form.notes ?? ""} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
@@ -360,7 +381,7 @@ export default function SalesPage() {
                 </div>
               </div>
               <div className="flex gap-3 px-6 py-5 border-t border-gray-800">
-                <button onClick={() => setModalOpen(false)} className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium transition-colors">Cancelar</button>
+                <button onClick={() => { setModalOpen(false); setViewReceipt(null); }} className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium transition-colors">Cancelar</button>
                 <button onClick={handleSave} disabled={saving}
                   className="flex flex-1 items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors disabled:opacity-60">
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}

@@ -54,6 +54,7 @@ export interface Sale {
   paymentMethod: string;
   status: "pending" | "confirmed" | "cancelled";
   reference?: string;    // referência de pagamento
+  receiptUrl?: string;   // comprovativo de pagamento
   notes?: string;
   createdAt?: unknown;
   updatedAt?: unknown;

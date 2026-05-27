@@ -102,7 +102,10 @@ service cloud.firestore {
 
     // ── sales ─────────────────────────────────────────────
     match /sales/{saleId} {
-      allow read, create, update, delete: if isAdmin();
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow read: if isAdmin() || (isAuth() && resource.data.userId == request.auth.uid);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     // ── settings ──────────────────────────────────────────
