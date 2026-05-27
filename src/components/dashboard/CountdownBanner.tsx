@@ -74,7 +74,7 @@ function BannerItem({ banner, onDismiss }: { banner: CountdownBannerType; onDism
 
         {/* CTA */}
         {banner.ctaLabel && banner.ctaUrl && (
-          <a href={banner.ctaUrl}
+          <a href={banner.ctaUrl} target="_blank" rel="noopener noreferrer"
             className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold transition-colors shrink-0 ${c.btn}`}>
             {banner.ctaLabel}
             <ChevronRight className="h-3.5 w-3.5" />

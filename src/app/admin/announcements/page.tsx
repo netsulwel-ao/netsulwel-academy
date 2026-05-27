@@ -8,12 +8,13 @@ import {
   doc, serverTimestamp, orderBy, query,
 } from "firebase/firestore";
 import {
-  Plus, Trash2, Pencil, Loader2, X, Save, AlertCircle,
-  CheckCircle2, Megaphone, Zap, BookOpen, Radio, Bell,
+  Plus, Trash2, Pencil, Loader2, X, Save, AlertCircle, CheckCircle2,
+  Megaphone, Zap, BookOpen, Radio, Bell,
   Eye, EyeOff, Users, Calendar, LinkIcon, ImagePlus, Sparkles,
   Clock, ChevronDown, ChevronUp, Timer,
 } from "lucide-react";
 import type { Announcement, AnnouncementType, AnnouncementTarget, CountdownBanner } from "@/types/announcement";
+import { toast } from "sonner";
 import IconPicker, { getIcon, getLucideIcon, AVAILABLE_ICONS } from "@/components/admin/IconPicker";
 
 // ── Upload ────────────────────────────────────────────────
@@ -79,10 +80,6 @@ export default function AnnouncementsPage() {
   const [editingCdId, setEditingCdId] = useState<string|null>(null);
   const [cdForm, setCdForm] = useState({...EMPTY_CD});
 
-  // ── Toast ─────────────────────────────────────────────────
-  const [toast, setToast] = useState<{msg:string;ok:boolean}|null>(null);
-  const showToast = (msg:string, ok:boolean) => { setToast({msg,ok}); setTimeout(()=>setToast(null),3000); };
-
   // ── Active tab ────────────────────────────────────────────
   const [tab, setTab] = useState<"announcements"|"countdowns">("announcements");
 
@@ -90,11 +87,11 @@ export default function AnnouncementsPage() {
   useEffect(() => {
     getDocs(query(collection(db,"announcements"), orderBy("createdAt","desc")))
       .then(s => setAnnouncements(s.docs.map(d=>({id:d.id,...d.data()} as Announcement))))
-      .catch(()=>showToast("Erro ao carregar anúncios.",false))
+      .catch(()=>toast.error("Erro ao carregar anúncios."))
       .finally(()=>setLoadingAnn(false));
     getDocs(query(collection(db,"countdownBanners"), orderBy("createdAt","desc")))
       .then(s => setCountdowns(s.docs.map(d=>({id:d.id,...d.data()} as CountdownBanner))))
-      .catch(()=>showToast("Erro ao carregar banners.",false))
+      .catch(()=>toast.error("Erro ao carregar banners."))
       .finally(()=>setLoadingCD(false));
   }, []);
 
@@ -144,8 +141,8 @@ export default function AnnouncementsPage() {
     setSavingAnn(true); setAnnError("");
     try {
       const payload = {...annForm, title:annForm.title.trim(), body:annForm.body.trim(), updatedAt:serverTimestamp()};
-      if(editingAnnId) { await updateDoc(doc(db,"announcements",editingAnnId),payload); showToast("Anúncio atualizado.",true); }
-      else { await addDoc(collection(db,"announcements"),{...payload,createdAt:serverTimestamp()}); showToast("Anúncio criado.",true); }
+      if(editingAnnId) { await updateDoc(doc(db,"announcements",editingAnnId),payload); toast.success("Anúncio atualizado."); }
+      else { await addDoc(collection(db,"announcements"),{...payload,createdAt:serverTimestamp()}); toast.success("Anúncio criado."); }
       setAnnModalOpen(false);
       const s = await getDocs(query(collection(db,"announcements"),orderBy("createdAt","desc")));
       setAnnouncements(s.docs.map(d=>({id:d.id,...d.data()} as Announcement)));
@@ -157,17 +154,23 @@ export default function AnnouncementsPage() {
     try {
       await updateDoc(doc(db,"announcements",a.id!),{active:!a.active,updatedAt:serverTimestamp()});
       setAnnouncements(p=>p.map(x=>x.id===a.id?{...x,active:!x.active}:x));
-    } catch { showToast("Erro.",false); }
+    } catch { toast.error("Erro ao atualizar."); }
   };
 
   const deleteAnn = async (id:string) => {
-    if(!confirm("Apagar este anúncio?")) return;
-    await deleteDoc(doc(db,"announcements",id));
-    setAnnouncements(p=>p.filter(x=>x.id!==id));
-    showToast("Apagado.",true);
+    toast("Apagar este anúncio?", {
+      action: { label: "Apagar", onClick: async () => {
+        try {
+          await deleteDoc(doc(db,"announcements",id));
+          setAnnouncements(p=>p.filter(x=>x.id!==id));
+          toast.success("Anúncio apagado.");
+        } catch { toast.error("Erro ao apagar anúncio."); }
+      }},
+      cancel: "Cancelar",
+      duration: Infinity,
+    });
   };
 
-  // ── Countdown modal ───────────────────────────────────────
   const openCreateCD = () => { setCdForm({...EMPTY_CD}); setEditingCdId(null); setCdError(""); setCdModalOpen(true); };
   const openEditCD = (b:CountdownBanner) => {
     setCdForm({active:b.active, label:b.label, endsAt:b.endsAt.slice(0,16),
@@ -181,8 +184,8 @@ export default function AnnouncementsPage() {
     setSavingCD(true); setCdError("");
     try {
       const payload = {...cdForm, label:cdForm.label.trim(), updatedAt:serverTimestamp()};
-      if(editingCdId) { await updateDoc(doc(db,"countdownBanners",editingCdId),payload); showToast("Banner atualizado.",true); }
-      else { await addDoc(collection(db,"countdownBanners"),{...payload,createdAt:serverTimestamp()}); showToast("Banner criado.",true); }
+      if(editingCdId) { await updateDoc(doc(db,"countdownBanners",editingCdId),payload); toast.success("Banner atualizado."); }
+      else { await addDoc(collection(db,"countdownBanners"),{...payload,createdAt:serverTimestamp()}); toast.success("Banner criado."); }
       setCdModalOpen(false);
       const s = await getDocs(query(collection(db,"countdownBanners"),orderBy("createdAt","desc")));
       setCountdowns(s.docs.map(d=>({id:d.id,...d.data()} as CountdownBanner)));
@@ -191,28 +194,30 @@ export default function AnnouncementsPage() {
   };
 
   const toggleCdActive = async (b:CountdownBanner) => {
-    await updateDoc(doc(db,"countdownBanners",b.id!),{active:!b.active,updatedAt:serverTimestamp()});
-    setCountdowns(p=>p.map(x=>x.id===b.id?{...x,active:!x.active}:x));
+    try {
+      await updateDoc(doc(db,"countdownBanners",b.id!),{active:!b.active,updatedAt:serverTimestamp()});
+      setCountdowns(p=>p.map(x=>x.id===b.id?{...x,active:!x.active}:x));
+    } catch { toast.error("Erro ao atualizar banner."); }
   };
 
   const deleteCD = async (id:string) => {
-    if(!confirm("Apagar este banner?")) return;
-    await deleteDoc(doc(db,"countdownBanners",id));
-    setCountdowns(p=>p.filter(x=>x.id!==id));
-    showToast("Apagado.",true);
+    toast("Apagar este banner?", {
+      action: { label: "Apagar", onClick: async () => {
+        try {
+          await deleteDoc(doc(db,"countdownBanners",id));
+          setCountdowns(p=>p.filter(x=>x.id!==id));
+          toast.success("Banner apagado.");
+        } catch { toast.error("Erro ao apagar banner."); }
+      }},
+      cancel: "Cancelar",
+      duration: Infinity,
+    });
   };
 
   const cfg = TYPE_CONFIG[annForm.type];
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
-
-      {/* Toast */}
-      {toast && (
-        <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 text-sm font-medium shadow-xl border animate-in slide-in-from-top-2 ${toast.ok?"bg-green-500/10 border-green-500/30 text-green-400":"bg-red-500/10 border-red-500/30 text-red-400"}`}>
-          {toast.ok?<CheckCircle2 className="h-4 w-4"/>:<AlertCircle className="h-4 w-4"/>}{toast.msg}
-        </div>
-      )}
 
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -676,7 +681,7 @@ export function AnnouncementModal({ announcement, onClose, preview=false }:
             {announcement.ctaLabel&&(
               preview
                 ? <div className={`flex items-center justify-center py-3 font-bold text-sm border ${cfg.bg} ${cfg.color}`}>{announcement.ctaLabel}</div>
-                : <a href={announcement.ctaUrl||"#"} onClick={onClose} className={`flex items-center justify-center py-3 font-bold text-sm transition-colors ${cfg.accent}`}>{announcement.ctaLabel}</a>
+                  : <a href={announcement.ctaUrl||"#"} target="_blank" rel="noopener noreferrer" onClick={onClose} className={`flex items-center justify-center py-3 font-bold text-sm transition-colors ${cfg.accent}`}>{announcement.ctaLabel}</a>
             )}
             {!preview&&<button onClick={onClose} className="text-center text-sm text-gray-500 hover:text-gray-300 transition-colors">Fechar</button>}
           </div>
@@ -723,7 +728,7 @@ export function AnnouncementModal({ announcement, onClose, preview=false }:
               <div className="pt-2">
                 {preview
                   ? <div className={`flex items-center justify-center py-3 font-bold text-sm border ${cfg.bg} ${cfg.color}`}>{announcement.ctaLabel}</div>
-                  : <a href={announcement.ctaUrl||"#"} onClick={onClose} className={`flex items-center justify-center py-3 font-bold text-sm transition-colors ${cfg.accent}`}>{announcement.ctaLabel}</a>
+                : <a href={announcement.ctaUrl||"#"} target="_blank" rel="noopener noreferrer" onClick={onClose} className={`flex items-center justify-center py-3 font-bold text-sm transition-colors ${cfg.accent}`}>{announcement.ctaLabel}</a>
                 }
               </div>
             )}

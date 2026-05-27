@@ -23,6 +23,7 @@ import {
   Clock,
 } from "lucide-react";
 import type { LiveSession } from "@/types/live";
+import { toast } from "sonner";
 
 const STATUS_CONFIG = {
   scheduled: {
@@ -81,16 +82,23 @@ export default function AdminLivesPage() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Tem a certeza que deseja eliminar esta live?")) return;
-    setDeleting(id);
-    try {
-      await deleteDoc(doc(db, "lives", id));
-      setLives((prev) => prev.filter((l) => l.id !== id));
-    } catch (err) {
-      console.error("Erro ao eliminar:", err);
-    } finally {
-      setDeleting(null);
-    }
+    toast("Tem a certeza que deseja eliminar esta live?", {
+      action: { label: "Eliminar", onClick: async () => {
+        setDeleting(id);
+        try {
+          await deleteDoc(doc(db, "lives", id));
+          setLives((prev) => prev.filter((l) => l.id !== id));
+          toast.success("Live eliminada.");
+        } catch (err) {
+          console.error("Erro ao eliminar:", err);
+          toast.error("Erro ao eliminar live.");
+        } finally {
+          setDeleting(null);
+        }
+      }},
+      cancel: "Cancelar",
+      duration: Infinity,
+    });
   };
 
   const formatDate = (iso: string) => {

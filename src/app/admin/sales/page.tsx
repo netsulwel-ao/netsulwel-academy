@@ -8,11 +8,12 @@ import {
 } from "firebase/firestore";
 import {
   DollarSign, TrendingUp, Users, ShoppingCart, Plus,
-  Search, Filter, CheckCircle2, XCircle, Clock, Pencil,
+  Search, Filter, XCircle, CheckCircle2, Clock, Pencil,
   Trash2, Loader2, X, Save, AlertCircle, ChevronDown,
   Download, Eye,
 } from "lucide-react";
 import type { Sale } from "@/types/settings";
+import { toast } from "sonner";
 
 const STATUS_CONFIG = {
   pending:   { label: "Pendente",   color: "text-amber-400",  bg: "bg-amber-500/10 border-amber-500/30",  icon: Clock },
@@ -37,7 +38,6 @@ export default function SalesPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -47,16 +47,12 @@ export default function SalesPage() {
   const [filterStatus, setFilterStatus] = useState<"all" | Sale["status"]>("all");
   const [filterType, setFilterType] = useState<"all" | Sale["type"]>("all");
 
-  const showToast = (msg: string, ok: boolean) => {
-    setToast({ msg, ok }); setTimeout(() => setToast(null), 3000);
-  };
-
   const fetchSales = async () => {
     try {
       const q = query(collection(db, "sales"), orderBy("createdAt", "desc"));
       const snap = await getDocs(q);
       setSales(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Sale)));
-    } catch { showToast("Erro ao carregar vendas.", false); }
+    } catch { toast.error("Erro ao carregar vendas."); }
     finally { setLoading(false); }
   };
 
@@ -83,10 +79,10 @@ export default function SalesPage() {
       const payload = { ...form, updatedAt: serverTimestamp() };
       if (editingId) {
         await updateDoc(doc(db, "sales", editingId), payload);
-        showToast("Venda atualizada.", true);
+        toast.success("Venda atualizada.");
       } else {
         await addDoc(collection(db, "sales"), { ...payload, createdAt: serverTimestamp() });
-        showToast("Venda registada.", true);
+        toast.success("Venda registada.");
       }
       setModalOpen(false); fetchSales();
     } catch { setError("Erro ao guardar."); }
@@ -97,15 +93,22 @@ export default function SalesPage() {
     try {
       await updateDoc(doc(db, "sales", id), { status, updatedAt: serverTimestamp() });
       setSales((p) => p.map((s) => s.id === id ? { ...s, status } : s));
-      showToast("Status atualizado.", true);
-    } catch { showToast("Erro.", false); }
+      toast.success("Status atualizado.");
+    } catch { toast.error("Erro ao atualizar status."); }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Apagar esta venda?")) return;
-    await deleteDoc(doc(db, "sales", id));
-    setSales((p) => p.filter((s) => s.id !== id));
-    showToast("Apagado.", true);
+    toast("Apagar esta venda?", {
+      action: { label: "Apagar", onClick: async () => {
+        try {
+          await deleteDoc(doc(db, "sales", id));
+          setSales((p) => p.filter((s) => s.id !== id));
+          toast.success("Venda apagada.");
+        } catch { toast.error("Erro ao apagar venda."); }
+      }},
+      cancel: "Cancelar",
+      duration: Infinity,
+    });
   };
 
   // ── Stats ─────────────────────────────────────────────────
@@ -150,14 +153,6 @@ export default function SalesPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
-
-      {/* Toast */}
-      {toast && (
-        <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 text-sm font-medium shadow-xl border animate-in slide-in-from-top-2 ${toast.ok ? "bg-green-500/10 border-green-500/30 text-green-400" : "bg-red-500/10 border-red-500/30 text-red-400"}`}>
-          {toast.ok ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
-          {toast.msg}
-        </div>
-      )}
 
       {/* Header */}
       <div className="flex items-center justify-between">
