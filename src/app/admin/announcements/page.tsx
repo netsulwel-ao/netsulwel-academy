@@ -729,7 +729,7 @@ export function AnnouncementModal({ announcement, onClose, preview=false }:
   const hasImage = !!announcement.imageUrl;
 
   return (
-    <div className={`relative bg-gray-900 border ${cfg.bg} overflow-hidden w-full max-w-xl mx-auto`}>
+    <div className={`relative bg-gray-900 border ${cfg.bg} overflow-hidden rounded-2xl w-full max-w-xl mx-auto`}>
 
       {/* Layout rico: imagem lateral + benefícios */}
       {hasImage && hasBenefits ? (

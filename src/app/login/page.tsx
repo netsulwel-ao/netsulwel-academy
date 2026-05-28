@@ -88,8 +88,7 @@ export default function LoginPage() {
  const userCredential = await signInWithEmailAndPassword(auth, email, password);
  const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
  
- console.log("Login com email bem-sucedido!");
- if (userDoc.exists() && userDoc.data().role === "admin") {
+  if (userDoc.exists() && userDoc.data().role === "admin") {
  router.push("/admin");
  } else {
  router.push("/dashboard");
@@ -110,8 +109,7 @@ export default function LoginPage() {
  createdAt: new Date()
  });
 
- console.log("Registo com sucesso!");
- router.push("/dashboard");
+  router.push("/dashboard");
  
  } else if (view === "forgot") {
  await sendPasswordResetEmail(auth, email);
@@ -156,8 +154,7 @@ export default function LoginPage() {
  router.push("/dashboard");
  }
  
- console.log(`Login com ${providerName} bem-sucedido!`);
- } catch (err: unknown) {
+  } catch (err: unknown) {
  console.error(err);
  setError(`Falha ao iniciar sessão com ${providerName}.`);
  } finally {

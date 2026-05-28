@@ -1,11 +1,12 @@
 "use client";
 
-import type { ElementType } from "react";
+import type { ElementType, ComponentType } from "react";
 import * as Icons from "lucide-react";
 
-const iconMap = Icons as unknown as Record<string, ElementType>;
+type LucideIcon = ComponentType<{ className?: string }>;
+const iconMap = Icons as unknown as Record<string, LucideIcon>;
 
-export function getLucideIcon(name: string): ElementType | null {
+export function getLucideIcon(name: string): LucideIcon | null {
   return iconMap[name] ?? null;
 }
 

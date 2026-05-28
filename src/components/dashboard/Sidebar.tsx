@@ -15,6 +15,8 @@ interface SidebarProps {
  setIsCollapsed: (val: boolean) => void;
  mobileOpen: boolean;
  setMobileOpen: (val: boolean) => void;
+ theme: "dark" | "light";
+ onToggleTheme: () => void;
 }
 
 const navSections = [
@@ -36,7 +38,7 @@ const navSections = [
  }
 ];
 
-export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen }: SidebarProps) {
+export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen, theme, onToggleTheme }: SidebarProps) {
    const pathname = usePathname();
    const { plan, isAdmin } = useAuth();
 
@@ -64,7 +66,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
  {/* 1. Header da Sidebar (Logo + Toggle) */}
  <div className="flex h-20 items-center justify-between px-6 shrink-0">
     <Link href="/" className={`flex items-center gap-3 overflow-hidden transition-all duration-300 ${isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"}`}>
-      <img src="/Logo-Academy-White.svg" alt="Netsulwel" className="h-15 w-auto brightness-0 invert drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
+      <img src="/Logo-Academy-White.svg" alt="Netsulwel" className="h-14 w-auto brightness-0 invert drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
       <span className="text-lg font-bold text-white tracking-wide">Academy</span>
     </Link>
 
@@ -184,15 +186,17 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
  {/* 5. Footer da Sidebar (Temas + Logout) */}
  <div className=" p-4 shrink-0 space-y-3">
 
- {/* Toggle de Temas */}
- <div className={`flex items-center justify-center p-1 bg-gray-900 ${isCollapsed ? "flex-col gap-2 py-3" : "gap-1"}`}>
- <button className={`flex items-center justify-center text-gray-400 hover:text-white transition-all ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
- <Sun className="w-4 h-4" />
- </button>
- <button className={`flex items-center justify-center bg-gray-800 text-purple shadow-sm transition-all ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
- <Moon className="w-4 h-4" />
- </button>
- </div>
+  {/* Toggle de Temas */}
+  <div className={`flex items-center justify-center p-1 bg-gray-900 ${isCollapsed ? "flex-col gap-2 py-3" : "gap-1"}`}>
+  <button onClick={onToggleTheme}
+    className={`flex items-center justify-center transition-all ${theme === "light" ? "bg-gray-800 text-purple shadow-sm" : "text-gray-400 hover:text-white"} ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
+  <Sun className="w-4 h-4" />
+  </button>
+  <button onClick={onToggleTheme}
+    className={`flex items-center justify-center transition-all ${theme === "dark" ? "bg-gray-800 text-purple shadow-sm" : "text-gray-400 hover:text-white"} ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
+  <Moon className="w-4 h-4" />
+  </button>
+  </div>
 
  {/* Botão de Logout */}
  <button

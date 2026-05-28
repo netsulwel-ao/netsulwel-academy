@@ -31,7 +31,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
  <input
  type="text"
  placeholder="Pesquisar cursos, aulas ou tópicos..."
- className="block w-full bg-gray-900/50 py-2.5 pl-10 pr-3 text-sm text-gray-200 placeholder-gray-500 focus:-purple focus:outline-none focus:ring-1 focus:ring-purple transition-all"
+            className="block w-full bg-gray-900/50 py-2.5 pl-10 pr-3 text-sm text-gray-200 placeholder-gray-500 focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple transition-all"
  />
  </div>
  </div>
@@ -55,7 +55,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
  <p className="text-xs text-gray-500">{user?.email}</p>
  </div>
  
- <div className="flex h-10 w-10 items-center justify-center bg-gradient-to-br from-purple to-purple-dark text-white font-bold shadow-lg shadow-purple/20 -purple-light/30">
+            <div className="flex h-10 w-10 items-center justify-center bg-gradient-to-br from-purple to-purple-dark text-white font-bold shadow-lg shadow-purple/20">
  {user?.photoURL ? (
  <img src={user.photoURL} alt="Avatar" className="h-full w-full object-cover" />
  ) : (

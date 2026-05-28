@@ -5,14 +5,36 @@
   --foreground: #e1e1e6;
   --purple: #8257e5;
   --purple-light: #996dff;
+  --purple-dark: #6d28d9;
   --green: #00b37e;
   --green-light: #04d361;
   --gray-100: #e1e1e6;
+  --gray-200: #c4c4cc;
   --gray-300: #a8a8b3;
+  --gray-400: #8d8d99;
+  --gray-500: #7c7c8a;
   --gray-600: #323238;
   --gray-700: #29292e;
   --gray-800: #202024;
   --gray-900: #121214;
+  --gray-950: #09090b;
+}
+
+[data-theme="light"] {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #d1d5db;
+  --gray-900: #e2e8f0;
+  --gray-950: #f1f5f9;
+  --card: #ffffff;
+  --card-border: #e2e8f0;
 }
 
 @theme inline {
@@ -20,16 +42,114 @@
   --color-foreground: var(--foreground);
   --color-purple: var(--purple);
   --color-purple-light: var(--purple-light);
+  --color-purple-dark: var(--purple-dark);
   --color-green: var(--green);
   --color-green-light: var(--green-light);
   --color-gray-100: var(--gray-100);
+  --color-gray-200: var(--gray-200);
   --color-gray-300: var(--gray-300);
+  --color-gray-400: var(--gray-400);
+  --color-gray-500: var(--gray-500);
   --color-gray-600: var(--gray-600);
   --color-gray-700: var(--gray-700);
   --color-gray-800: var(--gray-800);
   --color-gray-900: var(--gray-900);
+  --color-gray-950: var(--gray-950);
+  --color-card: var(--card);
+  --color-card-border: var(--card-border);
   --font-sans: var(--font-inter);
   --font-pixel: var(--font-press-start);
+}
+
+/* ── Light Mode Overrides ───────────────────────── */
+
+[data-theme="light"] .text-white {
+  color: #0f172a;
+}
+
+[data-theme="light"] .fixed.inset-0.z-50:first-child {
+  background-color: rgba(9, 9, 11, 0.85) !important;
+}
+
+[data-theme="light"] .border-white {
+  border-color: var(--color-gray-300);
+}
+
+[data-theme="light"] .divide-white {
+  border-color: var(--color-gray-300);
+}
+
+[data-theme="light"] .ring-white {
+  --tw-ring-color: var(--color-gray-300);
+}
+
+[data-theme="light"] .placeholder-white::placeholder {
+  color: var(--color-gray-400);
+}
+
+/* Logo: white SVG → black in light mode */
+[data-theme="light"] .brightness-0.invert {
+  filter: brightness(0) !important;
+}
+
+[data-theme="light"] .drop-shadow-\[0_0_8px_rgba\(168\2c 85\2c 247\2c 0\.5\)\] {
+  filter: none;
+}
+
+/* ── Glass cards → solid cards in light mode ── */
+[data-theme="light"] .bg-gray-900\/10,
+[data-theme="light"] .bg-gray-900\/20,
+[data-theme="light"] .bg-gray-900\/30,
+[data-theme="light"] .bg-gray-900\/40,
+[data-theme="light"] .bg-gray-900\/50,
+[data-theme="light"] .bg-gray-900\/60 {
+  background-color: #ffffff !important;
+}
+
+[data-theme="light"] .bg-gray-950\/40,
+[data-theme="light"] .bg-gray-950\/50,
+[data-theme="light"] .bg-gray-950\/80 {
+  background-color: #f8fafc !important;
+}
+
+[data-theme="light"] .bg-gray-950\/30 {
+  background-color: #f1f5f9 !important;
+}
+
+/* ── Inputs ── */
+[data-theme="light"] .bg-gray-900\/50 {
+  background-color: #ffffff !important;
+}
+[data-theme="light"] input,
+[data-theme="light"] input::placeholder {
+  color: #475569;
+}
+
+/* ── Sidebar plan card ── */
+[data-theme="light"] .bg-black\/30 {
+  background-color: #e2e8f0 !important;
+}
+[data-theme="light"] .bg-white {
+  background-color: #6366f1 !important;
+}
+
+/* ── Buttons hover states ── */
+[data-theme="light"] .hover\:bg-gray-800:hover {
+  background-color: #d1d5db !important;
+}
+[data-theme="light"] .hover\:bg-gray-900:hover {
+  background-color: #e2e8f0 !important;
+}
+[data-theme="light"] .hover\:bg-black:hover {
+  background-color: #e2e8f0 !important;
+}
+
+/* ── Icon containers with white/10 glass ── */
+[data-theme="light"] .bg-white\/10 {
+  background-color: #f1f5f9 !important;
+}
+[data-theme="light"] .hover\:bg-white\/20:hover {
+  background-color: #e2e8f0 !important;
 }
 
 html {
@@ -249,6 +369,34 @@ body {
 
 .animate-pulse-glow {
   animation: pulse-glow 4s ease-in-out infinite;
+}
+
+/* ── Animações de entrada (tailwindcss-animate compat) ── */
+@keyframes enter {
+  from {
+    opacity: var(--tw-enter-opacity, 1);
+    transform: translateX(var(--tw-enter-translate-x, 0)) translateY(var(--tw-enter-translate-y, 0)) scale(var(--tw-enter-scale, 1));
+  }
+}
+
+.animate-in {
+  animation: enter 300ms ease-out forwards;
+}
+
+.fade-in { --tw-enter-opacity: 0; }
+.zoom-in-95 { --tw-enter-scale: 0.95; }
+.slide-in-from-top-4 { --tw-enter-translate-y: -1rem; }
+.slide-in-from-top-2 { --tw-enter-translate-y: -0.5rem; }
+.slide-in-from-bottom-4 { --tw-enter-translate-y: 1rem; }
+.slide-in-from-bottom-2 { --tw-enter-translate-y: 0.5rem; }
+.slide-in-from-right { --tw-enter-translate-x: 1rem; }
+
+@layer utilities {
+  .duration-200 { animation-duration: 200ms; }
+  .duration-300 { animation-duration: 300ms; }
+  .duration-500 { animation-duration: 500ms; }
+  .duration-700 { animation-duration: 700ms; }
+  .duration-1000 { animation-duration: 1000ms; }
 }
 
 /* ── Bloquear overlays de download managers (IDM, etc.) ── */

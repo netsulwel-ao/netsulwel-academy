@@ -1,6 +1,7 @@
 "use client";
 import { useCountdown } from "@/hooks/useCountdown";
 import Link from "next/link";
+const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23202224'/%3E%3Ctext x='200' y='110' text-anchor='middle' fill='%23666' font-size='16' font-family='sans-serif'%3EPromo%3C/text%3E%3C/svg%3E";
 
 interface Props {
   targetDate: string | Date;
@@ -52,7 +53,7 @@ export default function Variant6ImageBanner({
         }}
       >
         <img
-          src={imageUrl || "/placeholder-student.jpg"}
+          src={imageUrl || PLACEHOLDER}
           alt=""
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
