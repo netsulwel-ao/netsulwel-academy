@@ -9,7 +9,7 @@ import {
 } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  LiveKitRoom, VideoTrack, useTracks, useParticipants,
+  LiveKitRoom, VideoTrack, AudioTrack, useTracks, useParticipants,
   TrackToggle, useLocalParticipant, useRoomContext,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
@@ -20,6 +20,7 @@ import {
   AlertTriangle, Hand, Settings, Maximize2, Volume2,
   Pin, ChevronRight, Eye,
 } from "lucide-react";
+import { VideoPlayer } from "@/components/VideoPlayer";
 import type { LiveSession, ChatMessage } from "@/types/live";
 
 // ── Elapsed Timer ─────────────────────────────────────────
@@ -223,28 +224,29 @@ function ParticipantsPanel({ liveId }: { liveId: string }) {
 
 // ── Video Stage ────────────────────────────────────────────
 function Stage() {
-  const tracks = useTracks([Track.Source.Camera, Track.Source.ScreenShare], { onlySubscribed: false });
+  const tracks = useTracks([Track.Source.Camera, Track.Source.ScreenShare, Track.Source.Microphone], { onlySubscribed: false });
   const { localParticipant } = useLocalParticipant();
   const screenTrack = tracks.find((t) => t.source === Track.Source.ScreenShare && t.participant.identity === localParticipant.identity);
   const cameraTrack = tracks.find((t) => t.source === Track.Source.Camera && t.participant.identity === localParticipant.identity);
+  const audioTracks = tracks.filter((t) => t.source === Track.Source.Microphone && t.participant.identity !== localParticipant?.identity);
 
   return (
-    <div className="relative w-full h-full bg-black flex items-center justify-center">
-      {screenTrack ? (
-        <>
-          <VideoTrack trackRef={screenTrack} className="w-full h-full object-contain" />
-          {cameraTrack && (
-            <div className="absolute bottom-16 right-4 w-44 h-32 shadow-2xl border-2 border-purple-600/50 overflow-hidden">
-              <VideoTrack trackRef={cameraTrack} className="w-full h-full object-cover" />
-            </div>
-          )}
-        </>
-      ) : cameraTrack ? (
-        <VideoTrack trackRef={cameraTrack} className="w-full h-full object-contain" />
-      ) : (
-        <div className="flex flex-col items-center gap-4 text-gray-700">
+    <div className="relative w-full h-full bg-black">
+      {/* Audio tracks from remote participants */}
+      {audioTracks.map((track) => (
+        <AudioTrack key={track.participant.identity} trackRef={track} />
+      ))}
+      <VideoPlayer
+        source={{
+          type: "livekit",
+          screenTrack: screenTrack ? <VideoTrack trackRef={screenTrack} className="w-full h-full object-contain" /> : undefined,
+          videoTrack: cameraTrack ? <VideoTrack trackRef={cameraTrack} className="w-full h-full object-cover" /> : undefined,
+        }}
+      />
+      {!screenTrack && !cameraTrack && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-700 pointer-events-none">
           <VideoOff className="h-20 w-20" />
-          <span className="text-lg font-medium text-gray-500">Câmara desligada</span>
+          <span className="text-lg font-medium text-gray-500 mt-4">Câmara desligada</span>
         </div>
       )}
     </div>
@@ -350,7 +352,7 @@ function StudioInterior({ live, onEnd }: { live: LiveSession; onEnd: () => void 
   const participants = useParticipants();
 
   return (
-    <div className="flex flex-col h-screen bg-[#0e0e10] overflow-hidden">
+    <div className="flex flex-col h-dvh bg-[#0e0e10] overflow-hidden">
 
       {/* ── Top bar ── */}
       <div className="flex items-center gap-4 px-4 py-2.5 bg-[#18181b] border-b border-gray-800 shrink-0">
@@ -377,10 +379,10 @@ function StudioInterior({ live, onEnd }: { live: LiveSession; onEnd: () => void 
       </div>
 
       {/* ── Main content ── */}
-      <div className="flex flex-1 min-h-0">
+      <div className="flex flex-col lg:flex-row flex-1 min-h-0">
 
         {/* Video + info column */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0">
 
           {/* Video area */}
           <div className="relative flex-1 min-h-0 bg-black">
@@ -389,10 +391,10 @@ function StudioInterior({ live, onEnd }: { live: LiveSession; onEnd: () => void 
           </div>
 
           {/* Stream info bar — below video like Twitch */}
-          <div className="bg-[#18181b] border-t border-gray-800 px-6 py-4 shrink-0">
+          <div className="bg-[#18181b] border-t border-gray-800 px-4 sm:px-6 py-4 shrink-0">
             <div className="flex items-start gap-4">
               {/* Avatar */}
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center bg-gradient-to-br from-purple-600 to-blue-600 text-white text-xl font-bold">
+              <div className="flex h-10 sm:h-14 w-10 sm:w-14 shrink-0 items-center justify-center bg-gradient-to-br from-purple-600 to-blue-600 text-white text-xl font-bold">
                 {live.hostName?.[0]?.toUpperCase() || "A"}
               </div>
 
@@ -402,19 +404,19 @@ function StudioInterior({ live, onEnd }: { live: LiveSession; onEnd: () => void 
                   <h2 className="text-lg font-bold text-white truncate">{live.title}</h2>
                 </div>
                 <p className="text-sm text-purple-400 font-medium mt-0.5">{live.hostName || "Admin"}</p>
-                <p className="text-sm text-gray-400 mt-1 line-clamp-2">{live.description}</p>
+                <p className="text-sm text-gray-400 mt-1 line-clamp-2 hidden sm:block">{live.description}</p>
               </div>
 
               {/* Stats */}
-              <div className="flex items-center gap-6 shrink-0">
+              <div className="flex items-center gap-4 sm:gap-6 shrink-0">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-white">{participants.length}</p>
-                  <p className="text-xs text-gray-500">Espectadores</p>
+                  <p className="text-xl sm:text-2xl font-bold text-white">{participants.length}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-500">Espectadores</p>
                 </div>
                 {live.startedAt && (
                   <div className="text-center">
                     <ElapsedTimer since={live.startedAt} />
-                    <p className="text-xs text-gray-500 mt-0.5">Duração</p>
+                    <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">Duração</p>
                   </div>
                 )}
               </div>
@@ -423,7 +425,7 @@ function StudioInterior({ live, onEnd }: { live: LiveSession; onEnd: () => void 
         </div>
 
         {/* Side panel */}
-        <div className="w-[340px] shrink-0 border-l border-gray-800 flex flex-col">
+        <div className="w-full lg:w-[340px] shrink-0 border-t lg:border-t-0 lg:border-l border-gray-800 flex flex-col max-h-[40vh] lg:max-h-none">
           {sidePanel === "chat"
             ? <ChatPanel liveId={live.id!} pinnedMsg={pinnedMsg} onPin={setPinnedMsg} />
             : <ParticipantsPanel liveId={live.id!} />

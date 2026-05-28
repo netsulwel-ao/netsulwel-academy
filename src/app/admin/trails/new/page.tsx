@@ -133,9 +133,9 @@ export default function NewTrailPage() {
         </div>
       )}
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
         {/* LEFT */}
-        <div className="w-[380px] shrink-0 border-r border-gray-800 overflow-y-auto p-6 space-y-6">
+        <div className="w-full lg:w-[380px] shrink-0 border-b lg:border-b-0 lg:border-r border-gray-800 overflow-y-auto p-6 space-y-6">
           {/* Thumbnail */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Capa da Trilha</label>

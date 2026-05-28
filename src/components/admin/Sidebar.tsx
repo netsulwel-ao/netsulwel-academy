@@ -12,6 +12,8 @@ import { signOut } from "firebase/auth";
 interface SidebarProps {
  isCollapsed: boolean;
  setIsCollapsed: (val: boolean) => void;
+ mobileOpen: boolean;
+ setMobileOpen: (val: boolean) => void;
 }
 
 const navSections = [
@@ -36,23 +38,29 @@ const navSections = [
  }
 ];
 
-export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
-  const pathname = usePathname();
+export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen }: SidebarProps) {
+   const pathname = usePathname();
 
-  const handleLogout = async () => {
-  try {
-  await signOut(auth);
-  } catch (error) {
-  console.error("Erro ao fazer logout:", error);
-  }
-  };
+   const handleLogout = async () => {
+   try {
+   await signOut(auth);
+   } catch (error) {
+   console.error("Erro ao fazer logout:", error);
+   }
+   };
 
- return (
- <aside 
- className={`fixed left-0 top-0 z-40 h-screen bg-gray-950/80 backdrop-blur-2xl transition-all duration-300 flex flex-col ${
- isCollapsed ? "w-20" : "w-[280px]"
- } hidden lg:flex`}
- >
+  return (
+  <>
+  {/* Mobile overlay */}
+  {mobileOpen && (
+  <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)} />
+  )}
+
+  <aside 
+  className={`fixed left-0 top-0 h-screen bg-gray-950/80 backdrop-blur-2xl transition-all duration-300 flex flex-col ${
+  isCollapsed ? "w-20" : "w-[280px]"
+  } ${mobileOpen ? "translate-x-0 z-50" : "-translate-x-full invisible pointer-events-none"} lg:translate-x-0 lg:z-40 lg:visible lg:pointer-events-auto`}
+  >
  <div className="flex h-20 items-center justify-between px-6 shrink-0">
  <a href="/admin" className={`flex items-center gap-3 overflow-hidden transition-all duration-300 ${isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"}`}>
  <img src="/Logo-Academy-White.svg" alt="Netsulwel" className="h-10 w-auto brightness-0 invert drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
@@ -149,6 +157,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
  {!isCollapsed && <span className="text-sm font-medium">Sair do Admin</span>}
  </button>
  </div>
- </aside>
- );
+  </aside>
+  </>
+  );
 }

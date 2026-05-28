@@ -145,12 +145,12 @@ export default function PreviewLiveClient({ live }: { live: LivePreview }) {
                 {live.hostName}
               </span>
               {live.scheduledAt && (
-                <span className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  {new Date(live.scheduledAt).toLocaleDateString("pt-AO", {
+                <span className="flex items-center gap-2 truncate min-w-0">
+                  <Calendar className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{new Date(live.scheduledAt).toLocaleDateString("pt-AO", {
                     day: "2-digit", month: "long", year: "numeric",
                     hour: "2-digit", minute: "2-digit",
-                  })}
+                  })}</span>
                 </span>
               )}
               {isLive && (
@@ -167,23 +167,23 @@ export default function PreviewLiveClient({ live }: { live: LivePreview }) {
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
                   <Clock className="h-3.5 w-3.5" /> Começa em
                 </p>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                   {time.d > 0 && (
                     <>
                       <div className="text-center">
-                        <p className="text-3xl font-bold text-white tabular-nums">{String(time.d).padStart(2, "0")}</p>
-                        <p className="text-xs text-gray-500 mt-1">dias</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums">{String(time.d).padStart(2, "0")}</p>
+                        <p className="text-[10px] sm:text-xs text-gray-500 mt-1">dias</p>
                       </div>
-                      <span className="text-2xl text-gray-600 font-bold">:</span>
+                      <span className="text-xl sm:text-2xl text-gray-600 font-bold">:</span>
                     </>
                   )}
                   {[{ v: time.h, l: "horas" }, { v: time.m, l: "min" }, { v: time.s, l: "seg" }].map(({ v, l }, i, arr) => (
-                    <div key={l} className="flex items-center gap-3">
+                    <div key={l} className="flex items-center gap-2 sm:gap-3">
                       <div className="text-center">
-                        <p className="text-3xl font-bold text-white tabular-nums">{String(v).padStart(2, "0")}</p>
-                        <p className="text-xs text-gray-500 mt-1">{l}</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums">{String(v).padStart(2, "0")}</p>
+                        <p className="text-[10px] sm:text-xs text-gray-500 mt-1">{l}</p>
                       </div>
-                      {i < arr.length - 1 && <span className="text-2xl text-gray-600 font-bold">:</span>}
+                      {i < arr.length - 1 && <span className="text-xl sm:text-2xl text-gray-600 font-bold">:</span>}
                     </div>
                   ))}
                 </div>

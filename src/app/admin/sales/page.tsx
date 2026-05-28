@@ -221,7 +221,8 @@ export default function SalesPage() {
           <p className="text-gray-400">Nenhuma venda encontrada</p>
         </div>
       ) : (
-        <div className="bg-gray-900/40 backdrop-blur-xl overflow-hidden">
+        <div className="bg-gray-900/40 backdrop-blur-xl overflow-x-auto">
+          <div className="min-w-[700px]">
           <div className="grid grid-cols-[1fr_120px_120px_140px_120px_80px] gap-4 px-5 py-3 border-b border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
             <span>Cliente / Item</span>
             <span>Tipo</span>
@@ -276,6 +277,7 @@ export default function SalesPage() {
           <div className="px-5 py-3 border-t border-gray-800 text-xs text-gray-500">
             {filtered.length} de {sales.length} vendas
           </div>
+          </div>
         </div>
       )}
 
@@ -292,7 +294,7 @@ export default function SalesPage() {
               <div className="p-6 space-y-4">
                 {error && <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400"><AlertCircle className="h-4 w-4 shrink-0" />{error}</div>}
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nome *</label>
                     <input type="text" value={form.userName} onChange={(e) => setForm((f) => ({ ...f, userName: e.target.value }))}
@@ -307,7 +309,7 @@ export default function SalesPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tipo</label>
                     <select value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as Sale["type"] }))}
@@ -334,7 +336,7 @@ export default function SalesPage() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Método de Pagamento</label>
                     <select value={form.paymentMethod} onChange={(e) => setForm((f) => ({ ...f, paymentMethod: e.target.value }))}

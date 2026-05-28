@@ -249,10 +249,10 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
       )}
 
       {/* Two-column layout */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
 
         {/* LEFT PANEL */}
-        <div className="w-[380px] shrink-0 border-r border-gray-800 overflow-y-auto p-6 space-y-6">
+        <div className="w-full lg:w-[380px] shrink-0 border-b lg:border-b-0 lg:border-r border-gray-800 overflow-y-auto p-6 space-y-6">
 
           {/* Thumbnail */}
           <div>

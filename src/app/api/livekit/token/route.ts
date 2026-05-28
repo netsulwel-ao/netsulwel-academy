@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     at.addGrant({
       roomJoin: true,
       room: roomName,
-      canPublish: !!isHost,
+      canPublish: true,
       canPublishSources: isHost ? undefined : [TrackSource.MICROPHONE],
       canPublishData: true,
       canSubscribe: true,

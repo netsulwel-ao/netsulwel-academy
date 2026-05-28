@@ -166,7 +166,7 @@ export default function LoginPage() {
  };
 
  return (
- <main className="flex min-h-screen bg-gray-950 flex-col lg:flex-row">
+  <main className="flex min-h-screen bg-gray-950 flex-col lg:flex-row overflow-hidden">
  
  {/* 
  ------------------------------------------
@@ -219,7 +219,7 @@ export default function LoginPage() {
  <div className="relative flex w-full flex-col lg:w-1/2 bg-gray-950 overflow-hidden">
  
  <div className="pointer-events-none absolute inset-0 grid-bg opacity-10" />
- <div className="pointer-events-none absolute top-[-20%] left-[-10%] h-[600px] w-[600px] bg-purple/10 blur-[150px]" />
+  <div className="pointer-events-none absolute top-[-20%] left-[-10%] h-[600px] w-[600px] bg-purple/10 blur-[150px] hidden sm:block" />
 
  <div className="flex items-center justify-between p-6 lg:justify-end z-20">
  <Link href="/" className="flex lg:hidden items-center gap-3">
@@ -252,7 +252,7 @@ export default function LoginPage() {
  {view === "forgot" && "Insira o seu email para receber um link de recuperação"}
  </p>
 
- <div className=" border border-gray-800/50 bg-gray-900/40 p-8 shadow-2xl backdrop-blur-xl relative">
+  <div className=" border border-gray-800/50 bg-gray-900/40 p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative">
  <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-50 pointer-events-none"></div>
 
  {error && (

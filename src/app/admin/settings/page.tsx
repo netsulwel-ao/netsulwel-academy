@@ -18,7 +18,7 @@ const DEFAULT_SETTINGS: PlatformSettings = {
   paymentMethods: {
     bankTransfer: { enabled: false, bankName: "", iban: "", accountHolder: "", reference: "" },
     multicaixa: { enabled: false, entity: "", reference: "" },
-    paypal: { enabled: false, email: "" },
+    paypal: { enabled: false, email: "", clientId: "" },
     stripe: { enabled: false, publicKey: "" },
   },
   socials: { instagram: "", youtube: "", facebook: "", twitter: "", linkedin: "", discord: "", whatsapp: "", tiktok: "" },
@@ -249,12 +249,21 @@ export default function SettingsPage() {
               <Toggle value={settings.paymentMethods.paypal.enabled} onChange={(v) => set("paymentMethods.paypal.enabled", v)} />
             </div>
             {settings.paymentMethods.paypal.enabled && (
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Email PayPal</label>
-                <input type="email" value={settings.paymentMethods.paypal.email}
-                  onChange={(e) => set("paymentMethods.paypal.email", e.target.value)}
-                  placeholder="pagamentos@exemplo.com"
-                  className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Email PayPal</label>
+                  <input type="email" value={settings.paymentMethods.paypal.email}
+                    onChange={(e) => set("paymentMethods.paypal.email", e.target.value)}
+                    placeholder="pagamentos@exemplo.com"
+                    className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Client ID (copia do <a href="https://developer.paypal.com/dashboard/applications" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">PayPal Developer Dashboard</a>)</label>
+                  <input type="text" value={settings.paymentMethods.paypal.clientId}
+                    onChange={(e) => set("paymentMethods.paypal.clientId", e.target.value)}
+                    placeholder="Axxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                    className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
+                </div>
               </div>
             )}
           </div>

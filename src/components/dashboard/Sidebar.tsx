@@ -13,6 +13,8 @@ import { useAuth } from "@/contexts/AuthContext";
 interface SidebarProps {
  isCollapsed: boolean;
  setIsCollapsed: (val: boolean) => void;
+ mobileOpen: boolean;
+ setMobileOpen: (val: boolean) => void;
 }
 
 const navSections = [
@@ -34,23 +36,30 @@ const navSections = [
  }
 ];
 
-export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
-  const pathname = usePathname();
-  const { plan, isAdmin } = useAuth();
+export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen }: SidebarProps) {
+   const pathname = usePathname();
+   const { plan, isAdmin } = useAuth();
 
-  const handleLogout = async () => {
-  try {
-  await signOut(auth);
-  } catch (error) {
-  console.error("Erro ao fazer logout:", error);
-  }
-  };
+   const handleLogout = async () => {
+   try {
+   await signOut(auth);
+   } catch (error) {
+   console.error("Erro ao fazer logout:", error);
+   }
+   };
 
- return (
- <aside
- className={`fixed left-0 top-0 z-40 h-screen bg-gray-950/80 backdrop-blur-2xl transition-all duration-300 flex flex-col ${isCollapsed ? "w-20" : "w-[280px]"
- } hidden lg:flex`}
- >
+  return (
+  <>
+  {/* Mobile overlay */}
+  {mobileOpen && (
+  <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)} />
+  )}
+
+  <aside
+  className={`fixed left-0 top-0 bg-gray-950/80 backdrop-blur-2xl transition-all duration-300 flex flex-col ${
+  isCollapsed ? "w-20" : "w-[280px]"
+  } ${mobileOpen ? "translate-x-0 z-50" : "-translate-x-full invisible pointer-events-none"} lg:translate-x-0 lg:z-40 lg:visible lg:pointer-events-auto`}
+  >
 
  {/* 1. Header da Sidebar (Logo + Toggle) */}
  <div className="flex h-20 items-center justify-between px-6 shrink-0">
@@ -196,6 +205,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
  {!isCollapsed && <span className="text-sm font-medium">Sair</span>}
  </button>
  </div>
- </aside>
- );
+  </aside>
+  </>
+  );
 }

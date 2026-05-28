@@ -142,7 +142,7 @@ export default function UsersPage() {
       </div>
 
       {/* ── Stats ── */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: "Total", value: stats.total, icon: Users, color: "blue" },
           { label: "Alunos", value: stats.alunos, icon: UserCheck, color: "green" },
@@ -222,7 +222,8 @@ export default function UsersPage() {
           {search && <p className="text-gray-600 text-sm mt-1">Tenta pesquisar por outro termo</p>}
         </div>
       ) : (
-        <div className="bg-gray-900/40 backdrop-blur-xl overflow-hidden">
+        <div className="bg-gray-900/40 backdrop-blur-xl overflow-x-auto">
+          <div className="min-w-[600px]">
           {/* Table header */}
           <div className="grid grid-cols-[1fr_1fr_120px_120px_48px] gap-4 px-5 py-3 border-b border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
             <span>Utilizador</span>
@@ -327,6 +328,7 @@ export default function UsersPage() {
           {/* Footer count */}
           <div className="px-5 py-3 border-t border-gray-800 text-xs text-gray-500">
             {filtered.length} de {users.length} utilizadores
+          </div>
           </div>
         </div>
       )}

@@ -8,8 +8,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   CreditCard, Crown, Zap, Lock, ArrowUpRight, Building2,
   Smartphone, Loader2, CheckCircle2, AlertCircle, Copy,
-  ExternalLink, Upload, FileText, X, ChevronRight,
+  ExternalLink, Upload, FileText, X, ChevronRight, Globe,
 } from "lucide-react";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { toast } from "sonner";
 import type { PlatformSettings } from "@/types/settings";
 import type { Course } from "@/types/course";
@@ -90,7 +91,7 @@ export default function DashboardFinancesPage() {
     setReceipt({ file, preview: URL.createObjectURL(file) });
   };
 
-  const handlePurchase = async () => {
+  const handlePurchase = async (paypalTransactionId?: string) => {
     if (!selectedMethod || !user) return;
     if (!course && (!selectedPlan || !plans)) return;
     setSubmitting(true);
@@ -107,10 +108,14 @@ export default function DashboardFinancesPage() {
         amount: course ? (course.price ?? 0) : (plans![selectedPlan!]?.price ?? 0),
         paymentMethod: activeMethods.find((m) => m.id === selectedMethod)?.label || selectedMethod,
         receiptUrl: receiptUrl || "",
-        status: "pending",
+        status: paypalTransactionId ? "confirmed" : "pending",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
+
+      if (paypalTransactionId) {
+        saleData.paypalTransactionId = paypalTransactionId;
+      }
 
       if (course) {
         saleData.type = "standalone";
@@ -121,7 +126,11 @@ export default function DashboardFinancesPage() {
       }
 
       await addDoc(collection(db, "sales"), saleData);
-      toast.success("Pedido registado! O pagamento será confirmado em breve.");
+      if (paypalTransactionId) {
+        toast.success("Pagamento confirmado! Bem-vindo ao curso.");
+      } else {
+        toast.success("Pedido registado! O pagamento será confirmado em breve.");
+      }
       if (course) { router.push("/dashboard/courses"); return; }
       setSelectedPlan(null);
       setSelectedMethod(null);
@@ -175,7 +184,7 @@ export default function DashboardFinancesPage() {
       </div>
 
       {/* Steps bar */}
-      <div className="flex items-center gap-2 text-sm">
+      <div className="flex items-center gap-2 text-sm flex-wrap">
         {(["plan", "method", "checkout"] as Step[]).map((s, i) => (
           <div key={s} className="flex items-center gap-2">
             <span className={`flex items-center justify-center w-7 h-7 text-xs font-bold border ${
@@ -388,20 +397,55 @@ export default function DashboardFinancesPage() {
             {selectedMethod === "paypal" && methods.paypal.enabled && (
               <div className="space-y-4">
                 <h3 className="text-sm font-bold text-white uppercase tracking-wider">PayPal</h3>
-                <p className="text-sm text-gray-400">Faz o pagamento para o email abaixo.</p>
-                {methods.paypal.email && (
-                  <div className="flex items-center justify-between bg-gray-950/50 border border-gray-800 px-4 py-3">
-                    <span className="text-sm text-white font-medium">{methods.paypal.email}</span>
-                    <button onClick={() => handleCopy(methods.paypal.email)} className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white">
-                      <Copy className="h-3.5 w-3.5" /> Copiar
-                    </button>
+                <p className="text-sm text-gray-400">Pagamento seguro processado via PayPal.</p>
+
+                {methods.paypal.clientId ? (
+                  <div className="min-h-[200px]">
+                    <PayPalScriptProvider options={{ clientId: methods.paypal.clientId, currency: "USD" }}>
+                      <PayPalButtons
+                        style={{ color: "blue", shape: "rect", label: "pay", height: 48 }}
+                        createOrder={(_data, actions) => {
+                          const amount = course ? (course.price ?? 0) : (plans?.[selectedPlan!]?.price ?? 0);
+                          return actions.order.create({
+                            intent: "CAPTURE",
+                            purchase_units: [{
+                              amount: { value: amount.toString(), currency_code: "USD" },
+                              description: course ? course.title : (plans?.[selectedPlan!]?.label || "Plano"),
+                            }],
+                          });
+                        }}
+                        onApprove={async (_data, actions) => {
+                          const details = await actions.order!.capture();
+                          if (details.status === "COMPLETED") {
+                            await handlePurchase(details.id);
+                          } else {
+                            toast.error("O pagamento não foi concluído.");
+                          }
+                        }}
+                        onError={() => toast.error("Erro ao processar pagamento PayPal.")}
+                      />
+                    </PayPalScriptProvider>
                   </div>
+                ) : (
+                  <>
+                    <div className="bg-amber-500/10 border border-amber-500/20 px-4 py-3 text-sm text-amber-200">
+                      PayPal não configurado — o administrador precisa definir o Client ID nas configurações.
+                    </div>
+                    {methods.paypal.email && (
+                      <div className="flex items-center justify-between bg-gray-950/50 border border-gray-800 px-4 py-3">
+                        <span className="text-sm text-white font-medium">{methods.paypal.email}</span>
+                        <button onClick={() => handleCopy(methods.paypal.email)} className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white">
+                          <Copy className="h-3.5 w-3.5" /> Copiar
+                        </button>
+                      </div>
+                    )}
+                    <a href={methods.paypal.email ? `https://www.paypal.com/paypalme/${methods.paypal.email.split("@")[0]}` : "#"}
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 bg-[#0070ba] hover:bg-[#003087] text-white py-3 font-bold transition-colors">
+                      <ExternalLink className="h-4 w-4" /> Pagar com PayPal (manual)
+                    </a>
+                  </>
                 )}
-                <a href={methods.paypal.email ? `https://www.paypal.com/paypalme/${methods.paypal.email.split("@")[0]}` : "#"}
-                  target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-[#0070ba] hover:bg-[#003087] text-white py-3 font-bold transition-colors">
-                  <ExternalLink className="h-4 w-4" /> Pagar com PayPal
-                </a>
               </div>
             )}
 
@@ -447,18 +491,22 @@ export default function DashboardFinancesPage() {
               </div>
             )}
 
-            {/* Submit */}
-            <button
-              onClick={handlePurchase}
-              disabled={submitting || (needsReceipt && !receipt) || uploading}
-              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-3 font-bold transition-colors disabled:opacity-60"
-            >
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUpRight className="h-4 w-4" />}
-              {submitting ? "A registar..." : "Concluir Pedido"}
-            </button>
+            {/* Submit — hidden for PayPal (handled by the button itself) */}
+            {selectedMethod !== "paypal" && (
+              <>
+                <button
+                  onClick={() => handlePurchase()}
+                  disabled={submitting || (needsReceipt && !receipt) || uploading}
+                  className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-3 font-bold transition-colors disabled:opacity-60"
+                >
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUpRight className="h-4 w-4" />}
+                  {submitting ? "A registar..." : "Concluir Pedido"}
+                </button>
 
-            {needsReceipt && !receipt && (
-              <p className="text-xs text-gray-500 text-center">Anexa o comprovativo antes de concluir.</p>
+                {needsReceipt && !receipt && (
+                  <p className="text-xs text-gray-500 text-center">Anexa o comprovativo antes de concluir.</p>
+                )}
+              </>
             )}
           </div>
         </section>

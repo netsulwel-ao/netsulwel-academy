@@ -11,6 +11,7 @@ import {
   Loader2, CheckCircle2, ChevronDown, ChevronRight, Crown, Zap,
 } from "lucide-react";
 import Link from "next/link";
+import { VideoPlayer } from "@/components/VideoPlayer";
 import type { Course } from "@/types/course";
 import type { CourseType } from "@/types/course";
 
@@ -66,6 +67,24 @@ function getVimeoEmbedUrl(url: string): string | null {
   } catch {
     return null;
   }
+}
+
+function getVimeoId(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (!u.hostname.includes("vimeo.com")) return null;
+    return u.pathname.split("/").filter(Boolean).pop() || null;
+  } catch {
+    return null;
+  }
+}
+
+function buildVideoSource(url: string, poster?: string) {
+  const youtubeId = getYoutubeId(url);
+  if (youtubeId) return { type: "youtube" as const, youtubeId };
+  const vimeoId = getVimeoId(url);
+  if (vimeoId) return { type: "vimeo" as const, vimeoId };
+  return { type: "direct" as const, src: url, poster };
 }
 
 export default function CourseDetailPage() {
@@ -132,36 +151,15 @@ export default function CourseDetailPage() {
         <div className="flex-1 min-w-0 space-y-6">
 
           {/* Player area */}
-          <div className="relative w-full aspect-video bg-gray-900 overflow-hidden">
+          <div className="relative w-full aspect-video bg-gray-900">
             {hasAccess && currentVideo?.url ? (
-              /* Video player */
-              youtubeEmbed ? (
-                <iframe
-                  src={youtubeEmbed}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  title={currentVideo.title}
-                />
-              ) : vimeoEmbed ? (
-                <iframe
-                  src={vimeoEmbed}
-                  className="w-full h-full"
-                  allow="autoplay; fullscreen; picture-in-picture"
-                  allowFullScreen
-                  title={currentVideo.title}
-                />
-              ) : (
-                <video src={currentVideo.url} controls className="w-full h-full" />
-              )
+              <VideoPlayer source={buildVideoSource(currentVideo.url, course.thumbnail)} />
             ) : hasAccess && !currentVideo?.url ? (
-              /* No video URL yet */
               <div className="flex flex-col items-center justify-center h-full gap-3 text-gray-500">
                 <Play className="h-12 w-12" />
                 <p className="text-sm">Seleciona uma aula para começar</p>
               </div>
             ) : (
-              /* PAYWALL */
               <div className="relative h-full">
                 {course.thumbnail && (
                   <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover opacity-20 blur-sm" />

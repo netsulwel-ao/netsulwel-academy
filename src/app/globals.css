@@ -34,12 +34,18 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 .font-pixel {
@@ -243,6 +249,24 @@ body {
 
 .animate-pulse-glow {
   animation: pulse-glow 4s ease-in-out infinite;
+}
+
+/* ── Bloquear overlays de download managers (IDM, etc.) ── */
+div[id*="IDM"]:not([required]),
+div[class*="IDM"]:not([required]),
+div[id*="idm"]:not([required]),
+div[class*="idm"]:not([required]),
+div[id*="Download"]:not([required]),
+div[class*="download"]:not([required]),
+div[aria-label*="download" i],
+div[title*="download" i],
+div:has(> img[alt*="Download"]) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -9999 !important;
+  position: absolute !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -135,7 +135,7 @@ export default function DashboardPage() {
           {/* Stats */}
           <div className="bg-gray-900/40 border border-gray-800 p-6 space-y-4">
             <h2 className="text-sm font-bold text-white uppercase tracking-wider">Resumo</h2>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <Stat label="Publicados" value={stats.published} />
               <Stat label="Disponíveis" value={stats.accessible} />
               <Stat label="Comprados" value={stats.enrolled} />

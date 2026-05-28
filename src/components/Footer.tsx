@@ -32,9 +32,9 @@ export function Footer() {
  return (
  <footer className="border-t border-gray-800 py-16">
  <div className="mx-auto max-w-6xl px-6">
- <div className="grid gap-12 md:grid-cols-5 lg:gap-16">
+  <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-5 lg:gap-16">
  <div className="md:col-span-2">
- <Link href="/" className="flex items-center gap-3 sm:gap-4 whitespace-nowrap">
+  <Link href="/" className="flex items-center gap-3 sm:gap-4 flex-wrap">
  <img src="/Logo-Academy-White.svg" alt="Academy Logo" className="h-16 w-auto sm:h-20" />
  <span className="text-3xl font-light text-gray-600 sm:text-4xl">|</span>
  <div className="flex items-center gap-2">

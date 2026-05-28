@@ -74,11 +74,11 @@ export function Trails() {
  </a>
  </div>
 
- <div className="mt-12 grid gap-6 md:grid-cols-3">
+  <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
  {trails.map((trail) => (
  <article
  key={trail.title}
- className={`group border p-6 backdrop-blur-md transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-purple/5 ${trail.color}`}
+ className={`group border p-6 sm:p-8 backdrop-blur-md transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-purple/5 ${trail.color}`}
  >
  <div className="flex items-start justify-between">
  <span

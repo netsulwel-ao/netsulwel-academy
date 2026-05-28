@@ -131,12 +131,12 @@ function CarouselRow({ catKey, courses }: { catKey: CourseCategory; courses: Cou
         <div className="relative">
           <div
             ref={rowRef}
-            className="flex gap-5 overflow-x-auto"
+            className="flex gap-5 overflow-x-auto hide-scrollbar"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
-              paddingLeft: "max(24px, calc((100vw - 1152px) / 2 + 24px))",
-              paddingRight: "max(24px, calc((100vw - 1152px) / 2 + 24px))",
+              paddingLeft: "max(12px, calc((100vw - 1152px) / 2 + 12px))",
+              paddingRight: "max(12px, calc((100vw - 1152px) / 2 + 12px))",
             }}
           >
             {courses.map((course) => (
@@ -145,17 +145,17 @@ function CarouselRow({ catKey, courses }: { catKey: CourseCategory; courses: Cou
           </div>
 
           {/* Fade edges */}
-          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-gray-950 to-transparent z-[2]" />
-          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-gray-950 to-transparent z-[2]" />
+          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 sm:w-16 bg-gradient-to-r from-gray-950 to-transparent z-[2]" />
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 sm:w-16 bg-gradient-to-l from-gray-950 to-transparent z-[2]" />
 
           {/* Nav buttons */}
           <button onClick={() => scroll("left")} aria-label="Anterior"
-            className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center border border-white/10 bg-gray-950/90 text-white opacity-0 transition-opacity hover:bg-gray-900 group-hover/row:opacity-100 backdrop-blur-sm">
-            <ChevronLeft className="h-5 w-5" />
+            className="absolute left-1 sm:left-3 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border border-white/10 bg-gray-950/90 text-white transition-opacity hover:bg-gray-900 backdrop-blur-sm md:opacity-0 md:group-hover/row:opacity-100">
+            <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
           <button onClick={() => scroll("right")} aria-label="Seguinte"
-            className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center border border-white/10 bg-gray-950/90 text-white opacity-0 transition-opacity hover:bg-gray-900 group-hover/row:opacity-100 backdrop-blur-sm">
-            <ChevronRight className="h-5 w-5" />
+            className="absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border border-white/10 bg-gray-950/90 text-white transition-opacity hover:bg-gray-900 backdrop-blur-sm md:opacity-0 md:group-hover/row:opacity-100">
+            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
       )}

@@ -20,6 +20,7 @@ import {
   AlertTriangle, Hand, ArrowLeft, Eye, Volume2,
   Maximize2, Settings, Pin, ChevronRight, Heart, Mic, MicOff,
 } from "lucide-react";
+import { VideoPlayer } from "@/components/VideoPlayer";
 import type { LiveSession, ChatMessage } from "@/types/live";
 
 // ── Chat ──────────────────────────────────────────────────
@@ -164,59 +165,37 @@ function ViewerParticipants() {
 
 // ── Viewer Stage ───────────────────────────────────────────
 function ViewerStage({ live }: { live: LiveSession }) {
-  const tracks = useTracks([Track.Source.Camera, Track.Source.ScreenShare, Track.Source.Microphone], { onlySubscribed: true });
+  const tracks = useTracks([Track.Source.Camera, Track.Source.ScreenShare, Track.Source.Microphone], { onlySubscribed: false });
+  const { localParticipant } = useLocalParticipant();
   const participants = useParticipants();
   const screenTrack = tracks.find((t) => t.source === Track.Source.ScreenShare);
   const cameraTrack = tracks.find((t) => t.source === Track.Source.Camera);
-  const audioTracks = tracks.filter((t) => t.source === Track.Source.Microphone);
+  const audioTracks = tracks.filter((t) => t.source === Track.Source.Microphone && t.participant.identity !== localParticipant?.identity);
 
   return (
-    <div className="relative w-full h-full bg-black flex items-center justify-center">
+    <div className="relative w-full h-full bg-black">
       {/* Audio tracks — hidden elements that play the host's mic */}
       {audioTracks.map((track) => (
         <AudioTrack key={track.participant.identity} trackRef={track} />
       ))}
 
-      {screenTrack ? (
-        <>
-          <VideoTrack trackRef={screenTrack} className="w-full h-full object-contain" />
-          {cameraTrack && (
-            <div className="absolute bottom-16 right-4 w-44 h-32 shadow-2xl border-2 border-purple-600/50 overflow-hidden">
-              <VideoTrack trackRef={cameraTrack} className="w-full h-full object-cover" />
-            </div>
-          )}
-        </>
-      ) : cameraTrack ? (
-        <VideoTrack trackRef={cameraTrack} className="w-full h-full object-contain" />
-      ) : (
-        <div className="flex flex-col items-center gap-4 text-gray-700">
-          <Radio className="h-20 w-20" />
-          <span className="text-lg font-medium text-gray-500">A aguardar o professor...</span>
-        </div>
-      )}
+      <VideoPlayer
+        source={{
+          type: "livekit",
+          screenTrack: screenTrack ? <VideoTrack trackRef={screenTrack} className="w-full h-full object-contain" /> : undefined,
+          videoTrack: cameraTrack ? <VideoTrack trackRef={cameraTrack} className="w-full h-full object-cover" /> : undefined,
+        }}
+      />
 
-      {/* Bottom controls overlay */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-4 pb-3 pt-8">
-        <div className="w-full h-1 bg-gray-700 mb-3">
-          <div className="h-full bg-red-500 w-full" />
+      {/* Live badge + viewer count overlay */}
+      <div className="absolute top-3 left-3 z-20 flex items-center gap-2">
+        <div className="flex items-center gap-1.5 bg-red-600 px-2.5 py-1 text-xs font-bold text-white">
+          <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+          LIVE
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 bg-red-600 px-2.5 py-1 text-xs font-bold text-white">
-            <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-            LIVE
-          </div>
-          <Volume2 className="h-5 w-5 text-white ml-1" />
-          <div className="flex items-center gap-1.5 text-white text-sm ml-2">
-            <Eye className="h-4 w-4" />
-            <span className="font-medium">{participants.length}</span>
-          </div>
-          <div className="flex-1" />
-          <button className="flex items-center justify-center h-9 w-9 bg-gray-800/80 hover:bg-gray-700 text-white transition-colors backdrop-blur-sm">
-            <Settings className="h-4 w-4" />
-          </button>
-          <button className="flex items-center justify-center h-9 w-9 bg-gray-800/80 hover:bg-gray-700 text-white transition-colors backdrop-blur-sm">
-            <Maximize2 className="h-4 w-4" />
-          </button>
+        <div className="flex items-center gap-1.5 bg-black/60 px-2.5 py-1 text-xs text-white">
+          <Eye className="h-3.5 w-3.5" />
+          <span>{participants.length}</span>
         </div>
       </div>
     </div>
@@ -247,7 +226,7 @@ function ViewerInterior({ live }: { live: LiveSession }) {
   }, [canSpeak, localParticipant]);
 
   return (
-    <div className="flex flex-col h-screen bg-[#0e0e10] overflow-hidden">
+    <div className="flex flex-col h-dvh bg-[#0e0e10] overflow-hidden">
 
       {/* Top bar */}
       <div className="flex items-center gap-4 px-4 py-2.5 bg-[#18181b] border-b border-gray-800 shrink-0">
@@ -279,8 +258,8 @@ function ViewerInterior({ live }: { live: LiveSession }) {
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 min-h-0">
-        <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex flex-col lg:flex-row flex-1 min-h-0">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0">
 
           {/* Video */}
           <div className="relative flex-1 min-h-0">
@@ -288,23 +267,23 @@ function ViewerInterior({ live }: { live: LiveSession }) {
           </div>
 
           {/* Stream info — below video */}
-          <div className="bg-[#18181b] border-t border-gray-800 px-6 py-4 shrink-0">
+          <div className="bg-[#18181b] border-t border-gray-800 px-4 sm:px-6 py-4 shrink-0">
             <div className="flex items-start gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center bg-gradient-to-br from-purple-600 to-blue-600 text-white text-xl font-bold">
+              <div className="flex h-10 sm:h-14 w-10 sm:w-14 shrink-0 items-center justify-center bg-gradient-to-br from-purple-600 to-blue-600 text-white text-xl font-bold">
                 {live.hostName?.[0]?.toUpperCase() || "P"}
               </div>
               <div className="flex-1 min-w-0">
                 <h2 className="text-lg font-bold text-white truncate">{live.title}</h2>
                 <p className="text-sm text-purple-400 font-medium mt-0.5">{live.hostName || "Professor"}</p>
-                <p className="text-sm text-gray-400 mt-1 line-clamp-2">{live.description}</p>
+                <p className="text-sm text-gray-400 mt-1 line-clamp-2 hidden sm:block">{live.description}</p>
               </div>
               <div className="flex items-center gap-4 shrink-0">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-white">{participants.length}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-white">{participants.length}</p>
                   <p className="text-xs text-gray-500">Online</p>
                 </div>
-                <button className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 font-bold text-sm transition-colors">
-                  <Heart className="h-4 w-4" /> Seguir
+                <button className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-3 sm:px-4 py-2 font-bold text-sm transition-colors">
+                  <Heart className="h-4 w-4" /> <span className="hidden sm:inline">Seguir</span>
                 </button>
               </div>
             </div>
@@ -312,7 +291,7 @@ function ViewerInterior({ live }: { live: LiveSession }) {
         </div>
 
         {/* Side panel */}
-        <div className="w-[340px] shrink-0 border-l border-gray-800 flex flex-col">
+        <div className="w-full lg:w-[340px] shrink-0 border-t lg:border-t-0 lg:border-l border-gray-800 flex flex-col max-h-[40vh] lg:max-h-none">
           {sidePanel === "chat" ? <ViewerChat liveId={live.id!} /> : <ViewerParticipants />}
         </div>
       </div>
@@ -413,7 +392,7 @@ export default function ViewerPage() {
 
   return (
     <LiveKitRoom
-      video={false} audio={true} token={token}
+      video={false} audio={false} token={token}
       serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL}
       data-lk-theme="default"
       style={{ height: "100dvh" }}

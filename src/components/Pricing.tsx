@@ -64,15 +64,15 @@ export function Pricing() {
  </p>
  </div>
 
- <div className="mt-16 grid gap-8 lg:grid-cols-3">
- {plans.map((plan) => (
- <div
- key={plan.name}
- className={`relative flex flex-col border p-8 backdrop-blur-md transition-transform ${
- plan.highlighted
- ? "z-10 border-purple bg-gray-800/60 glow-purple lg:scale-105"
- : "border-gray-700 bg-gray-800/30 hover:border-gray-600 hover:bg-gray-800/50"
- }`}
+  <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+  {plans.map((plan) => (
+  <div
+  key={plan.name}
+  className={`relative flex flex-col border p-6 sm:p-8 backdrop-blur-md transition-transform ${
+  plan.highlighted
+  ? "z-10 border-purple bg-gray-800/60 glow-purple lg:scale-105"
+  : "border-gray-700 bg-gray-800/30 hover:border-gray-600 hover:bg-gray-800/50"
+  }`}
  >
  {plan.highlighted && (
  <span className="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1 bg-purple px-4 py-1 text-xs font-bold text-white">

@@ -1,11 +1,15 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { Search, Bell, ExternalLink } from "lucide-react";
+import { Search, Bell, ExternalLink, Menu } from "lucide-react";
 import Link from "next/link";
 
-export default function Header() {
- const { user } = useAuth();
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export default function Header({ onMenuClick }: HeaderProps) {
+  const { user } = useAuth();
  
  const getInitials = (name: string | null | undefined) => {
  if (!name) return "A";
@@ -13,9 +17,12 @@ export default function Header() {
  };
 
  return (
- <header className="sticky top-0 z-30 flex h-20 items-center justify-between bg-gray-950/80 backdrop-blur-xl px-8">
- 
- <div className="flex flex-1 items-center gap-4">
+  <header className="sticky top-0 z-30 flex h-20 items-center justify-between bg-gray-950/80 backdrop-blur-xl px-4 sm:px-8">
+  
+  <div className="flex flex-1 items-center gap-4">
+  <button onClick={onMenuClick} className="lg:hidden text-gray-400 hover:text-white transition-colors mr-2">
+  <Menu className="h-6 w-6" />
+  </button>
  <span className="px-3 py-1 bg-blue-500/10 text-blue-400 text-xs font-bold uppercase tracking-wider hidden sm:block">
  Modo Gestão
  </span>

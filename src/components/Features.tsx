@@ -70,11 +70,11 @@ export function Features() {
  </p>
  </div>
 
- <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+  <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
  {features.map((feature) => (
  <div
  key={feature.title}
- className="group relative overflow-hidden border border-gray-700 bg-gray-800/30 p-6 backdrop-blur-md transition-all hover:border-purple/50 hover:bg-gray-800/50"
+ className="group relative overflow-hidden border border-gray-700 bg-gray-800/30 p-6 sm:p-8 backdrop-blur-md transition-all hover:border-purple/50 hover:bg-gray-800/50"
  >
  <div className="pointer-events-none absolute -right-4 -top-4 h-24 w-24 bg-purple/10 blur-2xl transition-opacity group-hover:opacity-100 opacity-0" />
  <div className="flex h-12 w-12 items-center justify-center border border-purple/30 bg-purple/10 text-purple-light transition-colors group-hover:border-purple/60 group-hover:bg-purple/20">

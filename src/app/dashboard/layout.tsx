@@ -8,18 +8,19 @@ import CountdownBanner from "@/components/dashboard/CountdownBanner";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
  const [isCollapsed, setIsCollapsed] = useState(false);
+ const [mobileOpen, setMobileOpen] = useState(false);
 
  return (
  <div className="flex min-h-screen bg-gray-950">
- <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+ <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
  <div className={`flex-1 flex flex-col transition-all duration-300 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'}`}>
  {/* Banner de contagem regressiva — topo */}
  <CountdownBanner />
- <Header />
- <main className="flex-1 overflow-y-auto p-8 bg-gray-950">
- {children}
- </main>
+ <Header onMenuClick={() => setMobileOpen(true)} />
+   <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gray-950">
+  {children}
+  </main>
  </div>
 
  <AnnouncementPopup />

@@ -1,10 +1,14 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { Search, Bell, User as UserIcon } from "lucide-react";
+import { Search, Bell, User as UserIcon, Menu } from "lucide-react";
 
-export default function Header() {
- const { user } = useAuth();
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export default function Header({ onMenuClick }: HeaderProps) {
+  const { user } = useAuth();
  
  // Obter o primeiro nome ou as iniciais para o Avatar
  const getInitials = (name: string | null | undefined) => {
@@ -13,10 +17,13 @@ export default function Header() {
  };
 
  return (
- <header className="sticky top-0 z-30 flex h-20 items-center justify-between bg-gray-950/80 backdrop-blur-xl px-8">
- 
- {/* Barra de Pesquisa */}
- <div className="flex flex-1 items-center gap-4">
+  <header className="sticky top-0 z-30 flex h-20 items-center justify-between bg-gray-950/80 backdrop-blur-xl px-4 sm:px-8">
+  
+  <div className="flex flex-1 items-center gap-4">
+  {/* Mobile menu button */}
+  <button onClick={onMenuClick} className="lg:hidden text-gray-400 hover:text-white transition-colors mr-2">
+  <Menu className="h-6 w-6" />
+  </button>
  <div className="relative hidden sm:block w-full max-w-md">
  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
  <Search className="h-5 w-5 text-gray-500" />

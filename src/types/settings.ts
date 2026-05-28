@@ -9,7 +9,7 @@ export interface PlatformSettings {
   paymentMethods: {
     bankTransfer: { enabled: boolean; bankName: string; iban: string; accountHolder: string; reference: string };
     multicaixa: { enabled: boolean; entity: string; reference: string };
-    paypal: { enabled: boolean; email: string };
+    paypal: { enabled: boolean; email: string; clientId: string };
     stripe: { enabled: boolean; publicKey: string };
   };
 

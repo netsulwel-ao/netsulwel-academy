@@ -71,6 +71,12 @@ service cloud.firestore {
         );
         allow update, delete: if isAdmin();
       }
+
+      // Speakers — permissão para falar (teacher toggles)
+      match /speakers/{uid} {
+        allow read: if isAuth();
+        allow write: if isAdmin();
+      }
     }
 
     // ── enrollments (compras standalone) ──────────────────
