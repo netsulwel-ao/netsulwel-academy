@@ -36,6 +36,8 @@ export interface Course {
   modulesCount: number;
   lessonsCount: number;
   totalDuration?: string;    // calculado
+  createdBy?: string;          // UID do admin que criou
+  views?: number;
   createdAt?: unknown;
   updatedAt?: unknown;
 }

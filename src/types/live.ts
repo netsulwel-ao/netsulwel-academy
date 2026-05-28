@@ -15,6 +15,7 @@ export interface LiveSession {
   startedAt?: string;
   endedAt?: string;
   participantCount?: number;
+  views?: number;
   recordingUrl?: string;      // R2 URL after recording saved
   createdAt?: unknown;
   updatedAt?: unknown;

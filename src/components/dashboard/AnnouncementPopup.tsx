@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, query, where, doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { X } from "lucide-react";
 import { AnnouncementModal } from "@/app/admin/announcements/page";
@@ -12,38 +12,37 @@ export default function AnnouncementPopup() {
   const { user, plan } = useAuth();
   const [current, setCurrent] = useState<Announcement | null>(null);
   const [queue, setQueue] = useState<Announcement[]>([]);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (!user) return;
+    let cancelled = false;
 
     const fetchAnnouncements = async () => {
       try {
-        // Busca anúncios ativos
-        const snap = await getDocs(
-          query(collection(db, "announcements"), where("active", "==", true))
-        );
+        const [snap, userDoc] = await Promise.all([
+          getDocs(query(collection(db, "announcements"), where("active", "==", true))),
+          getDoc(doc(db, "users", user.uid)),
+        ]);
+
+        if (cancelled) return;
 
         const now = new Date();
-        const userDoc = await import("firebase/firestore").then(({ getDoc }) =>
-          getDoc(doc(db, "users", user.uid))
-        );
-        const seenIds: string[] = userDoc.exists() ? (userDoc.data().seenAnnouncements ?? []) : [];
+        const seenIds: string[] = userDoc.exists()
+          ? (userDoc.data().seenAnnouncements ?? [])
+          : [];
 
         const eligible = snap.docs
           .map((d) => ({ id: d.id, ...d.data() } as Announcement))
           .filter((a) => {
-            // Expiração
             if (a.expiresAt && new Date(a.expiresAt) < now) return false;
-            // showOnce — já viu?
             if (a.showOnce && seenIds.includes(a.id!)) return false;
-            // Target
             const targets: AnnouncementTarget[] = ["all"];
             if (plan === "smart") targets.push("smart");
             if (plan === "golden") targets.push("smart", "golden");
             if (plan === "free") targets.push("free");
             return targets.includes(a.target);
           })
-          // live primeiro, depois por ordem de criação
           .sort((a, b) => {
             if (a.type === "live" && b.type !== "live") return -1;
             if (b.type === "live" && a.type !== "live") return 1;
@@ -53,6 +52,7 @@ export default function AnnouncementPopup() {
         if (eligible.length > 0) {
           setCurrent(eligible[0]);
           setQueue(eligible.slice(1));
+          setTimeout(() => setVisible(true), 50);
         }
       } catch (err) {
         console.error("Erro ao carregar anúncios:", err);
@@ -60,12 +60,14 @@ export default function AnnouncementPopup() {
     };
 
     fetchAnnouncements();
+    return () => { cancelled = true; };
   }, [user, plan]);
 
   const handleClose = async () => {
+    setVisible(false);
+
     if (!current || !user) return;
 
-    // Marca como visto se showOnce
     if (current.showOnce) {
       try {
         await updateDoc(doc(db, "users", user.uid), {
@@ -76,13 +78,15 @@ export default function AnnouncementPopup() {
       }
     }
 
-    // Avança para o próximo da fila
-    if (queue.length > 0) {
-      setCurrent(queue[0]);
-      setQueue(queue.slice(1));
-    } else {
-      setCurrent(null);
-    }
+    setTimeout(() => {
+      if (queue.length > 0) {
+        setCurrent(queue[0]);
+        setQueue(queue.slice(1));
+        setTimeout(() => setVisible(true), 50);
+      } else {
+        setCurrent(null);
+      }
+    }, 300);
   };
 
   if (!current) return null;
@@ -91,37 +95,45 @@ export default function AnnouncementPopup() {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-50 bg-gray-950/80 backdrop-blur-sm animate-in fade-in duration-300"
-        onClick={handleClose}
+        className={`fixed inset-0 z-50 bg-gray-950/85 backdrop-blur-md transition-opacity duration-300 ${
+          visible ? "opacity-100" : "opacity-0"
+        }`}
       />
 
-      {/* Modal */}
+      {/* Modal wrapper */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-lg animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+        <div
+          className={`pointer-events-auto w-full max-w-lg transition-all duration-300 ${
+            visible
+              ? "opacity-100 translate-y-0 scale-100"
+              : "opacity-0 translate-y-6 scale-95"
+          }`}
+        >
+          {/* Topo — fila + botão fechar */}
+          <div className="flex items-center justify-between mb-3 px-1">
+            {/* Indicador de fila */}
+            {queue.length > 0 ? (
+              <span className="flex items-center gap-1.5 bg-purple-500/15 border border-purple-500/25 text-purple-300 text-xs font-semibold px-3 py-1.5 rounded-full">
+                <span className="flex h-1.5 w-1.5 rounded-full bg-purple-400" />
+                +{queue.length} {queue.length === 1 ? "anúncio" : "anúncios"} a seguir
+              </span>
+            ) : (
+              <span />
+            )}
 
-          {/* Close button — fora do card */}
-          <div className="flex justify-end mb-2">
+            {/* Botão X redondo */}
             <button
               onClick={handleClose}
-              className="flex h-8 w-8 items-center justify-center bg-gray-900 border border-gray-700 text-gray-400 hover:text-white transition-colors"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-800/90 border border-gray-700 text-gray-400 hover:text-white hover:bg-gray-700 hover:border-gray-600 transition-all"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
 
+          {/* Card do anúncio */}
           <AnnouncementModal announcement={current} onClose={handleClose} />
 
-          {/* Fechar link + queue indicator */}
-          <div className="flex items-center justify-between mt-3 px-1">
-            <button onClick={handleClose} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
-              Fechar
-            </button>
-            {queue.length > 0 && (
-              <p className="text-xs text-gray-500">
-                +{queue.length} {queue.length === 1 ? "anúncio" : "anúncios"} a seguir
-              </p>
-            )}
-          </div>
+
         </div>
       </div>
     </>

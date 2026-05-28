@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, increment, updateDoc, onSnapshot, setDoc, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAccess } from "@/hooks/useAccess";
 import {
   Lock, Play, BookOpen, Award, ChevronLeft, Clock,
   Loader2, CheckCircle2, ChevronDown, ChevronRight, Crown, Zap,
+  Heart, HeartOff,
 } from "lucide-react";
 import Link from "next/link";
 import { VideoPlayer } from "@/components/VideoPlayer";
@@ -98,6 +99,8 @@ export default function CourseDetailPage() {
   const [loading, setLoading] = useState(true);
   const [activeLesson, setActiveLesson] = useState<{ mi: number; vi: number } | null>(null);
   const [expandedModules, setExpandedModules] = useState<number[]>([0]);
+  const [followed, setFollowed] = useState(false);
+  const [followCount, setFollowCount] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -112,6 +115,10 @@ export default function CourseDetailPage() {
           if (userDoc.exists()) setEnrolledCourses(userDoc.data().enrolledCourses ?? []);
         }
 
+        if (snap.exists()) {
+          updateDoc(doc(db, "courses", id), { views: increment(1) }).catch(() => {});
+        }
+
         // Abre automaticamente na primeira aula
         if (data.modules?.[0]?.videos?.[0]) setActiveLesson({ mi: 0, vi: 0 });
       } catch (err) {
@@ -122,6 +129,38 @@ export default function CourseDetailPage() {
     };
     fetchData();
   }, [id, user, router]);
+
+  useEffect(() => {
+    if (!user || !course?.createdBy) return;
+    const unsub = onSnapshot(doc(db, "ratings", `admin_${course.createdBy}_${user.uid}`), (snap) => {
+      setFollowed(snap.exists() && snap.data()?.rating === 1);
+    });
+    const countUnsub = onSnapshot(doc(db, "ratings", `admin_${course.createdBy}_stats`), (snap) => {
+      if (snap.exists()) setFollowCount(snap.data().count ?? 0);
+    });
+    return () => { unsub(); countUnsub(); };
+  }, [course?.createdBy, user]);
+
+  const toggleFollow = async () => {
+    if (!user || !course?.createdBy) return;
+    const ref = doc(db, "ratings", `admin_${course.createdBy}_${user.uid}`);
+    const statsRef = doc(db, "ratings", `admin_${course.createdBy}_stats`);
+    try {
+      if (followed) {
+        await Promise.all([
+          setDoc(ref, { targetId: course.createdBy, targetType: "admin", userId: user.uid, rating: 0, createdAt: serverTimestamp() }),
+          setDoc(statsRef, { count: increment(-1) }, { merge: true }),
+        ]);
+        setFollowed(false);
+      } else {
+        await Promise.all([
+          setDoc(ref, { targetId: course.createdBy, targetType: "admin", userId: user.uid, rating: 1, createdAt: serverTimestamp() }),
+          setDoc(statsRef, { count: increment(1) }, { merge: true }),
+        ]);
+        setFollowed(true);
+      }
+    } catch {}
+  };
 
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="h-8 w-8 animate-spin text-blue-500" /></div>;
   if (!course) return null;
@@ -182,7 +221,7 @@ export default function CourseDetailPage() {
                         Comprar por {course.price ? `${course.price.toLocaleString("pt-AO")} Kz` : "Grátis"}
                       </Link>
                     ) : (
-                      <Link href="/dashboard/plans"
+                      <Link href="/dashboard/finances"
                         className={`flex items-center gap-2 px-6 py-3 font-bold transition-colors ${
                           normalizedType === "golden"
                             ? "bg-yellow-500 hover:bg-yellow-400 text-gray-900"
@@ -239,6 +278,19 @@ export default function CourseDetailPage() {
                   <span key={t} className="px-2.5 py-1 bg-gray-800 text-gray-400 text-xs">{t}</span>
                 ))}
               </div>
+            )}
+            {course.createdBy && (
+              <button onClick={toggleFollow}
+                className={`flex items-center gap-2 px-3 py-2 font-bold text-sm transition-colors ${
+                  followed
+                    ? "bg-red-600 text-white hover:bg-red-700"
+                    : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
+                }`}
+              >
+                {followed ? <Heart className="h-4 w-4 fill-current" /> : <HeartOff className="h-4 w-4" />}
+                {followed ? "A Seguir" : "Seguir"}
+                {followCount > 0 && <span className="text-xs opacity-70">({followCount})</span>}
+              </button>
             )}
           </div>
         </div>
@@ -323,7 +375,7 @@ export default function CourseDetailPage() {
                     Comprar — {course.price ? `${course.price.toLocaleString("pt-AO")} Kz` : "Grátis"}
                   </Link>
                 ) : (
-                  <Link href="/dashboard/plans"
+                  <Link href="/dashboard/finances"
                     className={`flex w-full items-center justify-center gap-2 py-3 font-bold transition-colors text-sm ${
                       normalizedType === "golden" ? "bg-yellow-500 hover:bg-yellow-400 text-gray-900" : "bg-green-600 hover:bg-green-500 text-white"
                     }`}>

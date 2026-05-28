@@ -123,6 +123,7 @@ export default function DashboardFinancesPage() {
         saleData.itemTitle = course.title;
       } else {
         saleData.type = selectedPlan;
+        saleData.itemId = selectedPlan;
       }
 
       await addDoc(collection(db, "sales"), saleData);

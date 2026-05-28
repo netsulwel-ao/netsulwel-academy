@@ -13,7 +13,8 @@ import {
   Eye, EyeOff, Users, Calendar, LinkIcon, ImagePlus, Sparkles,
   Clock, ChevronDown, ChevronUp, Timer,
 } from "lucide-react";
-import type { Announcement, AnnouncementType, AnnouncementTarget, CountdownBanner } from "@/types/announcement";
+import type { Announcement, AnnouncementType, AnnouncementTarget, CountdownBanner, CountdownVariant } from "@/types/announcement";
+import { VARIANT_LABELS } from "@/types/announcement";
 import { toast } from "sonner";
 import IconPicker, { getIcon, getLucideIcon, AVAILABLE_ICONS } from "@/components/admin/IconPicker";
 
@@ -51,8 +52,8 @@ const EMPTY_ANN: Omit<Announcement, "id"|"createdAt"|"updatedAt"> = {
 };
 
 const EMPTY_CD: Omit<CountdownBanner, "id"|"createdAt"|"updatedAt"> = {
-  active: true, label: "", endsAt: "", ctaLabel: "", ctaUrl: "",
-  color: "red", target: "all",
+  active: true, label: "", endsAt: "", ctaLabel: "", ctaUrl: "", imageUrl: "", badgeLabel: "",
+  color: "red", variant: 1, target: "all",
 };
 
 export default function AnnouncementsPage() {
@@ -79,6 +80,9 @@ export default function AnnouncementsPage() {
   const [cdModalOpen, setCdModalOpen] = useState(false);
   const [editingCdId, setEditingCdId] = useState<string|null>(null);
   const [cdForm, setCdForm] = useState({...EMPTY_CD});
+  const [cdImageUploading, setCdImageUploading] = useState(false);
+  const [cdImagePreview, setCdImagePreview] = useState("");
+  const cdImageInputRef = useRef<HTMLInputElement>(null);
 
   // ── Active tab ────────────────────────────────────────────
   const [tab, setTab] = useState<"announcements"|"countdowns">("announcements");
@@ -171,11 +175,20 @@ export default function AnnouncementsPage() {
     });
   };
 
-  const openCreateCD = () => { setCdForm({...EMPTY_CD}); setEditingCdId(null); setCdError(""); setCdModalOpen(true); };
+  const handleCdImageChange = async (e:React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; if(!file) return;
+    setCdImagePreview(URL.createObjectURL(file)); setCdImageUploading(true); setCdError("");
+    try { const url = await uploadToR2(file,"countdowns"); setCdForm(f=>({...f,imageUrl:url})); }
+    catch { setCdError("Erro ao fazer upload da imagem."); setCdImagePreview(cdForm.imageUrl??""); }
+    finally { setCdImageUploading(false); }
+  };
+
+  const openCreateCD = () => { setCdForm({...EMPTY_CD}); setEditingCdId(null); setCdError(""); setCdImagePreview(""); setCdModalOpen(true); };
   const openEditCD = (b:CountdownBanner) => {
     setCdForm({active:b.active, label:b.label, endsAt:b.endsAt.slice(0,16),
-      ctaLabel:b.ctaLabel??"", ctaUrl:b.ctaUrl??"", color:b.color, target:b.target});
-    setEditingCdId(b.id!); setCdError(""); setCdModalOpen(true);
+      ctaLabel:b.ctaLabel??"", ctaUrl:b.ctaUrl??"", imageUrl:b.imageUrl??"", badgeLabel:b.badgeLabel??"",
+      color:b.color, variant:b.variant??1, target:b.target});
+    setCdImagePreview(b.imageUrl??""); setEditingCdId(b.id!); setCdError(""); setCdModalOpen(true);
   };
 
   const handleSaveCD = async () => {
@@ -332,6 +345,7 @@ export default function AnnouncementsPage() {
                           b.color==="purple"?"bg-purple-500/10 text-purple-400 border-purple-500/30":
                           "bg-blue-500/10 text-blue-400 border-blue-500/30"
                         }`}>{b.color}</span>
+                        <span className="text-xs text-gray-500 border border-gray-700 px-2 py-0.5">V{b.variant ?? 1}</span>
                         <span className="text-xs text-gray-500 border border-gray-700 px-2 py-0.5">{TARGET_LABELS[b.target]}</span>
                         {expired&&<span className="text-xs text-red-400 border border-red-500/30 px-2 py-0.5">Expirado</span>}
                       </div>
@@ -549,82 +563,148 @@ export default function AnnouncementsPage() {
         </>
       )}
 
-      {/* ── COUNTDOWN MODAL ── */}
+      {/* ── COUNTDOWN SIDEPANEL ── */}
       {cdModalOpen&&(
         <>
           <div className="fixed inset-0 z-40 bg-gray-950/80 backdrop-blur-sm" onClick={()=>setCdModalOpen(false)}/>
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="bg-gray-900 border border-gray-800 w-full max-w-lg shadow-2xl">
-              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-800">
+          <div className="fixed inset-y-0 right-0 z-50 w-full max-w-lg shadow-2xl translate-x-0 transition-transform">
+            <div className="h-full bg-gray-900 border-l border-gray-800 flex flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-800 shrink-0">
                 <h2 className="text-lg font-bold text-white">{editingCdId?"Editar Banner":"Novo Banner de Contagem"}</h2>
                 <button onClick={()=>setCdModalOpen(false)} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"><X className="h-5 w-5"/></button>
               </div>
-              <div className="p-6 space-y-5">
-                {cdError&&<div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400"><AlertCircle className="h-4 w-4 shrink-0"/>{cdError}</div>}
 
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Banner *</label>
-                  <input type="text" value={cdForm.label} onChange={e=>setCdForm(f=>({...f,label:e.target.value}))}
-                    placeholder="Ex: Promoção termina em · Aula ao vivo começa em"
-                    className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
-                </div>
+              {/* Scrollable body — no visible scrollbar */}
+              <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                <div className="p-6 space-y-5">
+                  {cdError&&<div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400"><AlertCircle className="h-4 w-4 shrink-0"/>{cdError}</div>}
 
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Data e Hora de Fim *</label>
-                  <input type="datetime-local" value={cdForm.endsAt} onChange={e=>setCdForm(f=>({...f,endsAt:e.target.value}))}
-                    className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none transition-all"/>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Botão</label>
-                    <input type="text" value={cdForm.ctaLabel??""} onChange={e=>setCdForm(f=>({...f,ctaLabel:e.target.value}))}
-                      placeholder="Ex: Ver Promoção"
-                      className="w-full bg-gray-950 border border-gray-800 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Banner *</label>
+                    <input type="text" value={cdForm.label} onChange={e=>setCdForm(f=>({...f,label:e.target.value}))}
+                      placeholder="Ex: Promoção termina em · Aula ao vivo começa em"
+                      className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">URL do Botão</label>
-                    <input type="text" value={cdForm.ctaUrl??""} onChange={e=>setCdForm(f=>({...f,ctaUrl:e.target.value}))}
-                      placeholder="/dashboard/plans"
-                      className="w-full bg-gray-950 border border-gray-800 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
-                  </div>
-                </div>
 
-                {/* Cor */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Cor do Banner</label>
-                  <div className="flex gap-2">
-                    {COUNTDOWN_COLORS.map(color=>(
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Data e Hora de Fim *</label>
+                    <input type="datetime-local" value={cdForm.endsAt} onChange={e=>setCdForm(f=>({...f,endsAt:e.target.value}))}
+                      className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none transition-all"/>
+                  </div>
+
+                  {/* Imagem (variante 6) */}
+                  {cdForm.variant === 6 && (
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Imagem do Banner</label>
+                      <div onClick={()=>!cdImageUploading&&cdImageInputRef.current?.click()}
+                        className="relative w-full h-36 border border-dashed border-gray-700 hover:border-blue-500/50 cursor-pointer overflow-hidden bg-gray-950 group transition-colors">
+                        {cdImagePreview?(
+                          <>
+                            <img src={cdImagePreview} alt="preview" className="w-full h-full object-cover"/>
+                            <div className="absolute inset-0 bg-gray-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer" onClick={()=>cdImageInputRef.current?.click()}>
+                              <ImagePlus className="h-8 w-8 text-white"/>
+                            </div>
+                            <button type="button" onClick={e=>{e.stopPropagation();setCdImagePreview("");setCdForm(f=>({...f,imageUrl:""}));}}
+                              className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center bg-gray-900/80 border border-gray-700 text-gray-300 hover:text-white z-10">
+                              <X className="h-3.5 w-3.5"/>
+                            </button>
+                          </>
+                        ):(
+                          <div className="flex flex-col items-center justify-center h-full gap-2 text-gray-500 group-hover:text-blue-400 transition-colors">
+                            <ImagePlus className="h-10 w-10"/><span className="text-sm font-medium">Clique para carregar</span><span className="text-xs">PNG, JPG, WEBP</span>
+                          </div>
+                        )}
+                        {cdImageUploading&&<div className="absolute inset-0 bg-gray-950/70 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-blue-400"/></div>}
+                      </div>
+                      <input ref={cdImageInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleCdImageChange}/>
+                      {cdForm.imageUrl&&!cdImageUploading&&<p className="mt-2 text-xs text-green-400 flex items-center gap-1"><CheckCircle2 className="h-3 w-3"/>Upload concluído</p>}
+                      <div className="mt-3">
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Badge</label>
+                        <input type="text" value={cdForm.badgeLabel ?? ""} onChange={e => setCdForm(f => ({ ...f, badgeLabel: e.target.value }))}
+                          placeholder="Ex: 82% OFF · Promoção · Limitado"
+                          className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Botão</label>
+                      <input type="text" value={cdForm.ctaLabel??""} onChange={e=>setCdForm(f=>({...f,ctaLabel:e.target.value}))}
+                        placeholder="Ex: Ver Promoção"
+                        className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">URL do Botão</label>
+                      <input type="text" value={cdForm.ctaUrl??""} onChange={e=>setCdForm(f=>({...f,ctaUrl:e.target.value}))}
+                        placeholder="/dashboard/finances"
+                        className="w-full bg-gray-950 border border-gray-800 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Cor do Banner</label>
+                    <div className="flex gap-2">
+                      {COUNTDOWN_COLORS.map(color=>(
                       <button key={color} type="button" onClick={()=>setCdForm(f=>({...f,color}))}
                         className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider border transition-all ${cdForm.color===color?"border-white/30 scale-105":"border-gray-800 opacity-60 hover:opacity-100"} ${
                           color==="red"?"bg-red-600 text-white":color==="yellow"?"bg-yellow-500 text-gray-900":
                           color==="blue"?"bg-blue-600 text-white":color==="green"?"bg-green-600 text-white":"bg-purple-600 text-white"
                         }`}>{color}</button>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                {/* Target + Ativo */}
-                <div className="grid grid-cols-2 gap-3">
+                  {/* Variante */}
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Mostrar para</label>
-                    <select value={cdForm.target} onChange={e=>setCdForm(f=>({...f,target:e.target.value as AnnouncementTarget}))}
-                      className="w-full bg-gray-950 border border-gray-800 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer">
-                      {(Object.entries(TARGET_LABELS) as [AnnouncementTarget,string][]).map(([v,l])=><option key={v} value={v}>{l}</option>)}
-                    </select>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Variante de Visual</label>
+                    <div className="grid grid-cols-1 gap-2">
+                      {([1,2,3,4,5,6] as CountdownVariant[]).map((v) => {
+                        const info = VARIANT_LABELS[v];
+                        const isSelected = cdForm.variant === v;
+                        return (
+                          <button key={v} type="button" onClick={() => setCdForm(f=>({...f, variant: v}))}
+                            className={`flex items-center gap-3 px-4 py-3 border text-left transition-all ${
+                              isSelected ? "border-blue-500/40 bg-blue-500/10" : "border-gray-800 bg-gray-950/50 hover:border-gray-700"
+                            }`}>
+                            <div className={`flex h-8 w-8 shrink-0 items-center justify-center text-xs font-bold rounded-full ${
+                              isSelected ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400"
+                            }`}>{v}</div>
+                            <div>
+                              <p className={`text-sm font-medium ${isSelected ? "text-white" : "text-gray-400"}`}>{info.name}</p>
+                              <p className="text-xs text-gray-500 mt-0.5">{info.desc}</p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="flex items-end">
-                    <button type="button" onClick={()=>setCdForm(f=>({...f,active:!f.active}))}
-                      className={`w-full flex items-center gap-3 px-4 py-2.5 border transition-all ${cdForm.active?"border-blue-500/40 bg-blue-500/10":"border-gray-800 bg-gray-950/50"}`}>
-                      <div className={`h-5 w-9 rounded-full transition-colors relative shrink-0 ${cdForm.active?"bg-blue-500":"bg-gray-700"}`}>
-                        <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${cdForm.active?"translate-x-4":"translate-x-0.5"}`}/>
-                      </div>
-                      <span className="text-sm text-white font-medium">Ativo</span>
-                    </button>
+
+                  {/* Target + Ativo */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Mostrar para</label>
+                      <select value={cdForm.target} onChange={e=>setCdForm(f=>({...f,target:e.target.value as AnnouncementTarget}))}
+                        className="w-full bg-gray-950 border border-gray-800 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer">
+                        {(Object.entries(TARGET_LABELS) as [AnnouncementTarget,string][]).map(([v,l])=><option key={v} value={v}>{l}</option>)}
+                      </select>
+                    </div>
+                    <div className="flex items-end">
+                      <button type="button" onClick={()=>setCdForm(f=>({...f,active:!f.active}))}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 border transition-all ${cdForm.active?"border-blue-500/40 bg-blue-500/10":"border-gray-800 bg-gray-950/50"}`}>
+                        <div className={`h-5 w-9 rounded-full transition-colors relative shrink-0 ${cdForm.active?"bg-blue-500":"bg-gray-700"}`}>
+                          <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${cdForm.active?"translate-x-4":"translate-x-0.5"}`}/>
+                        </div>
+                        <span className="text-sm text-white font-medium">Ativo</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="flex gap-3 px-6 py-5 border-t border-gray-800">
+
+              {/* Footer */}
+              <div className="flex gap-3 px-6 py-5 border-t border-gray-800 shrink-0">
                 <button onClick={()=>setCdModalOpen(false)} className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium transition-colors">Cancelar</button>
                 <button onClick={handleSaveCD} disabled={savingCD}
                   className="flex flex-1 items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors disabled:opacity-60">
@@ -683,7 +763,6 @@ export function AnnouncementModal({ announcement, onClose, preview=false }:
                 ? <div className={`flex items-center justify-center py-3 font-bold text-sm border ${cfg.bg} ${cfg.color}`}>{announcement.ctaLabel}</div>
                   : <a href={announcement.ctaUrl||"#"} target="_blank" rel="noopener noreferrer" onClick={onClose} className={`flex items-center justify-center py-3 font-bold text-sm transition-colors ${cfg.accent}`}>{announcement.ctaLabel}</a>
             )}
-            {!preview&&<button onClick={onClose} className="text-center text-sm text-gray-500 hover:text-gray-300 transition-colors">Fechar</button>}
           </div>
           {/* Right — imagem */}
           <div className="relative w-56 shrink-0 overflow-hidden">
@@ -732,7 +811,6 @@ export function AnnouncementModal({ announcement, onClose, preview=false }:
                 }
               </div>
             )}
-            {!preview&&<button onClick={onClose} className="w-full text-center text-sm text-gray-500 hover:text-gray-300 transition-colors pt-1">Fechar</button>}
           </div>
         </>
       )}

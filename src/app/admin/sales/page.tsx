@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { db } from "@/lib/firebase";
 import {
   collection, getDocs, addDoc, updateDoc, deleteDoc,
-  doc, serverTimestamp, orderBy, query,
+  doc, serverTimestamp, orderBy, query, arrayUnion, arrayRemove,
 } from "firebase/firestore";
 import {
   DollarSign, TrendingUp, Users, ShoppingCart, Plus,
@@ -91,11 +91,29 @@ export default function SalesPage() {
     finally { setSaving(false); }
   };
 
-  const updateStatus = async (id: string, status: Sale["status"]) => {
+  const updateStatus = async (id: string, newStatus: Sale["status"]) => {
     try {
-      await updateDoc(doc(db, "sales", id), { status, updatedAt: serverTimestamp() });
-      setSales((p) => p.map((s) => s.id === id ? { ...s, status } : s));
-      toast.success("Status atualizado.");
+      const sale = sales.find((s) => s.id === id);
+      if (!sale) return;
+      const userRef = doc(db, "users", sale.userId);
+
+      if (newStatus === "confirmed" && sale.status !== "confirmed") {
+        if (sale.type === "standalone" && sale.itemId) {
+          await updateDoc(userRef, { enrolledCourses: arrayUnion(sale.itemId) });
+        } else if (sale.type === "smart" || sale.type === "golden") {
+          await updateDoc(userRef, { plan: sale.type });
+        }
+      } else if (newStatus !== "confirmed" && sale.status === "confirmed") {
+        if (sale.type === "standalone" && sale.itemId) {
+          await updateDoc(userRef, { enrolledCourses: arrayRemove(sale.itemId) });
+        } else if (sale.type === "smart" || sale.type === "golden") {
+          await updateDoc(userRef, { plan: "free" });
+        }
+      }
+
+      await updateDoc(doc(db, "sales", id), { status: newStatus, updatedAt: serverTimestamp() });
+      setSales((p) => p.map((s) => s.id === id ? { ...s, status: newStatus } : s));
+      toast.success(newStatus === "confirmed" ? "Pagamento confirmado — acesso atribuído." : "Status atualizado.");
     } catch { toast.error("Erro ao atualizar status."); }
   };
 

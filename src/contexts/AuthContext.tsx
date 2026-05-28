@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { useRouter, usePathname } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -30,29 +30,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const prevPlan = useRef<UserPlan>("free");
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        let adminStatus = false;
-        let userPlan: UserPlan = "free";
-        try {
-          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            if (data.role === "admin") adminStatus = true;
-            if (data.plan === "smart" || data.plan === "golden") userPlan = data.plan;
-          }
-          prevIsAdmin.current = adminStatus;
-          prevPlan.current = userPlan;
-          setIsAdmin(adminStatus);
-          setPlan(userPlan);
-        } catch (error: any) {
-          if (error?.code !== "permission-denied") {
-            console.error("Erro a verificar utilizador:", error);
-          }
-          setIsAdmin(prevIsAdmin.current);
-          setPlan(prevPlan.current);
-        }
         setLoading(false);
       } else {
         setUser(null);
@@ -64,6 +44,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const unsub = onSnapshot(doc(db, "users", user.uid), (snap) => {
+      if (!snap.exists()) return;
+      const data = snap.data();
+      prevIsAdmin.current = data.role === "admin";
+      prevPlan.current = data.plan === "smart" || data.plan === "golden" ? data.plan : "free";
+      setIsAdmin(data.role === "admin");
+      setPlan(data.plan === "smart" || data.plan === "golden" ? data.plan : "free");
+    }, () => {
+      setIsAdmin(prevIsAdmin.current);
+      setPlan(prevPlan.current);
+    });
+    return () => unsub();
+  }, [user]);
 
   useEffect(() => {
     if (loading) return;

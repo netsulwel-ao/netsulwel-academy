@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { db } from "@/lib/firebase";
 import {
   doc, getDoc, onSnapshot, collection, addDoc,
-  query, orderBy, serverTimestamp, setDoc,
+  query, orderBy, serverTimestamp, setDoc, increment, updateDoc,
 } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -18,7 +18,7 @@ import { Track } from "livekit-client";
 import {
   Send, Users, MessageSquare, Radio, Loader2,
   AlertTriangle, Hand, ArrowLeft, Eye, Volume2,
-  Maximize2, Settings, Pin, ChevronRight, Heart, Mic, MicOff,
+  Maximize2, Settings, Pin, ChevronRight, Heart, HeartOff, Mic, MicOff, Star,
 } from "lucide-react";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import type { LiveSession, ChatMessage } from "@/types/live";
@@ -208,6 +208,8 @@ function ViewerInterior({ live }: { live: LiveSession }) {
   const { localParticipant } = useLocalParticipant();
   const [sidePanel, setSidePanel] = useState<"chat" | "participants">("chat");
   const [canSpeak, setCanSpeak] = useState(false);
+  const [followed, setFollowed] = useState(false);
+  const [followCount, setFollowCount] = useState(0);
   const participants = useParticipants();
 
   useEffect(() => {
@@ -224,6 +226,43 @@ function ViewerInterior({ live }: { live: LiveSession }) {
       localParticipant.setMicrophoneEnabled(canSpeak);
     }
   }, [canSpeak, localParticipant]);
+
+  useEffect(() => {
+    if (!user || !live.id) return;
+    updateDoc(doc(db, "lives", live.id), { views: increment(1) }).catch(() => {});
+  }, [live.id, user]);
+
+  useEffect(() => {
+    if (!user || !live.hostUid) return;
+    const unsub = onSnapshot(doc(db, "ratings", `admin_${live.hostUid}_${user.uid}`), (snap) => {
+      setFollowed(snap.exists());
+    });
+    const countUnsub = onSnapshot(doc(db, "ratings", `admin_${live.hostUid}_stats`), (snap) => {
+      if (snap.exists()) setFollowCount(snap.data().count ?? 0);
+    });
+    return () => { unsub(); countUnsub(); };
+  }, [live.hostUid, user]);
+
+  const toggleFollow = async () => {
+    if (!user || !live.hostUid) return;
+    const ref = doc(db, "ratings", `admin_${live.hostUid}_${user.uid}`);
+    const statsRef = doc(db, "ratings", `admin_${live.hostUid}_stats`);
+    try {
+      if (followed) {
+        await Promise.all([
+          setDoc(ref, { targetId: live.hostUid, targetType: "admin", userId: user.uid, rating: 0, createdAt: serverTimestamp() }),
+          setDoc(statsRef, { count: increment(-1) }, { merge: true }),
+        ]);
+        setFollowed(false);
+      } else {
+        await Promise.all([
+          setDoc(ref, { targetId: live.hostUid, targetType: "admin", userId: user.uid, rating: 1, createdAt: serverTimestamp() }),
+          setDoc(statsRef, { count: increment(1) }, { merge: true }),
+        ]);
+        setFollowed(true);
+      }
+    } catch {}
+  };
 
   return (
     <div className="flex flex-col h-dvh bg-[#0e0e10] overflow-hidden">
@@ -282,8 +321,16 @@ function ViewerInterior({ live }: { live: LiveSession }) {
                   <p className="text-xl sm:text-2xl font-bold text-white">{participants.length}</p>
                   <p className="text-xs text-gray-500">Online</p>
                 </div>
-                <button className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-3 sm:px-4 py-2 font-bold text-sm transition-colors">
-                  <Heart className="h-4 w-4" /> <span className="hidden sm:inline">Seguir</span>
+                <button onClick={toggleFollow}
+                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-bold text-sm transition-colors ${
+                    followed
+                      ? "bg-red-600 text-white hover:bg-red-700"
+                      : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
+                  }`}
+                >
+                  {followed ? <Heart className="h-4 w-4 fill-current" /> : <HeartOff className="h-4 w-4" />}
+                  <span className="hidden sm:inline">{followed ? "A Seguir" : "Seguir"}</span>
+                  {followCount > 0 && <span className="text-xs opacity-70">({followCount})</span>}
                 </button>
               </div>
             </div>

@@ -56,7 +56,7 @@ export default function PreviewLiveClient({ live }: { live: LivePreview }) {
   const handleWatch = () => {
     if (!user) { router.push(`/login?redirect=/dashboard/lives/${live.id}`); return; }
     if (hasAccess) { router.push(`/dashboard/lives/${live.id}`); return; }
-    router.push("/dashboard/plans");
+    router.push("/dashboard/finances");
   };
 
   const handleShare = async () => {

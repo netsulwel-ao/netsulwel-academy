@@ -5,9 +5,26 @@ import { Users, Video, DollarSign, TrendingUp, Loader2 } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
+function isSameMonth(date: unknown, reference: Date): boolean {
+  if (!date) return false;
+  const d = (date as any).toDate?.() ?? new Date(date as string);
+  return d.getFullYear() === reference.getFullYear() && d.getMonth() === reference.getMonth();
+}
+
+function isToday(date: unknown): boolean {
+  if (!date) return false;
+  const d = (date as any).toDate?.() ?? new Date(date as string);
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear()
+    && d.getMonth() === now.getMonth()
+    && d.getDate() === now.getDate();
+}
+
 export default function AdminDashboardPage() {
   const [studentsCount, setStudentsCount] = useState<number | null>(null);
   const [coursesCount, setCoursesCount] = useState<number | null>(null);
+  const [monthlyRevenue, setMonthlyRevenue] = useState<number | null>(null);
+  const [todayAccesses, setTodayAccesses] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -23,6 +40,27 @@ export default function AdminDashboardPage() {
         const coursesRef = collection(db, "courses");
         const coursesSnapshot = await getDocs(coursesRef);
         if (!cancelled) setCoursesCount(coursesSnapshot.size);
+
+        // Buscar vendas confirmadas para receita e acessos
+        const salesRef = collection(db, "sales");
+        const qSales = query(salesRef, where("status", "==", "confirmed"));
+        const salesSnapshot = await getDocs(qSales);
+        if (!cancelled) {
+          let revenue = 0;
+          let today = 0;
+          const now = new Date();
+          salesSnapshot.forEach((sale) => {
+            const data = sale.data();
+            if (isSameMonth(data.createdAt, now)) {
+              revenue += data.price ?? data.amount ?? 0;
+            }
+            if (isToday(data.createdAt)) {
+              today++;
+            }
+          });
+          setMonthlyRevenue(revenue);
+          setTodayAccesses(today);
+        }
       } catch (error: any) {
         if (!cancelled && error?.code !== "permission-denied") {
           console.error("Erro ao carregar dados do dashboard:", error);
@@ -95,7 +133,13 @@ export default function AdminDashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-400">Receita (Mês)</p>
-              <p className="mt-2 text-3xl font-bold text-white">{formatKz(0)}</p>
+              <div className="mt-2 text-3xl font-bold text-white">
+                {monthlyRevenue === null ? (
+                  <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+                ) : (
+                  formatKz(monthlyRevenue)
+                )}
+              </div>
             </div>
             <div className="flex h-12 w-12 items-center justify-center bg-green-500/10">
               <DollarSign className="h-6 w-6 text-green-400" />
@@ -108,7 +152,13 @@ export default function AdminDashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-400">Acessos Hoje</p>
-              <p className="mt-2 text-3xl font-bold text-white">0</p>
+              <div className="mt-2 text-3xl font-bold text-white">
+                {todayAccesses === null ? (
+                  <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+                ) : (
+                  todayAccesses
+                )}
+              </div>
             </div>
             <div className="flex h-12 w-12 items-center justify-center bg-amber-500/10">
               <TrendingUp className="h-6 w-6 text-amber-400" />

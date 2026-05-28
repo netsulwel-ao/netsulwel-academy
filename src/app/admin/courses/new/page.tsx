@@ -6,10 +6,12 @@ import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import CourseForm from "@/components/admin/CourseForm";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Course } from "@/types/course";
 
 export default function NewCoursePage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -18,6 +20,7 @@ export default function NewCoursePage() {
     try {
       await addDoc(collection(db, "courses"), {
         ...data,
+        createdBy: user?.uid ?? null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });

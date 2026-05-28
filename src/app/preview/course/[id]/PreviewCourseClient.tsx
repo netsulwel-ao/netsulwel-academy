@@ -43,8 +43,8 @@ export default function PreviewCourseClient({ course }: { course: CoursePreview 
   const handleWatch = () => {
     if (!user) { router.push(`/login?redirect=/dashboard/courses/${course.id}`); return; }
     if (hasAccess) { router.push(`/dashboard/courses/${course.id}`); return; }
-    if (course.type === "standalone") { router.push(`/dashboard/checkout/${course.id}`); return; }
-    router.push("/dashboard/plans");
+    if (course.type === "standalone") { router.push(`/dashboard/finances?courseId=${course.id}`); return; }
+    router.push("/dashboard/finances");
   };
 
   const handleShare = async () => {
