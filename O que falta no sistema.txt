@@ -1,0 +1,18 @@
+O que falta no sistema
+O sistema já tem bastante — é um gestor de contratos completo. As lacunas principais:
+
+Críticas (bloqueiam fluxos reais)
+Enviar email de assinatura — o botão "Enviar Email" no painel de assinaturas não faz nada. Sem envio real, o signatário nunca recebe o link.
+Zero testes — sem unit, integration ou e2e. Qualquer alteração é feita no escuro.
+Funcionalidades que um gestor de contratos devia ter
+Workflow de aprovação — o status existe (draft→pending→approved→rejected) mas não há notificação, revisão nem approvação/rejeição com comentários.
+Pesquisa avançada — só texto livre + IA semântica. Sem filtros por status, data, risco, valor, partes envolvidas.
+Gestão de contrapartes/contactos — não há uma base de clientes/fornecedores. As partes são texto livre no contrato.
+Renovação automática — contratos com renovação não disparam alertas nem geram novo período.
+Biblioteca de cláusulas — não há snippets reutilizáveis para montar contratos mais rápido.
+Logs de auditoria completos — a tabela audit_logs existe mas regista apenas ações manuais; não captura automaticamente cada alteração a contratos.
+Painel de administração de utilizadores — não há interface para gerir roles ou bloquear contas.
+Técnico
+Chave de serviço exposta — SUPABASE_SERVICE_ROLE_KEY está no .env e potencialmente acessível no bundle. Isto é uma falha de segurança grave.
+PWA / offline — não dá para usar sem internet nem instalar como app.
+Qual gostarias de atacar primeiro?

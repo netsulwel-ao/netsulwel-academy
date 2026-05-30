@@ -4,12 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { User, Mail, Lock, Loader2, AlertCircle, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, query, where, getDocs, collection } from "firebase/firestore";
 import {
- signInWithEmailAndPassword,
- createUserWithEmailAndPassword,
- sendPasswordResetEmail,
- updateProfile,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
  signInWithPopup,
  GoogleAuthProvider,
  GithubAuthProvider,
@@ -111,10 +110,27 @@ export default function LoginPage() {
 
   router.push("/dashboard");
  
- } else if (view === "forgot") {
- await sendPasswordResetEmail(auth, email);
- setSuccessMsg("Email de recuperação enviado! Verifique a sua caixa de entrada e a pasta de spam.");
- }
+  } else if (view === "forgot") {
+  // Verificar se o email existe na base de dados
+  const q = query(collection(db, "users"), where("email", "==", email));
+  const querySnapshot = await getDocs(q);
+
+  if (querySnapshot.empty) {
+  setError("Email inexistente. Verifique se o endereço está correto.");
+  } else {
+  const res = await fetch("/api/auth/forgot-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  if (res.ok) {
+    setSuccessMsg("Email de recuperação enviado! Verifique a sua caixa de entrada e a pasta de spam.");
+  } else {
+    setError("Erro ao enviar o email de recuperação. Tente novamente.");
+  }
+  }
+  }
  } catch (err: unknown) {
  console.error(err);
  if (view === "forgot") {
