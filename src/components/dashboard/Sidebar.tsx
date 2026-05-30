@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
- Home, BookOpen, CreditCard, Users, Settings, LogOut,
- Search, PanelLeftClose, PanelLeft, Sun, Moon, ChevronRight, FileText
+  Home, BookOpen, CreditCard, Users, Settings, LogOut,
+  PanelLeftClose, PanelLeft, Sun, Moon, ChevronRight, FileText, Layers
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
@@ -24,8 +24,9 @@ const navSections = [
  title: "NAVEGAÇÃO",
  items: [
  { icon: Home, label: "Início", href: "/dashboard" },
- { icon: BookOpen, label: "Meus Cursos", href: "/dashboard/courses" },
- { icon: FileText, label: "Avaliações", href: "/dashboard/exams" },
+  { icon: BookOpen, label: "Meus Cursos", href: "/dashboard/courses" },
+  { icon: Layers, label: "Trilhas", href: "/dashboard/trails" },
+  { icon: FileText, label: "Avaliações", href: "/dashboard/exams" },
  { icon: Users, label: "Comunidade", href: "/dashboard/community" },
  ]
  },
@@ -67,40 +68,25 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
  <div className="flex h-20 items-center justify-between px-6 shrink-0">
     <Link href="/" className={`flex items-center gap-3 overflow-hidden transition-all duration-300 ${isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"}`}>
       <img src="/Logo-Academy-White.svg" alt="Netsulwel" className="h-14 w-auto brightness-0 invert drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
-      <span className="text-lg font-bold text-white tracking-wide">Academy</span>
+      <span className="text-xl font-bold text-white tracking-wide">Academy</span>
     </Link>
 
  <button
  onClick={() => setIsCollapsed(!isCollapsed)}
  className={`flex h-8 w-8 items-center justify-center bg-gray-900 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors ${isCollapsed ? "mx-auto" : ""}`}
  >
- {isCollapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+  {isCollapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
  </button>
  </div>
 
  <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4 custom-scrollbar">
 
- {/* 2. Barra de Pesquisa Integrada */}
- <div className={`px-4 mb-6 transition-all duration-300 ${isCollapsed ? "opacity-0 invisible h-0 mb-0" : "opacity-100 visible"}`}>
- <div className="relative flex items-center">
- <Search className="absolute left-3 h-4 w-4 text-gray-500" />
- <input
- type="text"
- placeholder="Pesquisar..."
- className="w-full bg-gray-900 py-2.5 pl-10 pr-10 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-purple/50 focus:ring-1 focus:ring-purple/50 transition-all"
- />
- <div className="absolute right-3 flex items-center justify-center h-5 w-5 bg-gray-800 text-[10px] font-bold text-gray-400 ">
- /
- </div>
- </div>
- </div>
-
- {/* 3. Navegação com Categorias */}
+  {/* 2. Navegação com Categorias */}
  <div className="space-y-6 px-4">
  {navSections.map((section, idx) => (
  <div key={idx}>
  {!isCollapsed && (
- <h3 className="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+ <h3 className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-gray-500">
  {section.title}
  </h3>
  )}
@@ -118,15 +104,15 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
  : "text-gray-400 hover:bg-gray-900 hover:text-gray-200"
  }`}
  >
- <item.icon className={`h-5 w-5 shrink-0 ${isCollapsed ? "mx-auto" : "mr-3"} ${isActive ? "text-white drop-shadow-md" : "text-gray-500 group-hover:text-gray-300"}`} />
+ <item.icon className={`h-6 w-6 shrink-0 ${isCollapsed ? "mx-auto" : "mr-3"} ${isActive ? "text-white drop-shadow-md" : "text-gray-500 group-hover:text-gray-300"}`} />
 
  {!isCollapsed && (
- <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>
+ <span className="text-base font-medium whitespace-nowrap">{item.label}</span>
  )}
 
  {/* Tooltip para modo fechado */}
  {isCollapsed && (
- <div className="absolute left-14 hidden group-hover:block bg-gray-800 px-2 py-1 text-xs text-white whitespace-nowrap z-50 ">
+ <div className="absolute left-14 hidden group-hover:block bg-gray-800 px-2 py-1 text-sm text-white whitespace-nowrap z-50 ">
  {item.label}
  </div>
  )}
@@ -154,12 +140,12 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
   <img src="/logo.svg" alt="Icon" className="w-5 h-5 brightness-0 invert" />
   </div>
 
-  <h4 className="text-white font-bold text-sm">Plano {planData.label}</h4>
-  <div className="mt-1 flex justify-between items-center text-xs text-white/70">
+  <h4 className="text-white font-bold text-base">Plano {planData.label}</h4>
+  <div className="mt-1 flex justify-between items-center text-sm text-white/70">
   <span>{planData.pct}% — {planData.suffix}</span>
   </div>
 
-  <div className="mt-2 h-1.5 w-full bg-black/30 overflow-hidden">
+  <div className="mt-2 h-1.5 w-full bg-black/30 overflow-hidden sidebar-progress-bar">
   <div style={{ width: `${planData.pct}%` }} className="h-full bg-white relative">
   <div className="absolute right-0 top-0 bottom-0 w-1 bg-gray-900 shadow-[0_0_5px_white]"></div>
   </div>
@@ -167,14 +153,14 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
 
   <div className="mt-4 space-y-2">
   <Link href="/dashboard/courses"
-    className="block w-full py-2 px-4 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-sm transition-colors text-center">
+    className="block w-full py-2 px-4 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold backdrop-blur-sm transition-colors text-center">
   Saber mais
   </Link>
   {showUpgrade && (
   <Link href="/dashboard/finances"
-    className="flex w-full py-2 px-4 bg-gray-950 text-white text-xs font-bold hover:bg-black transition-colors items-center justify-between">
+    className="flex w-full py-2 px-4 bg-gray-950 text-white text-sm font-bold hover:bg-black transition-colors items-center justify-between">
   Fazer Upgrade
-  <ChevronRight className="w-3 h-3" />
+  <ChevronRight className="w-4 h-4" />
   </Link>
   )}
   </div>
@@ -190,11 +176,11 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
   <div className={`flex items-center justify-center p-1 bg-gray-900 ${isCollapsed ? "flex-col gap-2 py-3" : "gap-1"}`}>
   <button onClick={onToggleTheme}
     className={`flex items-center justify-center transition-all ${theme === "light" ? "bg-gray-800 text-purple shadow-sm" : "text-gray-400 hover:text-white"} ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
-  <Sun className="w-4 h-4" />
+  <Sun className="w-5 h-5" />
   </button>
   <button onClick={onToggleTheme}
     className={`flex items-center justify-center transition-all ${theme === "dark" ? "bg-gray-800 text-purple shadow-sm" : "text-gray-400 hover:text-white"} ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
-  <Moon className="w-4 h-4" />
+  <Moon className="w-5 h-5" />
   </button>
   </div>
 
@@ -205,8 +191,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
  }`}
  title={isCollapsed ? "Terminar Sessão" : ""}
  >
- <LogOut className="h-5 w-5 shrink-0 group-hover:text-red-400" />
- {!isCollapsed && <span className="text-sm font-medium">Sair</span>}
+ <LogOut className="h-6 w-6 shrink-0 group-hover:text-red-400" />
+ {!isCollapsed && <span className="text-base font-medium">Sair</span>}
  </button>
  </div>
   </aside>

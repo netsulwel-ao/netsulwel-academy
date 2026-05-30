@@ -1,10 +1,11 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
- LayoutDashboard, Users, Settings, LogOut, Search, 
- PanelLeftClose, PanelLeft, Sun, Moon, Video, DollarSign, Folders, Layers, Megaphone, Radio
+  LayoutDashboard, Users, Settings, LogOut, Search, 
+  PanelLeftClose, PanelLeft, Sun, Moon, Video, DollarSign, Folders, Layers, Megaphone, Radio, Calendar
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
@@ -23,8 +24,9 @@ const navSections = [
  { icon: LayoutDashboard, label: "Visão Geral", href: "/admin" },
  { icon: Folders, label: "Meus Cursos", href: "/admin/courses" },
  { icon: Video, label: "Criar Curso", href: "/admin/courses/new" },
- { icon: Layers, label: "Trilhas", href: "/admin/trails" },
- { icon: Radio, label: "Aulas ao Vivo", href: "/admin/lives" },
+  { icon: Layers, label: "Trilhas", href: "/admin/trails" },
+  { icon: Calendar, label: "Cronograma", href: "/admin/schedules" },
+  { icon: Radio, label: "Aulas ao Vivo", href: "/admin/lives" },
  { icon: Users, label: "Alunos", href: "/admin/users" },
  { icon: DollarSign, label: "Vendas", href: "/admin/sales" },
  ]
@@ -40,6 +42,26 @@ const navSections = [
 
 export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen }: SidebarProps) {
    const pathname = usePathname();
+   const searchRef = useRef<HTMLInputElement>(null);
+   const [searchQuery, setSearchQuery] = useState("");
+
+   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "/" && !["INPUT", "TEXTAREA"].includes((e.target as HTMLElement).tagName)) {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+   }, []);
+
+   const filteredSections = navSections.map(section => ({
+    ...section,
+    items: section.items.filter(item =>
+      item.label.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+   })).filter(section => section.items.length > 0);
 
    const handleLogout = async () => {
    try {
@@ -80,11 +102,13 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
  <div className={`px-4 mb-6 transition-all duration-300 ${isCollapsed ? "opacity-0 invisible h-0 mb-0" : "opacity-100 visible"}`}>
  <div className="relative flex items-center">
  <Search className="absolute left-3 h-4 w-4 text-gray-500" />
- <input 
- type="text" 
- placeholder="Pesquisar..." 
- className="w-full bg-gray-900 py-2.5 pl-10 pr-10 text-sm text-gray-200 placeholder-gray-500 focus:outline-none transition-all"
- />
+  <input 
+  ref={searchRef}
+  type="text" 
+  placeholder="Pesquisar..." 
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  className="w-full bg-gray-900 py-2.5 pl-10 pr-10 text-sm text-gray-200 placeholder-gray-500 focus:outline-none transition-all" />
  <div className="absolute right-3 flex items-center justify-center h-5 w-5 bg-gray-800 text-[10px] font-bold text-gray-400 ">
  /
  </div>
@@ -92,7 +116,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
  </div>
 
  <div className="space-y-6 px-4">
- {navSections.map((section, idx) => (
+  {filteredSections.map((section, idx) => (
  <div key={idx}>
  {!isCollapsed && (
  <h3 className="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">

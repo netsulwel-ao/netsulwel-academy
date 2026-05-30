@@ -48,9 +48,9 @@ function CountdownDisplay({ scheduledAt }: { scheduledAt: string }) {
   return (
     <div className="flex items-center gap-2">
       {time.d > 0 && (
-        <span className="text-xs text-gray-400">{time.d}d</span>
+        <span className="text-sm text-gray-400">{time.d}d</span>
       )}
-      <div className="flex items-center gap-1 text-xs font-mono tabular-nums text-gray-300">
+      <div className="flex items-center gap-1 text-sm font-mono tabular-nums text-gray-300">
         <span className="bg-gray-800 px-1.5 py-0.5">
           {String(time.h).padStart(2, "0")}
         </span>
@@ -129,17 +129,17 @@ export default function DashboardLivesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-purple" />
+        <Loader2 className="h-10 w-10 animate-spin text-purple" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in duration-500">
+    <div className="max-w-[100rem] mx-auto space-y-10 animate-in fade-in duration-500">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-          <Radio className="h-8 w-8 text-red-400" />
+        <h1 className="text-4xl font-bold text-white flex items-center gap-3">
+          <Radio className="h-10 w-10 text-red-400" />
           Aulas ao Vivo
         </h1>
         <p className="mt-2 text-gray-400">
@@ -150,7 +150,7 @@ export default function DashboardLivesPage() {
       {/* Currently Live */}
       {liveSessions.length > 0 && (
         <section className="space-y-4">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
             A Decorrer Agora
           </h2>
@@ -177,30 +177,30 @@ export default function DashboardLivesPage() {
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent" />
-                    <div className="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1 bg-red-600 text-white text-xs font-bold">
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1 bg-red-600 text-white text-sm font-bold">
                       <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                       AO VIVO
                     </div>
-                    <div className={`absolute top-3 right-3 px-2 py-1 text-xs font-bold ${target.color} backdrop-blur-md`}>
+                    <div className={`absolute top-3 right-3 px-2 py-1 text-sm font-bold ${target.color} backdrop-blur-md`}>
                       {target.label}
                     </div>
                   </div>
 
                   <div className="p-5 space-y-3">
-                    <h3 className="text-lg font-bold text-white">{live.title}</h3>
-                    <p className="text-sm text-gray-400 line-clamp-2">{live.description}</p>
+                    <h3 className="text-xl font-bold text-white">{live.title}</h3>
+                    <p className="text-base text-gray-400 line-clamp-2">{live.description}</p>
 
                     {hasAccess ? (
                       <Link
                         href={`/dashboard/lives/${live.id}`}
                         className="flex items-center justify-center gap-2 w-full bg-red-600 hover:bg-red-700 text-white py-3 font-bold transition-colors"
                       >
-                        <Play className="h-5 w-5" />
+                        <Play className="h-6 w-6" />
                         Entrar na Aula
                       </Link>
                     ) : (
-                      <div className="flex items-center justify-center gap-2 w-full bg-gray-800 text-gray-500 py-3 text-sm">
-                        <Lock className="h-4 w-4" />
+                      <div className="flex items-center justify-center gap-2 w-full bg-gray-800 text-gray-500 py-3 text-base">
+                        <Lock className="h-5 w-5" />
                         Requer Plano {live.target === "golden" ? "Golden" : "Smart"}
                       </div>
                     )}
@@ -215,8 +215,8 @@ export default function DashboardLivesPage() {
       {/* Scheduled */}
       {scheduledSessions.length > 0 && (
         <section className="space-y-4">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-blue-400" />
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <Calendar className="h-6 w-6 text-blue-400" />
             Próximas Aulas
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -241,29 +241,29 @@ export default function DashboardLivesPage() {
                         <Radio className="h-10 w-10 text-gray-700" />
                       </div>
                     )}
-                    <div className={`absolute top-3 right-3 px-2 py-1 text-xs font-bold ${target.color} backdrop-blur-md`}>
+                    <div className={`absolute top-3 right-3 px-2 py-1 text-sm font-bold ${target.color} backdrop-blur-md`}>
                       {target.label}
                     </div>
                     {!hasAccess && (
                       <div className="absolute inset-0 bg-gray-950/60 flex items-center justify-center">
-                        <Lock className="h-8 w-8 text-gray-500" />
+                        <Lock className="h-10 w-10 text-gray-500" />
                       </div>
                     )}
                   </div>
 
                   <div className="p-4 space-y-3">
-                    <h3 className="text-sm font-bold text-white truncate">{live.title}</h3>
+                    <h3 className="text-base font-bold text-white truncate">{live.title}</h3>
 
                     <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5 text-xs text-gray-500">
-                        <Calendar className="h-3 w-3" />
+                      <span className="flex items-center gap-1.5 text-sm text-gray-500">
+                        <Calendar className="h-4 w-4" />
                         {formatDate(live.scheduledAt)}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between pt-2 border-t border-gray-800">
-                      <span className="flex items-center gap-1.5 text-xs text-gray-400">
-                        <Clock className="h-3 w-3" />
+                      <span className="flex items-center gap-1.5 text-sm text-gray-400">
+                        <Clock className="h-4 w-4" />
                         Começa em:
                       </span>
                       <CountdownDisplay scheduledAt={live.scheduledAt} />
@@ -279,8 +279,8 @@ export default function DashboardLivesPage() {
       {/* Past Sessions */}
       {endedSessions.length > 0 && (
         <section className="space-y-4">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Clock className="h-5 w-5 text-gray-500" />
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <Clock className="h-6 w-6 text-gray-500" />
             Aulas Anteriores
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -298,16 +298,16 @@ export default function DashboardLivesPage() {
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-                      <Radio className="h-8 w-8 text-gray-800" />
+                      <Radio className="h-10 w-10 text-gray-800" />
                     </div>
                   )}
-                  <div className="absolute top-3 left-3 px-2 py-1 bg-gray-800 text-gray-400 text-xs font-bold">
+                  <div className="absolute top-3 left-3 px-2 py-1 bg-gray-800 text-gray-400 text-sm font-bold">
                     Encerrada
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="text-sm font-bold text-gray-400 truncate">{live.title}</h3>
-                  <span className="text-xs text-gray-600 mt-1 block">
+                  <h3 className="text-base font-bold text-gray-400 truncate">{live.title}</h3>
+                  <span className="text-sm text-gray-600 mt-1 block">
                     {formatDate(live.scheduledAt)}
                   </span>
                 </div>
@@ -321,9 +321,9 @@ export default function DashboardLivesPage() {
       {lives.length === 0 && (
         <div className="p-12 bg-gray-900/40 backdrop-blur-xl text-center">
           <div className="mx-auto w-16 h-16 bg-purple/10 text-purple flex items-center justify-center mb-4">
-            <Sparkles className="w-8 h-8" />
+            <Sparkles className="w-10 h-10" />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">
+          <h2 className="text-3xl font-bold text-white mb-2">
             Nenhuma aula ao vivo agendada
           </h2>
           <p className="text-gray-400 max-w-md mx-auto">

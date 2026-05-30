@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, Radio } from "lucide-react";
 import CourseForm from "@/components/admin/CourseForm";
 import type { Course } from "@/types/course";
 
@@ -80,12 +81,22 @@ export default function EditCoursePage() {
   }
 
   return (
-    <CourseForm
+    <>
+      {initialData?.format === "live" && (
+        <div className="max-w-5xl mx-auto mb-4">
+          <Link href={`/admin/courses/${id}/live-studio`}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold transition-colors">
+            <Radio className="h-4 w-4" /> Gerir Aulas ao Vivo
+          </Link>
+        </div>
+      )}
+      <CourseForm
       mode="edit"
       initialData={initialData ?? undefined}
       saving={saving}
       onSave={handleSave}
       backHref="/admin/courses"
-    />
+      />
+    </>
   );
 }

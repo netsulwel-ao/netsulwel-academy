@@ -103,6 +103,15 @@ export default function SalesPage() {
         } else if (sale.type === "smart" || sale.type === "golden") {
           await updateDoc(userRef, { plan: sale.type });
         }
+        await addDoc(collection(db, "users", sale.userId, "notifications"), {
+          uid: sale.userId,
+          type: "payment_approved",
+          title: "Pagamento Confirmado",
+          message: `O teu pagamento para "${sale.itemTitle || sale.type}" foi aprovado.`,
+          link: sale.type === "standalone" && sale.itemId ? `/dashboard/courses/${sale.itemId}` : "/dashboard",
+          read: false,
+          createdAt: serverTimestamp(),
+        });
       } else if (newStatus !== "confirmed" && sale.status === "confirmed") {
         if (sale.type === "standalone" && sale.itemId) {
           await updateDoc(userRef, { enrolledCourses: arrayRemove(sale.itemId) });

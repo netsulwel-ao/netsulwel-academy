@@ -6,10 +6,10 @@ import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import {
   Plus, Video, Trash2, Save, ArrowLeft, Loader2, CheckCircle2,
   AlertCircle, ImagePlus, X, GripVertical, UploadCloud,
-  Link as LinkIcon, Sparkles, Award, Tag,
+  Link as LinkIcon, Sparkles, Award, Tag, Radio,
 } from "lucide-react";
 import Link from "next/link";
-import type { Course, CourseModule, VideoItem, CourseType, CourseLevel, CourseCategory, Trail } from "@/types/course";
+import type { Course, CourseModule, VideoItem, CourseType, CourseLevel, CourseCategory, CourseFormat, Trail } from "@/types/course";
 
 // ── Upload helpers ────────────────────────────────────────
 async function uploadToR2WithProgress(file: File, folder: string, onProgress: (p: number) => void): Promise<string> {
@@ -73,6 +73,15 @@ const CATEGORIES: { value: CourseCategory; label: string }[] = [
   { value: "other", label: "Outro" },
 ];
 
+function toDatetimeLocal(iso: string) {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  } catch { return ""; }
+}
+
 export default function CourseForm({ initialData, onSave, saving, backHref = "/admin/courses", mode }: CourseFormProps) {
   // ── State ─────────────────────────────────────────────────
   const [title, setTitle] = useState(initialData?.title ?? "");
@@ -82,6 +91,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
   const [thumbnailUploading, setThumbnailUploading] = useState(false);
   const [price, setPrice] = useState(initialData?.price ? String(initialData.price) : "");
   const [courseType, setCourseType] = useState<CourseType>(initialData?.type ?? "standalone");
+  const [format, setFormat] = useState<CourseFormat>(initialData?.format ?? "recorded");
   const [level, setLevel] = useState<CourseLevel>(initialData?.level ?? "beginner");
   const [category, setCategory] = useState<CourseCategory>(initialData?.category ?? "tech");
   const [hasCertificate, setHasCertificate] = useState(initialData?.hasCertificate ?? false);
@@ -192,13 +202,22 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
     setError("");
     const cleanModules = modules.map((m) => ({
       title: m.title,
-      videos: m.videos.map(({ title, url, duration }) => ({ title, url, duration })),
+      videos: m.videos.map((v) => {
+        if (format === "live") {
+          const roomName = v.roomName || (
+            title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") + "-" +
+            Math.random().toString(36).substring(2, 8)
+          );
+          return { title: v.title, url: "", duration: v.duration, scheduledAt: v.scheduledAt, roomName };
+        }
+        return { title: v.title, url: v.url, duration: v.duration };
+      }),
     }));
     const lessonsCount = cleanModules.reduce((a, m) => a + m.videos.length, 0);
     const courseData: Omit<Course, "id" | "createdAt" | "updatedAt"> = {
       title: title.trim(), description: description.trim(), thumbnail,
       price: price ? parseFloat(price) : 0,
-      type: courseType, level, category, hasCertificate, featured,
+      type: courseType, format, level, category, hasCertificate, featured,
       tags, modules: cleanModules,
       modulesCount: cleanModules.length, lessonsCount, status,
     };
@@ -341,6 +360,29 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                   </div>
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Formato */}
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Formato do Curso</label>
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => setFormat("recorded")}
+                className={`flex items-center justify-center gap-2 px-4 py-3 border text-sm font-bold transition-all ${
+                  format === "recorded"
+                    ? "border-blue-500/50 bg-blue-500/10 text-blue-400"
+                    : "border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700"
+                }`}>
+                <Video className="h-4 w-4" /> Gravado
+              </button>
+              <button type="button" onClick={() => setFormat("live")}
+                className={`flex items-center justify-center gap-2 px-4 py-3 border text-sm font-bold transition-all ${
+                  format === "live"
+                    ? "border-purple-500/50 bg-purple-500/10 text-purple-400"
+                    : "border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700"
+                }`}>
+                <Radio className="h-4 w-4" /> Ao Vivo
+              </button>
             </div>
           </div>
 
@@ -509,90 +551,110 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                     const key = videoKey(mi, vi);
                     return (
                       <div key={vi} className="bg-gray-950/60 border border-gray-800/60 p-3 space-y-2">
-                        {/* Row 1: título + duração + delete */}
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-600 w-5 shrink-0 text-right">{vi + 1}.</span>
-                          <input type="text" value={video.title} onChange={(e) => updateVideo(mi, vi, "title", e.target.value)}
-                            placeholder="Título da aula"
-                            className="flex-1 bg-gray-900 border border-gray-800 focus:border-blue-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all" />
-                          <input type="text" value={video.duration} onChange={(e) => updateVideo(mi, vi, "duration", e.target.value)}
-                            placeholder="00:00"
-                            className="w-20 shrink-0 bg-gray-900 border border-gray-800 focus:border-blue-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none text-center transition-all" />
-                          {module.videos.length > 1 && (
-                            <button onClick={() => removeVideo(mi, vi)} className="p-1.5 text-gray-600 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0">
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Row 2: toggle upload/link */}
-                        <div className="flex items-start gap-2 pl-7">
-                          <div className="flex shrink-0 border border-gray-800 overflow-hidden">
-                            <button onClick={() => { if (mode !== "upload") toggleMode(mi, vi); }}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${mode === "upload" ? "bg-blue-600 text-white" : "bg-gray-900 text-gray-500 hover:text-gray-300"}`}>
-                              <UploadCloud className="w-3.5 h-3.5" /> Upload
-                            </button>
-                            <button onClick={() => { if (mode !== "link") toggleMode(mi, vi); }}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${mode === "link" ? "bg-blue-600 text-white" : "bg-gray-900 text-gray-500 hover:text-gray-300"}`}>
-                              <LinkIcon className="w-3.5 h-3.5" /> URL
-                            </button>
+                        {format === "live" ? (
+                          /* ── Live lesson row ── */
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-600 w-5 shrink-0 text-right">{vi + 1}.</span>
+                            <input type="text" value={video.title} onChange={(e) => updateVideo(mi, vi, "title", e.target.value)}
+                              placeholder="Título da aula"
+                              className="flex-1 bg-gray-900 border border-gray-800 focus:border-purple-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all" />
+                            <input type="datetime-local" value={toDatetimeLocal(video.scheduledAt ?? "")}
+                              onChange={(e) => updateVideo(mi, vi, "scheduledAt", new Date(e.target.value).toISOString())}
+                              className="w-44 shrink-0 bg-gray-900 border border-gray-800 focus:border-purple-500/40 py-1.5 px-3 text-sm text-white focus:outline-none transition-all" />
+                            <input type="number" min="1" value={video.duration}
+                              onChange={(e) => updateVideo(mi, vi, "duration", e.target.value)}
+                              placeholder="Minutos"
+                              className="w-20 shrink-0 bg-gray-900 border border-gray-800 focus:border-purple-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none text-center transition-all" />
+                            {module.videos.length > 1 && (
+                              <button onClick={() => removeVideo(mi, vi)} className="p-1.5 text-gray-600 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <>
+                          <div className="flex items-center gap-2">
+                           <span className="text-xs text-gray-600 w-5 shrink-0 text-right">{vi + 1}.</span>
+                           <input type="text" value={video.title} onChange={(e) => updateVideo(mi, vi, "title", e.target.value)}
+                             placeholder="Título da aula"
+                             className="flex-1 bg-gray-900 border border-gray-800 focus:border-blue-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all" />
+                           <input type="text" value={video.duration} onChange={(e) => updateVideo(mi, vi, "duration", e.target.value)}
+                             placeholder="00:00"
+                             className="w-20 shrink-0 bg-gray-900 border border-gray-800 focus:border-blue-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none text-center transition-all" />
+                           {module.videos.length > 1 && (
+                             <button onClick={() => removeVideo(mi, vi)} className="p-1.5 text-gray-600 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0">
+                               <Trash2 className="w-3.5 h-3.5" />
+                             </button>
+                           )}
                           </div>
 
-                          {/* Upload mode */}
-                          {mode === "upload" && (
-                            <div className="flex-1">
-                              {!video.url && !video.uploading && (
-                                <button onClick={() => videoInputRefs.current[key]?.click()}
-                                  className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-700 hover:border-blue-500/50 bg-gray-900 py-2 text-xs text-gray-400 hover:text-blue-400 transition-colors">
-                                  <UploadCloud className="w-4 h-4" /> Clique para selecionar vídeo (MP4, MOV, WEBM)
-                                </button>
-                              )}
-                              {video.uploading && (
-                                <div className="space-y-1">
-                                  <div className="flex justify-between text-xs text-gray-400">
-                                    <span className="flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> A enviar...</span>
-                                    <span>{video.uploadProgress ?? 0}%</span>
-                                  </div>
-                                  <div className="w-full bg-gray-800 h-1.5">
-                                    <div className="bg-blue-500 h-1.5 transition-all duration-200" style={{ width: `${video.uploadProgress ?? 0}%` }} />
-                                  </div>
-                                </div>
-                              )}
-                              {video.url && !video.uploading && (
-                                <div className="flex items-center gap-2">
-                                  <div className="flex-1 flex items-center gap-2 bg-green-500/10 border border-green-500/20 px-3 py-1.5 text-xs text-green-400">
-                                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                                    <span className="truncate">{video.url.split("/").pop()}</span>
-                                  </div>
-                                  <button onClick={() => { updateVideo(mi, vi, "url", ""); updateVideo(mi, vi, "uploadProgress", 0); }}
-                                    className="p-1.5 text-gray-500 hover:text-red-400 transition-colors shrink-0">
-                                    <X className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                              )}
-                              {video.uploadError && (
-                                <p className="text-xs text-red-400 flex items-center gap-1">
-                                  <AlertCircle className="w-3.5 h-3.5" />{video.uploadError}
-                                </p>
-                              )}
-                              <input ref={(el) => { videoInputRefs.current[key] = el; }} type="file"
-                                accept="video/mp4,video/quicktime,video/webm" className="hidden"
-                                onChange={(e) => handleVideoUpload(mi, vi, e)} />
-                            </div>
-                          )}
+                          <div className="flex items-start gap-2 pl-7">
+                           <div className="flex shrink-0 border border-gray-800 overflow-hidden">
+                             <button onClick={() => { if (mode !== "upload") toggleMode(mi, vi); }}
+                               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${mode === "upload" ? "bg-blue-600 text-white" : "bg-gray-900 text-gray-500 hover:text-gray-300"}`}>
+                               <UploadCloud className="w-3.5 h-3.5" /> Upload
+                             </button>
+                             <button onClick={() => { if (mode !== "link") toggleMode(mi, vi); }}
+                               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${mode === "link" ? "bg-blue-600 text-white" : "bg-gray-900 text-gray-500 hover:text-gray-300"}`}>
+                               <LinkIcon className="w-3.5 h-3.5" /> URL
+                             </button>
+                           </div>
 
-                          {/* Link mode */}
-                          {mode === "link" && (
-                            <div className="relative flex-1">
-                              <Video className="absolute left-2.5 top-2 h-3.5 w-3.5 text-gray-500" />
-                              <input type="text" value={video.url} onChange={(e) => updateVideo(mi, vi, "url", e.target.value)}
-                                placeholder="https://... (YouTube, Vimeo, etc.)"
-                                className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/40 py-1.5 pl-8 pr-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all" />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
+                           {mode === "upload" && (
+                             <div className="flex-1">
+                               {!video.url && !video.uploading && (
+                                 <button onClick={() => videoInputRefs.current[key]?.click()}
+                                   className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-700 hover:border-blue-500/50 bg-gray-900 py-2 text-xs text-gray-400 hover:text-blue-400 transition-colors">
+                                   <UploadCloud className="w-4 h-4" /> Clique para selecionar vídeo (MP4, MOV, WEBM)
+                                 </button>
+                               )}
+                               {video.uploading && (
+                                 <div className="space-y-1">
+                                   <div className="flex justify-between text-xs text-gray-400">
+                                     <span className="flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> A enviar...</span>
+                                     <span>{video.uploadProgress ?? 0}%</span>
+                                   </div>
+                                   <div className="w-full bg-gray-800 h-1.5">
+                                     <div className="bg-blue-500 h-1.5 transition-all duration-200" style={{ width: `${video.uploadProgress ?? 0}%` }} />
+                                   </div>
+                                 </div>
+                               )}
+                               {video.url && !video.uploading && (
+                                 <div className="flex items-center gap-2">
+                                   <div className="flex-1 flex items-center gap-2 bg-green-500/10 border border-green-500/20 px-3 py-1.5 text-xs text-green-400">
+                                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                     <span className="truncate">{video.url.split("/").pop()}</span>
+                                   </div>
+                                   <button onClick={() => { updateVideo(mi, vi, "url", ""); updateVideo(mi, vi, "uploadProgress", 0); }}
+                                     className="p-1.5 text-gray-500 hover:text-red-400 transition-colors shrink-0">
+                                     <X className="w-3.5 h-3.5" />
+                                   </button>
+                                 </div>
+                               )}
+                               {video.uploadError && (
+                                 <p className="text-xs text-red-400 flex items-center gap-1">
+                                   <AlertCircle className="w-3.5 h-3.5" />{video.uploadError}
+                                 </p>
+                               )}
+                               <input ref={(el) => { videoInputRefs.current[key] = el; }} type="file"
+                                 accept="video/mp4,video/quicktime,video/webm" className="hidden"
+                                 onChange={(e) => handleVideoUpload(mi, vi, e)} />
+                             </div>
+                           )}
+
+                           {mode === "link" && (
+                             <div className="relative flex-1">
+                               <Video className="absolute left-2.5 top-2 h-3.5 w-3.5 text-gray-500" />
+                               <input type="text" value={video.url} onChange={(e) => updateVideo(mi, vi, "url", e.target.value)}
+                                 placeholder="https://... (YouTube, Vimeo, etc.)"
+                                 className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/40 py-1.5 pl-8 pr-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all" />
+                             </div>
+                           )}
+                           </div>
+                           </>
+                         )}
+                       </div>
+                     );
                   })}
 
                   <button onClick={() => addVideo(mi)}

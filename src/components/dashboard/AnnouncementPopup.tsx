@@ -103,7 +103,7 @@ export default function AnnouncementPopup() {
       {/* Modal wrapper */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <div
-          className={`pointer-events-auto w-full max-w-xl transition-all duration-300 ${
+          className={`pointer-events-auto w-full max-w-3xl transition-all duration-300 ${
             visible
               ? "opacity-100 translate-y-0 scale-100"
               : "opacity-0 translate-y-6 scale-95"

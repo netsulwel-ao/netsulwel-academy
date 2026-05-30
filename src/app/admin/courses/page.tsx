@@ -21,6 +21,7 @@ interface Course {
   modulesCount: number;
   lessonsCount: number;
   status: "published" | "draft";
+  format?: "recorded" | "live";
   createdAt: Date;
 }
 
@@ -181,6 +182,16 @@ export default function CoursesPage() {
                     <Pencil className="h-4 w-4" />
                     Editar
                   </Link>
+
+                  {course.format === "live" && (
+                    <Link
+                      href={`/admin/courses/${course.id}/live-studio`}
+                      className="flex flex-1 items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white py-2 text-sm font-bold transition-colors"
+                    >
+                      <Video className="h-4 w-4" />
+                      Estúdio
+                    </Link>
+                  )}
 
                   {confirmDelete === course.id ? (
                     <div className="flex flex-1 items-center gap-2">

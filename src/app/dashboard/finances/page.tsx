@@ -147,26 +147,26 @@ export default function DashboardFinancesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
       </div>
     );
   }
 
   const planPill = isAdmin ? (
-    <span className="inline-flex items-center gap-2 px-3 py-1 text-xs font-bold border bg-purple-500/15 text-purple-300 border-purple-500/25">
-      <Crown className="h-3.5 w-3.5" /> Admin
+    <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-bold border bg-purple-500/15 text-purple-300 border-purple-500/25">
+      <Crown className="h-4 w-4" /> Admin
     </span>
   ) : currentPlan === "golden" ? (
-    <span className="inline-flex items-center gap-2 px-3 py-1 text-xs font-bold border bg-yellow-500/15 text-yellow-300 border-yellow-500/25">
-      <Crown className="h-3.5 w-3.5" /> Golden
+    <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-bold border bg-yellow-500/15 text-yellow-300 border-yellow-500/25">
+      <Crown className="h-4 w-4" /> Golden
     </span>
   ) : currentPlan === "smart" ? (
-    <span className="inline-flex items-center gap-2 px-3 py-1 text-xs font-bold border bg-green-500/15 text-green-300 border-green-500/25">
-      <Zap className="h-3.5 w-3.5" /> Smart
+    <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-bold border bg-green-500/15 text-green-300 border-green-500/25">
+      <Zap className="h-4 w-4" /> Smart
     </span>
   ) : (
-    <span className="inline-flex items-center gap-2 px-3 py-1 text-xs font-bold border bg-gray-500/10 text-gray-300 border-gray-700/60">
-      <Lock className="h-3.5 w-3.5" /> Grátis
+    <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-bold border bg-gray-500/10 text-gray-300 border-gray-700/60">
+      <Lock className="h-4 w-4" /> Grátis
     </span>
   );
 
@@ -178,17 +178,17 @@ export default function DashboardFinancesPage() {
           <CreditCard className="h-6 w-6 text-blue-400" />
         </div>
         <div className="min-w-0">
-          <h1 className="text-3xl font-bold text-white">Checkout</h1>
+          <h1 className="text-4xl font-bold text-white">Checkout</h1>
           <p className="mt-1 text-gray-400">Escolhe o plano e o método de pagamento.</p>
           <div className="mt-3">{planPill}</div>
         </div>
       </div>
 
       {/* Steps bar */}
-      <div className="flex items-center gap-2 text-sm flex-wrap">
+      <div className="flex items-center gap-2 text-base flex-wrap">
         {(["plan", "method", "checkout"] as Step[]).map((s, i) => (
           <div key={s} className="flex items-center gap-2">
-            <span className={`flex items-center justify-center w-7 h-7 text-xs font-bold border ${
+            <span className={`flex items-center justify-center w-7 h-7 text-sm font-bold border ${
               step === s ? "border-blue-500 bg-blue-500/10 text-blue-400" :
               ["plan", "method", "checkout"].indexOf(step) >= i ? "border-green-500 bg-green-500/10 text-green-400" :
               "border-gray-700 text-gray-600"
@@ -205,11 +205,11 @@ export default function DashboardFinancesPage() {
       {course && (
         <section>
           <div className="border border-gray-800 bg-gray-900/40 p-6">
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Curso Avulso</p>
-            <h2 className="text-xl font-bold text-white mb-2">{course.title}</h2>
-            <p className="text-gray-400 text-sm mb-4">{course.description}</p>
-            <p className="text-3xl font-bold text-white">
-              {(course.price ?? 0).toLocaleString("pt-AO")} <span className="text-lg text-gray-500 font-normal">Kz</span>
+            <p className="text-sm text-gray-500 uppercase tracking-wider mb-1">Curso Avulso</p>
+            <h2 className="text-3xl font-bold text-white mb-2">{course.title}</h2>
+            <p className="text-gray-400 text-base mb-4">{course.description}</p>
+            <p className="text-4xl font-bold text-white">
+              {(course.price ?? 0).toLocaleString("pt-AO")} <span className="text-xl text-gray-500 font-normal">Kz</span>
             </p>
           </div>
         </section>
@@ -218,7 +218,7 @@ export default function DashboardFinancesPage() {
       {/* Step 1: Plans (only when not buying a course) */}
       {step === "plan" && !course && plans && (
         <section>
-          <h2 className="text-lg font-bold text-white mb-4">Seleciona o teu Plano</h2>
+          <h2 className="text-xl font-bold text-white mb-4">Seleciona o teu Plano</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {(["smart", "golden"] as PlanId[]).map((id) => {
               const plan = plans[id];
@@ -240,19 +240,19 @@ export default function DashboardFinancesPage() {
                   <div className="flex items-center justify-between mb-4">
                     <div className={`flex items-center gap-3 ${id === "golden" ? "text-yellow-400" : "text-green-400"}`}>
                       {id === "golden" ? <Crown className="h-6 w-6" /> : <Zap className="h-6 w-6" />}
-                      <span className="text-xl font-bold text-white">{plan.label}</span>
+                      <span className="text-3xl font-bold text-white">{plan.label}</span>
                     </div>
-                    {isCurrent && <span className="text-xs font-bold text-green-400 border border-green-500/30 px-2 py-1">Atual</span>}
+                    {isCurrent && <span className="text-sm font-bold text-green-400 border border-green-500/30 px-2 py-1">Atual</span>}
                   </div>
-                  <p className="text-gray-400 text-sm mb-4">{plan.description}</p>
-                  <p className="text-3xl font-bold text-white mb-4">
-                    {plan.price.toLocaleString("pt-AO")} <span className="text-lg text-gray-500 font-normal">Kz</span>
+                  <p className="text-gray-400 text-base mb-4">{plan.description}</p>
+                  <p className="text-4xl font-bold text-white mb-4">
+                    {plan.price.toLocaleString("pt-AO")} <span className="text-xl text-gray-500 font-normal">Kz</span>
                   </p>
                   {plan.features.length > 0 && (
                     <ul className="space-y-2">
                       {plan.features.map((f, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                          <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                        <li key={i} className="flex items-start gap-2 text-base text-gray-300">
+                          <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0 mt-0.5" />
                           {f}
                         </li>
                       ))}
@@ -268,11 +268,11 @@ export default function DashboardFinancesPage() {
       {/* Step 2: Payment Method */}
       {step === "method" && (selectedPlan || course) && (
         <section>
-          <button onClick={() => setStep("plan")} className="text-sm text-gray-400 hover:text-white transition-colors mb-4">&larr; Voltar aos planos</button>
-          <h2 className="text-lg font-bold text-white mb-4">Método de Pagamento</h2>
+          <button onClick={() => setStep("plan")} className="text-base text-gray-400 hover:text-white transition-colors mb-4">&larr; Voltar aos planos</button>
+          <h2 className="text-xl font-bold text-white mb-4">Método de Pagamento</h2>
           {activeMethods.length === 0 ? (
-            <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 px-4 py-3 text-sm text-amber-200">
-              <AlertCircle className="h-4 w-4 shrink-0" />
+            <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 px-4 py-3 text-base text-amber-200">
+              <AlertCircle className="h-5 w-5 shrink-0" />
               Nenhum método de pagamento ativo. Contacta o administrador.
             </div>
           ) : (
@@ -288,9 +288,9 @@ export default function DashboardFinancesPage() {
                       selected ? "border-blue-500 bg-blue-500/10" : "border-gray-800 bg-gray-900/40 hover:border-gray-700"
                     }`}
                   >
-                    <Icon className="h-5 w-5 text-gray-300 shrink-0" />
-                    <span className="text-sm font-medium text-white">{method.label}</span>
-                    <ChevronRight className="h-4 w-4 text-gray-500 ml-auto shrink-0" />
+                    <Icon className="h-6 w-6 text-gray-300 shrink-0" />
+                    <span className="text-base font-medium text-white">{method.label}</span>
+                    <ChevronRight className="h-5 w-5 text-gray-500 ml-auto shrink-0" />
                   </button>
                 );
               })}
@@ -302,13 +302,13 @@ export default function DashboardFinancesPage() {
       {/* Step 3: Checkout / Confirmation */}
       {step === "checkout" && selectedMethod && methods && (selectedPlan || course) && (
         <section>
-          <button onClick={() => setStep("method")} className="text-sm text-gray-400 hover:text-white transition-colors mb-4">&larr; Voltar aos métodos</button>
+          <button onClick={() => setStep("method")} className="text-base text-gray-400 hover:text-white transition-colors mb-4">&larr; Voltar aos métodos</button>
 
           <div className="border border-gray-800 bg-gray-900/40 p-6 space-y-6">
             {/* Resumo */}
             <div>
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-3">Resumo</h3>
-              <div className="bg-gray-950/50 border border-gray-800 p-4 space-y-2 text-sm">
+              <h3 className="text-base font-bold text-white uppercase tracking-wider mb-3">Resumo</h3>
+              <div className="bg-gray-950/50 border border-gray-800 p-4 space-y-2 text-base">
                 {course ? (
                   <>
                     <div className="flex justify-between">
@@ -340,8 +340,8 @@ export default function DashboardFinancesPage() {
             {/* Bank Transfer Details */}
             {selectedMethod === "bankTransfer" && methods.bankTransfer.enabled && (
               <div>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-3">Dados Bancários</h3>
-                <div className="space-y-3 text-sm bg-gray-950/50 border border-gray-800 p-4">
+                <h3 className="text-base font-bold text-white uppercase tracking-wider mb-3">Dados Bancários</h3>
+                <div className="space-y-3 text-base bg-gray-950/50 border border-gray-800 p-4">
                   {methods.bankTransfer.bankName && (
                     <div className="flex items-center justify-between">
                       <span className="text-gray-400">Banco</span>
@@ -358,8 +358,8 @@ export default function DashboardFinancesPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-gray-400">IBAN</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-white font-medium font-mono text-xs">{methods.bankTransfer.iban}</span>
-                        <button onClick={() => handleCopy(methods.bankTransfer.iban)} className="text-gray-500 hover:text-white"><Copy className="h-3.5 w-3.5" /></button>
+                        <span className="text-white font-medium font-mono text-sm">{methods.bankTransfer.iban}</span>
+                        <button onClick={() => handleCopy(methods.bankTransfer.iban)} className="text-gray-500 hover:text-white"><Copy className="h-4 w-4" /></button>
                       </div>
                     </div>
                   )}
@@ -376,8 +376,8 @@ export default function DashboardFinancesPage() {
             {/* Multicaixa Details */}
             {selectedMethod === "multicaixa" && methods.multicaixa.enabled && (
               <div>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-3">Multicaixa</h3>
-                <div className="space-y-3 text-sm bg-gray-950/50 border border-gray-800 p-4">
+                <h3 className="text-base font-bold text-white uppercase tracking-wider mb-3">Multicaixa</h3>
+                <div className="space-y-3 text-base bg-gray-950/50 border border-gray-800 p-4">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400">Entidade</span>
                     <span className="text-white font-medium">{methods.multicaixa.entity}</span>
@@ -386,10 +386,10 @@ export default function DashboardFinancesPage() {
                     <span className="text-gray-400">Referência</span>
                     <div className="flex items-center gap-2">
                       <span className="text-white font-medium">{methods.multicaixa.reference}</span>
-                      <button onClick={() => handleCopy(methods.multicaixa.reference)} className="text-gray-500 hover:text-white"><Copy className="h-3.5 w-3.5" /></button>
+                      <button onClick={() => handleCopy(methods.multicaixa.reference)} className="text-gray-500 hover:text-white"><Copy className="h-4 w-4" /></button>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500">Gera a referência após confirmação do pedido.</p>
+                  <p className="text-sm text-gray-500">Gera a referência após confirmação do pedido.</p>
                 </div>
               </div>
             )}
@@ -397,8 +397,8 @@ export default function DashboardFinancesPage() {
             {/* PayPal */}
             {selectedMethod === "paypal" && methods.paypal.enabled && (
               <div className="space-y-4">
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider">PayPal</h3>
-                <p className="text-sm text-gray-400">Pagamento seguro processado via PayPal.</p>
+                <h3 className="text-base font-bold text-white uppercase tracking-wider">PayPal</h3>
+                <p className="text-base text-gray-400">Pagamento seguro processado via PayPal.</p>
 
                 {methods.paypal.clientId ? (
                   <div className="min-h-[200px]">
@@ -429,21 +429,21 @@ export default function DashboardFinancesPage() {
                   </div>
                 ) : (
                   <>
-                    <div className="bg-amber-500/10 border border-amber-500/20 px-4 py-3 text-sm text-amber-200">
+                    <div className="bg-amber-500/10 border border-amber-500/20 px-4 py-3 text-base text-amber-200">
                       PayPal não configurado — o administrador precisa definir o Client ID nas configurações.
                     </div>
                     {methods.paypal.email && (
                       <div className="flex items-center justify-between bg-gray-950/50 border border-gray-800 px-4 py-3">
-                        <span className="text-sm text-white font-medium">{methods.paypal.email}</span>
-                        <button onClick={() => handleCopy(methods.paypal.email)} className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white">
-                          <Copy className="h-3.5 w-3.5" /> Copiar
+                        <span className="text-base text-white font-medium">{methods.paypal.email}</span>
+                        <button onClick={() => handleCopy(methods.paypal.email)} className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white">
+                          <Copy className="h-4 w-4" /> Copiar
                         </button>
                       </div>
                     )}
                     <a href={methods.paypal.email ? `https://www.paypal.com/paypalme/${methods.paypal.email.split("@")[0]}` : "#"}
                       target="_blank" rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2 bg-[#0070ba] hover:bg-[#003087] text-white py-3 font-bold transition-colors">
-                      <ExternalLink className="h-4 w-4" /> Pagar com PayPal (manual)
+                      <ExternalLink className="h-5 w-5" /> Pagar com PayPal (manual)
                     </a>
                   </>
                 )}
@@ -452,7 +452,7 @@ export default function DashboardFinancesPage() {
 
             {/* Stripe */}
             {selectedMethod === "stripe" && methods.stripe.enabled && (
-              <div className="text-sm text-gray-400 py-4">
+              <div className="text-base text-gray-400 py-4">
                 Pagamento processado via Stripe. Cartões de crédito/débito aceites.
               </div>
             )}
@@ -460,32 +460,32 @@ export default function DashboardFinancesPage() {
             {/* Receipt Upload — only for bank transfer and multicaixa */}
             {needsReceipt && (
               <div>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-3">Comprovativo de Pagamento</h3>
-                <p className="text-xs text-gray-500 mb-3">Faz upload do comprovativo (foto, PDF, screenshot) após realizar o pagamento.</p>
+                <h3 className="text-base font-bold text-white uppercase tracking-wider mb-3">Comprovativo de Pagamento</h3>
+                <p className="text-sm text-gray-500 mb-3">Faz upload do comprovativo (foto, PDF, screenshot) após realizar o pagamento.</p>
                 {!receipt ? (
                   <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-700 hover:border-gray-500 p-8 cursor-pointer transition-colors">
-                    <Upload className="h-8 w-8 text-gray-500 mb-2" />
-                    <span className="text-sm text-gray-400">Clique para selecionar o comprovativo</span>
-                    <span className="text-xs text-gray-600 mt-1">PNG, JPG, PDF</span>
+                    <Upload className="h-10 w-10 text-gray-500 mb-2" />
+                    <span className="text-base text-gray-400">Clique para selecionar o comprovativo</span>
+                    <span className="text-sm text-gray-600 mt-1">PNG, JPG, PDF</span>
                     <input type="file" accept="image/png,image/jpeg,image/jpg,application/pdf" onChange={handleReceiptChange} className="hidden" />
                   </label>
                 ) : (
                   <div className="border border-gray-800 bg-gray-950/50 p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-blue-400" />
-                        <span className="text-sm text-white">{receipt.file.name}</span>
-                        <span className="text-xs text-gray-500">({(receipt.file.size / 1024).toFixed(1)} KB)</span>
+                        <FileText className="h-5 w-5 text-blue-400" />
+                        <span className="text-base text-white">{receipt.file.name}</span>
+                        <span className="text-sm text-gray-500">({(receipt.file.size / 1024).toFixed(1)} KB)</span>
                       </div>
                       <button onClick={() => { setReceipt(null); }} className="text-gray-500 hover:text-white transition-colors">
-                        <X className="h-4 w-4" />
+                        <X className="h-5 w-5" />
                       </button>
                     </div>
                     {receipt.file.type.startsWith("image/") && (
                       <img src={receipt.preview} alt="Comprovativo" className="max-h-48 object-contain border border-gray-800" />
                     )}
-                    <p className="text-xs text-green-400 flex items-center gap-1 mt-2">
-                      <CheckCircle2 className="h-3 w-3" /> Comprovativo selecionado
+                    <p className="text-sm text-green-400 flex items-center gap-1 mt-2">
+                      <CheckCircle2 className="h-4 w-4" /> Comprovativo selecionado
                     </p>
                   </div>
                 )}
@@ -500,12 +500,12 @@ export default function DashboardFinancesPage() {
                   disabled={submitting || (needsReceipt && !receipt) || uploading}
                   className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-3 font-bold transition-colors disabled:opacity-60"
                 >
-                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUpRight className="h-4 w-4" />}
+                  {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowUpRight className="h-5 w-5" />}
                   {submitting ? "A registar..." : "Concluir Pedido"}
                 </button>
 
                 {needsReceipt && !receipt && (
-                  <p className="text-xs text-gray-500 text-center">Anexa o comprovativo antes de concluir.</p>
+                  <p className="text-sm text-gray-500 text-center">Anexa o comprovativo antes de concluir.</p>
                 )}
               </>
             )}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, deleteDoc, doc, orderBy, query } from "firebase/firestore";
-import { Plus, Trash2, Pencil, Loader2, BookOpen, AlertTriangle, X, Layers } from "lucide-react";
+import { Plus, Trash2, Pencil, Loader2, BookOpen, AlertTriangle, X, Layers, Radio } from "lucide-react";
 import Link from "next/link";
 import type { Trail } from "@/types/course";
 
@@ -98,6 +98,7 @@ export default function TrailsPage() {
                 <p className="mt-2 text-sm text-gray-400 line-clamp-2 flex-1">{trail.description || "Sem descrição."}</p>
                 <div className="mt-3 flex items-center gap-3 text-xs text-gray-500">
                   <span className="flex items-center gap-1"><BookOpen className="h-3.5 w-3.5" />{trail.coursesCount ?? 0} cursos</span>
+<span className="flex items-center gap-1"><Radio className="h-3.5 w-3.5" />{trail.livesCount ?? 0} aulas</span>
                   <span className={`px-2 py-0.5 border text-xs font-medium ${trail.status === "published" ? "bg-green-500/10 text-green-400 border-green-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20"}`}>
                     {trail.status === "published" ? "Publicada" : "Rascunho"}
                   </span>

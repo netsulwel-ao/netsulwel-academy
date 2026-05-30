@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, getDocs, serverTimestamp, query, orderBy } from "firebase/firestore";
+import { doc, getDoc, updateDoc, getDocs, collection, query, orderBy, serverTimestamp } from "firebase/firestore";
 import { ArrowLeft, Save, Loader2, CheckCircle2, AlertCircle, ImagePlus, X, Plus, Trash2, GripVertical, Radio, Calendar, Crown, Zap, Coins } from "lucide-react";
 import Link from "next/link";
 import type { Trail, TrailLiveSession, CourseType, CourseLevel, CourseCategory, Course } from "@/types/course";
@@ -27,8 +27,20 @@ const TYPE_OPTIONS: { value: CourseType; label: string; desc: string; color: str
   { value: "golden", label: "Plano Golden", desc: "Exclusivo Golden", color: "yellow" },
 ];
 
-export default function NewTrailPage() {
+function toDatetimeLocal(iso: string) {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  } catch { return ""; }
+}
+
+export default function EditTrailPage() {
+  const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [thumbnail, setThumbnail] = useState("");
@@ -49,14 +61,36 @@ export default function NewTrailPage() {
   const sessionThumbInputs = useRef<Map<number, HTMLInputElement>>(new Map());
 
   useEffect(() => {
-    Promise.all([
-      getDocs(query(collection(db, "courses"), orderBy("title"))),
-      getDocs(query(collection(db, "lives"), orderBy("scheduledAt", "desc"))),
-    ]).then(([coursesSnap, livesSnap]) => {
-      setAllCourses(coursesSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Course)));
-      setAllLives(livesSnap.docs.map((d) => ({ id: d.id, ...d.data() } as LiveSession)));
-    }).catch(console.error);
-  }, []);
+    const fetchData = async () => {
+      try {
+        const [trailSnap, coursesSnap, livesSnap] = await Promise.all([
+          getDoc(doc(db, "trails", id)),
+          getDocs(query(collection(db, "courses"), orderBy("title"))),
+          getDocs(query(collection(db, "lives"), orderBy("scheduledAt", "desc"))),
+        ]);
+        if (!trailSnap.exists()) { router.push("/admin/trails"); return; }
+        const data = { id: trailSnap.id, ...trailSnap.data() } as Trail;
+        setTitle(data.title);
+        setDescription(data.description || "");
+        setThumbnail(data.thumbnail || "");
+        if (data.thumbnail) setThumbnailPreview(data.thumbnail);
+        setTrailType(data.type);
+        setLevel(data.level);
+        setCategory(data.category);
+        setSelectedCourseIds(data.courseIds || []);
+        setSelectedLiveIds(data.liveIds || []);
+        setLiveSessions(data.liveSessions || []);
+        setAllCourses(coursesSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Course)));
+        setAllLives(livesSnap.docs.map((d) => ({ id: d.id, ...d.data() } as LiveSession)));
+      } catch (err) {
+        console.error(err);
+        setError("Erro ao carregar trilha.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [id, router]);
 
   const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
@@ -67,9 +101,9 @@ export default function NewTrailPage() {
     finally { setThumbnailUploading(false); }
   };
 
-  const toggleCourse = (id: string) => {
+  const toggleCourse = (cid: string) => {
     setSelectedCourseIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(cid) ? prev.filter((x) => x !== cid) : [...prev, cid]
     );
   };
 
@@ -81,9 +115,9 @@ export default function NewTrailPage() {
     setSelectedCourseIds(arr);
   };
 
-  const toggleLive = (id: string) => {
+  const toggleLive = (lid: string) => {
     setSelectedLiveIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(lid) ? prev.filter((x) => x !== lid) : [...prev, lid]
     );
   };
 
@@ -136,7 +170,7 @@ export default function NewTrailPage() {
     if (!title.trim()) { setError("O nome da trilha é obrigatório."); return; }
     setSaving(true); setError("");
     try {
-      await addDoc(collection(db, "trails"), {
+      await updateDoc(doc(db, "trails", id), {
         title: title.trim(), description: description.trim(), thumbnail,
         type: trailType, level, category, status,
         courseIds: selectedCourseIds,
@@ -144,13 +178,21 @@ export default function NewTrailPage() {
         liveIds: selectedLiveIds,
         liveSessions,
         livesCount: totalLiveCount,
-        createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
-      } as Omit<Trail, "id">);
+        updatedAt: serverTimestamp(),
+      });
       setSuccess(true);
       setTimeout(() => router.push("/admin/trails"), 1500);
     } catch { setError("Erro ao guardar. Tenta novamente."); }
     finally { setSaving(false); }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
 
   if (success) {
     return (
@@ -158,7 +200,7 @@ export default function NewTrailPage() {
         <div className="flex h-16 w-16 items-center justify-center bg-green-500/10">
           <CheckCircle2 className="h-8 w-8 text-green-400" />
         </div>
-        <h2 className="text-2xl font-bold text-white">Trilha criada!</h2>
+        <h2 className="text-2xl font-bold text-white">Trilha actualizada!</h2>
         <p className="text-gray-400">A redirecionar...</p>
       </div>
     );
@@ -173,8 +215,8 @@ export default function NewTrailPage() {
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-white leading-none">Criar Nova Trilha</h1>
-            <p className="text-xs text-gray-500 mt-0.5">Agrupe cursos e aulas ao vivo numa sequência de aprendizagem</p>
+            <h1 className="text-xl font-bold text-white leading-none">Editar Trilha</h1>
+            <p className="text-xs text-gray-500 mt-0.5">Altere os cursos, aulas ao vivo e cronograma da trilha</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -184,7 +226,7 @@ export default function NewTrailPage() {
           </button>
           <button onClick={() => handleSave("published")} disabled={saving || thumbnailUploading}
             className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-50">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Publicar Trilha
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Publicar
           </button>
         </div>
       </div>
@@ -197,9 +239,9 @@ export default function NewTrailPage() {
       )}
 
       <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
-        {/* LEFT */}
+        {/* LEFT — Info panel */}
         <div className="w-full lg:w-[380px] shrink-0 border-b lg:border-b-0 lg:border-r border-gray-800 overflow-y-auto p-6 space-y-6">
-          {/* Thumbnail — unchanged */}
+          {/* Thumbnail */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Capa da Trilha</label>
             <div onClick={() => thumbInputRef.current?.click()}
@@ -286,7 +328,7 @@ export default function NewTrailPage() {
           </div>
         </div>
 
-        {/* RIGHT — Cursos + Lives da trilha */}
+        {/* RIGHT — Courses + Lives + Schedule */}
         <div className="flex-1 overflow-y-auto p-6 space-y-10">
           {/* ── CURSOS ── */}
           <div>
@@ -351,13 +393,13 @@ export default function NewTrailPage() {
             )}
           </div>
 
-          {/* ── LIVES ── */}
+          {/* ── LIVES (referenciadas) ── */}
           <div>
             <div className="mb-4">
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Radio className="h-5 w-5 text-red-400" /> Aulas ao Vivo na Trilha
+                <Radio className="h-5 w-5 text-red-400" /> Aulas ao Vivo Existentes
               </h2>
-              <p className="text-xs text-gray-500 mt-0.5">Seleciona e ordena as aulas ao vivo que fazem parte desta trilha</p>
+              <p className="text-xs text-gray-500 mt-0.5">Seleciona aulas ao vivo que já existem na plataforma</p>
             </div>
 
             {selectedLiveIds.length > 0 && (
@@ -428,11 +470,11 @@ export default function NewTrailPage() {
             )}
           </div>
 
-          {/* ── AULAS PRÓPRIAS DA TRILHA ── */}
+          {/* ── CRONOGRAMA (aulas próprias da trilha) ── */}
           <div>
             <div className="mb-4">
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Radio className="h-5 w-5 text-orange-400" /> Aulas Próprias da Trilha
+                <Radio className="h-5 w-5 text-orange-400" /> Cronograma da Trilha
               </h2>
               <p className="text-xs text-gray-500 mt-0.5">Adiciona aulas ao vivo com data, capa, descrição e plano de acesso</p>
             </div>
@@ -480,7 +522,7 @@ export default function NewTrailPage() {
                             className="w-full bg-gray-800 border border-gray-700 focus:border-orange-500/50 py-2 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
                           <div className="relative">
                             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                            <input type="datetime-local" value={sess.scheduledAt}
+                            <input type="datetime-local" value={toDatetimeLocal ? toDatetimeLocal(sess.scheduledAt) : sess.scheduledAt}
                               onChange={(e) => updateLiveSession(idx, "scheduledAt", e.target.value)}
                               className="w-full bg-gray-800 border border-gray-700 focus:border-orange-500/50 py-2 pl-10 pr-3 text-white text-sm focus:outline-none transition-all" />
                           </div>

@@ -1,8 +1,7 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { Search, Bell, ExternalLink, Menu } from "lucide-react";
-import Link from "next/link";
+import { Bell, Menu } from "lucide-react";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -28,14 +27,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
  </span>
  </div>
 
- <div className="flex items-center gap-6">
- 
- <Link href="/dashboard" className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white transition-colors bg-gray-900 px-4 py-2 ">
- <span>Ver como Aluno</span>
- <ExternalLink className="h-4 w-4" />
- </Link>
+  <div className="flex items-center gap-6">
 
- <button className="relative text-gray-400 hover:text-white transition-colors">
+  <button className="relative text-gray-400 hover:text-white transition-colors">
  <Bell className="h-6 w-6" />
  <span className="absolute top-0 right-0 block h-2.5 w-2.5 bg-blue-500 ring-2 ring-gray-950 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
  </button>

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { User, Mail, Lock, Loader2, AlertCircle, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
-import { doc, getDoc, setDoc, query, where, getDocs, collection } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -36,29 +36,30 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
 
 const carouselSlides = [
  {
- id: 1,
- image: "https://images.pexels.com/photos/3184311/pexels-photo-3184311.jpeg?auto=compress&cs=tinysrgb&w=1600",
- title: "Domine o código",
- desc: "Aprenda com os melhores profissionais do mercado tech com acompanhamento real.",
- },
- {
- id: 2,
- image: "https://images.pexels.com/photos/1181244/pexels-photo-1181244.jpeg?auto=compress&cs=tinysrgb&w=1600",
- title: "Finanças de alto nível",
- desc: "Estratégias avançadas para alavancar os seus resultados no mercado.",
- },
- {
- id: 3,
- image: "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1600",
- title: "Comunidade de elite",
- desc: "Faça networking com mentes brilhantes e cresça em conjunto.",
- }
+  id: 1,
+  image: "https://images.pexels.com/photos/1181391/pexels-photo-1181391.jpeg?auto=compress&cs=tinysrgb&w=1600",
+  title: "Cursos de programação",
+  desc: "Aprenda a programar do zero ao avançado com projectos práticos e mentoria ao vivo.",
+  },
+  {
+  id: 2,
+  image: "https://images.pexels.com/photos/4143800/pexels-photo-4143800.jpeg?auto=compress&cs=tinysrgb&w=1600",
+  title: "Aulas ao vivo",
+  desc: "Participe de aulas em tempo real com instrutores experientes e tire dúvidas na hora.",
+  },
+  {
+  id: 3,
+  image: "https://images.pexels.com/photos/6953925/pexels-photo-6953925.jpeg?auto=compress&cs=tinysrgb&w=1600",
+  title: "Comunidade de alunos",
+  desc: "Conecte-se com outros estudantes, troque conhecimento e cresça junto com a comunidade.",
+  }
 ];
 
 export default function LoginPage() {
- const [view, setView] = useState<"login" | "register" | "forgot">("login");
- 
- const [name, setName] = useState("");
+  const [view, setView] = useState<"login" | "register" | "forgot">("login");
+  const [slideIndex, setSlideIndex] = useState(0);
+  
+  const [name, setName] = useState("");
  const [email, setEmail] = useState("");
  const [password, setPassword] = useState("");
  const [showPassword, setShowPassword] = useState(false);
@@ -66,9 +67,18 @@ export default function LoginPage() {
  const [error, setError] = useState("");
  const [successMsg, setSuccessMsg] = useState("");
  const [loading, setLoading] = useState(false);
- const router = useRouter();
+  const router = useRouter();
 
- // Mudar de vista sem limpar o email (útil se o utilizador já o preencheu)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const interval = setInterval(() => {
+        setSlideIndex((prev) => (prev + 1) % carouselSlides.length);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, []);
+
+  // Mudar de vista sem limpar o email (útil se o utilizador já o preencheu)
  const toggleView = (newView: "login" | "register" | "forgot") => {
  setView(newView);
  setError("");
@@ -111,13 +121,6 @@ export default function LoginPage() {
   router.push("/dashboard");
  
   } else if (view === "forgot") {
-  // Verificar se o email existe na base de dados
-  const q = query(collection(db, "users"), where("email", "==", email));
-  const querySnapshot = await getDocs(q);
-
-  if (querySnapshot.empty) {
-  setError("Email inexistente. Verifique se o endereço está correto.");
-  } else {
   const res = await fetch("/api/auth/forgot-password", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -127,8 +130,7 @@ export default function LoginPage() {
   if (res.ok) {
     setSuccessMsg("Email de recuperação enviado! Verifique a sua caixa de entrada e a pasta de spam.");
   } else {
-    setError("Erro ao enviar o email de recuperação. Tente novamente.");
-  }
+    setError("Email inexistente. Verifique se o endereço está correto.");
   }
   }
  } catch (err: unknown) {
@@ -187,15 +189,16 @@ export default function LoginPage() {
  (Oculto em mobile, visível a partir de lg)
  ------------------------------------------
  */}
- <div className="relative hidden w-1/2 lg:flex flex-col items-center justify-center bg-gray-900 overflow-hidden">
- {/* ... Imagens do Carrossel (removido a lógica do setInterval para simplificar a demo estática, pode ser reposta se necessário) ... */}
- <div className="absolute inset-0 z-0">
- <img 
- src={carouselSlides[0].image} 
- alt="Academy" 
- className="absolute inset-0 h-full w-full object-cover opacity-80" 
- />
- </div>
+  <div className="relative hidden w-1/2 lg:flex flex-col items-center justify-center bg-gray-900 overflow-hidden">
+  {carouselSlides.map((slide, i) => (
+  <div key={slide.id} className={`absolute inset-0 z-0 transition-opacity duration-700 ${i === slideIndex ? "opacity-100" : "opacity-0"}`}>
+  <img 
+  src={slide.image} 
+  alt={slide.title} 
+  className="absolute inset-0 h-full w-full object-cover" 
+  />
+  </div>
+  ))}
 
  <div className="absolute inset-0 bg-gray-950/20 z-10 pointer-events-none" />
  <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/60 to-transparent z-10 pointer-events-none" />
@@ -209,18 +212,18 @@ export default function LoginPage() {
  </div>
  </Link>
 
- <div className="absolute bottom-16 left-10 right-10 z-20">
- <h1 className="text-4xl lg:text-5xl font-bold text-white leading-tight drop-shadow-xl">
- Aprenda com quem <br/> faz acontecer.
- </h1>
- <p className="mt-4 text-lg text-gray-200 drop-shadow-md max-w-lg">
- Domine as tecnologias de topo, invista de forma inteligente e aceda à nossa comunidade de elite.
- </p>
- <div className="mt-8 flex gap-3">
- <div className="h-1.5 w-8 bg-white transition-all"></div>
- <div className="h-1.5 w-2 bg-white/40 transition-all"></div>
- <div className="h-1.5 w-2 bg-white/40 transition-all"></div>
- </div>
+  <div className="absolute bottom-16 left-10 right-10 z-20">
+  <h2 className="text-4xl lg:text-5xl font-bold text-white leading-tight drop-shadow-xl transition-all duration-500">
+  {carouselSlides[slideIndex].title}
+  </h2>
+  <p className="mt-4 text-lg text-gray-200 drop-shadow-md max-w-lg transition-all duration-500">
+  {carouselSlides[slideIndex].desc}
+  </p>
+  <div className="mt-8 flex gap-3">
+  {carouselSlides.map((_, i) => (
+  <div key={i} className={`h-1.5 transition-all duration-300 ${i === slideIndex ? "w-8 bg-white" : "w-2 bg-white/40"}`} />
+  ))}
+  </div>
  </div>
  </div>
 

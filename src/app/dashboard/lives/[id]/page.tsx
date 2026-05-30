@@ -67,21 +67,21 @@ function ViewerChat({ liveId }: { liveId: string }) {
   return (
     <div className="flex flex-col h-full bg-[#0e0e10]">
       <div className="px-4 py-3 border-b border-gray-800 flex items-center gap-2">
-        <MessageSquare className="h-4 w-4 text-purple-400" />
-        <span className="text-sm font-bold text-white">Chat ao Vivo</span>
-        <span className="ml-auto text-xs text-gray-500 bg-gray-800 px-2 py-0.5">{messages.length}</span>
+        <MessageSquare className="h-5 w-5 text-purple-400" />
+        <span className="text-base font-bold text-white">Chat ao Vivo</span>
+        <span className="ml-auto text-sm text-gray-500 bg-gray-800 px-2 py-0.5">{messages.length}</span>
       </div>
 
       {/* Pinned */}
       {pinnedMsg && (
         <div className="mx-3 mt-3 px-3 py-2 bg-amber-500/10 border border-amber-500/20 flex items-start gap-2">
-          <Pin className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
+          <Pin className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-amber-400">Fixado pelo Admin</p>
-            <p className="text-xs text-gray-300 mt-0.5">{pinnedMsg.text}</p>
+            <p className="text-sm font-bold text-amber-400">Fixado pelo Admin</p>
+            <p className="text-sm text-gray-300 mt-0.5">{pinnedMsg.text}</p>
           </div>
           <button onClick={() => setPinnedMsg(null)} className="text-gray-600 hover:text-gray-400 shrink-0">
-            <ChevronRight className="h-3.5 w-3.5" />
+            <ChevronRight className="h-4 w-4" />
           </button>
         </div>
       )}
@@ -89,25 +89,25 @@ function ViewerChat({ liveId }: { liveId: string }) {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
         {messages.length === 0 && (
-          <p className="text-xs text-gray-600 text-center py-8">Sem mensagens. Diga olá! 👋</p>
+          <p className="text-sm text-gray-600 text-center py-8">Sem mensagens. Diga olá! 👋</p>
         )}
         {messages.map((msg) => (
           <div key={msg.id}>
             {msg.type === "hand_raise" ? (
-              <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs">
-                <Hand className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 border border-amber-500/20 text-amber-300 text-sm">
+                <Hand className="h-4 w-4" />
                 <span className="font-bold">{msg.displayName}</span> levantou a mão
               </div>
             ) : msg.type === "system" ? (
-              <div className="text-center text-xs text-gray-600 py-1 italic">{msg.text}</div>
+              <div className="text-center text-sm text-gray-600 py-1 italic">{msg.text}</div>
             ) : (
               <div className="flex gap-2 items-start hover:bg-white/5 px-1 py-0.5 -mx-1 transition-colors">
                 <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shrink-0 text-[9px] font-bold text-white mt-0.5">
                   {msg.displayName?.[0]?.toUpperCase() || "?"}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-xs font-bold text-purple-400">{msg.displayName} </span>
-                  <span className="text-sm text-gray-200 break-words">{msg.text}</span>
+                  <span className="text-sm font-bold text-purple-400">{msg.displayName} </span>
+                  <span className="text-base text-gray-200 break-words">{msg.text}</span>
                 </div>
               </div>
             )}
@@ -122,16 +122,16 @@ function ViewerChat({ liveId }: { liveId: string }) {
           <input
             type="text" value={text} onChange={(e) => setText(e.target.value)}
             placeholder="Enviar mensagem..."
-            className="flex-1 bg-gray-900 border border-gray-700 px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
+            className="flex-1 bg-gray-900 border border-gray-700 px-3 py-2 text-base text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
           />
           <button type="submit" disabled={!text.trim()}
             className="flex items-center justify-center h-9 w-9 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-800 disabled:text-gray-600 text-white transition-colors">
-            <Send className="h-4 w-4" />
+            <Send className="h-5 w-5" />
           </button>
         </form>
         <button onClick={raiseHand}
-          className="flex items-center justify-center gap-2 w-full py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-bold border border-amber-500/20 transition-colors">
-          <Hand className="h-3.5 w-3.5" /> Levantar a Mão
+          className="flex items-center justify-center gap-2 w-full py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-sm font-bold border border-amber-500/20 transition-colors">
+          <Hand className="h-4 w-4" /> Levantar a Mão
         </button>
       </div>
     </div>
@@ -144,18 +144,18 @@ function ViewerParticipants() {
   return (
     <div className="flex flex-col h-full bg-[#0e0e10]">
       <div className="px-4 py-3 border-b border-gray-800 flex items-center gap-2">
-        <Users className="h-4 w-4 text-green-400" />
-        <span className="text-sm font-bold text-white">Online</span>
-        <span className="ml-auto text-xs text-gray-500 bg-gray-800 px-2 py-0.5">{participants.length}</span>
+        <Users className="h-5 w-5 text-green-400" />
+        <span className="text-base font-bold text-white">Online</span>
+        <span className="ml-auto text-sm text-gray-500 bg-gray-800 px-2 py-0.5">{participants.length}</span>
       </div>
       <div className="flex-1 overflow-y-auto p-3 space-y-1">
         {participants.map((p) => (
           <div key={p.identity} className="flex items-center gap-3 px-3 py-2 hover:bg-white/5 transition-colors">
             <div className="w-2 h-2 rounded-full bg-green-400 shrink-0" />
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-sm font-bold text-white shrink-0">
               {(p.name || p.identity)?.[0]?.toUpperCase()}
             </div>
-            <span className="text-sm text-gray-300 truncate flex-1">{p.name || p.identity}</span>
+            <span className="text-base text-gray-300 truncate flex-1">{p.name || p.identity}</span>
           </div>
         ))}
       </div>
@@ -189,12 +189,12 @@ function ViewerStage({ live }: { live: LiveSession }) {
 
       {/* Live badge + viewer count overlay */}
       <div className="absolute top-3 left-3 z-20 flex items-center gap-2">
-        <div className="flex items-center gap-1.5 bg-red-600 px-2.5 py-1 text-xs font-bold text-white">
+        <div className="flex items-center gap-1.5 bg-red-600 px-2.5 py-1 text-sm font-bold text-white">
           <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
           LIVE
         </div>
-        <div className="flex items-center gap-1.5 bg-black/60 px-2.5 py-1 text-xs text-white">
-          <Eye className="h-3.5 w-3.5" />
+        <div className="flex items-center gap-1.5 bg-black/60 px-2.5 py-1 text-sm text-white">
+          <Eye className="h-4 w-4" />
           <span>{participants.length}</span>
         </div>
       </div>
@@ -270,28 +270,28 @@ function ViewerInterior({ live }: { live: LiveSession }) {
       {/* Top bar */}
       <div className="flex items-center gap-4 px-4 py-2.5 bg-[#18181b] border-b border-gray-800 shrink-0">
         <Link href="/dashboard/lives"
-          className="flex items-center justify-center h-8 w-8 bg-gray-800 text-gray-400 hover:text-white transition-colors">
-          <ArrowLeft className="h-4 w-4" />
+          className="flex items-center justify-center h-10 w-10 bg-gray-800 text-gray-400 hover:text-white transition-colors">
+          <ArrowLeft className="h-5 w-5" />
         </Link>
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          <span className="text-sm font-bold text-white truncate max-w-xs">{live.title}</span>
+          <span className="text-base font-bold text-white truncate max-w-xs">{live.title}</span>
         </div>
         <div className="flex-1" />
         <div className="flex border border-gray-700 overflow-hidden">
           <div
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium ${canSpeak ? "bg-green-600/30 text-green-400" : "bg-gray-800 text-gray-500"}`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium ${canSpeak ? "bg-green-600/30 text-green-400" : "bg-gray-800 text-gray-500"}`}
             title={canSpeak ? "Podes falar" : "Microfone desativado"}
           >
-            {canSpeak ? <Mic className="h-3.5 w-3.5" /> : <MicOff className="h-3.5 w-3.5" />}
+            {canSpeak ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
           </div>
           <button onClick={() => setSidePanel("chat")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${sidePanel === "chat" ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"}`}>
-            <MessageSquare className="h-3.5 w-3.5" /> Chat
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${sidePanel === "chat" ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"}`}>
+            <MessageSquare className="h-4 w-4" /> Chat
           </button>
           <button onClick={() => setSidePanel("participants")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${sidePanel === "participants" ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"}`}>
-            <Users className="h-3.5 w-3.5" /> {participants.length}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${sidePanel === "participants" ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"}`}>
+            <Users className="h-4 w-4" /> {participants.length}
           </button>
         </div>
       </div>
@@ -308,29 +308,29 @@ function ViewerInterior({ live }: { live: LiveSession }) {
           {/* Stream info — below video */}
           <div className="bg-[#18181b] border-t border-gray-800 px-4 sm:px-6 py-4 shrink-0">
             <div className="flex items-start gap-4">
-              <div className="flex h-10 sm:h-14 w-10 sm:w-14 shrink-0 items-center justify-center bg-gradient-to-br from-purple-600 to-blue-600 text-white text-xl font-bold">
+              <div className="flex h-10 sm:h-14 w-10 sm:w-14 shrink-0 items-center justify-center bg-gradient-to-br from-purple-600 to-blue-600 text-white text-2xl font-bold">
                 {live.hostName?.[0]?.toUpperCase() || "P"}
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-bold text-white truncate">{live.title}</h2>
-                <p className="text-sm text-purple-400 font-medium mt-0.5">{live.hostName || "Professor"}</p>
-                <p className="text-sm text-gray-400 mt-1 line-clamp-2 hidden sm:block">{live.description}</p>
+                <h2 className="text-xl font-bold text-white truncate">{live.title}</h2>
+                <p className="text-base text-purple-400 font-medium mt-0.5">{live.hostName || "Professor"}</p>
+                <p className="text-base text-gray-400 mt-1 line-clamp-2 hidden sm:block">{live.description}</p>
               </div>
               <div className="flex items-center gap-4 shrink-0">
                 <div className="text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-white">{participants.length}</p>
-                  <p className="text-xs text-gray-500">Online</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-white">{participants.length}</p>
+                  <p className="text-sm text-gray-500">Online</p>
                 </div>
                 <button onClick={toggleFollow}
-                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-bold text-sm transition-colors ${
+                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-bold text-base transition-colors ${
                     followed
                       ? "bg-red-600 text-white hover:bg-red-700"
                       : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
                   }`}
                 >
-                  {followed ? <Heart className="h-4 w-4 fill-current" /> : <HeartOff className="h-4 w-4" />}
+                  {followed ? <Heart className="h-5 w-5 fill-current" /> : <HeartOff className="h-5 w-5" />}
                   <span className="hidden sm:inline">{followed ? "A Seguir" : "Seguir"}</span>
-                  {followCount > 0 && <span className="text-xs opacity-70">({followCount})</span>}
+                  {followCount > 0 && <span className="text-sm opacity-70">({followCount})</span>}
                 </button>
               </div>
             </div>
@@ -354,11 +354,11 @@ function EndedOverlay() {
         <div className="w-20 h-20 bg-gray-800 flex items-center justify-center mx-auto">
           <Radio className="h-10 w-10 text-gray-600" />
         </div>
-        <h2 className="text-2xl font-bold text-white">Aula Terminada</h2>
+        <h2 className="text-3xl font-bold text-white">Aula Terminada</h2>
         <p className="text-gray-400">O professor encerrou esta aula ao vivo. Obrigado por participar!</p>
         <Link href="/dashboard/lives"
           className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 font-bold transition-colors">
-          <ArrowLeft className="h-5 w-5" /> Voltar às Aulas
+          <ArrowLeft className="h-6 w-6" /> Voltar às Aulas
         </Link>
       </div>
     </div>
@@ -425,8 +425,8 @@ export default function ViewerPage() {
     <div className="flex items-center justify-center min-h-screen bg-[#0e0e10]">
       <div className="text-center space-y-4">
         <AlertTriangle className="h-12 w-12 text-red-400 mx-auto" />
-        <p className="text-lg font-bold text-white">{error || "Erro"}</p>
-        <Link href="/dashboard/lives" className="text-sm text-purple-400 hover:text-purple-300">Voltar às aulas</Link>
+        <p className="text-xl font-bold text-white">{error || "Erro"}</p>
+        <Link href="/dashboard/lives" className="text-base text-purple-400 hover:text-purple-300">Voltar às aulas</Link>
       </div>
     </div>
   );

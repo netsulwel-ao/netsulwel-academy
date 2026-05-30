@@ -460,6 +460,13 @@ export default function StudioPage() {
           const now = new Date().toISOString();
           await updateDoc(doc(db, "lives", id), { status: "live", startedAt: now, updatedAt: serverTimestamp() });
           liveData.status = "live"; liveData.startedAt = now;
+          await addDoc(collection(db, "broadcasts"), {
+            type: "live_started",
+            title: "Aula ao Vivo Agora",
+            message: `"${liveData.title}" começou! Entra agora para assistir.`,
+            link: `/dashboard/lives/${id}`,
+            createdAt: serverTimestamp(),
+          });
         }
         setLive(liveData);
 
