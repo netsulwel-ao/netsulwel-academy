@@ -3,7 +3,31 @@ import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 
 function getServiceAccount(): admin.ServiceAccount | null {
-  // 1. Env var com JSON inline
+  // 1. Env vars individuais (recomendado para Hostinger)
+  if (
+    process.env.FIREBASE_PROJECT_ID &&
+    process.env.FIREBASE_CLIENT_EMAIL &&
+    process.env.FIREBASE_PRIVATE_KEY
+  ) {
+    return {
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    };
+  }
+
+  // 2. Env var com JSON em base64
+  const b64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
+  if (b64) {
+    try {
+      const decoded = Buffer.from(b64, "base64").toString("utf-8");
+      return JSON.parse(decoded);
+    } catch {
+      // ignore
+    }
+  }
+
+  // 2. Env var com JSON inline
   const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
   if (key) {
     try {
@@ -13,7 +37,7 @@ function getServiceAccount(): admin.ServiceAccount | null {
     }
   }
 
-  // 2. Env var com caminho do ficheiro
+  // 3. Env var com caminho do ficheiro
   const pathFromEnv = process.env.GOOGLE_APPLICATION_CREDENTIALS;
   if (pathFromEnv && existsSync(pathFromEnv)) {
     try {
