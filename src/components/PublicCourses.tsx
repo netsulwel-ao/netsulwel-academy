@@ -172,7 +172,7 @@ function CourseCard({ course, catKey }: { course: Course; catKey: CourseCategory
 
   return (
     <Link
-      href={`/dashboard/courses/${course.id}`}
+      href={`/register?redirect=/dashboard/courses/${course.id}`}
       className="group/card relative w-[260px] shrink-0 flex flex-col bg-gray-900/60 border border-white/5 overflow-hidden hover:border-white/15 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
       data-card
     >

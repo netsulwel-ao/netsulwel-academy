@@ -48,14 +48,15 @@ export interface Sale {
   userName: string;
   userEmail: string;
   type: "standalone" | "smart" | "golden";
-  itemId?: string;       // courseId se standalone
+  itemId?: string;
   itemTitle?: string;
-  amount: number;        // em Kz
+  amount: number;
   paymentMethod: string;
   status: "pending" | "confirmed" | "cancelled";
-  reference?: string;    // referência de pagamento
-  receiptUrl?: string;   // comprovativo de pagamento
+  reference?: string;
+  receiptUrl?: string;
   notes?: string;
+  paypalTransactionId?: string;
   createdAt?: unknown;
   updatedAt?: unknown;
 }

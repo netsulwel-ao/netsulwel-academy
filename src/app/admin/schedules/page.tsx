@@ -6,6 +6,7 @@ import { auth, db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { collection, getDocs, doc, updateDoc, query, orderBy, serverTimestamp } from "firebase/firestore";
 import { Calendar, Loader2, ChevronDown, ChevronRight, Plus, Trash2, ImagePlus, Save, AlertCircle, CheckCircle2, X, Layers, Radio, Crown, Zap, Coins } from "lucide-react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import type { Trail, TrailLiveSession } from "@/types/course";
 
 const TARGET_OPTIONS: { value: TrailLiveSession["target"]; label: string; icon: typeof Crown; color: string }[] = [
@@ -182,11 +183,12 @@ export default function SchedulesPage() {
       )}
 
       {trails.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-24 bg-gray-900/40 text-center">
-          <Calendar className="h-12 w-12 text-gray-700 mb-3" />
-          <h2 className="text-xl font-bold text-white mb-2">Nenhuma trilha encontrada</h2>
-          <p className="text-gray-400">Cria trilhas primeiro para definires o cronograma de aulas ao vivo.</p>
-        </div>
+        <EmptyState
+          icon={Calendar}
+          title="Nenhuma trilha encontrada"
+          description="Cria trilhas primeiro para definires o cronograma de aulas ao vivo."
+          action={{ label: "Criar trilha", href: "/admin/trails/new", icon: Layers }}
+        />
       )}
 
       <div className="space-y-6">

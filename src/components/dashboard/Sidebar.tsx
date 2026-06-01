@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home, BookOpen, CreditCard, Users, Settings, LogOut,
-  PanelLeftClose, PanelLeft, Sun, Moon, ChevronRight, FileText, Layers
+  PanelLeftClose, PanelLeft, Sun, Moon, ChevronRight, FileText, Layers, Award
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
@@ -27,8 +27,9 @@ const navSections = [
   { icon: BookOpen, label: "Meus Cursos", href: "/dashboard/courses" },
   { icon: Layers, label: "Trilhas", href: "/dashboard/trails" },
   { icon: FileText, label: "Avaliações", href: "/dashboard/exams" },
- { icon: Users, label: "Comunidade", href: "/dashboard/community" },
- ]
+  { icon: Award, label: "Certificados", href: "/dashboard/certificates" },
+  { icon: Users, label: "Comunidade", href: "/dashboard/community" },
+  ]
  },
  {
  title: "SISTEMA",

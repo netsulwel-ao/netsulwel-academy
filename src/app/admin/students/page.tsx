@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { collection, query, where, getDocs, doc, updateDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
-import { Search, ArrowUpDown, Loader2, GraduationCap, Shield, Mail, Calendar, BookOpen, UserCheck, Award, X } from "lucide-react";
+import { Search, ArrowUpDown, Loader2, GraduationCap, Shield, Mail, Calendar, BookOpen, UserCheck, Award, X, UserPlus } from "lucide-react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -135,10 +136,13 @@ export default function AdminStudentsPage() {
         {loading ? (
           <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16">
-            <GraduationCap className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-500">{search ? "Nenhum aluno encontrado." : "Ainda não há alunos."}</p>
-          </div>
+          <EmptyState
+            icon={GraduationCap}
+            title={search ? "Nenhum aluno encontrado" : "Ainda não há alunos"}
+            description={search ? "Tenta pesquisar por outro termo." : "Os alunos aparecerão aqui depois de se registarem na plataforma."}
+            action={!search ? { label: "Convidar alunos", href: "/dashboard/community", icon: UserPlus } as const : undefined}
+            compact
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">

@@ -5,6 +5,7 @@ import Sidebar from "@/components/dashboard/Sidebar";
 import Header from "@/components/dashboard/Header";
 import AnnouncementPopup from "@/components/dashboard/AnnouncementPopup";
 import CountdownBanner from "@/components/dashboard/CountdownBanner";
+import { OnboardingTour } from "@/components/dashboard/OnboardingTour";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
  const [isCollapsed, setIsCollapsed] = useState(false);
@@ -43,7 +44,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
    </main>
  </div>
 
- <AnnouncementPopup />
- </div>
+  <AnnouncementPopup />
+  <OnboardingTour />
+  </div>
  );
 }

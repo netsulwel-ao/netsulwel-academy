@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, query, orderBy, where, doc, getDoc } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAccess } from "@/hooks/useAccess";
 import {
-  Lock, BookOpen, Clock, Award, Search, Filter,
-  Loader2, Play, ChevronRight, Star,
+  Lock, BookOpen, Award, Search, X,
+  Loader2, Play, ChevronRight, SlidersHorizontal,
 } from "lucide-react";
 import Link from "next/link";
-import type { Course, CourseType, CourseCategory } from "@/types/course";
+import type { Course, CourseType, CourseCategory, CourseLevel } from "@/types/course";
 
 const TYPE_BADGE: Record<CourseType, { label: string; color: string }> = {
   standalone: { label: "Avulso", color: "bg-blue-500/15 text-blue-400 border-blue-500/25" },
@@ -38,6 +38,39 @@ const CAT_LABEL: Record<CourseCategory, string> = {
   other: "Outro",
 };
 
+type SortKey = "recent" | "oldest" | "az" | "za" | "price-asc" | "price-desc";
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "recent", label: "Mais recentes" },
+  { value: "oldest", label: "Mais antigos" },
+  { value: "az", label: "A-Z" },
+  { value: "za", label: "Z-A" },
+  { value: "price-asc", label: "Preço (menor → maior)" },
+  { value: "price-desc", label: "Preço (maior → menor)" },
+];
+
+interface Filters {
+  cat: CourseCategory | "all";
+  type: CourseType | "all";
+  level: CourseLevel | "all";
+  price: "all" | "free" | "paid";
+  certificate: boolean | null;
+}
+
+const DEFAULT_FILTERS: Filters = {
+  cat: "all",
+  type: "all",
+  level: "all",
+  price: "all",
+  certificate: null,
+};
+
+const LEVELS: { value: CourseLevel; label: string }[] = [
+  { value: "beginner", label: "Iniciante" },
+  { value: "intermediate", label: "Intermédio" },
+  { value: "advanced", label: "Avançado" },
+];
+
 export default function CourseCatalogPage() {
   const { user } = useAuth();
   const { canAccessCourse, requiredPlanLabel } = useAccess();
@@ -46,15 +79,15 @@ export default function CourseCatalogPage() {
   const [enrolledCourses, setEnrolledCourses] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filterCat, setFilterCat] = useState<CourseCategory | "all">("all");
-  const [filterType, setFilterType] = useState<CourseType | "all">("all");
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [sort, setSort] = useState<SortKey>("recent");
+  const [showFilters, setShowFilters] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoadError(null);
-        // Só cursos publicados — tem de bater com firestore.rules (alunos não podem listar rascunhos).
         const q = query(
           collection(db, "courses"),
           where("status", "==", "published"),
@@ -64,7 +97,6 @@ export default function CourseCatalogPage() {
         const all = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Course));
         setCourses(all);
 
-        // Cursos comprados pelo user
         if (user) {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
@@ -84,28 +116,74 @@ export default function CourseCatalogPage() {
     fetchData();
   }, [user]);
 
+  const setFilter = useCallback(<K extends keyof Filters>(key: K, value: Filters[K]) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  }, []);
+
+  const hasActiveFilters = useMemo(() => {
+    return search.trim() !== "" ||
+      filters.cat !== "all" || filters.type !== "all" ||
+      filters.level !== "all" || filters.price !== "all" ||
+      filters.certificate !== null || sort !== "recent";
+  }, [search, filters, sort]);
+
   const filtered = useMemo(() => {
-    return courses.filter((c) => {
-      if (filterCat !== "all" && c.category !== filterCat) return false;
-      if (filterType !== "all" && c.type !== filterType) return false;
+    let result = courses.filter((c) => {
+      if (filters.cat !== "all" && c.category !== filters.cat) return false;
+      if (filters.type !== "all" && c.type !== filters.type) return false;
+      if (filters.level !== "all" && c.level !== filters.level) return false;
+      if (filters.price === "free" && c.price > 0) return false;
+      if (filters.price === "paid" && c.price === 0) return false;
+      if (filters.certificate === true && !c.hasCertificate) return false;
+      if (filters.certificate === false && c.hasCertificate) return false;
       if (search.trim()) {
         const q = search.toLowerCase();
-        return c.title.toLowerCase().includes(q) || c.description?.toLowerCase().includes(q);
+        const inTitle = c.title.toLowerCase().includes(q);
+        const inDesc = c.description?.toLowerCase().includes(q);
+        const inTags = c.tags?.some((t) => t.toLowerCase().includes(q));
+        return inTitle || inDesc || inTags;
       }
       return true;
     });
-  }, [courses, filterCat, filterType, search]);
+
+    result.sort((a, b) => {
+      switch (sort) {
+        case "oldest": return (a.createdAt as number) - (b.createdAt as number);
+        case "az": return a.title.localeCompare(b.title);
+        case "za": return b.title.localeCompare(a.title);
+        case "price-asc": return (a.price ?? 0) - (b.price ?? 0);
+        case "price-desc": return (b.price ?? 0) - (a.price ?? 0);
+        default: return (b.createdAt as number) - (a.createdAt as number);
+      }
+    });
+
+    return result;
+  }, [courses, filters, search, sort]);
 
   const accessible = filtered.filter((c) => canAccessCourse(normalizeCourseType(c.type), c.id!, enrolledCourses, c.price));
   const locked = filtered.filter((c) => !canAccessCourse(normalizeCourseType(c.type), c.id!, enrolledCourses, c.price));
+  const resultCount = filtered.length;
+
+  const activeTag = (label: string, onRemove: () => void) => (
+    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm bg-gray-800 border border-gray-700 text-gray-300">
+      {label}
+      <button onClick={onRemove} className="text-gray-500 hover:text-white transition-colors">
+        <X className="h-3.5 w-3.5" />
+      </button>
+    </span>
+  );
 
   return (
-    <div className="max-w-[100rem] mx-auto space-y-8 animate-in fade-in duration-500">
+    <div className="max-w-[100rem] mx-auto space-y-6 animate-in fade-in duration-500">
 
       {/* Header */}
-      <div>
-        <h1 className="text-4xl font-bold text-white">Catálogo de Cursos</h1>
-        <p className="mt-1 text-gray-400">{loading ? "A carregar..." : `${courses.length} cursos disponíveis`}</p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-4xl font-bold text-white">Catálogo de Cursos</h1>
+          <p className="mt-1 text-gray-400">
+            {loading ? "A carregar..." : `${courses.length} cursos disponíveis`}
+          </p>
+        </div>
       </div>
 
       {loadError && (
@@ -114,36 +192,140 @@ export default function CourseCatalogPage() {
         </div>
       )}
 
-      {/* Filters */}
+      {/* Search + Sort + Filter toggle */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
+          <Search className="absolute left-3.5 top-3 h-5 w-5 text-gray-500" />
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
-            placeholder="Pesquisar cursos..."
-            className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 pl-10 pr-4 text-white placeholder-gray-600 text-base focus:outline-none transition-all" />
+            placeholder="Pesquisar por título, descrição ou tags..."
+            className="w-full bg-gray-900 border border-gray-800 focus:border-purple/50 py-3 pl-11 pr-10 text-white placeholder-gray-600 text-base focus:outline-none transition-all" />
+          {search && (
+            <button onClick={() => setSearch("")} className="absolute right-3.5 top-3 text-gray-500 hover:text-white transition-colors">
+              <X className="h-5 w-5" />
+            </button>
+          )}
         </div>
 
-        <select value={filterCat} onChange={(e) => setFilterCat(e.target.value as CourseCategory | "all")}
-          className="bg-gray-900 border border-gray-800 text-gray-300 text-base py-2.5 px-4 focus:outline-none appearance-none cursor-pointer">
-          <option value="all">Todas as categorias</option>
-          {Object.entries(CAT_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-        </select>
+        <button onClick={() => setShowFilters(!showFilters)}
+          className={`flex items-center gap-2 px-4 py-3 border text-sm font-bold transition-colors ${
+            showFilters
+              ? "bg-purple/20 border-purple/40 text-purple"
+              : "bg-gray-900 border-gray-800 text-gray-400 hover:text-white hover:border-gray-700"
+          }`}>
+          <SlidersHorizontal className="h-4 w-4" />
+          Filtros
+        </button>
 
-        <select value={filterType} onChange={(e) => setFilterType(e.target.value as CourseType | "all")}
-          className="bg-gray-900 border border-gray-800 text-gray-300 text-base py-2.5 px-4 focus:outline-none appearance-none cursor-pointer">
-          <option value="all">Todos os planos</option>
-          <option value="standalone">Avulso</option>
-          <option value="smart">Smart</option>
-          <option value="golden">Golden</option>
+        <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}
+          className="bg-gray-900 border border-gray-800 text-gray-300 text-sm py-3 px-4 focus:outline-none appearance-none cursor-pointer min-w-[160px]">
+          {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </div>
+
+      {/* Filter chips (collapsible) */}
+      {showFilters && (
+        <div className="bg-gray-900/60 border border-gray-800 p-5 animate-in slide-in-from-top-2 duration-200">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {/* Category */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Categoria</p>
+              <div className="flex flex-wrap gap-2">
+                <Chip selected={filters.cat === "all"} onClick={() => setFilter("cat", "all")}>Todas</Chip>
+                {(Object.entries(CAT_LABEL) as [CourseCategory, string][]).map(([v, l]) => (
+                  <Chip key={v} selected={filters.cat === v} onClick={() => setFilter("cat", v)}>{l}</Chip>
+                ))}
+              </div>
+            </div>
+
+            {/* Plan type */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Plano</p>
+              <div className="flex flex-wrap gap-2">
+                <Chip selected={filters.type === "all"} onClick={() => setFilter("type", "all")}>Todos</Chip>
+                <Chip selected={filters.type === "standalone"} onClick={() => setFilter("type", "standalone")}>Avulso</Chip>
+                <Chip selected={filters.type === "smart"} onClick={() => setFilter("type", "smart")}>Smart</Chip>
+                <Chip selected={filters.type === "golden"} onClick={() => setFilter("type", "golden")}>Golden</Chip>
+              </div>
+            </div>
+
+            {/* Level */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Nível</p>
+              <div className="flex flex-wrap gap-2">
+                <Chip selected={filters.level === "all"} onClick={() => setFilter("level", "all")}>Todos</Chip>
+                {LEVELS.map((l) => (
+                  <Chip key={l.value} selected={filters.level === l.value} onClick={() => setFilter("level", l.value)}>{l.label}</Chip>
+                ))}
+              </div>
+            </div>
+
+            {/* Price */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Preço</p>
+              <div className="flex flex-wrap gap-2">
+                <Chip selected={filters.price === "all"} onClick={() => setFilter("price", "all")}>Todos</Chip>
+                <Chip selected={filters.price === "free"} onClick={() => setFilter("price", "free")}>Gratuitos</Chip>
+                <Chip selected={filters.price === "paid"} onClick={() => setFilter("price", "paid")}>Pagos</Chip>
+              </div>
+            </div>
+
+            {/* Certificate */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Certificado</p>
+              <div className="flex flex-wrap gap-2">
+                <Chip selected={filters.certificate === null} onClick={() => setFilter("certificate", null)}>Todos</Chip>
+                <Chip selected={filters.certificate === true} onClick={() => setFilter("certificate", true)}>Com certificado</Chip>
+                <Chip selected={filters.certificate === false} onClick={() => setFilter("certificate", false)}>Sem certificado</Chip>
+              </div>
+            </div>
+          </div>
+
+          {/* Clear all */}
+          {hasActiveFilters && (
+            <div className="mt-4 pt-4 border-t border-gray-800 flex justify-between items-center">
+              <span className="text-sm text-gray-500">{resultCount} resultado{resultCount !== 1 ? "s" : ""}</span>
+              <button onClick={() => { setSearch(""); setFilters(DEFAULT_FILTERS); setSort("recent"); }}
+                className="text-sm text-purple hover:text-purple-light font-bold transition-colors">
+                Limpar todos os filtros
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Active filter tags */}
+      {hasActiveFilters && !showFilters && (
+        <div className="flex flex-wrap items-center gap-2">
+          {search && activeTag(`"${search}"`, () => setSearch(""))}
+          {filters.cat !== "all" && activeTag(CAT_LABEL[filters.cat], () => setFilter("cat", "all"))}
+          {filters.type !== "all" && activeTag(TYPE_BADGE[filters.type].label, () => setFilter("type", "all"))}
+          {filters.level !== "all" && activeTag(LEVEL_LABEL[filters.level], () => setFilter("level", "all"))}
+          {filters.price !== "all" && activeTag(filters.price === "free" ? "Gratuitos" : "Pagos", () => setFilter("price", "all"))}
+          {filters.certificate !== null && activeTag(filters.certificate ? "Com certificado" : "Sem certificado", () => setFilter("certificate", null))}
+          {sort !== "recent" && activeTag(SORT_OPTIONS.find((o) => o.value === sort)?.label ?? sort, () => setSort("recent"))}
+
+          {hasActiveFilters && (
+            <button onClick={() => { setSearch(""); setFilters(DEFAULT_FILTERS); setSort("recent"); }}
+              className="text-sm text-gray-500 hover:text-purple transition-colors underline underline-offset-2">
+              Limpar tudo
+            </button>
+          )}
+        </div>
+      )}
 
       {loading && <div className="flex items-center justify-center py-24"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>}
 
       {!loading && filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 bg-gray-900/40 text-center">
-          <BookOpen className="h-12 w-12 text-gray-700 mb-3" />
-          <p className="text-gray-400">Nenhum curso encontrado.</p>
+          <Search className="h-12 w-12 text-gray-700 mb-3" />
+          <p className="text-gray-400 text-lg">Nenhum curso encontrado</p>
+          <p className="text-gray-600 text-sm mt-1">Tenta alterar os filtros ou a pesquisa.</p>
+          {hasActiveFilters && (
+            <button onClick={() => { setSearch(""); setFilters(DEFAULT_FILTERS); setSort("recent"); }}
+              className="mt-4 px-5 py-2.5 bg-purple hover:bg-purple-light text-white text-sm font-bold transition-colors">
+              Limpar filtros
+            </button>
+          )}
         </div>
       )}
 
@@ -152,6 +334,7 @@ export default function CourseCatalogPage() {
         <div>
           <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
             <Play className="h-6 w-6 text-green-400" /> Disponíveis para ti
+            <span className="text-sm font-normal text-gray-500">({accessible.length})</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {accessible.map((course) => (
@@ -166,6 +349,7 @@ export default function CourseCatalogPage() {
         <div>
           <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
             <Lock className="h-6 w-6 text-gray-500" /> Requer upgrade
+            <span className="text-sm font-normal text-gray-500">({locked.length})</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {locked.map((course) => (
@@ -181,6 +365,20 @@ export default function CourseCatalogPage() {
         </div>
       )}
     </div>
+  );
+}
+
+// ── Chip component ───────────────────────────────────────────
+function Chip({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button onClick={onClick}
+      className={`px-3 py-1.5 text-sm font-bold border transition-colors ${
+        selected
+          ? "bg-purple/20 border-purple/40 text-purple"
+          : "bg-gray-950 border-gray-800 text-gray-400 hover:text-white hover:border-gray-600"
+      }`}>
+      {children}
+    </button>
   );
 }
 

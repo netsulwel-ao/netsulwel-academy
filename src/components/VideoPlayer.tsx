@@ -33,9 +33,10 @@ type VideoSource = DirectSource | YoutubeSource | VimeoSource | LiveKitSource;
 interface VideoPlayerProps {
   source: VideoSource;
   className?: string;
+  onProgress?: (currentTime: number, duration: number) => void;
 }
 
-export function VideoPlayer({ source, className = "" }: VideoPlayerProps) {
+export function VideoPlayer({ source, className = "", onProgress }: VideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [fullscreen, setFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
@@ -76,7 +77,7 @@ export function VideoPlayer({ source, className = "" }: VideoPlayerProps) {
       onMouseLeave={() => setShowControls(false)}
     >
       {source.type === "direct" && (
-        <DirectPlayer source={source} showControls={showControls} onFullscreen={toggleFullscreen} fullscreen={fullscreen} />
+        <DirectPlayer source={source} showControls={showControls} onFullscreen={toggleFullscreen} fullscreen={fullscreen} onProgress={onProgress} />
       )}
       {(source.type === "youtube" || source.type === "vimeo") && (
         <EmbedPlayer source={source} showControls={showControls} onFullscreen={toggleFullscreen} fullscreen={fullscreen} />
@@ -104,11 +105,13 @@ function DirectPlayer({
   showControls,
   onFullscreen,
   fullscreen,
+  onProgress,
 }: {
   source: DirectSource;
   showControls: boolean;
   onFullscreen: () => void;
   fullscreen: boolean;
+  onProgress?: (currentTime: number, duration: number) => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -127,12 +130,12 @@ function DirectPlayer({
     const v = videoRef.current;
     if (!v) return;
 
-    const onTime = () => { setCurrentTime(v.currentTime); setDuration(v.duration || 0); };
+    const onTime = () => { setCurrentTime(v.currentTime); const d = v.duration || 0; setDuration(d); onProgress?.(v.currentTime, d); };
     const onPlay = () => setPlaying(true);
     const onPause = () => setPlaying(false);
     const onVol = () => { setVolume(v.volume); setMuted(v.muted); };
     const onRate = () => setPlaybackRate(v.playbackRate);
-    const onProgress = () => {
+    const onBuffer = () => {
       if (v.buffered.length > 0) setBuffered(v.buffered.end(v.buffered.length - 1));
     };
 
@@ -141,7 +144,7 @@ function DirectPlayer({
     v.addEventListener("pause", onPause);
     v.addEventListener("volumechange", onVol);
     v.addEventListener("ratechange", onRate);
-    v.addEventListener("progress", onProgress);
+    v.addEventListener("progress", onBuffer);
     v.addEventListener("loadedmetadata", onTime);
 
     return () => {
@@ -150,7 +153,7 @@ function DirectPlayer({
       v.removeEventListener("pause", onPause);
       v.removeEventListener("volumechange", onVol);
       v.removeEventListener("ratechange", onRate);
-      v.removeEventListener("progress", onProgress);
+      v.removeEventListener("progress", onBuffer);
       v.removeEventListener("loadedmetadata", onTime);
     };
   }, []);

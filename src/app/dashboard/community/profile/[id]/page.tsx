@@ -5,7 +5,8 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, query, where, orderBy, getDocs } from "firebase/firestore";
-import { ArrowLeft, Calendar, Award, Loader2, Lock, Sparkles } from "lucide-react";
+import { ArrowLeft, Calendar, Award, Loader2, Lock, Sparkles, MessageSquare } from "lucide-react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import PostCard from "@/components/dashboard/community/PostCard";
 import type { CommunityPost } from "@/types/community";
 import { useAuth } from "@/contexts/AuthContext";
@@ -161,9 +162,13 @@ export default function CommunityProfilePage() {
       <div className="mt-8">
         <h2 className="text-xl font-bold text-white mb-4">Publicações</h2>
         {posts.length === 0 ? (
-          <p className="text-gray-500 text-center py-8 bg-gray-900/30 border border-gray-800">
-            Este utilizador ainda não fez nenhuma publicação.
-          </p>
+          <EmptyState
+            icon={MessageSquare}
+            title="Nenhuma publicação"
+            description="Este utilizador ainda não fez nenhuma publicação."
+            action={{ label: "Ir para a comunidade", href: "/dashboard/community", icon: Sparkles }}
+            compact
+          />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {posts.map((post) => (

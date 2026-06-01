@@ -9,8 +9,9 @@ import {
 } from "firebase/firestore";
 import {
   Users, Search, Shield, ShieldOff, Loader2, ChevronDown,
-  Mail, Calendar, BookOpen, MoreVertical, UserCheck, UserX, Filter, X,
+  Mail, Calendar, BookOpen, MoreVertical, UserCheck, UserX, Filter, X, UserPlus,
 } from "lucide-react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { toast } from "sonner";
 
 interface Student {
@@ -203,11 +204,12 @@ export default function UsersPage() {
           <Loader2 className="h-8 w-8 animate-spin text-purple" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-gray-900/40 text-center">
-          <Users className="h-12 w-12 text-gray-700 mb-3" />
-          <p className="text-gray-400 font-medium">Nenhum utilizador encontrado</p>
-          {search && <p className="text-gray-600 text-sm mt-1">Tenta pesquisar por outro termo</p>}
-        </div>
+        <EmptyState
+          icon={Users}
+          title={search ? "Nenhum utilizador encontrado" : "Ainda não há utilizadores"}
+          description={search ? "Tenta pesquisar por outro termo." : "Os utilizadores aparecerão aqui depois de se registarem."}
+          compact
+        />
       ) : (
         <div className="bg-gray-900/40 backdrop-blur-xl overflow-x-auto">
           <div className="min-w-[600px]">

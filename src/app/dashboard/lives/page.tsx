@@ -14,7 +14,9 @@ import {
   Loader2,
   Lock,
   Sparkles,
+  BookOpen,
 } from "lucide-react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import type { LiveSession } from "@/types/live";
 
 /* ─── Countdown Hook ──────────────────────────────────── */
@@ -319,18 +321,13 @@ export default function DashboardLivesPage() {
 
       {/* Empty State */}
       {lives.length === 0 && (
-        <div className="p-12 bg-gray-900/40 backdrop-blur-xl text-center">
-          <div className="mx-auto w-16 h-16 bg-purple/10 text-purple flex items-center justify-center mb-4">
-            <Sparkles className="w-10 h-10" />
-          </div>
-          <h2 className="text-3xl font-bold text-white mb-2">
-            Nenhuma aula ao vivo agendada
-          </h2>
-          <p className="text-gray-400 max-w-md mx-auto">
-            Quando o professor agendar uma nova aula ao vivo, ela aparecerá aqui
-            com uma contagem regressiva.
-          </p>
-        </div>
+        <EmptyState
+          icon={Sparkles}
+          title="Nenhuma aula ao vivo agendada"
+          description="Quando o professor agendar uma nova aula ao vivo, ela aparecerá aqui com uma contagem regressiva."
+          action={{ label: "Explorar cursos", href: "/dashboard/courses", icon: BookOpen }}
+          secondaryAction={{ label: "Voltar ao painel", href: "/dashboard" }}
+        />
       )}
     </div>
   );

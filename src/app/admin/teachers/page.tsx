@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { collection, query, where, getDocs, doc, updateDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
-import { Users, GraduationCap, Search, ArrowUpDown, Loader2, Shield, ShieldOff, Mail, Calendar, BookOpen, UserCheck, X } from "lucide-react";
+import { Users, GraduationCap, Search, ArrowUpDown, Loader2, Shield, ShieldOff, Mail, Calendar, BookOpen, UserCheck, X, UserPlus } from "lucide-react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -124,13 +125,13 @@ export default function AdminTeachersPage() {
         {loading ? (
           <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16">
-            <GraduationCap className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-500">{search ? "Nenhum professor encontrado." : "Ainda não há professores."}</p>
-            {!search && (
-              <p className="text-gray-600 text-sm mt-2">Pode promover um aluno a professor na página de alunos.</p>
-            )}
-          </div>
+          <EmptyState
+            icon={GraduationCap}
+            title={search ? "Nenhum professor encontrado" : "Ainda não há professores"}
+            description={search ? "Tenta pesquisar por outro termo." : "Pode promover um aluno a professor na página de alunos."}
+            action={!search ? { label: "Ver alunos", href: "/admin/students", icon: Users } as const : undefined}
+            compact
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">

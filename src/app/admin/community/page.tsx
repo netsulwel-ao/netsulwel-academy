@@ -8,8 +8,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { collection, query, orderBy, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import {
   Users, MessageCircle, Heart, Trash2, ExternalLink, Loader2,
-  Search, X,
+  Search, X, MessageSquare,
 } from "lucide-react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import type { CommunityPost } from "@/types/community";
 import { toast } from "sonner";
 
@@ -111,12 +112,13 @@ export default function AdminCommunityPage() {
           <Loader2 className="h-8 w-8 animate-spin text-purple" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-gray-900/40 text-center">
-          <Users className="h-12 w-12 text-gray-700 mb-3" />
-          <p className="text-gray-400 font-medium">
-            {search ? "Nenhuma publicação encontrada" : "Nenhuma publicação na comunidade"}
-          </p>
-        </div>
+        <EmptyState
+          icon={MessageSquare}
+          title={search ? "Nenhuma publicação encontrada" : "Nenhuma publicação na comunidade"}
+          description={search ? "Tenta pesquisar por outro termo." : "As publicações dos alunos aparecerão aqui."}
+          action={!search ? { label: "Ver comunidade", href: "/dashboard/community", icon: ExternalLink } as const : undefined}
+          compact
+        />
       ) : (
         <div className="bg-gray-900/40 backdrop-blur-xl overflow-x-auto">
           <div className="min-w-[700px]">

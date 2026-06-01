@@ -6,7 +6,7 @@ import { User, Mail, Lock, Loader2, AlertCircle, Eye, EyeOff, CheckCircle2, Sun,
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, type AuthProvider } from "firebase/auth";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -58,6 +58,8 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/dashboard";
 
   useEffect(() => {
     const saved = localStorage.getItem("public-theme") as "dark" | "light" | null;
@@ -87,7 +89,7 @@ export default function RegisterPage() {
         role: "aluno",
         createdAt: new Date(),
       });
-      router.push("/dashboard");
+      router.push(redirectTo);
     } catch {
       setError("Erro ao criar conta. A palavra-passe deve ter pelo menos 6 caracteres ou o email já está em uso.");
     } finally {
@@ -118,9 +120,9 @@ export default function RegisterPage() {
           createdAt: new Date(),
         });
       }
-      router.push("/dashboard");
+      router.push(redirectTo);
     } catch {
-      setError(`Falha ao registar com ${providerName}.`);
+        setError(`Falha ao registar com ${providerName}.`);
     } finally {
       setLoading(false);
     }

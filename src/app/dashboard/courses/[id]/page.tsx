@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, increment, updateDoc, onSnapshot, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, increment, updateDoc, onSnapshot, setDoc, serverTimestamp, Timestamp, collection } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAccess } from "@/hooks/useAccess";
 import {
   Lock, Play, BookOpen, Award, ChevronLeft, Clock,
   Loader2, CheckCircle2, ChevronDown, ChevronRight, Crown, Zap,
-  Heart, HeartOff, Radio,
+  Heart, HeartOff, Radio, Circle, Search,
 } from "lucide-react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import Link from "next/link";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import type { Course } from "@/types/course";
@@ -121,6 +122,11 @@ export default function CourseDetailPage() {
   const [expandedModules, setExpandedModules] = useState<number[]>([0]);
   const [followed, setFollowed] = useState(false);
   const [followCount, setFollowCount] = useState(0);
+  const [completed, setCompleted] = useState<Record<number, Record<number, boolean>>>({});
+  const [completedCount, setCompletedCount] = useState(0);
+  const [progressLoaded, setProgressLoaded] = useState(false);
+  const saveTimerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  const currentTimeRef = useRef(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -139,8 +145,31 @@ export default function CourseDetailPage() {
           updateDoc(doc(db, "courses", id), { views: increment(1) }).catch(() => {});
         }
 
-        // Abre automaticamente na primeira aula
-        if (data.modules?.[0]?.videos?.[0]) setActiveLesson({ mi: 0, vi: 0 });
+        // Abre automaticamente na primeira aula (ou restaura progresso)
+        if (user) {
+          const progressSnap = await getDoc(doc(db, "progress", user.uid, "courses", id));
+          if (progressSnap.exists()) {
+            const p = progressSnap.data();
+            setCompleted(p.completed ?? {});
+            setCompletedCount(p.completedCount ?? 0);
+            setProgressLoaded(true);
+            const mi = p.currentMi ?? 0;
+            const vi = p.currentVi ?? 0;
+            if (data.modules?.[mi]?.videos?.[vi]) {
+              setActiveLesson({ mi, vi });
+              // Expand the active module
+              setExpandedModules(prev => prev.includes(mi) ? prev : [...prev, mi]);
+            } else if (data.modules?.[0]?.videos?.[0]) {
+              setActiveLesson({ mi: 0, vi: 0 });
+            }
+          } else {
+            setProgressLoaded(true);
+            if (data.modules?.[0]?.videos?.[0]) setActiveLesson({ mi: 0, vi: 0 });
+          }
+        } else {
+          setProgressLoaded(true);
+          if (data.modules?.[0]?.videos?.[0]) setActiveLesson({ mi: 0, vi: 0 });
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -160,6 +189,92 @@ export default function CourseDetailPage() {
     });
     return () => { unsub(); countUnsub(); };
   }, [course?.createdBy, user]);
+
+  // Save progress periodically and on lesson change
+  const saveProgress = useCallback(async (mi: number, vi: number, time?: number) => {
+    if (!user || !course?.id) return;
+    const totalLessons = course.modules?.reduce((acc, m) => acc + m.videos.length, 0) ?? 0;
+    await setDoc(doc(db, "progress", user.uid, "courses", course.id), {
+      currentMi: mi,
+      currentVi: vi,
+      currentTime: time ?? currentTimeRef.current,
+      completed,
+      completedCount,
+      totalCount: totalLessons,
+      lastAccessedAt: serverTimestamp(),
+    }, { merge: true });
+  }, [user, course?.id, course?.modules, completed, completedCount]);
+
+  useEffect(() => {
+    if (!user || !course?.id || !activeLesson) return;
+    // Save immediately when lesson changes
+    saveProgress(activeLesson.mi, activeLesson.vi);
+    // Start periodic save every 30s
+    saveTimerRef.current = setInterval(() => {
+      saveProgress(activeLesson.mi, activeLesson.vi);
+    }, 30000);
+    return () => { clearInterval(saveTimerRef.current); };
+  }, [activeLesson?.mi, activeLesson?.vi, user, course?.id]);
+
+  const currentLessonKey = activeLesson ? `${activeLesson.mi}-${activeLesson.vi}` : "";
+  const lessonCompleted = activeLesson ? completed[activeLesson.mi]?.[activeLesson.vi] ?? false : false;
+
+  const totalLessons = course?.modules?.reduce((acc, m) => acc + m.videos.length, 0) ?? 0;
+  const progressPct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+
+  const toggleComplete = async () => {
+    if (!activeLesson || !user || !course?.id) return;
+    const mi = activeLesson.mi;
+    const vi = activeLesson.vi;
+    const isCompleted = completed[mi]?.[vi] ?? false;
+    const newCompleted = { ...completed };
+    if (!newCompleted[mi]) newCompleted[mi] = {};
+    newCompleted[mi] = { ...newCompleted[mi], [vi]: !isCompleted };
+    const delta = !isCompleted ? 1 : -1;
+    setCompleted(newCompleted);
+    setCompletedCount(prev => prev + delta);
+    const newCount = completedCount + delta;
+
+    // Save immediately
+    await setDoc(doc(db, "progress", user.uid, "courses", course.id), {
+      currentMi: mi,
+      currentVi: vi,
+      completed: newCompleted,
+      completedCount: newCount,
+      totalCount: totalLessons,
+      lastAccessedAt: serverTimestamp(),
+    }, { merge: true });
+
+    // Gerar certificado se completou 100% e o curso tem certificado ativo
+    const justCompleted = !isCompleted && newCount >= totalLessons && totalLessons > 0;
+    if (justCompleted && course.hasCertificate) {
+      const certId = `CERT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+      const estHours = course.totalDuration ? parseInt(course.totalDuration) : course.lessonsCount ?? 0;
+      await setDoc(doc(collection(db, "certificates", user.uid, "courses"), course.id), {
+        userId: user.uid,
+        courseId: course.id,
+        courseTitle: course.title,
+        studentName: user.displayName || user.email || "Aluno",
+        completedAt: serverTimestamp(),
+        hours: estHours,
+        certificateId: certId,
+      });
+    }
+
+    // Auto-avançar para a próxima aula não concluída
+    if (!isCompleted && course.modules) {
+      for (let m = mi; m < course.modules.length; m++) {
+        const videos = course.modules[m].videos;
+        for (let v = (m === mi ? vi + 1 : 0); v < videos.length; v++) {
+          if (!newCompleted[m]?.[v]) {
+            setActiveLesson({ mi: m, vi: v });
+            setExpandedModules(prev => prev.includes(m) ? prev : [...prev, m]);
+            return;
+          }
+        }
+      }
+    }
+  };
 
   const toggleFollow = async () => {
     if (!user || !course?.createdBy) return;
@@ -183,7 +298,17 @@ export default function CourseDetailPage() {
   };
 
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>;
-  if (!course) return null;
+  if (!course) return (
+    <div className="max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-in fade-in duration-500">
+      <EmptyState
+        icon={Search}
+        title="Curso não encontrado"
+        description="Este curso pode ter sido removido ou o link está incorrecto."
+        action={{ label: "Ver catálogo", href: "/dashboard/courses", icon: BookOpen }}
+        secondaryAction={{ label: "Voltar ao painel", href: "/dashboard" }}
+      />
+    </div>
+  );
 
   const normalizedType = normalizeCourseType(course.type);
   const hasAccess = canAccessCourse(normalizedType, course.id!, enrolledCourses, course.price);
@@ -321,7 +446,15 @@ export default function CourseDetailPage() {
           {/* Player area */}
           <div className="relative w-full aspect-video bg-gray-900">
             {hasAccess && currentVideo?.url ? (
-              <VideoPlayer source={buildVideoSource(currentVideo.url, course.thumbnail)} />
+              <VideoPlayer source={buildVideoSource(currentVideo.url, course.thumbnail)}
+                onProgress={(time, dur) => {
+                  currentTimeRef.current = time;
+                  // Auto-marcar como completo se viu ≥90%
+                  if (dur > 0 && (time / dur) >= 0.9 && activeLesson && !completed[activeLesson.mi]?.[activeLesson.vi]) {
+                    toggleComplete();
+                  }
+                }}
+              />
             ) : hasAccess && !currentVideo?.url ? (
               <div className="flex flex-col items-center justify-center h-full gap-3 text-gray-500">
                 <Play className="h-12 w-12" />
@@ -369,15 +502,27 @@ export default function CourseDetailPage() {
           {/* Current lesson title */}
           {hasAccess && currentVideo && (
             <div className="bg-gray-900/40 px-5 py-4 border border-gray-800">
-              <p className="text-sm text-gray-500 uppercase tracking-wider font-bold mb-1">
-                Módulo {(activeLesson?.mi ?? 0) + 1} · Aula {(activeLesson?.vi ?? 0) + 1}
-              </p>
-              <h2 className="text-xl font-bold text-white">{currentVideo.title}</h2>
-              {currentVideo.duration && (
-                <p className="text-base text-gray-400 mt-1 flex items-center gap-1">
-                  <Clock className="h-4 w-4" /> {currentVideo.duration}
-                </p>
-              )}
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-sm text-gray-500 uppercase tracking-wider font-bold mb-1">
+                    Módulo {(activeLesson?.mi ?? 0) + 1} · Aula {(activeLesson?.vi ?? 0) + 1}
+                  </p>
+                  <h2 className="text-xl font-bold text-white">{currentVideo.title}</h2>
+                  {currentVideo.duration && (
+                    <p className="text-base text-gray-400 mt-1 flex items-center gap-1">
+                      <Clock className="h-4 w-4" /> {currentVideo.duration}
+                    </p>
+                  )}
+                </div>
+                <button onClick={toggleComplete}
+                  className={`shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-bold transition-colors ${
+                    lessonCompleted
+                      ? "bg-green-600 hover:bg-green-700 text-white"
+                      : "bg-gray-800 hover:bg-gray-700 text-gray-300"
+                  }`}>
+                  {lessonCompleted ? <><CheckCircle2 className="h-4 w-4" /> Concluída</> : <><Circle className="h-4 w-4" /> Marcar conclusão</>}
+                </button>
+              </div>
             </div>
           )}
 
@@ -430,8 +575,26 @@ export default function CourseDetailPage() {
             <div className="px-5 py-4 border-b border-gray-800">
               <h3 className="font-bold text-white">Conteúdo do Curso</h3>
               <p className="text-sm text-gray-500 mt-0.5">{course.modulesCount} módulos · {course.lessonsCount} aulas</p>
+              {progressLoaded && (
+                <div className="mt-3">
+                  <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+                    <span>{completedCount} de {totalLessons} concluídas</span>
+                    <span>{progressPct}%</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-purple rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
+                  </div>
+                  {progressPct === 100 && course?.hasCertificate && (
+                    <Link href={`/dashboard/certificates/${course.id}`}
+                      className="mt-3 flex items-center justify-center gap-2 w-full px-3 py-2 bg-amber-500/20 border border-amber-500/30 text-amber-300 text-sm font-bold hover:bg-amber-500/30 transition-colors">
+                      <Award className="h-4 w-4" />
+                      Ver Certificado
+                    </Link>
+                  )}
+                </div>
+              )}
               {!hasAccess && (
-                <p className="text-sm text-amber-300 mt-2 flex items-center gap-1.5">
+                <p className="text-sm text-amber-300 mt-3 flex items-center gap-1.5">
                   <Lock className="h-4 w-4" />
                   Requer {required}
                 </p>
@@ -459,6 +622,7 @@ export default function CourseDetailPage() {
                       {module.videos.map((video, vi) => {
                         const isActive = activeLesson?.mi === mi && activeLesson?.vi === vi;
                         const lessonLocked = !hasAccess;
+                        const isCompleted = completed[mi]?.[vi] ?? false;
                         return (
                           <button key={vi}
                             onClick={() => { if (!lessonLocked) setActiveLesson({ mi, vi }); }}
@@ -467,20 +631,28 @@ export default function CourseDetailPage() {
                               isActive ? "bg-blue-600/20 border-l-2 border-blue-500" : "hover:bg-gray-800/30 border-l-2 border-transparent"
                             } ${lessonLocked ? "cursor-not-allowed" : "cursor-pointer"}`}>
                             <div className={`flex h-7 w-7 shrink-0 items-center justify-center ${
-                              isActive ? "bg-blue-600" : lessonLocked ? "bg-gray-800" : "bg-gray-800 group-hover:bg-gray-700"
+                              isCompleted ? "bg-green-600"
+                                : isActive ? "bg-blue-600"
+                                : lessonLocked ? "bg-gray-800"
+                                : "bg-gray-800 group-hover:bg-gray-700"
                             }`}>
-                              {lessonLocked
-                                ? <Lock className="h-4 w-4 text-gray-500" />
-                                : isActive
-                                  ? <Play className="h-4 w-4 text-white ml-0.5" />
-                                  : <Play className="h-4 w-4 text-gray-400 ml-0.5" />
+                              {isCompleted
+                                ? <CheckCircle2 className="h-4 w-4 text-white" />
+                                : lessonLocked
+                                  ? <Lock className="h-4 w-4 text-gray-500" />
+                                  : isActive
+                                    ? <Play className="h-4 w-4 text-white ml-0.5" />
+                                    : <Circle className="h-4 w-4 text-gray-500" />
                               }
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className={`text-base truncate ${isActive ? "text-white font-medium" : lessonLocked ? "text-gray-600" : "text-gray-300"}`}>
+                              <p className={`text-base truncate ${isCompleted ? "text-green-400" : isActive ? "text-white font-medium" : lessonLocked ? "text-gray-600" : "text-gray-300"}`}>
                                 {video.title || `Aula ${vi + 1}`}
                               </p>
-                              {video.duration && <p className="text-sm text-gray-600 mt-0.5 flex items-center gap-1"><Clock className="h-4 w-4" />{video.duration}</p>}
+                              <p className="text-sm text-gray-600 mt-0.5 flex items-center gap-1">
+                                <Clock className="h-4 w-4" />{video.duration || "—"}
+                                {isCompleted && <span className="text-green-500 ml-1">Concluída</span>}
+                              </p>
                             </div>
                           </button>
                         );

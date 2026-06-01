@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, arrayUnion } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   CreditCard, Crown, Zap, Lock, ArrowUpRight, Building2,
@@ -91,6 +91,16 @@ export default function DashboardFinancesPage() {
     setReceipt({ file, preview: URL.createObjectURL(file) });
   };
 
+  const grantAccess = async (type: string, itemId?: string) => {
+    if (!user) return;
+    const userRef = doc(db, "users", user.uid);
+    if (type === "standalone" && itemId) {
+      await updateDoc(userRef, { enrolledCourses: arrayUnion(itemId) });
+    } else if (type === "smart" || type === "golden") {
+      await updateDoc(userRef, { plan: type });
+    }
+  };
+
   const handlePurchase = async (paypalTransactionId?: string) => {
     if (!selectedMethod || !user) return;
     if (!course && (!selectedPlan || !plans)) return;
@@ -101,38 +111,35 @@ export default function DashboardFinancesPage() {
         receiptUrl = await uploadReceipt(receipt.file);
       }
 
-      const saleData: Record<string, unknown> = {
+      const isConfirmed = !!paypalTransactionId;
+      const saleType = course ? "standalone" : selectedPlan!;
+
+      const saleData = {
         userId: user.uid,
         userName: user.displayName || "Aluno",
         userEmail: user.email || "",
         amount: course ? (course.price ?? 0) : (plans![selectedPlan!]?.price ?? 0),
         paymentMethod: activeMethods.find((m) => m.id === selectedMethod)?.label || selectedMethod,
         receiptUrl: receiptUrl || "",
-        status: paypalTransactionId ? "confirmed" : "pending",
+        status: isConfirmed ? "confirmed" as const : "pending" as const,
+        type: saleType,
+        itemId: course?.id ?? selectedPlan,
+        itemTitle: course?.title ?? undefined,
+        paypalTransactionId: paypalTransactionId,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
 
-      if (paypalTransactionId) {
-        saleData.paypalTransactionId = paypalTransactionId;
-      }
-
-      if (course) {
-        saleData.type = "standalone";
-        saleData.itemId = course.id;
-        saleData.itemTitle = course.title;
-      } else {
-        saleData.type = selectedPlan;
-        saleData.itemId = selectedPlan;
-      }
-
       await addDoc(collection(db, "sales"), saleData);
-      if (paypalTransactionId) {
+
+      if (isConfirmed) {
+        await grantAccess(saleType, course?.id);
         toast.success("Pagamento confirmado! Bem-vindo ao curso.");
       } else {
         toast.success("Pedido registado! O pagamento será confirmado em breve.");
       }
-      if (course) { router.push("/dashboard/courses"); return; }
+
+      if (course) { router.push("/dashboard/courses/" + course.id); return; }
       setSelectedPlan(null);
       setSelectedMethod(null);
       setReceipt(null);

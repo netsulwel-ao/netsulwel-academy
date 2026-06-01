@@ -16,6 +16,8 @@ import {
   Lock,
   Calendar,
   Play,
+  GraduationCap,
+  Users,
 } from "lucide-react";
 import type { Course } from "@/types/course";
 import type { LiveSession } from "@/types/live";
@@ -207,12 +209,59 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="bg-gray-950/40 border border-gray-800/80 p-8 text-center">
+                <div className="h-12 w-12 mx-auto flex items-center justify-center bg-gray-800/50 mb-3">
+                  <Radio className="h-6 w-6 text-gray-500" />
+                </div>
                 <p className="text-base text-gray-400">Ainda não há aulas ao vivo agendadas.</p>
-                <p className="mt-1 text-sm text-gray-600">Quando houver, vai aparecer aqui com atalho direto.</p>
+                <p className="mt-1 text-sm text-gray-600">Volta mais tarde para veres os próximos directos.</p>
+                <Link href="/dashboard/lives" className="mt-4 inline-flex items-center gap-2 text-sm text-purple hover:text-purple-light font-bold transition-colors">
+                  Ver agenda <span aria-hidden>→</span>
+                </Link>
               </div>
             )}
           </div>
           </div>
+
+          {enrolledCourses.length === 0 && (
+          <div className="mt-10 bg-gray-900/40 border border-gray-800 p-8 space-y-5">
+            <h2 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <GraduationCap className="h-5 w-5 text-purple" />
+              Primeiros Passos
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Link href="/dashboard/courses"
+                className="flex items-center gap-4 bg-gray-950/40 border border-gray-800/70 hover:border-purple/40 p-5 transition-colors group">
+                <div className="h-12 w-12 shrink-0 flex items-center justify-center bg-purple/20 group-hover:bg-purple/30 transition-colors">
+                  <BookOpen className="h-6 w-6 text-purple" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-white">Explora os Cursos</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Escolhe o teu primeiro curso</p>
+                </div>
+              </Link>
+              <Link href="/dashboard/lives"
+                className="flex items-center gap-4 bg-gray-950/40 border border-gray-800/70 hover:border-purple/40 p-5 transition-colors group">
+                <div className="h-12 w-12 shrink-0 flex items-center justify-center bg-purple/20 group-hover:bg-purple/30 transition-colors">
+                  <Radio className="h-6 w-6 text-purple" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-white">Aulas ao Vivo</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Participa numa sessão ao vivo</p>
+                </div>
+              </Link>
+              <Link href="/dashboard/community"
+                className="flex items-center gap-4 bg-gray-950/40 border border-gray-800/70 hover:border-purple/40 p-5 transition-colors group">
+                <div className="h-12 w-12 shrink-0 flex items-center justify-center bg-purple/20 group-hover:bg-purple/30 transition-colors">
+                  <Users className="h-6 w-6 text-purple" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-white">Comunidade</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Conecta-te com outros alunos</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+          )}
 
           <div className="mt-8 bg-gray-900/40 border border-gray-800 p-8 space-y-5">
           <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -252,8 +301,15 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="bg-gray-950/40 border border-gray-800/80 p-6 text-center">
+            <div className="bg-gray-950/40 border border-gray-800/80 p-8 text-center">
+              <div className="h-12 w-12 mx-auto flex items-center justify-center bg-gray-800/50 mb-3">
+                <BookOpen className="h-6 w-6 text-gray-500" />
+              </div>
               <p className="text-base text-gray-400">Ainda não tens cursos disponíveis para ver agora.</p>
+              <p className="mt-1 text-sm text-gray-600">Faz upgrade do teu plano ou compra um curso avulso.</p>
+              <Link href="/dashboard/finances" className="mt-4 inline-flex items-center gap-2 text-sm text-purple hover:text-purple-light font-bold transition-colors">
+                Ver planos <span aria-hidden>→</span>
+              </Link>
             </div>
           )}
           </div>

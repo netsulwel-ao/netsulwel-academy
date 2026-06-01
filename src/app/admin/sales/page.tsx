@@ -12,8 +12,9 @@ import {
   DollarSign, TrendingUp, Users, ShoppingCart, Plus,
   Search, Filter, XCircle, CheckCircle2, Clock, Pencil,
   Trash2, Loader2, X, Save, AlertCircle, ChevronDown,
-  Download, Eye, FileText, ExternalLink,
+  Download, Eye, FileText, ExternalLink, CreditCard,
 } from "lucide-react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import type { Sale } from "@/types/settings";
 import { toast } from "sonner";
 
@@ -92,11 +93,20 @@ export default function SalesPage() {
     setSaving(true); setError("");
     try {
       const payload = { ...form, updatedAt: serverTimestamp() };
+      const userRef = doc(db, "users", form.userId || "__none__");
       if (editingId) {
         await updateDoc(doc(db, "sales", editingId), payload);
         toast.success("Venda atualizada.");
       } else {
         await addDoc(collection(db, "sales"), { ...payload, createdAt: serverTimestamp() });
+        // Grant access immediately if confirmed on creation
+        if (form.status === "confirmed" && form.userId) {
+          if (form.type === "standalone" && form.itemId) {
+            await updateDoc(userRef, { enrolledCourses: arrayUnion(form.itemId) });
+          } else if (form.type === "smart" || form.type === "golden") {
+            await updateDoc(userRef, { plan: form.type });
+          }
+        }
         toast.success("Venda registada.");
       }
       setModalOpen(false); fetchSales();
@@ -256,10 +266,13 @@ export default function SalesPage() {
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-gray-900/40 text-center">
-          <ShoppingCart className="h-12 w-12 text-gray-700 mb-3" />
-          <p className="text-gray-400">Nenhuma venda encontrada</p>
-        </div>
+        <EmptyState
+          icon={ShoppingCart}
+          title={search ? "Nenhuma venda encontrada" : "Ainda não há vendas"}
+          description={search ? "Tenta pesquisar por outro termo." : "As vendas aparecerão aqui depois de os alunos comprarem cursos ou planos."}
+          action={!search ? { label: "Registar venda", href: "#", icon: CreditCard } as const : undefined}
+          compact
+        />
       ) : (
         <div className="bg-gray-900/40 backdrop-blur-xl overflow-x-auto">
           <div className="min-w-[700px]">

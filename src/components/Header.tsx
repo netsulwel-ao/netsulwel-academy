@@ -44,13 +44,13 @@ export function Header() {
  <LogIn className="h-4 w-4" />
  Entrar
  </Link>
- <a
- href="#planos"
- className="flex items-center gap-1.5 bg-green px-4 py-2 text-sm font-semibold text-gray-900 transition-colors hover:bg-green-light"
- >
- Comprar agora
- <ArrowRight className="h-4 w-4" />
- </a>
+  <Link
+  href="/register"
+  className="flex items-center gap-1.5 bg-green px-4 py-2 text-sm font-semibold text-gray-900 transition-colors hover:bg-green-light"
+  >
+  Criar conta grátis
+  <ArrowRight className="h-4 w-4" />
+  </Link>
  </div>
 
  <button
@@ -85,14 +85,14 @@ export function Header() {
   <LogIn className="h-4 w-4" />
   Entrar
   </Link>
-  <a
-  href="#planos"
+  <Link
+  href="/register"
   className="flex items-center justify-center gap-2 bg-green py-3 font-semibold text-gray-900"
   onClick={() => setOpen(false)}
   >
-  Começar agora
+  Criar conta grátis
   <ArrowRight className="h-4 w-4" />
-  </a>
+  </Link>
   </div>
   </nav>
   </div>
