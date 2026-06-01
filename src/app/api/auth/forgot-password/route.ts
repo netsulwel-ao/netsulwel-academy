@@ -27,9 +27,19 @@ export async function POST(req: NextRequest) {
     const resetData = await resetResp.json();
 
     if (!resetResp.ok) {
+      const fbError = resetData?.error?.message || "";
       console.error("Firebase OOB error:", resetData);
+
+      if (fbError === "EMAIL_NOT_FOUND") {
+        return NextResponse.json(
+          { error: "Email não encontrado na autenticação." },
+          { status: 404 }
+        );
+      }
+
+      // Outros erros: API não configurada, etc.
       return NextResponse.json(
-        { error: "Erro ao gerar link de recuperação." },
+        { error: `Erro ao gerar link: ${fbError}` },
         { status: 500 }
       );
     }

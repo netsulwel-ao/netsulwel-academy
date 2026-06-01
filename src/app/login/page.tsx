@@ -127,17 +127,22 @@ export default function LoginPage() {
     body: JSON.stringify({ email }),
   });
 
+  const data = await res.json().catch(() => ({}));
+
   if (res.ok) {
     setSuccessMsg("Email de recuperação enviado! Verifique a sua caixa de entrada e a pasta de spam.");
-  } else {
+  } else if (res.status === 404) {
     setError("Email inexistente. Verifique se o endereço está correto.");
+  } else {
+    setError(data?.error || "Erro ao enviar email de recuperação.");
   }
   }
- } catch (err: unknown) {
- console.error(err);
- if (view === "forgot") {
- setError("Não foi possível enviar o email. Verifique se o endereço está correto.");
- } else if (view === "register") {
+  } catch (err: unknown) {
+  console.error(err);
+  if (view === "forgot") {
+  const msg = err instanceof Error ? err.message : "Não foi possível enviar o email. Verifique se o endereço está correto.";
+  setError(msg);
+  } else if (view === "register") {
  setError("Erro ao criar conta. A palavra-passe deve ter pelo menos 6 caracteres ou o email já está em uso.");
  } else {
  setError("Credenciais inválidas. Verifique o seu email e senha.");
