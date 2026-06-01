@@ -14,9 +14,10 @@ export async function POST(req: NextRequest) {
     let admin;
     try {
       admin = getFirebaseAdmin();
-    } catch {
+    } catch (initErr) {
+      const initMsg = initErr instanceof Error ? initErr.message : "erro desconhecido";
       return NextResponse.json(
-        { error: "Serviço de autenticação indisponível (Admin SDK)." },
+        { error: "Serviço de autenticação indisponível (Admin SDK).", detail: initMsg },
         { status: 500 }
       );
     }
