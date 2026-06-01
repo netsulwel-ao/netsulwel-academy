@@ -17,6 +17,7 @@ import type { Announcement, AnnouncementType, AnnouncementTarget, CountdownBanne
 import { VARIANT_LABELS } from "@/types/announcement";
 import { toast } from "sonner";
 import IconPicker, { getIcon, getLucideIcon, AVAILABLE_ICONS } from "@/components/admin/IconPicker";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ── Upload ────────────────────────────────────────────────
 async function uploadToR2(file: File, folder: string): Promise<string> {
@@ -57,6 +58,7 @@ const EMPTY_CD: Omit<CountdownBanner, "id"|"createdAt"|"updatedAt"> = {
 };
 
 export default function AnnouncementsPage() {
+  const { user, isAdmin } = useAuth();
   // ── Announcements state ───────────────────────────────────
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loadingAnn, setLoadingAnn] = useState(true);
@@ -70,6 +72,7 @@ export default function AnnouncementsPage() {
   const [imagePreview, setImagePreview] = useState("");
   const [generatingAI, setGeneratingAI] = useState(false);
   const [iconPickerIdx, setIconPickerIdx] = useState<number|null>(null);
+  const [annStatusFilter, setAnnStatusFilter] = useState<"all"|"pending"|"approved">("all");
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   // ── Countdown state ───────────────────────────────────────
@@ -90,14 +93,20 @@ export default function AnnouncementsPage() {
   // ── Fetch ─────────────────────────────────────────────────
   useEffect(() => {
     getDocs(query(collection(db,"announcements"), orderBy("createdAt","desc")))
-      .then(s => setAnnouncements(s.docs.map(d=>({id:d.id,...d.data()} as Announcement))))
+      .then(s => {
+        let list = s.docs.map(d=>({id:d.id,...d.data()} as Announcement));
+        if (!isAdmin && user?.uid) {
+          list = list.filter(a => a.createdBy === user.uid);
+        }
+        setAnnouncements(list);
+      })
       .catch(()=>toast.error("Erro ao carregar anúncios."))
       .finally(()=>setLoadingAnn(false));
     getDocs(query(collection(db,"countdownBanners"), orderBy("createdAt","desc")))
       .then(s => setCountdowns(s.docs.map(d=>({id:d.id,...d.data()} as CountdownBanner))))
       .catch(()=>toast.error("Erro ao carregar banners."))
       .finally(()=>setLoadingCD(false));
-  }, []);
+  }, [isAdmin, user?.uid]);
 
   // ── Ann modal ─────────────────────────────────────────────
   const openCreateAnn = () => { setAnnForm({...EMPTY_ANN}); setEditingAnnId(null); setAnnError(""); setImagePreview(""); setPreviewOpen(false); setAnnModalOpen(true); };
@@ -144,14 +153,45 @@ export default function AnnouncementsPage() {
     if(!annForm.body.trim()) { setAnnError("A mensagem é obrigatória."); return; }
     setSavingAnn(true); setAnnError("");
     try {
-      const payload = {...annForm, title:annForm.title.trim(), body:annForm.body.trim(), updatedAt:serverTimestamp()};
-      if(editingAnnId) { await updateDoc(doc(db,"announcements",editingAnnId),payload); toast.success("Anúncio atualizado."); }
-      else { await addDoc(collection(db,"announcements"),{...payload,createdAt:serverTimestamp()}); toast.success("Anúncio criado."); }
+      if(editingAnnId) {
+        const payload = {...annForm, title:annForm.title.trim(), body:annForm.body.trim(), updatedAt:serverTimestamp()};
+        await updateDoc(doc(db,"announcements",editingAnnId),payload);
+        toast.success("Anúncio atualizado.");
+      } else {
+        const payload = {
+          ...annForm, title:annForm.title.trim(), body:annForm.body.trim(),
+          createdBy: user?.uid ?? null,
+          status: isAdmin ? "approved" : "pending",
+          createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+        };
+        await addDoc(collection(db,"announcements"), payload);
+        toast.success(isAdmin ? "Anúncio criado." : "Anúncio enviado para aprovação.");
+      }
       setAnnModalOpen(false);
       const s = await getDocs(query(collection(db,"announcements"),orderBy("createdAt","desc")));
-      setAnnouncements(s.docs.map(d=>({id:d.id,...d.data()} as Announcement)));
+      let list = s.docs.map(d=>({id:d.id,...d.data()} as Announcement));
+      if (!isAdmin && user?.uid) {
+        list = list.filter(a => a.createdBy === user.uid);
+      }
+      setAnnouncements(list);
     } catch { setAnnError("Erro ao guardar."); }
     finally { setSavingAnn(false); }
+  };
+
+  const approveAnn = async (id: string) => {
+    try {
+      await updateDoc(doc(db, "announcements", id), { status: "approved", updatedAt: serverTimestamp() });
+      setAnnouncements(p => p.map(a => a.id === id ? { ...a, status: "approved" } : a));
+      toast.success("Anúncio aprovado.");
+    } catch { toast.error("Erro ao aprovar."); }
+  };
+
+  const rejectAnn = async (id: string) => {
+    try {
+      await updateDoc(doc(db, "announcements", id), { status: "rejected", updatedAt: serverTimestamp() });
+      setAnnouncements(p => p.map(a => a.id === id ? { ...a, status: "rejected" } : a));
+      toast.success("Anúncio rejeitado.");
+    } catch { toast.error("Erro ao rejeitar."); }
   };
 
   const toggleAnnActive = async (a:Announcement) => {
@@ -272,6 +312,17 @@ export default function AnnouncementsPage() {
             })}
           </div>
 
+          {/* Status filter */}
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Filtrar:</span>
+            {(["all","pending","approved"] as const).map(s => (
+              <button key={s} onClick={() => setAnnStatusFilter(s)}
+                className={`px-3 py-1.5 text-xs font-medium border transition-colors ${annStatusFilter===s?"bg-blue-500/20 text-blue-400 border-blue-500/30":"bg-gray-900/40 text-gray-500 border-gray-800 hover:text-gray-300"}`}>
+                {s === "all" ? "Todas" : s === "pending" ? "Pendentes" : "Aprovados"}
+              </button>
+            ))}
+          </div>
+
           {loadingAnn?<div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-blue-500"/></div>
           :announcements.length===0?(
             <div className="flex flex-col items-center justify-center py-20 bg-gray-900/40 text-center">
@@ -280,14 +331,26 @@ export default function AnnouncementsPage() {
             </div>
           ):(
             <div className="space-y-3">
-              {announcements.map(a=>{
+              {announcements
+                .filter(a => annStatusFilter === "all" || a.status === annStatusFilter)
+                .map(a=>{
                 const c=TYPE_CONFIG[a.type]; const Icon=c.icon;
+                const isPending = a.status === "pending";
                 return (
                   <div key={a.id} className={`flex items-center gap-4 p-5 border bg-gray-900/40 transition-all ${a.active?"border-gray-800":"border-gray-800/40 opacity-60"}`}>
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center border ${c.bg}`}><Icon className={`h-5 w-5 ${c.color}`}/></div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className={`text-xs font-bold uppercase tracking-wider ${c.color}`}>{c.label}</span>
+                        {isPending && (
+                          <span className="text-xs text-amber-400 border border-amber-500/30 bg-amber-500/10 px-2 py-0.5">Pendente</span>
+                        )}
+                        {a.status === "approved" && (
+                          <span className="text-xs text-green-400 border border-green-500/30 bg-green-500/10 px-2 py-0.5">Aprovado</span>
+                        )}
+                        {a.status === "rejected" && (
+                          <span className="text-xs text-red-400 border border-red-500/30 bg-red-500/10 px-2 py-0.5">Rejeitado</span>
+                        )}
                         <span className="text-xs text-gray-500 border border-gray-700 px-2 py-0.5">{TARGET_LABELS[a.target]}</span>
                         {a.showOnce&&<span className="text-xs text-gray-500 border border-gray-700 px-2 py-0.5">1x por user</span>}
                         {(a.benefits??[]).length>0&&<span className="text-xs text-gray-500 border border-gray-700 px-2 py-0.5">{a.benefits!.length} benefícios</span>}
@@ -296,11 +359,25 @@ export default function AnnouncementsPage() {
                       <p className="text-gray-400 text-sm truncate">{a.body}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
+                      {isAdmin && isPending && (
+                        <>
+                          <button onClick={() => approveAnn(a.id!)} className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/30 hover:bg-green-500/20 transition-colors">
+                            <CheckCircle2 className="h-3.5 w-3.5"/> Aprovar
+                          </button>
+                          <button onClick={() => rejectAnn(a.id!)} className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-colors">
+                            <X className="h-3.5 w-3.5"/> Rejeitar
+                          </button>
+                        </>
+                      )}
                       <button onClick={()=>toggleAnnActive(a)} className={`p-2 transition-colors ${a.active?"text-green-400 hover:text-green-300":"text-gray-600 hover:text-gray-400"}`}>
                         {a.active?<Eye className="h-4 w-4"/>:<EyeOff className="h-4 w-4"/>}
                       </button>
-                      <button onClick={()=>openEditAnn(a)} className="p-2 text-gray-500 hover:text-white transition-colors"><Pencil className="h-4 w-4"/></button>
-                      <button onClick={()=>deleteAnn(a.id!)} className="p-2 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-4 w-4"/></button>
+                      {(isAdmin || a.createdBy === user?.uid) && (
+                        <>
+                          <button onClick={()=>openEditAnn(a)} className="p-2 text-gray-500 hover:text-white transition-colors"><Pencil className="h-4 w-4"/></button>
+                          <button onClick={()=>deleteAnn(a.id!)} className="p-2 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-4 w-4"/></button>
+                        </>
+                      )}
                     </div>
                   </div>
                 );

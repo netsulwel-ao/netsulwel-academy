@@ -70,6 +70,7 @@ export interface Trail {
   liveIds: string[];         // referência a lives existentes
   liveSessions: TrailLiveSession[];  // aulas próprias da trilha
   livesCount: number;        // liveIds.length + liveSessions.length
+  createdBy?: string;
   createdAt?: unknown;
   updatedAt?: unknown;
 }

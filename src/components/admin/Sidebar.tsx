@@ -5,10 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, Users, Settings, LogOut, Search, 
-  PanelLeftClose, PanelLeft, Sun, Moon, Video, DollarSign, Folders, Layers, Megaphone, Radio, Calendar, MessageSquare
+  PanelLeftClose, PanelLeft, Sun, Moon, Video, DollarSign, Folders, Layers, Megaphone, Radio, Calendar, MessageSquare, GraduationCap
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
  isCollapsed: boolean;
@@ -24,12 +25,13 @@ const navSections = [
  { icon: LayoutDashboard, label: "Visão Geral", href: "/admin" },
  { icon: Folders, label: "Meus Cursos", href: "/admin/courses" },
  { icon: Video, label: "Criar Curso", href: "/admin/courses/new" },
-  { icon: Layers, label: "Trilhas", href: "/admin/trails" },
-  { icon: Calendar, label: "Cronograma", href: "/admin/schedules" },
-  { icon: Radio, label: "Aulas ao Vivo", href: "/admin/lives" },
- { icon: Users, label: "Alunos", href: "/admin/users" },
-  { icon: DollarSign, label: "Vendas", href: "/admin/sales" },
-  { icon: MessageSquare, label: "Comunidade", href: "/admin/community" },
+   { icon: Layers, label: "Trilhas", href: "/admin/trails" },
+   { icon: Calendar, label: "Cronograma", href: "/admin/schedules" },
+   { icon: Radio, label: "Aulas ao Vivo", href: "/admin/lives" },
+   { icon: GraduationCap, label: "Professores", href: "/admin/teachers" },
+   { icon: Users, label: "Alunos", href: "/admin/students" },
+   { icon: DollarSign, label: "Vendas", href: "/admin/sales" },
+   { icon: MessageSquare, label: "Comunidade", href: "/admin/community" },
  ]
  },
  {
@@ -41,27 +43,41 @@ const navSections = [
  }
 ];
 
+const teacherAllowed = new Set([
+  "/admin", "/admin/courses", "/admin/courses/new",
+  "/admin/trails", "/admin/schedules", "/admin/lives",
+  "/admin/announcements",
+]);
+
 export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen }: SidebarProps) {
    const pathname = usePathname();
    const searchRef = useRef<HTMLInputElement>(null);
    const [searchQuery, setSearchQuery] = useState("");
+   const { isAdmin, isTeacher } = useAuth();
 
    useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "/" && !["INPUT", "TEXTAREA"].includes((e.target as HTMLElement).tagName)) {
-        e.preventDefault();
-        searchRef.current?.focus();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+     const handleKeyDown = (e: KeyboardEvent) => {
+       if (e.key === "/" && !["INPUT", "TEXTAREA"].includes((e.target as HTMLElement).tagName)) {
+         e.preventDefault();
+         searchRef.current?.focus();
+       }
+     };
+     window.addEventListener("keydown", handleKeyDown);
+     return () => window.removeEventListener("keydown", handleKeyDown);
    }, []);
 
-   const filteredSections = navSections.map(section => ({
-    ...section,
-    items: section.items.filter(item =>
-      item.label.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+   const roleFiltered = isAdmin
+     ? navSections
+     : navSections.map(section => ({
+         ...section,
+         items: section.items.filter(item => teacherAllowed.has(item.href)),
+       })).filter(section => section.items.length > 0);
+
+   const filteredSections = roleFiltered.map(section => ({
+     ...section,
+     items: section.items.filter(item =>
+       item.label.toLowerCase().includes(searchQuery.toLowerCase())
+     )
    })).filter(section => section.items.length > 0);
 
    const handleLogout = async () => {
@@ -98,7 +114,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
  </button>
  </div>
 
- <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4 custom-scrollbar">
+  <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4 hide-scrollbar">
  
  <div className={`px-4 mb-6 transition-all duration-300 ${isCollapsed ? "opacity-0 invisible h-0 mb-0" : "opacity-100 visible"}`}>
  <div className="relative flex items-center">

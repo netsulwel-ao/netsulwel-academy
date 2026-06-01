@@ -9,9 +9,11 @@ import {
   doc,
   orderBy,
   query,
+  where,
 } from "firebase/firestore";
 import { Plus, Pencil, Trash2, Loader2, Video, BookOpen, AlertTriangle, Share2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Course {
   id: string;
@@ -23,9 +25,11 @@ interface Course {
   status: "published" | "draft";
   format?: "recorded" | "live";
   createdAt: Date;
+  createdBy?: string;
 }
 
 export default function CoursesPage() {
+  const { isAdmin, isTeacher, user } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -41,7 +45,11 @@ export default function CoursesPage() {
 
   const fetchCourses = async () => {
     try {
-      const q = query(collection(db, "courses"), orderBy("createdAt", "desc"));
+      const constraints: any[] = [orderBy("createdAt", "desc")];
+      if (isTeacher && user?.uid) {
+        constraints.push(where("createdBy", "==", user.uid));
+      }
+      const q = query(collection(db, "courses"), ...constraints);
       const snapshot = await getDocs(q);
       const data = snapshot.docs.map((d) => ({
         id: d.id,
@@ -59,7 +67,7 @@ export default function CoursesPage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCourses();
-  }, []);
+  }, [isTeacher, user?.uid]);
 
   const handleDelete = async (id: string) => {
     setDeletingId(id);

@@ -7,6 +7,8 @@ export interface AnnouncementBenefit {
   desc?: string;
 }
 
+export type AnnouncementStatus = "pending" | "approved" | "rejected";
+
 export interface Announcement {
   id?: string;
   type: AnnouncementType;
@@ -21,6 +23,8 @@ export interface Announcement {
   expiresAt?: string;
   benefits?: AnnouncementBenefit[];
   badgeLabel?: string;
+  status?: AnnouncementStatus;
+  createdBy?: string;
   createdAt?: unknown;
   updatedAt?: unknown;
 }

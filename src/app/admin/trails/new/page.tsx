@@ -8,6 +8,7 @@ import { ArrowLeft, Save, Loader2, CheckCircle2, AlertCircle, ImagePlus, X, Plus
 import Link from "next/link";
 import type { Trail, TrailLiveSession, CourseType, CourseLevel, CourseCategory, Course } from "@/types/course";
 import type { LiveSession } from "@/types/live";
+import { useAuth } from "@/contexts/AuthContext";
 
 async function uploadToR2(file: File, folder: string): Promise<string> {
   const res = await fetch("/api/upload/presign", {
@@ -29,6 +30,7 @@ const TYPE_OPTIONS: { value: CourseType; label: string; desc: string; color: str
 
 export default function NewTrailPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [thumbnail, setThumbnail] = useState("");
@@ -144,6 +146,7 @@ export default function NewTrailPage() {
         liveIds: selectedLiveIds,
         liveSessions,
         livesCount: totalLiveCount,
+        createdBy: user?.uid ?? null,
         createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
       } as Omit<Trail, "id">);
       setSuccess(true);

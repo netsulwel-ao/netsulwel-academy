@@ -7,28 +7,40 @@ import { auth, db } from "@/lib/firebase";
 import { useRouter, usePathname } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
+export type UserRole = "aluno" | "teacher" | "admin";
 export type UserPlan = "free" | "smart" | "golden";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  role: UserRole;
   isAdmin: boolean;
+  isTeacher: boolean;
+  isAdminOrTeacher: boolean;
   plan: UserPlan;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, loading: true, isAdmin: false, plan: "free" });
+const AuthContext = createContext<AuthContextType>({
+  user: null, loading: true,
+  role: "aluno", isAdmin: false, isTeacher: false, isAdminOrTeacher: false,
+  plan: "free"
+});
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [role, setRole] = useState<UserRole>("aluno");
   const [plan, setPlan] = useState<UserPlan>("free");
   const [loading, setLoading] = useState(true);
   const [adminLoaded, setAdminLoaded] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
-  const prevIsAdmin = useRef(false);
+  const prevRole = useRef<UserRole>("aluno");
   const prevPlan = useRef<UserPlan>("free");
+
+  const isAdmin = role === "admin";
+  const isTeacher = role === "teacher";
+  const isAdminOrTeacher = isAdmin || isTeacher;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -37,12 +49,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
       } else {
         setUser(null);
-        setIsAdmin(false);
+        setRole("aluno");
         setPlan("free");
         setLoading(false);
       }
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -51,13 +62,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const unsub = onSnapshot(doc(db, "users", user.uid), (snap) => {
       if (!snap.exists()) return;
       const data = snap.data();
-      prevIsAdmin.current = data.role === "admin";
+      const r = data.role === "admin" ? "admin" : data.role === "teacher" ? "teacher" : "aluno";
+      prevRole.current = r;
       prevPlan.current = data.plan === "smart" || data.plan === "golden" ? data.plan : "free";
-      setIsAdmin(data.role === "admin");
+      setRole(r);
       setPlan(data.plan === "smart" || data.plan === "golden" ? data.plan : "free");
       setAdminLoaded(true);
     }, () => {
-      setIsAdmin(prevIsAdmin.current);
+      setRole(prevRole.current);
       setPlan(prevPlan.current);
       setAdminLoaded(true);
     });
@@ -70,20 +82,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (pathname?.startsWith("/admin")) {
       if (!user) {
         router.push("/login");
-      } else if (adminLoaded && !isAdmin) {
+      } else if (adminLoaded && !isAdminOrTeacher) {
         router.push("/dashboard");
       }
     } else if (!user && pathname?.startsWith("/dashboard")) {
       router.push("/login");
     }
-  }, [user, loading, isAdmin, adminLoaded, pathname, router]);
+  }, [user, loading, isAdminOrTeacher, adminLoaded, pathname, router]);
 
   const isProtectedRoute = pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin");
   const needsAdminCheck = pathname?.startsWith("/admin") && !adminLoaded && !!user;
 
   if ((!user || loading || needsAdminCheck) && isProtectedRoute) {
     return (
-      <AuthContext.Provider value={{ user, loading, isAdmin, plan }}>
+      <AuthContext.Provider value={{ user, loading, role, isAdmin, isTeacher, isAdminOrTeacher, plan }}>
         <div className="flex items-center justify-center min-h-screen bg-gray-950">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         </div>
@@ -92,7 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAdmin, plan }}>
+    <AuthContext.Provider value={{ user, loading, role, isAdmin, isTeacher, isAdminOrTeacher, plan }}>
       {children}
     </AuthContext.Provider>
   );
