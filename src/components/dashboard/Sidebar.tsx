@@ -79,7 +79,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
  </button>
  </div>
 
- <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4 custom-scrollbar">
+ <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4 hide-scrollbar">
 
   {/* 2. Navegação com Categorias */}
  <div className="space-y-6 px-4">
