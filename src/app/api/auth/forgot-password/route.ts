@@ -11,14 +11,39 @@ export async function POST(req: NextRequest) {
 
     // 1. Gerar link de redefinição via Firebase Admin SDK
     const { getFirebaseAdmin } = await import("@/lib/firebase-admin");
-    const admin = getFirebaseAdmin();
-    const resetLink = await admin.auth().generatePasswordResetLink(email);
+    let admin;
+    try {
+      admin = getFirebaseAdmin();
+    } catch {
+      return NextResponse.json(
+        { error: "Serviço de autenticação indisponível (Admin SDK)." },
+        { status: 500 }
+      );
+    }
+
+    let resetLink: string;
+    try {
+      resetLink = await admin.auth().generatePasswordResetLink(email);
+    } catch (fbErr: unknown) {
+      const msg = fbErr instanceof Error ? fbErr.message : "";
+      if (msg.includes("EMAIL_NOT_FOUND")) {
+        return NextResponse.json(
+          { error: "Email não encontrado na autenticação." },
+          { status: 404 }
+        );
+      }
+      console.error("Firebase generatePasswordResetLink error:", fbErr);
+      return NextResponse.json(
+        { error: "Erro ao gerar link de recuperação." },
+        { status: 500 }
+      );
+    }
 
     // 2. Configurar transporte SMTP
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT),
-      secure: true,
+      secure: false,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
