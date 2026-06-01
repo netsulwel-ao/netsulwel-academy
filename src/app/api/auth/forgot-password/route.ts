@@ -9,48 +9,67 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email é obrigatório." }, { status: 400 });
     }
 
-    // 1. Gerar link de redefinição via Firebase Auth REST API
-    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-    const resetResp = await fetch(
-      `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          requestType: "PASSWORD_RESET",
-          email,
-          returnOobLink: true,
-        }),
-      }
-    );
+    // 1. Gerar link de redefinição
+    let resetLink: string;
 
-    const resetData = await resetResp.json();
+    try {
+      const { getFirebaseAdmin } = await import("@/lib/firebase-admin");
+      const admin = getFirebaseAdmin();
+      resetLink = await admin.auth().generatePasswordResetLink(email);
+    } catch (adminErr) {
+      console.warn("Firebase Admin falhou, a tentar REST API:", adminErr);
 
-    if (!resetResp.ok) {
-      const fbError = resetData?.error?.message || "";
-      console.error("Firebase OOB error:", resetData);
+      const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+      const resetResp = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            requestType: "PASSWORD_RESET",
+            email,
+            returnOobLink: true,
+          }),
+        }
+      );
 
-      if (fbError === "EMAIL_NOT_FOUND") {
+      const resetData = await resetResp.json();
+
+      if (!resetResp.ok) {
+        const fbError = resetData?.error?.message || "";
+        console.error("Firebase OOB error:", resetData);
+
+        if (fbError === "EMAIL_NOT_FOUND") {
+          return NextResponse.json(
+            { error: "Email não encontrado na autenticação." },
+            { status: 404 }
+          );
+        }
+
+        if (fbError === "INSUFFICIENT_PERMISSION") {
+          return NextResponse.json(
+            {
+              error:
+                "API Identity Toolkit não ativada. Pede ao admin para ativar em console.cloud.google.com/apis/library/identitytoolkit.googleapis.com",
+            },
+            { status: 500 }
+          );
+        }
+
         return NextResponse.json(
-          { error: "Email não encontrado na autenticação." },
-          { status: 404 }
+          { error: `Erro ao gerar link: ${fbError}` },
+          { status: 500 }
         );
       }
 
-      // Outros erros: API não configurada, etc.
-      return NextResponse.json(
-        { error: `Erro ao gerar link: ${fbError}` },
-        { status: 500 }
-      );
+      resetLink = resetData.oobLink;
     }
-
-    const resetLink = resetData.oobLink;
 
     // 2. Configurar transporte SMTP
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT),
-      secure: true, // 465 = SSL
+      secure: true,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -75,14 +94,12 @@ export async function POST(req: NextRequest) {
     <tr>
       <td align="center">
         <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-          <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#7c3aed,#a855f7);padding:40px 32px;text-align:center;">
               <img src="https://netsulwel-academy.firebasestorage.app/o/Logo-Academy-White.svg?alt=media" alt="Netsulwel Academy" style="height:48px;margin-bottom:8px;" />
               <h1 style="color:#ffffff;font-size:24px;font-weight:700;margin:16px 0 0 0;">Recuperação de senha</h1>
             </td>
           </tr>
-          <!-- Body -->
           <tr>
             <td style="padding:40px 32px;">
               <p style="color:#333333;font-size:16px;line-height:1.6;margin:0 0 24px 0;">Olá,</p>
@@ -92,7 +109,6 @@ export async function POST(req: NextRequest) {
               <p style="color:#333333;font-size:16px;line-height:1.6;margin:0 0 24px 0;">
                 Clique no botão abaixo para criar uma nova palavra-passe:
               </p>
-              <!-- CTA Button -->
               <table role="presentation" cellpadding="0" cellspacing="0" style="margin:32px auto;">
                 <tr>
                   <td align="center" style="background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:8px;padding:14px 40px;">
@@ -112,7 +128,6 @@ export async function POST(req: NextRequest) {
               </p>
             </td>
           </tr>
-          <!-- Footer -->
           <tr>
             <td style="background-color:#fafafa;padding:24px 32px;text-align:center;border-top:1px solid #e0e0e0;">
               <p style="color:#999999;font-size:12px;margin:0 0 8px 0;">
