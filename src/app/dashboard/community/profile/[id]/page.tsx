@@ -5,9 +5,10 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, query, where, orderBy, getDocs } from "firebase/firestore";
-import { ArrowLeft, Calendar, Award, Loader2 } from "lucide-react";
+import { ArrowLeft, Calendar, Award, Loader2, Lock, Sparkles } from "lucide-react";
 import PostCard from "@/components/dashboard/community/PostCard";
 import type { CommunityPost } from "@/types/community";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ProfileData {
   name: string;
@@ -24,11 +25,14 @@ const PLAN_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export default function CommunityProfilePage() {
+  const { user, plan, isAdmin } = useAuth();
   const params = useParams();
   const userId = params?.id as string;
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const canAccess = isAdmin || plan === "smart" || plan === "golden";
 
   useEffect(() => {
     if (!userId) return;
@@ -64,6 +68,29 @@ export default function CommunityProfilePage() {
     };
     fetchData();
   }, [userId]);
+
+  if (!canAccess) {
+    return (
+      <div className="max-w-2xl mx-auto mt-20 animate-in fade-in duration-500">
+        <div className="bg-gray-900/40 border border-gray-800 p-10 text-center">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple to-purple-dark flex items-center justify-center mb-6">
+            <Lock className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-3">Conteúdo exclusivo</h2>
+          <p className="text-gray-400 max-w-md mx-auto mb-8">
+            A comunidade é um benefício exclusivo para alunos dos planos <strong className="text-blue-400">Smart</strong> e <strong className="text-amber-400">Golden</strong>.
+          </p>
+          <Link
+            href="/dashboard/finances"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-purple to-purple-dark hover:from-purple-light hover:to-purple text-white px-8 py-4 font-bold transition-all"
+          >
+            <Sparkles className="h-5 w-5" />
+            Fazer Upgrade
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

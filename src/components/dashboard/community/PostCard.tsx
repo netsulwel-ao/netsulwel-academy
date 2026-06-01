@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Heart, MessageCircle, Image as ImageIcon } from "lucide-react";
 import { db } from "@/lib/firebase";
-import { doc, increment, updateDoc, setDoc, deleteDoc } from "firebase/firestore";
+import { doc, increment, updateDoc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import PostTypeBadge from "./PostTypeBadge";
 import type { CommunityPost } from "@/types/community";
@@ -55,7 +55,7 @@ export default function PostCard({ post }: { post: CommunityPost }) {
           message: `${user.displayName || "Alguém"} gostou do teu post "${post.title}"`,
           link: `/dashboard/community/${post.id}`,
           read: false,
-          createdAt: new Date(),
+          createdAt: serverTimestamp(),
         });
       }
     }

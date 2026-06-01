@@ -7,7 +7,7 @@ import {
   addDoc, serverTimestamp, doc, increment, updateDoc,
 } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, AlertCircle } from "lucide-react";
 import type { CommunityComment } from "@/types/community";
 
 function timeAgo(date: Date) {
@@ -27,6 +27,7 @@ export default function CommentSection({ postId, postAuthorId, postTitle }: { po
   const [comments, setComments] = useState<CommunityComment[]>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const q = query(
@@ -71,6 +72,7 @@ export default function CommentSection({ postId, postAuthorId, postTitle }: { po
       setText("");
     } catch (err) {
       console.error(err);
+      setError("Erro ao enviar comentário.");
     } finally {
       setSending(false);
     }
@@ -108,6 +110,14 @@ export default function CommentSection({ postId, postAuthorId, postTitle }: { po
           </div>
         ))}
       </div>
+
+      {/* Error */}
+      {error && (
+        <div className="flex items-center gap-2 bg-red-500/10 p-3 text-sm text-red-400 border border-red-500/20">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          {error}
+        </div>
+      )}
 
       {/* Input */}
       {user && (

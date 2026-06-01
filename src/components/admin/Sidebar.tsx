@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, Users, Settings, LogOut, Search, 
-  PanelLeftClose, PanelLeft, Sun, Moon, Video, DollarSign, Folders, Layers, Megaphone, Radio, Calendar
+  PanelLeftClose, PanelLeft, Sun, Moon, Video, DollarSign, Folders, Layers, Megaphone, Radio, Calendar, MessageSquare
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
@@ -28,7 +28,8 @@ const navSections = [
   { icon: Calendar, label: "Cronograma", href: "/admin/schedules" },
   { icon: Radio, label: "Aulas ao Vivo", href: "/admin/lives" },
  { icon: Users, label: "Alunos", href: "/admin/users" },
- { icon: DollarSign, label: "Vendas", href: "/admin/sales" },
+  { icon: DollarSign, label: "Vendas", href: "/admin/sales" },
+  { icon: MessageSquare, label: "Comunidade", href: "/admin/community" },
  ]
  },
  {
