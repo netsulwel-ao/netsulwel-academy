@@ -134,7 +134,8 @@ export default function LoginPage() {
   } else if (res.status === 404) {
     setError("Email inexistente. Verifique se o endereço está correto.");
   } else {
-    setError(data?.error || "Erro ao enviar email de recuperação.");
+    const errMsg = data?.error || "Erro ao enviar email de recuperação.";
+    setError(data?.detail ? `${errMsg} (${data.detail})` : errMsg);
   }
   }
   } catch (err: unknown) {
