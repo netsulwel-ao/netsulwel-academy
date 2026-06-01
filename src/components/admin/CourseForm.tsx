@@ -58,19 +58,19 @@ interface CourseFormProps {
 
 const COURSE_TYPES: { value: CourseType; label: string; color: string; desc: string }[] = [
   { value: "standalone", label: "Standalone", color: "blue", desc: "Compra individual em Kz" },
-  { value: "smart", label: "Plano Smart", color: "green", desc: "Inclu�do no Plano Smart e Golden" },
+  { value: "smart", label: "Plano Smart", color: "green", desc: "Incluï¿½do no Plano Smart e Golden" },
   { value: "golden", label: "Plano Golden", color: "yellow", desc: "Exclusivo Plano Golden" },
 ];
 
 const LEVELS: { value: CourseLevel; label: string }[] = [
   { value: "beginner", label: "Iniciante" },
-  { value: "intermediate", label: "Interm�dio" },
-  { value: "advanced", label: "Avan�ado" },
+  { value: "intermediate", label: "Intermï¿½dio" },
+  { value: "advanced", label: "Avanï¿½ado" },
 ];
 
 const CATEGORIES: { value: CourseCategory; label: string }[] = [
   { value: "tech", label: "Tecnologia" },
-  { value: "finance", label: "Finan�as" },
+  { value: "finance", label: "Finanï¿½as" },
   { value: "investments", label: "Investimentos" },
   { value: "other", label: "Outro" },
 ];
@@ -180,7 +180,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
 
   // -- AI description ----------------------------------------
   const handleGenerateDescription = async () => {
-    if (!title.trim()) { setError("Preenche o nome do curso antes de gerar a descri��o."); return; }
+    if (!title.trim()) { setError("Preenche o nome do curso antes de gerar a descriï¿½ï¿½o."); return; }
     setGeneratingDesc(true); setError("");
     try {
       const token = auth.currentUser ? await auth.currentUser.getIdToken() : "";
@@ -193,7 +193,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
       if (!res.ok) throw new Error(data.error ?? "Erro");
       setDescription(data.description);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Erro ao gerar descri��o.");
+      setError(err instanceof Error ? err.message : "Erro ao gerar descriï¿½ï¿½o.");
     } finally { setGeneratingDesc(false); }
   };
 
@@ -201,7 +201,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
   const anyUploading = modules.some((m) => m.videos.some((v) => v.uploading));
 
   const handleSave = async (status: "draft" | "published") => {
-    if (!title.trim()) { setError("O nome do curso � obrigat�rio."); return; }
+    if (!title.trim()) { setError("O nome do curso ï¿½ obrigatï¿½rio."); return; }
     if (anyUploading) { setError("Aguarda o fim dos uploads."); return; }
     setError("");
     const cleanModules = modules.map((m) => ({
@@ -298,27 +298,27 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                 <div className="flex flex-col items-center justify-center h-full gap-2 text-gray-500 group-hover:text-blue-400 transition-colors">
                   <ImagePlus className="h-10 w-10" />
                   <span className="text-sm font-medium">Clique para carregar</span>
-                  <span className="text-xs">PNG, JPG, WEBP � m�x. 5MB</span>
+                  <span className="text-xs">PNG, JPG, WEBP ï¿½ mï¿½x. 5MB</span>
                 </div>
               )}
             </div>
             <input ref={thumbInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleThumbnailChange} />
             {thumbnailUploading && <p className="mt-2 text-xs text-blue-400 flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> A enviar...</p>}
-            {thumbnail && !thumbnailUploading && <p className="mt-2 text-xs text-green-400 flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Upload conclu�do</p>}
+            {thumbnail && !thumbnailUploading && <p className="mt-2 text-xs text-green-400 flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Upload concluï¿½do</p>}
           </div>
 
           {/* Nome */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nome do Curso <span className="text-red-400">*</span></label>
             <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ex: Forma��o Completa em JavaScript"
+              placeholder="Ex: Formaï¿½ï¿½o Completa em JavaScript"
               className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all" />
           </div>
 
-          {/* Descri��o + IA */}
+          {/* Descriï¿½ï¿½o + IA */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Descri��o</label>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Descriï¿½ï¿½o</label>
               <button type="button" onClick={handleGenerateDescription} disabled={generatingDesc || !title.trim()}
                 className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
                 {generatingDesc ? <><Loader2 className="w-3 h-3 animate-spin" /> A gerar...</> : <><Sparkles className="w-3 h-3" /> Gerar com IA</>}
@@ -326,7 +326,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
             </div>
             <div className="relative">
               <textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
-                placeholder="Descreva o que os alunos v�o aprender..."
+                placeholder="Descreva o que os alunos vï¿½o aprender..."
                 className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all resize-none" />
               {generatingDesc && (
                 <div className="absolute inset-0 bg-gray-900/70 flex items-center justify-center">
@@ -390,10 +390,10 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
             </div>
           </div>
 
-          {/* Pre�o � s� standalone */}
+          {/* Preï¿½o ï¿½ sï¿½ standalone */}
           {courseType === "standalone" && (
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Pre�o (Kz)</label>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Preï¿½o (Kz)</label>
               <div className="relative">
                 <span className="absolute left-3 top-2.5 text-sm text-gray-500 font-medium">Kz</span>
                 <input type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)}
@@ -403,10 +403,10 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
             </div>
           )}
 
-          {/* N�vel + Categoria */}
+          {/* Nï¿½vel + Categoria */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">N�vel</label>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nï¿½vel</label>
               <select value={level} onChange={(e) => setLevel(e.target.value as CourseLevel)}
                 className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer">
                 {LEVELS.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
@@ -451,9 +451,9 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
               <Sparkles className={`h-5 w-5 shrink-0 ${featured ? "text-blue-400" : "text-gray-600"}`} />
               <div className="text-left">
                 <p className={`text-sm font-bold ${featured ? "text-blue-400" : "text-gray-400"}`}>
-                  {featured ? "Em Destaque" : "N�o em Destaque"}
+                  {featured ? "Em Destaque" : "Nï¿½o em Destaque"}
                 </p>
-                <p className="text-xs text-gray-500">Aparece na sec��o "Cursos em destaque" da landing page</p>
+                <p className="text-xs text-gray-500">Aparece na secï¿½ï¿½o "Cursos em destaque" da landing page</p>
               </div>
               <div className={`ml-auto h-5 w-9 rounded-full transition-colors relative shrink-0 ${featured ? "bg-blue-500" : "bg-gray-700"}`}>
                 <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${featured ? "translate-x-4" : "translate-x-0.5"}`} />
@@ -466,12 +466,12 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Trilha (opcional)</label>
             <select value={trailId} onChange={(e) => setTrailId(e.target.value)}
               className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer mb-2">
-              <option value="">� Nenhuma trilha �</option>
+              <option value="">ï¿½ Nenhuma trilha ï¿½</option>
               {trails.map((t) => <option key={t.id} value={t.id}>{t.title}</option>)}
             </select>
             {trailId && (
               <input type="number" min="1" value={trailOrder} onChange={(e) => setTrailOrder(e.target.value)}
-                placeholder="Posi��o na trilha (ex: 1)"
+                placeholder="Posiï¿½ï¿½o na trilha (ex: 1)"
                 className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all" />
             )}
           </div>
@@ -506,27 +506,27 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
           {/* Resumo */}
           <div className="bg-gray-900/60 border border-gray-800 p-4 space-y-2.5">
             <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Resumo</p>
-            <div className="flex justify-between text-sm"><span className="text-gray-400">M�dulos</span><span className="text-white font-medium">{modules.length}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-gray-400">Mï¿½dulos</span><span className="text-white font-medium">{modules.length}</span></div>
             <div className="flex justify-between text-sm"><span className="text-gray-400">Aulas</span><span className="text-white font-medium">{modules.reduce((a, m) => a + m.videos.length, 0)}</span></div>
             <div className="flex justify-between text-sm"><span className="text-gray-400">Tipo</span><span className="text-white font-medium capitalize">{courseType}</span></div>
             {courseType === "standalone" && (
-              <div className="flex justify-between text-sm"><span className="text-gray-400">Pre�o</span><span className="text-white font-medium">{price ? `${parseInt(price).toLocaleString("pt-AO")} Kz` : "Gratuito"}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-gray-400">Preï¿½o</span><span className="text-white font-medium">{price ? `${parseInt(price).toLocaleString("pt-AO")} Kz` : "Gratuito"}</span></div>
             )}
-            <div className="flex justify-between text-sm"><span className="text-gray-400">Certificado</span><span className={`font-medium ${hasCertificate ? "text-amber-400" : "text-gray-500"}`}>{hasCertificate ? "Sim" : "N�o"}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-gray-400">Destaque</span><span className={`font-medium ${featured ? "text-blue-400" : "text-gray-500"}`}>{featured ? "Sim" : "N�o"}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-gray-400">Certificado</span><span className={`font-medium ${hasCertificate ? "text-amber-400" : "text-gray-500"}`}>{hasCertificate ? "Sim" : "Nï¿½o"}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-gray-400">Destaque</span><span className={`font-medium ${featured ? "text-blue-400" : "text-gray-500"}`}>{featured ? "Sim" : "Nï¿½o"}</span></div>
           </div>
         </div>
 
-        {/* RIGHT PANEL � M�dulos e Aulas */}
+        {/* RIGHT PANEL ï¿½ Mï¿½dulos e Aulas */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-lg font-bold text-white">M�dulos e Aulas</h2>
-              <p className="text-xs text-gray-500 mt-0.5">Organize o conte�do em m�dulos e fa�a upload dos v�deos</p>
+              <h2 className="text-lg font-bold text-white">Mï¿½dulos e Aulas</h2>
+              <p className="text-xs text-gray-500 mt-0.5">Organize o conteï¿½do em mï¿½dulos e faï¿½a upload dos vï¿½deos</p>
             </div>
             <button onClick={addModule}
               className="flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-2 transition-colors">
-              <Plus className="w-4 h-4" /> Novo M�dulo
+              <Plus className="w-4 h-4" /> Novo Mï¿½dulo
             </button>
           </div>
 
@@ -537,9 +537,9 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                 {/* Module header */}
                 <div className="flex items-center gap-3 px-4 py-3 bg-gray-900 border-b border-gray-800">
                   <GripVertical className="h-4 w-4 text-gray-600 shrink-0" />
-                  <span className="text-xs font-bold text-blue-400 uppercase tracking-wider shrink-0">M�dulo {mi + 1}</span>
+                  <span className="text-xs font-bold text-blue-400 uppercase tracking-wider shrink-0">Mï¿½dulo {mi + 1}</span>
                   <input type="text" value={module.title} onChange={(e) => updateModuleTitle(mi, e.target.value)}
-                    placeholder="Nome do m�dulo (ex: Introdu��o)"
+                    placeholder="Nome do mï¿½dulo (ex: Introduï¿½ï¿½o)"
                     className="flex-1 bg-transparent text-white placeholder-gray-600 text-sm focus:outline-none" />
                   {modules.length > 1 && (
                     <button onClick={() => removeModule(mi)} className="p-1.5 text-gray-600 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0">
@@ -560,7 +560,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-gray-600 w-5 shrink-0 text-right">{vi + 1}.</span>
                             <input type="text" value={video.title} onChange={(e) => updateVideo(mi, vi, "title", e.target.value)}
-                              placeholder="T�tulo da aula"
+                              placeholder="Tï¿½tulo da aula"
                               className="flex-1 bg-gray-900 border border-gray-800 focus:border-purple-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all" />
                             <input type="datetime-local" value={toDatetimeLocal(video.scheduledAt ?? "")}
                               onChange={(e) => updateVideo(mi, vi, "scheduledAt", new Date(e.target.value).toISOString())}
@@ -580,7 +580,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                           <div className="flex items-center gap-2">
                            <span className="text-xs text-gray-600 w-5 shrink-0 text-right">{vi + 1}.</span>
                            <input type="text" value={video.title} onChange={(e) => updateVideo(mi, vi, "title", e.target.value)}
-                             placeholder="T�tulo da aula"
+                             placeholder="Tï¿½tulo da aula"
                              className="flex-1 bg-gray-900 border border-gray-800 focus:border-blue-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all" />
                            <input type="text" value={video.duration} onChange={(e) => updateVideo(mi, vi, "duration", e.target.value)}
                              placeholder="00:00"
@@ -609,7 +609,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                                {!video.url && !video.uploading && (
                                  <button onClick={() => videoInputRefs.current[key]?.click()}
                                    className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-700 hover:border-blue-500/50 bg-gray-900 py-2 text-xs text-gray-400 hover:text-blue-400 transition-colors">
-                                   <UploadCloud className="w-4 h-4" /> Clique para selecionar v�deo (MP4, MOV, WEBM)
+                                   <UploadCloud className="w-4 h-4" /> Clique para selecionar vï¿½deo (MP4, MOV, WEBM)
                                  </button>
                                )}
                                {video.uploading && (

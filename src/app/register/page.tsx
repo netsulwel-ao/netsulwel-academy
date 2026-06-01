@@ -6,7 +6,7 @@ import { User, Mail, Lock, Loader2, AlertCircle, Eye, EyeOff, CheckCircle2, Sun,
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, type AuthProvider } from "firebase/auth";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -58,8 +58,7 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/dashboard";
+  const [redirectTo, setRedirectTo] = useState("/dashboard");
 
   useEffect(() => {
     const saved = localStorage.getItem("public-theme") as "dark" | "light" | null;
@@ -73,6 +72,11 @@ export default function RegisterPage() {
       }, 5000);
       return () => clearInterval(interval);
     }
+  }, []);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const r = params.get("redirect");
+    if (r) setRedirectTo(r);
   }, []);
 
   const handleRegister = async (e: React.FormEvent) => {
