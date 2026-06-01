@@ -72,7 +72,7 @@ export default function AdminCourseLiveStudio() {
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-[#0e0e10]">
-      <Loader2 className="h-10 w-10 animate-spin text-purple-500" />
+      <Loader2 className="h-8 w-8 animate-spin text-purple" />
     </div>
   );
 

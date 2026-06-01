@@ -1,8 +1,12 @@
 import { NextRequest } from "next/server";
 import { AccessToken, TrackSource } from "livekit-server-sdk";
+import { verifyAuth } from "@/lib/api-auth";
 
 export async function POST(req: NextRequest) {
   try {
+    const { uid, error } = await verifyAuth(req);
+    if (!uid) return Response.json({ error }, { status: 401 });
+
     const { roomName, identity, name, isHost } = await req.json();
 
     if (!roomName || !identity || !name) {

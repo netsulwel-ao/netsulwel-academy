@@ -82,7 +82,7 @@ export default function IconPicker({ value, onChange, onClose }: IconPickerProps
               onClick={() => { onChange(ic.name); onClose(); }}
               className={`flex items-center justify-center h-8 w-8 transition-colors ${
                 value === ic.name
-                  ? "bg-blue-600 text-white"
+                  ? "bg-purple text-white"
                   : "text-gray-400 hover:bg-gray-800 hover:text-white"
               }`}
             >

@@ -94,7 +94,7 @@ export default function DashboardPage() {
     );
 
  return (
- <div className="max-w-[100rem] mx-auto">
+ <div className="max-w-[100rem] mx-auto animate-in fade-in duration-500">
       <div className="flex items-start justify-between gap-6 flex-wrap">
         <div className="min-w-0">
           <h1 className="text-4xl font-bold text-white">Olá{user?.displayName ? `, ${user.displayName.split(" ")[0]}` : ""}</h1>
@@ -127,7 +127,7 @@ export default function DashboardPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-24">
-          <Loader2 className="h-10 w-10 animate-spin text-purple" />
+          <Loader2 className="h-8 w-8 animate-spin text-purple" />
         </div>
       ) : (
         <>

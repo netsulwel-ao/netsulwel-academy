@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   collection, getDocs, addDoc, updateDoc, deleteDoc,
-  doc, serverTimestamp, orderBy, query, arrayUnion, arrayRemove,
+  doc, serverTimestamp, orderBy, query, where, arrayUnion, arrayRemove,
 } from "firebase/firestore";
 import {
   DollarSign, TrendingUp, Users, ShoppingCart, Plus,
@@ -29,11 +31,18 @@ const PAYMENT_METHODS = ["Transferência Bancária", "Multicaixa", "PayPal", "St
 
 const EMPTY_SALE: Omit<Sale, "id" | "createdAt" | "updatedAt"> = {
   userId: "", userName: "", userEmail: "", type: "standalone",
-  itemTitle: "", amount: 0, paymentMethod: "Transferência Bancária",
+  itemId: "", itemTitle: "", amount: 0, paymentMethod: "Transferência Bancária",
   status: "pending", reference: "", notes: "",
 };
 
 export default function SalesPage() {
+  const router = useRouter();
+  const { isAdminOrTeacher } = useAuth();
+
+  useEffect(() => {
+    if (!isAdminOrTeacher) router.replace("/dashboard");
+  }, [isAdminOrTeacher, router]);
+
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -47,6 +56,7 @@ export default function SalesPage() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | Sale["status"]>("all");
   const [filterType, setFilterType] = useState<"all" | Sale["type"]>("all");
+  const [courses, setCourses] = useState<{ id: string; title: string }[]>([]);
 
   const fetchSales = async () => {
     try {
@@ -60,13 +70,16 @@ export default function SalesPage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSales();
+    getDocs(query(collection(db, "courses"), where("status", "==", "published")))
+      .then(s => setCourses(s.docs.map(d => ({ id: d.id, title: d.data().title || "" }))))
+      .catch(() => {});
   }, []);
 
   const openCreate = () => { setForm({ ...EMPTY_SALE }); setEditingId(null); setError(""); setModalOpen(true); setViewReceipt(null); };
   const openEdit = (s: Sale) => {
     setForm({
       userId: s.userId, userName: s.userName, userEmail: s.userEmail,
-      type: s.type, itemTitle: s.itemTitle ?? "", amount: s.amount,
+      type: s.type, itemId: s.itemId ?? "", itemTitle: s.itemTitle ?? "", amount: s.amount,
       paymentMethod: s.paymentMethod, status: s.status,
       reference: s.reference ?? "", notes: s.notes ?? "",
     });
@@ -190,7 +203,7 @@ export default function SalesPage() {
           <p className="mt-1 text-gray-400">Gestão de pagamentos e subscrições</p>
         </div>
         <button onClick={openCreate}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 font-semibold transition-colors">
+          className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-2.5 font-semibold transition-colors">
           <Plus className="w-4 h-4" /> Registar Venda
         </button>
       </div>
@@ -241,7 +254,7 @@ export default function SalesPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-blue-500" /></div>
+        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 bg-gray-900/40 text-center">
           <ShoppingCart className="h-12 w-12 text-gray-700 mb-3" />
@@ -357,9 +370,14 @@ export default function SalesPage() {
                 {form.type === "standalone" && (
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Curso</label>
-                    <input type="text" value={form.itemTitle ?? ""} onChange={(e) => setForm((f) => ({ ...f, itemTitle: e.target.value }))}
-                      placeholder="Nome do curso"
-                      className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
+                    <select value={form.itemId ?? ""} onChange={(e) => {
+                      const selected = courses.find(c => c.id === e.target.value);
+                      setForm((f) => ({ ...f, itemId: e.target.value, itemTitle: selected?.title ?? "" }));
+                    }}
+                      className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer">
+                      <option value="">Selecionar curso...</option>
+                      {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                    </select>
                   </div>
                 )}
 
@@ -412,7 +430,7 @@ export default function SalesPage() {
               <div className="flex gap-3 px-6 py-5 border-t border-gray-800">
                 <button onClick={() => { setModalOpen(false); setViewReceipt(null); }} className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium transition-colors">Cancelar</button>
                 <button onClick={handleSave} disabled={saving}
-                  className="flex flex-1 items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors disabled:opacity-60">
+                  className="flex flex-1 items-center justify-center gap-2 py-3 bg-purple hover:bg-purple-light text-white font-bold transition-colors disabled:opacity-60">
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   {editingId ? "Atualizar" : "Registar"}
                 </button>

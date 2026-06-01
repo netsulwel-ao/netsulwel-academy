@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import { useState, useRef, useEffect } from "react";
-import { db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import {
   Plus, Video, Trash2, Save, ArrowLeft, Loader2, CheckCircle2,
@@ -11,11 +11,12 @@ import {
 import Link from "next/link";
 import type { Course, CourseModule, VideoItem, CourseType, CourseLevel, CourseCategory, CourseFormat, Trail } from "@/types/course";
 
-// ── Upload helpers ────────────────────────────────────────
+// -- Upload helpers ----------------------------------------
 async function uploadToR2WithProgress(file: File, folder: string, onProgress: (p: number) => void): Promise<string> {
+  const token = auth.currentUser ? await auth.currentUser.getIdToken() : "";
   const res = await fetch("/api/upload/presign", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     body: JSON.stringify({ filename: file.name, contentType: file.type, folder }),
   });
   if (!res.ok) throw new Error("Falha ao obter URL de upload.");
@@ -33,9 +34,10 @@ async function uploadToR2WithProgress(file: File, folder: string, onProgress: (p
 }
 
 async function uploadToR2(file: File, folder: string): Promise<string> {
+  const token = auth.currentUser ? await auth.currentUser.getIdToken() : "";
   const res = await fetch("/api/upload/presign", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     body: JSON.stringify({ filename: file.name, contentType: file.type, folder }),
   });
   if (!res.ok) throw new Error("Falha ao obter URL.");
@@ -45,7 +47,7 @@ async function uploadToR2(file: File, folder: string): Promise<string> {
   return publicUrl;
 }
 
-// ── Props ─────────────────────────────────────────────────
+// -- Props -------------------------------------------------
 interface CourseFormProps {
   initialData?: Partial<Course>;
   onSave: (data: Omit<Course, "id" | "createdAt" | "updatedAt">, status: "draft" | "published") => Promise<void>;
@@ -56,19 +58,19 @@ interface CourseFormProps {
 
 const COURSE_TYPES: { value: CourseType; label: string; color: string; desc: string }[] = [
   { value: "standalone", label: "Standalone", color: "blue", desc: "Compra individual em Kz" },
-  { value: "smart", label: "Plano Smart", color: "green", desc: "Incluído no Plano Smart e Golden" },
+  { value: "smart", label: "Plano Smart", color: "green", desc: "Inclu�do no Plano Smart e Golden" },
   { value: "golden", label: "Plano Golden", color: "yellow", desc: "Exclusivo Plano Golden" },
 ];
 
 const LEVELS: { value: CourseLevel; label: string }[] = [
   { value: "beginner", label: "Iniciante" },
-  { value: "intermediate", label: "Intermédio" },
-  { value: "advanced", label: "Avançado" },
+  { value: "intermediate", label: "Interm�dio" },
+  { value: "advanced", label: "Avan�ado" },
 ];
 
 const CATEGORIES: { value: CourseCategory; label: string }[] = [
   { value: "tech", label: "Tecnologia" },
-  { value: "finance", label: "Finanças" },
+  { value: "finance", label: "Finan�as" },
   { value: "investments", label: "Investimentos" },
   { value: "other", label: "Outro" },
 ];
@@ -83,7 +85,7 @@ function toDatetimeLocal(iso: string) {
 }
 
 export default function CourseForm({ initialData, onSave, saving, backHref = "/admin/courses", mode }: CourseFormProps) {
-  // ── State ─────────────────────────────────────────────────
+  // -- State -------------------------------------------------
   const [title, setTitle] = useState(initialData?.title ?? "");
   const [description, setDescription] = useState(initialData?.description ?? "");
   const [thumbnail, setThumbnail] = useState(initialData?.thumbnail ?? "");
@@ -115,14 +117,14 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
   const videoKey = (mi: number, vi: number) => `${mi}-${vi}`;
   const getMode = (mi: number, vi: number) => urlMode[videoKey(mi, vi)] ?? "upload";
 
-  // ── Load trails ───────────────────────────────────────────
+  // -- Load trails -------------------------------------------
   useEffect(() => {
     getDocs(query(collection(db, "trails"), orderBy("title"))).then((snap) => {
       setTrails(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Trail)));
     }).catch(console.error);
   }, []);
 
-  // ── Thumbnail ─────────────────────────────────────────────
+  // -- Thumbnail ---------------------------------------------
   const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
     setThumbnailPreview(URL.createObjectURL(file));
@@ -132,7 +134,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
     finally { setThumbnailUploading(false); }
   };
 
-  // ── Video upload ──────────────────────────────────────────
+  // -- Video upload ------------------------------------------
   const handleVideoUpload = async (mi: number, vi: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
     updateVideo(mi, vi, "uploading", true);
@@ -149,7 +151,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
     }
   };
 
-  // ── Tags ──────────────────────────────────────────────────
+  // -- Tags --------------------------------------------------
   const addTag = () => {
     const t = tagInput.trim().toLowerCase();
     if (t && !tags.includes(t)) setTags([...tags, t]);
@@ -157,12 +159,12 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
   };
   const removeTag = (t: string) => setTags(tags.filter((x) => x !== t));
 
-  // ── Modules ───────────────────────────────────────────────
+  // -- Modules -----------------------------------------------
   const addModule = () => setModules([...modules, { title: "", videos: [{ title: "", url: "", duration: "" }] }]);
   const removeModule = (mi: number) => setModules(modules.filter((_, i) => i !== mi));
   const updateModuleTitle = (mi: number, v: string) => { const u = [...modules]; u[mi].title = v; setModules(u); };
 
-  // ── Videos ────────────────────────────────────────────────
+  // -- Videos ------------------------------------------------
   const addVideo = (mi: number) => { const u = [...modules]; u[mi].videos.push({ title: "", url: "", duration: "" }); setModules(u); };
   const removeVideo = (mi: number, vi: number) => { const u = [...modules]; u[mi].videos = u[mi].videos.filter((_, i) => i !== vi); setModules(u); };
   const updateVideo = (mi: number, vi: number, field: keyof VideoItem, v: unknown) => {
@@ -176,28 +178,30 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
     updateVideo(mi, vi, "url", ""); updateVideo(mi, vi, "uploadProgress", 0); updateVideo(mi, vi, "uploadError", "");
   };
 
-  // ── AI description ────────────────────────────────────────
+  // -- AI description ----------------------------------------
   const handleGenerateDescription = async () => {
-    if (!title.trim()) { setError("Preenche o nome do curso antes de gerar a descrição."); return; }
+    if (!title.trim()) { setError("Preenche o nome do curso antes de gerar a descri��o."); return; }
     setGeneratingDesc(true); setError("");
     try {
+      const token = auth.currentUser ? await auth.currentUser.getIdToken() : "";
       const res = await fetch("/api/ai/generate-description", {
-        method: "POST", headers: { "Content-Type": "application/json" },
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ title, modules }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erro");
       setDescription(data.description);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Erro ao gerar descrição.");
+      setError(err instanceof Error ? err.message : "Erro ao gerar descri��o.");
     } finally { setGeneratingDesc(false); }
   };
 
-  // ── Save ──────────────────────────────────────────────────
+  // -- Save --------------------------------------------------
   const anyUploading = modules.some((m) => m.videos.some((v) => v.uploading));
 
   const handleSave = async (status: "draft" | "published") => {
-    if (!title.trim()) { setError("O nome do curso é obrigatório."); return; }
+    if (!title.trim()) { setError("O nome do curso � obrigat�rio."); return; }
     if (anyUploading) { setError("Aguarda o fim dos uploads."); return; }
     setError("");
     const cleanModules = modules.map((m) => ({
@@ -226,7 +230,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
     await onSave(courseData, status);
   };
 
-  // ── Render ────────────────────────────────────────────────
+  // -- Render ------------------------------------------------
   return (
     <div className="flex flex-col h-full animate-in fade-in duration-500">
 
@@ -248,12 +252,12 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
         <div className="flex items-center gap-3">
           <button onClick={() => handleSave("draft")} disabled={saving || thumbnailUploading || anyUploading}
             className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium transition-colors disabled:opacity-50">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Rascunho
           </button>
           <button onClick={() => handleSave("published")} disabled={saving || thumbnailUploading || anyUploading}
-            className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-50">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            className="flex items-center gap-2 px-5 py-2 bg-purple hover:bg-purple-light text-white text-sm font-bold transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-50">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {mode === "edit" ? "Atualizar Curso" : "Publicar Curso"}
           </button>
         </div>
@@ -286,7 +290,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                   </div>
                   {thumbnailUploading && (
                     <div className="absolute inset-0 bg-gray-950/70 flex items-center justify-center">
-                      <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+                      <Loader2 className="h-8 w-8 animate-spin text-purple" />
                     </div>
                   )}
                 </>
@@ -294,27 +298,27 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                 <div className="flex flex-col items-center justify-center h-full gap-2 text-gray-500 group-hover:text-blue-400 transition-colors">
                   <ImagePlus className="h-10 w-10" />
                   <span className="text-sm font-medium">Clique para carregar</span>
-                  <span className="text-xs">PNG, JPG, WEBP — máx. 5MB</span>
+                  <span className="text-xs">PNG, JPG, WEBP � m�x. 5MB</span>
                 </div>
               )}
             </div>
             <input ref={thumbInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleThumbnailChange} />
             {thumbnailUploading && <p className="mt-2 text-xs text-blue-400 flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> A enviar...</p>}
-            {thumbnail && !thumbnailUploading && <p className="mt-2 text-xs text-green-400 flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Upload concluído</p>}
+            {thumbnail && !thumbnailUploading && <p className="mt-2 text-xs text-green-400 flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Upload conclu�do</p>}
           </div>
 
           {/* Nome */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nome do Curso <span className="text-red-400">*</span></label>
             <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ex: Formação Completa em JavaScript"
+              placeholder="Ex: Forma��o Completa em JavaScript"
               className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all" />
           </div>
 
-          {/* Descrição + IA */}
+          {/* Descri��o + IA */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Descrição</label>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Descri��o</label>
               <button type="button" onClick={handleGenerateDescription} disabled={generatingDesc || !title.trim()}
                 className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
                 {generatingDesc ? <><Loader2 className="w-3 h-3 animate-spin" /> A gerar...</> : <><Sparkles className="w-3 h-3" /> Gerar com IA</>}
@@ -322,7 +326,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
             </div>
             <div className="relative">
               <textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
-                placeholder="Descreva o que os alunos vão aprender..."
+                placeholder="Descreva o que os alunos v�o aprender..."
                 className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all resize-none" />
               {generatingDesc && (
                 <div className="absolute inset-0 bg-gray-900/70 flex items-center justify-center">
@@ -386,10 +390,10 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
             </div>
           </div>
 
-          {/* Preço — só standalone */}
+          {/* Pre�o � s� standalone */}
           {courseType === "standalone" && (
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Preço (Kz)</label>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Pre�o (Kz)</label>
               <div className="relative">
                 <span className="absolute left-3 top-2.5 text-sm text-gray-500 font-medium">Kz</span>
                 <input type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)}
@@ -399,10 +403,10 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
             </div>
           )}
 
-          {/* Nível + Categoria */}
+          {/* N�vel + Categoria */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nível</label>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">N�vel</label>
               <select value={level} onChange={(e) => setLevel(e.target.value as CourseLevel)}
                 className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer">
                 {LEVELS.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
@@ -447,9 +451,9 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
               <Sparkles className={`h-5 w-5 shrink-0 ${featured ? "text-blue-400" : "text-gray-600"}`} />
               <div className="text-left">
                 <p className={`text-sm font-bold ${featured ? "text-blue-400" : "text-gray-400"}`}>
-                  {featured ? "Em Destaque" : "Não em Destaque"}
+                  {featured ? "Em Destaque" : "N�o em Destaque"}
                 </p>
-                <p className="text-xs text-gray-500">Aparece na secção "Cursos em destaque" da landing page</p>
+                <p className="text-xs text-gray-500">Aparece na sec��o "Cursos em destaque" da landing page</p>
               </div>
               <div className={`ml-auto h-5 w-9 rounded-full transition-colors relative shrink-0 ${featured ? "bg-blue-500" : "bg-gray-700"}`}>
                 <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${featured ? "translate-x-4" : "translate-x-0.5"}`} />
@@ -462,12 +466,12 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Trilha (opcional)</label>
             <select value={trailId} onChange={(e) => setTrailId(e.target.value)}
               className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer mb-2">
-              <option value="">— Nenhuma trilha —</option>
+              <option value="">� Nenhuma trilha �</option>
               {trails.map((t) => <option key={t.id} value={t.id}>{t.title}</option>)}
             </select>
             {trailId && (
               <input type="number" min="1" value={trailOrder} onChange={(e) => setTrailOrder(e.target.value)}
-                placeholder="Posição na trilha (ex: 1)"
+                placeholder="Posi��o na trilha (ex: 1)"
                 className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all" />
             )}
           </div>
@@ -502,27 +506,27 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
           {/* Resumo */}
           <div className="bg-gray-900/60 border border-gray-800 p-4 space-y-2.5">
             <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Resumo</p>
-            <div className="flex justify-between text-sm"><span className="text-gray-400">Módulos</span><span className="text-white font-medium">{modules.length}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-gray-400">M�dulos</span><span className="text-white font-medium">{modules.length}</span></div>
             <div className="flex justify-between text-sm"><span className="text-gray-400">Aulas</span><span className="text-white font-medium">{modules.reduce((a, m) => a + m.videos.length, 0)}</span></div>
             <div className="flex justify-between text-sm"><span className="text-gray-400">Tipo</span><span className="text-white font-medium capitalize">{courseType}</span></div>
             {courseType === "standalone" && (
-              <div className="flex justify-between text-sm"><span className="text-gray-400">Preço</span><span className="text-white font-medium">{price ? `${parseInt(price).toLocaleString("pt-AO")} Kz` : "Gratuito"}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-gray-400">Pre�o</span><span className="text-white font-medium">{price ? `${parseInt(price).toLocaleString("pt-AO")} Kz` : "Gratuito"}</span></div>
             )}
-            <div className="flex justify-between text-sm"><span className="text-gray-400">Certificado</span><span className={`font-medium ${hasCertificate ? "text-amber-400" : "text-gray-500"}`}>{hasCertificate ? "Sim" : "Não"}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-gray-400">Destaque</span><span className={`font-medium ${featured ? "text-blue-400" : "text-gray-500"}`}>{featured ? "Sim" : "Não"}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-gray-400">Certificado</span><span className={`font-medium ${hasCertificate ? "text-amber-400" : "text-gray-500"}`}>{hasCertificate ? "Sim" : "N�o"}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-gray-400">Destaque</span><span className={`font-medium ${featured ? "text-blue-400" : "text-gray-500"}`}>{featured ? "Sim" : "N�o"}</span></div>
           </div>
         </div>
 
-        {/* RIGHT PANEL — Módulos e Aulas */}
+        {/* RIGHT PANEL � M�dulos e Aulas */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-lg font-bold text-white">Módulos e Aulas</h2>
-              <p className="text-xs text-gray-500 mt-0.5">Organize o conteúdo em módulos e faça upload dos vídeos</p>
+              <h2 className="text-lg font-bold text-white">M�dulos e Aulas</h2>
+              <p className="text-xs text-gray-500 mt-0.5">Organize o conte�do em m�dulos e fa�a upload dos v�deos</p>
             </div>
             <button onClick={addModule}
               className="flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-2 transition-colors">
-              <Plus className="w-4 h-4" /> Novo Módulo
+              <Plus className="w-4 h-4" /> Novo M�dulo
             </button>
           </div>
 
@@ -533,9 +537,9 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                 {/* Module header */}
                 <div className="flex items-center gap-3 px-4 py-3 bg-gray-900 border-b border-gray-800">
                   <GripVertical className="h-4 w-4 text-gray-600 shrink-0" />
-                  <span className="text-xs font-bold text-blue-400 uppercase tracking-wider shrink-0">Módulo {mi + 1}</span>
+                  <span className="text-xs font-bold text-blue-400 uppercase tracking-wider shrink-0">M�dulo {mi + 1}</span>
                   <input type="text" value={module.title} onChange={(e) => updateModuleTitle(mi, e.target.value)}
-                    placeholder="Nome do módulo (ex: Introdução)"
+                    placeholder="Nome do m�dulo (ex: Introdu��o)"
                     className="flex-1 bg-transparent text-white placeholder-gray-600 text-sm focus:outline-none" />
                   {modules.length > 1 && (
                     <button onClick={() => removeModule(mi)} className="p-1.5 text-gray-600 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0">
@@ -552,11 +556,11 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                     return (
                       <div key={vi} className="bg-gray-950/60 border border-gray-800/60 p-3 space-y-2">
                         {format === "live" ? (
-                          /* ── Live lesson row ── */
+                          /* -- Live lesson row -- */
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-gray-600 w-5 shrink-0 text-right">{vi + 1}.</span>
                             <input type="text" value={video.title} onChange={(e) => updateVideo(mi, vi, "title", e.target.value)}
-                              placeholder="Título da aula"
+                              placeholder="T�tulo da aula"
                               className="flex-1 bg-gray-900 border border-gray-800 focus:border-purple-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all" />
                             <input type="datetime-local" value={toDatetimeLocal(video.scheduledAt ?? "")}
                               onChange={(e) => updateVideo(mi, vi, "scheduledAt", new Date(e.target.value).toISOString())}
@@ -576,7 +580,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                           <div className="flex items-center gap-2">
                            <span className="text-xs text-gray-600 w-5 shrink-0 text-right">{vi + 1}.</span>
                            <input type="text" value={video.title} onChange={(e) => updateVideo(mi, vi, "title", e.target.value)}
-                             placeholder="Título da aula"
+                             placeholder="T�tulo da aula"
                              className="flex-1 bg-gray-900 border border-gray-800 focus:border-blue-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all" />
                            <input type="text" value={video.duration} onChange={(e) => updateVideo(mi, vi, "duration", e.target.value)}
                              placeholder="00:00"
@@ -591,11 +595,11 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                           <div className="flex items-start gap-2 pl-7">
                            <div className="flex shrink-0 border border-gray-800 overflow-hidden">
                              <button onClick={() => { if (mode !== "upload") toggleMode(mi, vi); }}
-                               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${mode === "upload" ? "bg-blue-600 text-white" : "bg-gray-900 text-gray-500 hover:text-gray-300"}`}>
+                               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${mode === "upload" ? "bg-purple text-white" : "bg-gray-900 text-gray-500 hover:text-gray-300"}`}>
                                <UploadCloud className="w-3.5 h-3.5" /> Upload
                              </button>
                              <button onClick={() => { if (mode !== "link") toggleMode(mi, vi); }}
-                               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${mode === "link" ? "bg-blue-600 text-white" : "bg-gray-900 text-gray-500 hover:text-gray-300"}`}>
+                               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${mode === "link" ? "bg-purple text-white" : "bg-gray-900 text-gray-500 hover:text-gray-300"}`}>
                                <LinkIcon className="w-3.5 h-3.5" /> URL
                              </button>
                            </div>
@@ -605,7 +609,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                                {!video.url && !video.uploading && (
                                  <button onClick={() => videoInputRefs.current[key]?.click()}
                                    className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-700 hover:border-blue-500/50 bg-gray-900 py-2 text-xs text-gray-400 hover:text-blue-400 transition-colors">
-                                   <UploadCloud className="w-4 h-4" /> Clique para selecionar vídeo (MP4, MOV, WEBM)
+                                   <UploadCloud className="w-4 h-4" /> Clique para selecionar v�deo (MP4, MOV, WEBM)
                                  </button>
                                )}
                                {video.uploading && (

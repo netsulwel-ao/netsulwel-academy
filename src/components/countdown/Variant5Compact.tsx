@@ -23,8 +23,8 @@ export default function Variant5Compact({ targetDate, label }: Props) {
   ];
 
   return (
-    <div className="flex items-center justify-between gap-4 bg-gray-100 px-5 py-3 rounded-lg">
-      <div className="flex items-center gap-2 text-sm text-gray-700">
+    <div className="flex items-center justify-between gap-4 bg-gray-800 px-5 py-3 rounded-lg">
+      <div className="flex items-center gap-2 text-sm text-gray-300">
         <Clock className="h-5 w-5 text-[#a020f0]" />
         <span>{label || "Oferta termina em"}</span>
       </div>

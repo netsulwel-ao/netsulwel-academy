@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
+import { useAuth } from "@/contexts/AuthContext";
 import { collection, getDocs, deleteDoc, doc, orderBy, query } from "firebase/firestore";
 import { Plus, Trash2, Pencil, Loader2, BookOpen, AlertTriangle, X, Layers, Radio } from "lucide-react";
 import Link from "next/link";
@@ -15,6 +17,13 @@ const TYPE_COLORS = {
 };
 
 export default function TrailsPage() {
+  const router = useRouter();
+  const { isAdminOrTeacher } = useAuth();
+
+  useEffect(() => {
+    if (!isAdminOrTeacher) router.replace("/dashboard");
+  }, [isAdminOrTeacher, router]);
+
   const [trails, setTrails] = useState<Trail[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -58,19 +67,19 @@ export default function TrailsPage() {
           <p className="mt-1 text-gray-400">{loading ? "A carregar..." : `${trails.length} trilha${trails.length !== 1 ? "s" : ""}`}</p>
         </div>
         <Link href="/admin/trails/new"
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 font-semibold transition-colors">
+          className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-2.5 font-semibold transition-colors">
           <Plus className="w-4 h-4" /> Nova Trilha
         </Link>
       </div>
 
-      {loading && <div className="flex items-center justify-center py-24"><Loader2 className="h-8 w-8 animate-spin text-blue-500" /></div>}
+      {loading && <div className="flex items-center justify-center py-24"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>}
 
       {!loading && trails.length === 0 && (
         <div className="flex flex-col items-center justify-center py-24 bg-gray-900/40 text-center">
           <Layers className="h-12 w-12 text-gray-700 mb-3" />
           <h2 className="text-xl font-bold text-white mb-2">Nenhuma trilha ainda</h2>
           <p className="text-gray-400 mb-6 max-w-sm">Crie trilhas para agrupar cursos em sequências de aprendizagem.</p>
-          <Link href="/admin/trails/new" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 font-bold transition-colors">
+          <Link href="/admin/trails/new" className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-6 py-3 font-bold transition-colors">
             <Plus className="w-4 h-4" /> Criar Primeira Trilha
           </Link>
         </div>

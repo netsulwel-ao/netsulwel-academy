@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   collection,
   getDocs,
@@ -56,6 +58,13 @@ const TARGET_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export default function AdminLivesPage() {
+  const router = useRouter();
+  const { isAdminOrTeacher } = useAuth();
+
+  useEffect(() => {
+    if (!isAdminOrTeacher) router.replace("/dashboard");
+  }, [isAdminOrTeacher, router]);
+
   const [lives, setLives] = useState<LiveSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -115,7 +124,7 @@ export default function AdminLivesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-purple" />
       </div>
     );
   }
@@ -135,7 +144,7 @@ export default function AdminLivesPage() {
         </div>
         <Link
           href="/admin/lives/new"
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 font-bold transition-colors"
+          className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-3 font-bold transition-colors"
         >
           <Plus className="h-5 w-5" />
           Nova Live
@@ -179,7 +188,7 @@ export default function AdminLivesPage() {
           </p>
           <Link
             href="/admin/lives/new"
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 font-bold transition-colors"
+            className="inline-flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-6 py-3 font-bold transition-colors"
           >
             <Plus className="h-5 w-5" />
             Criar Primeira Live

@@ -2,25 +2,29 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
+import { useAuth } from "@/contexts/AuthContext";
 import { collection, query, orderBy, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import {
   Users, MessageCircle, Heart, Trash2, ExternalLink, Loader2,
-  Search, X, AlertCircle, CheckCircle2,
+  Search, X,
 } from "lucide-react";
 import type { CommunityPost } from "@/types/community";
+import { toast } from "sonner";
 
 export default function AdminCommunityPage() {
+  const router = useRouter();
+  const { isAdminOrTeacher } = useAuth();
+
+  useEffect(() => {
+    if (!isAdminOrTeacher) router.replace("/dashboard");
+  }, [isAdminOrTeacher, router]);
+
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
-
-  const showToast = (msg: string, type: "success" | "error") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
-  };
 
   useEffect(() => {
     const q = query(collection(db, "community"), orderBy("createdAt", "desc"));
@@ -36,9 +40,9 @@ export default function AdminCommunityPage() {
     setDeleting(postId);
     try {
       await deleteDoc(doc(db, "community", postId));
-      showToast("Publicação apagada com sucesso.", "success");
+      toast.success("Publicação apagada com sucesso.");
     } catch {
-      showToast("Erro ao apagar publicação.", "error");
+      toast.error("Erro ao apagar publicação.");
     } finally {
       setDeleting(null);
     }
@@ -53,18 +57,6 @@ export default function AdminCommunityPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500">
-      {toast && (
-        <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 text-sm font-medium shadow-xl border animate-in slide-in-from-top-2 duration-300 ${
-          toast.type === "success"
-            ? "bg-green-500/10 border-green-500/30 text-green-400"
-            : "bg-red-500/10 border-red-500/30 text-red-400"
-        }`}>
-          {toast.type === "success" ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
-          {toast.msg}
-          <button onClick={() => setToast(null)}><X className="h-4 w-4 ml-2" /></button>
-        </div>
-      )}
-
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-white">Comunidade</h1>
@@ -116,7 +108,7 @@ export default function AdminCommunityPage() {
       {/* Table */}
       {loading ? (
         <div className="flex items-center justify-center py-24">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-purple" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 bg-gray-900/40 text-center">

@@ -5,7 +5,7 @@ import { db } from "@/lib/firebase";
 import { collection, getDocs, query, where, doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { X } from "lucide-react";
-import { AnnouncementModal } from "@/app/admin/announcements/page";
+import { AnnouncementModal } from "@/components/admin/AnnouncementModal";
 import type { Announcement, AnnouncementTarget } from "@/types/announcement";
 
 export default function AnnouncementPopup() {

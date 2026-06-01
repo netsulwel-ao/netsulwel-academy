@@ -46,13 +46,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        setLoading(false);
+        document.cookie = `auth-uid=${currentUser.uid};path=/;max-age=86400;SameSite=Strict`;
       } else {
         setUser(null);
+        document.cookie = "auth-uid=;path=/;max-age=0";
         setRole("aluno");
         setPlan("free");
-        setLoading(false);
       }
+      setLoading(false);
     });
     return () => unsubscribe();
   }, []);
@@ -97,7 +98,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return (
       <AuthContext.Provider value={{ user, loading, role, isAdmin, isTeacher, isAdminOrTeacher, plan }}>
         <div className="flex items-center justify-center min-h-screen bg-gray-950">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-purple" />
         </div>
       </AuthContext.Provider>
     );

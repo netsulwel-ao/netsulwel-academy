@@ -218,7 +218,7 @@ export default function AdminDashboardPage() {
           <p className="mt-2 text-gray-400">Visão geral da plataforma.</p>
         </div>
         {isAdmin && (
-          <Link href="/admin/users" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 text-sm font-bold transition-colors">
+          <Link href="/admin/users" className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-2.5 text-sm font-bold transition-colors">
             <UserPlus className="h-4 w-4" />
             Gerir Utilizadores
           </Link>
@@ -228,7 +228,7 @@ export default function AdminDashboardPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {stats.map((s) => (
-          <div key={s.label} className="bg-[#13131f] border border-[#1e1e30] p-5 transition-all hover:border-[#2e2e50]">
+          <div key={s.label} className="bg-gray-900 border border-gray-800 p-5 transition-all hover:border-gray-700">
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{s.label}</p>
               <div className={`flex h-8 w-8 items-center justify-center ${s.bg}`}>
@@ -245,7 +245,7 @@ export default function AdminDashboardPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* User Growth */}
-        <div className="lg:col-span-2 bg-[#13131f] border border-[#1e1e30] p-6">
+        <div className="lg:col-span-2 bg-gray-900 border border-gray-800 p-6">
           <h3 className="text-sm font-bold text-white mb-1">Crescimento de Alunos (7 dias)</h3>
           <p className="text-xs text-gray-500 mb-6">Novos alunos registados por dia</p>
           <div className="h-64">
@@ -262,7 +262,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Course Distribution */}
-        <div className="bg-[#13131f] border border-[#1e1e30] p-6">
+        <div className="bg-gray-900 border border-gray-800 p-6">
           <h3 className="text-sm font-bold text-white mb-1">Distribuição de Cursos</h3>
           <p className="text-xs text-gray-500 mb-6">Por tipo de plano</p>
           <div className="h-64 flex items-center justify-center">
@@ -285,7 +285,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Revenue Chart */}
-      <div className="bg-[#13131f] border border-[#1e1e30] p-6">
+      <div className="bg-gray-900 border border-gray-800 p-6">
         <h3 className="text-sm font-bold text-white mb-1">Receita (6 meses)</h3>
         <p className="text-xs text-gray-500 mb-6">Evolução da receita mensal</p>
         <div className="h-64">
@@ -309,7 +309,7 @@ export default function AdminDashboardPage() {
             <Link
               key={action.href}
               href={action.href}
-              className={`flex items-center gap-3 p-4 border border-[#1e1e30] bg-[#13131f] transition-all hover:border-[#2e2e50] group ${action.color}`}
+              className={`flex items-center gap-3 p-4 border border-gray-800 bg-gray-900 transition-all hover:border-gray-700 group ${action.color}`}
             >
               <div className="flex h-10 w-10 items-center justify-center shrink-0">
                 <action.icon className="h-5 w-5" />

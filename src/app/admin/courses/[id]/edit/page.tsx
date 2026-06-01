@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
+import { useAuth } from "@/contexts/AuthContext";
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { Loader2, CheckCircle2, AlertCircle, Radio } from "lucide-react";
 import CourseForm from "@/components/admin/CourseForm";
@@ -12,6 +13,11 @@ import type { Course } from "@/types/course";
 export default function EditCoursePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { isAdminOrTeacher } = useAuth();
+
+  useEffect(() => {
+    if (!isAdminOrTeacher) router.replace("/dashboard");
+  }, [isAdminOrTeacher, router]);
 
   const [initialData, setInitialData] = useState<Partial<Course> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,7 +60,7 @@ export default function EditCoursePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-purple" />
       </div>
     );
   }

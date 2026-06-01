@@ -233,30 +233,30 @@ function ViewerInterior({ live }: { live: LiveSession }) {
   }, [live.id, user]);
 
   useEffect(() => {
-    if (!user || !live.hostUid) return;
-    const unsub = onSnapshot(doc(db, "ratings", `admin_${live.hostUid}_${user.uid}`), (snap) => {
+    if (!user || !live.createdBy) return;
+    const unsub = onSnapshot(doc(db, "ratings", `admin_${live.createdBy}_${user.uid}`), (snap) => {
       setFollowed(snap.exists());
     });
-    const countUnsub = onSnapshot(doc(db, "ratings", `admin_${live.hostUid}_stats`), (snap) => {
+    const countUnsub = onSnapshot(doc(db, "ratings", `admin_${live.createdBy}_stats`), (snap) => {
       if (snap.exists()) setFollowCount(snap.data().count ?? 0);
     });
     return () => { unsub(); countUnsub(); };
-  }, [live.hostUid, user]);
+  }, [live.createdBy, user]);
 
   const toggleFollow = async () => {
-    if (!user || !live.hostUid) return;
-    const ref = doc(db, "ratings", `admin_${live.hostUid}_${user.uid}`);
-    const statsRef = doc(db, "ratings", `admin_${live.hostUid}_stats`);
+    if (!user || !live.createdBy) return;
+    const ref = doc(db, "ratings", `admin_${live.createdBy}_${user.uid}`);
+    const statsRef = doc(db, "ratings", `admin_${live.createdBy}_stats`);
     try {
       if (followed) {
         await Promise.all([
-          setDoc(ref, { targetId: live.hostUid, targetType: "admin", userId: user.uid, rating: 0, createdAt: serverTimestamp() }),
+          setDoc(ref, { targetId: live.createdBy, targetType: "admin", userId: user.uid, rating: 0, createdAt: serverTimestamp() }),
           setDoc(statsRef, { count: increment(-1) }, { merge: true }),
         ]);
         setFollowed(false);
       } else {
         await Promise.all([
-          setDoc(ref, { targetId: live.hostUid, targetType: "admin", userId: user.uid, rating: 1, createdAt: serverTimestamp() }),
+          setDoc(ref, { targetId: live.createdBy, targetType: "admin", userId: user.uid, rating: 1, createdAt: serverTimestamp() }),
           setDoc(statsRef, { count: increment(1) }, { merge: true }),
         ]);
         setFollowed(true);
@@ -415,7 +415,7 @@ export default function ViewerPage() {
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-[#0e0e10]">
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-purple-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-purple" />
         <p className="text-gray-400">A entrar na aula...</p>
       </div>
     </div>
@@ -433,7 +433,7 @@ export default function ViewerPage() {
 
   if (!token) return (
     <div className="flex items-center justify-center min-h-screen bg-[#0e0e10]">
-      <Loader2 className="h-10 w-10 animate-spin text-purple-500" />
+      <Loader2 className="h-8 w-8 animate-spin text-purple" />
     </div>
   );
 

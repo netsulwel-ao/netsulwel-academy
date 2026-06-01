@@ -40,7 +40,7 @@ export default function CourseLiveStudioPage() {
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-[60vh]">
-      <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
+      <Loader2 className="h-8 w-8 animate-spin text-purple" />
     </div>
   );
 
@@ -98,7 +98,7 @@ export default function CourseLiveStudioPage() {
                           className={`flex items-center gap-2 px-4 py-2 text-sm font-bold transition-colors ${
                             st.status === "live"
                               ? "bg-green-600 hover:bg-green-700 text-white"
-                              : "bg-blue-600 hover:bg-blue-700 text-white"
+                              : "bg-purple hover:bg-purple-light text-white"
                           }`}>
                           <Play className="h-4 w-4" />
                           {st.status === "live" ? "Transmitir" : "Iniciar"}

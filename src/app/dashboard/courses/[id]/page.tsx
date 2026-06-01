@@ -182,7 +182,7 @@ export default function CourseDetailPage() {
     } catch {}
   };
 
-  if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="h-10 w-10 animate-spin text-blue-500" /></div>;
+  if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>;
   if (!course) return null;
 
   const normalizedType = normalizeCourseType(course.type);

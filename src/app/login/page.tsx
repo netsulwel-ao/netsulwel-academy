@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { User, Mail, Lock, Loader2, AlertCircle, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { User, Mail, Lock, Loader2, AlertCircle, Eye, EyeOff, CheckCircle2, Sun, Moon } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import {
@@ -64,10 +64,16 @@ export default function LoginPage() {
  const [password, setPassword] = useState("");
  const [showPassword, setShowPassword] = useState(false);
  
- const [error, setError] = useState("");
- const [successMsg, setSuccessMsg] = useState("");
- const [loading, setLoading] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const saved = localStorage.getItem("public-theme") as "dark" | "light" | null;
+    if (saved) setTheme(saved);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -153,7 +159,15 @@ export default function LoginPage() {
  }
  };
 
- const handleProviderLogin = async (provider: Parameters<typeof signInWithPopup>[1], providerName: string) => {
+  const togglePublicTheme = () => {
+    setTheme(prev => {
+      const next = prev === "dark" ? "light" : "dark";
+      localStorage.setItem("public-theme", next);
+      return next;
+    });
+  };
+
+  const handleProviderLogin = async (provider: Parameters<typeof signInWithPopup>[1], providerName: string) => {
  setError("");
  setLoading(true);
 
@@ -238,27 +252,33 @@ export default function LoginPage() {
  PAINEL DIREITO: FORMULÁRIO GLASSMORPHISM
  ------------------------------------------
  */}
- <div className="relative flex w-full flex-col lg:w-1/2 bg-gray-950 overflow-hidden">
- 
- <div className="pointer-events-none absolute inset-0 grid-bg opacity-10" />
-  <div className="pointer-events-none absolute top-[-20%] left-[-10%] h-[600px] w-[600px] bg-purple/10 blur-[150px] hidden sm:block" />
+  <div data-theme={theme} className="relative flex w-full flex-col lg:w-1/2 bg-gray-950 overflow-hidden">
+  
+  <div className="pointer-events-none absolute inset-0 grid-bg opacity-10" />
+   <div className="pointer-events-none absolute top-[-20%] left-[-10%] h-[600px] w-[600px] bg-purple/10 blur-[150px] hidden sm:block" />
 
- <div className="flex items-center justify-between p-6 lg:justify-end z-20">
- <Link href="/" className="flex lg:hidden items-center gap-3">
- <img src="/Logo-Academy-White.svg" alt="Academy Logo" className="h-10 w-auto" />
- <img src="/logo.svg" alt="Netsulwel" className="h-6 w-auto brightness-0 invert" />
- </Link>
- 
- {view === "login" ? (
- <button onClick={() => toggleView("register")} className="text-sm font-medium text-white px-6 py-2.5 border border-gray-800 bg-gray-900/60 backdrop-blur-md hover:bg-gray-800 hover:border-gray-600 transition-all">
- Criar conta
- </button>
- ) : (
- <button onClick={() => toggleView("login")} className="text-sm font-medium text-white px-6 py-2.5 border border-gray-800 bg-gray-900/60 backdrop-blur-md hover:bg-gray-800 hover:border-gray-600 transition-all">
- Iniciar sessão
- </button>
- )}
- </div>
+  <div className="flex items-center justify-between p-6 z-20">
+  <div className="flex items-center gap-2">
+  <Link href="/" className="flex lg:hidden items-center gap-3">
+  <img src="/Logo-Academy-White.svg" alt="Academy Logo" className="h-10 w-auto" />
+  <img src="/logo.svg" alt="Netsulwel" className="h-6 w-auto brightness-0 invert" />
+  </Link>
+  </div>
+  <div className="flex items-center gap-3">
+  <button onClick={togglePublicTheme} className="flex items-center justify-center h-9 w-9 rounded-lg border border-gray-800 bg-gray-900/60 backdrop-blur-md hover:bg-gray-800 hover:border-gray-600 transition-all text-gray-400 hover:text-white">
+  {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+  </button>
+  {view === "login" ? (
+  <button onClick={() => toggleView("register")} className="text-sm font-medium text-white px-6 py-2.5 border border-gray-800 bg-gray-900/60 backdrop-blur-md hover:bg-gray-800 hover:border-gray-600 transition-all">
+  Criar conta
+  </button>
+  ) : (
+  <button onClick={() => toggleView("login")} className="text-sm font-medium text-white px-6 py-2.5 border border-gray-800 bg-gray-900/60 backdrop-blur-md hover:bg-gray-800 hover:border-gray-600 transition-all">
+  Iniciar sessão
+  </button>
+  )}
+  </div>
+  </div>
 
  <div className="flex-1 flex flex-col justify-center px-6 sm:px-16 lg:px-24 z-20 pb-12 lg:pb-0">
  <div className="w-full max-w-md mx-auto transition-all duration-300">

@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { db } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
+import { auth, db } from "@/lib/firebase";
+import { useAuth } from "@/contexts/AuthContext";
 import { collection, getDocs, doc, updateDoc, query, orderBy, serverTimestamp } from "firebase/firestore";
 import { Calendar, Loader2, ChevronDown, ChevronRight, Plus, Trash2, ImagePlus, Save, AlertCircle, CheckCircle2, X, Layers, Radio, Crown, Zap, Coins } from "lucide-react";
 import type { Trail, TrailLiveSession } from "@/types/course";
@@ -14,8 +16,10 @@ const TARGET_OPTIONS: { value: TrailLiveSession["target"]; label: string; icon: 
 ];
 
 async function uploadToR2(file: File, folder: string): Promise<string> {
+  const token = auth.currentUser ? await auth.currentUser.getIdToken() : "";
   const res = await fetch("/api/upload/presign", {
-    method: "POST", headers: { "Content-Type": "application/json" },
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     body: JSON.stringify({ filename: file.name, contentType: file.type, folder }),
   });
   if (!res.ok) throw new Error("Falha ao obter URL.");
@@ -39,6 +43,13 @@ function emptySession(): TrailLiveSession {
 }
 
 export default function SchedulesPage() {
+  const router = useRouter();
+  const { isAdminOrTeacher } = useAuth();
+
+  useEffect(() => {
+    if (!isAdminOrTeacher) router.replace("/dashboard");
+  }, [isAdminOrTeacher, router]);
+
   const [trails, setTrails] = useState<Trail[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -140,7 +151,7 @@ export default function SchedulesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-purple" />
       </div>
     );
   }

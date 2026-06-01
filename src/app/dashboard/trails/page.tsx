@@ -44,7 +44,7 @@ export default function TrailsPage() {
 
       {loading && (
         <div className="flex items-center justify-center py-24">
-          <Loader2 className="h-10 w-10 animate-spin text-purple" />
+          <Loader2 className="h-8 w-8 animate-spin text-purple" />
         </div>
       )}
 

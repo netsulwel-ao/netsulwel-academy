@@ -96,7 +96,7 @@ export default function NewLivePage() {
         scheduledAt,
         target,
         status: "scheduled",
-        hostUid: user.uid,
+        createdBy: user.uid,
         roomName,
         participantCount: 0,
         createdAt: serverTimestamp(),
@@ -252,7 +252,7 @@ export default function NewLivePage() {
           ) : (
             <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-700 hover:border-gray-600 bg-gray-900/30 cursor-pointer transition-colors">
               {uploadingThumb ? (
-                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                <Loader2 className="h-8 w-8 animate-spin text-purple" />
               ) : (
                 <>
                   <ImageIcon className="h-8 w-8 text-gray-600 mb-2" />
@@ -283,7 +283,7 @@ export default function NewLivePage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 text-white px-6 py-3 font-bold transition-colors ml-auto"
+            className="flex items-center gap-2 bg-purple hover:bg-purple-light disabled:bg-blue-800 disabled:opacity-50 text-white px-6 py-3 font-bold transition-colors ml-auto"
           >
             {saving ? (
               <Loader2 className="h-5 w-5 animate-spin" />

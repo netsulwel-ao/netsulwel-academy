@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "crypto";
+import { verifyAuth } from "@/lib/api-auth";
 
 const s3 = new S3Client({
   region: "auto",
@@ -17,6 +18,9 @@ const s3 = new S3Client({
 
 export async function POST(req: NextRequest) {
   try {
+    const { uid, error } = await verifyAuth(req);
+    if (!uid) return NextResponse.json({ error }, { status: 401 });
+
     const { filename, contentType, folder = "uploads" } = await req.json();
 
     if (!filename || !contentType) {

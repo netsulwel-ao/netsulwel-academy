@@ -9,7 +9,7 @@ export interface LiveSession {
   scheduledAt: string;        // ISO datetime
   target: LiveTarget;
   status: LiveStatus;
-  hostUid: string;            // admin UID
+  createdBy: string;          // admin UID (consistente com courses/trails)
   hostName?: string;
   roomName: string;           // LiveKit room slug
   startedAt?: string;

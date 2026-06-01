@@ -138,7 +138,7 @@ export default function CourseCatalogPage() {
         </select>
       </div>
 
-      {loading && <div className="flex items-center justify-center py-24"><Loader2 className="h-10 w-10 animate-spin text-blue-500" /></div>}
+      {loading && <div className="flex items-center justify-center py-24"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>}
 
       {!loading && filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 bg-gray-900/40 text-center">

@@ -94,7 +94,7 @@ export default function CoursesPage() {
         </div>
         <Link
           href="/admin/courses/new"
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 font-semibold transition-colors"
+          className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-2.5 font-semibold transition-colors"
         >
           <Plus className="w-4 h-4" />
           Novo Curso
@@ -104,7 +104,7 @@ export default function CoursesPage() {
       {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-24">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-purple" />
         </div>
       )}
 
@@ -120,7 +120,7 @@ export default function CoursesPage() {
           </p>
           <Link
             href="/admin/courses/new"
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 font-bold transition-colors"
+            className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-6 py-3 font-bold transition-colors"
           >
             <Plus className="w-4 h-4" />
             Criar Primeiro Curso

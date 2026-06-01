@@ -3,7 +3,7 @@
 :root {
   --background: #09090b;
   --foreground: #e1e1e6;
-  --purple: #8257e5;
+  --purple: #7c3aed;
   --purple-light: #996dff;
   --purple-dark: #6d28d9;
   --green: #00b37e;
@@ -138,6 +138,35 @@
   background-color: #6366f1 !important;
 }
 
+/* ── Public pages (login/register) light overrides ── */
+[data-theme="light"] .text-red-400 {
+  color: #dc2626 !important;
+}
+[data-theme="light"] .text-green-400 {
+  color: #16a34a !important;
+}
+[data-theme="light"] .bg-red-500\/10 {
+  background-color: #fef2f2 !important;
+}
+[data-theme="light"] .bg-green-500\/10 {
+  background-color: #f0fdf4 !important;
+}
+[data-theme="light"] .border-red-500\/20 {
+  border-color: #fecaca !important;
+}
+[data-theme="light"] .border-green-500\/20 {
+  border-color: #bbf7d0 !important;
+}
+[data-theme="light"] .from-white\/5 {
+  --tw-gradient-from: #1e1b2e !important;
+}
+[data-theme="light"] .bg-white\/5 {
+  background-color: #1e1b2e !important;
+}
+[data-theme="light"] .bg-white\/40 {
+  background-color: #e2dff5 !important;
+}
+
 /* ── Buttons hover states ── */
 [data-theme="light"] .hover\:bg-gray-800:hover {
   background-color: #e2dff5 !important;
@@ -156,6 +185,8 @@
 [data-theme="light"] .hover\:bg-white\/20:hover {
   background-color: #e2dff5 !important;
 }
+
+
 
 html {
   scroll-behavior: smooth;

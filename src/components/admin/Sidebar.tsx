@@ -16,6 +16,8 @@ interface SidebarProps {
  setIsCollapsed: (val: boolean) => void;
  mobileOpen: boolean;
  setMobileOpen: (val: boolean) => void;
+ theme?: string;
+ onToggleTheme?: () => void;
 }
 
 const navSections = [
@@ -49,7 +51,7 @@ const teacherAllowed = new Set([
   "/admin/announcements",
 ]);
 
-export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen }: SidebarProps) {
+export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen, theme, onToggleTheme }: SidebarProps) {
    const pathname = usePathname();
    const searchRef = useRef<HTMLInputElement>(null);
    const [searchQuery, setSearchQuery] = useState("");
@@ -178,14 +180,14 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
  </div>
 
  <div className=" p-4 shrink-0 space-y-3">
- <div className={`flex items-center justify-center p-1 bg-gray-900 ${isCollapsed ? "flex-col gap-2 py-3" : "gap-1"}`}>
- <button className={`flex items-center justify-center text-gray-400 hover:text-white transition-all ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
- <Sun className="w-4 h-4" />
- </button>
- <button className={`flex items-center justify-center bg-gray-800 text-blue-500 shadow-sm transition-all ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
- <Moon className="w-4 h-4" />
- </button>
- </div>
+  <div className={`flex items-center justify-center p-1 bg-gray-900 ${isCollapsed ? "flex-col gap-2 py-3" : "gap-1"}`}>
+  <button onClick={onToggleTheme} className={`flex items-center justify-center transition-all ${theme==="light"?"bg-gray-800 text-purple shadow-sm":"text-gray-400 hover:text-white"} ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
+  <Sun className="w-4 h-4" />
+  </button>
+  <button onClick={onToggleTheme} className={`flex items-center justify-center transition-all ${theme==="dark"?"bg-gray-800 text-blue-500 shadow-sm":"text-gray-400 hover:text-white"} ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
+  <Moon className="w-4 h-4" />
+  </button>
+  </div>
 
  <button
  onClick={handleLogout}

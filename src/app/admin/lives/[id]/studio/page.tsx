@@ -499,7 +499,7 @@ export default function StudioPage() {
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-[#0e0e10]">
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-purple-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-purple" />
         <p className="text-gray-400">A preparar o studio...</p>
       </div>
     </div>
@@ -517,7 +517,7 @@ export default function StudioPage() {
 
   if (!token) return (
     <div className="flex items-center justify-center min-h-screen bg-[#0e0e10]">
-      <Loader2 className="h-10 w-10 animate-spin text-purple-500" />
+      <Loader2 className="h-8 w-8 animate-spin text-purple" />
     </div>
   );
 

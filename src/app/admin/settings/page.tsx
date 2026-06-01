@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
+import { useAuth } from "@/contexts/AuthContext";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import {
   Save, Loader2, CheckCircle2, AlertCircle, Plus,
@@ -37,6 +39,13 @@ const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
 ];
 
 export default function SettingsPage() {
+  const router = useRouter();
+  const { isAdmin } = useAuth();
+
+  useEffect(() => {
+    if (!isAdmin) router.replace("/dashboard");
+  }, [isAdmin, router]);
+
   const [settings, setSettings] = useState<PlatformSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -94,7 +103,7 @@ export default function SettingsPage() {
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-[60vh]">
-      <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      <Loader2 className="h-8 w-8 animate-spin text-purple" />
     </div>
   );
 
@@ -108,8 +117,8 @@ export default function SettingsPage() {
           <p className="mt-1 text-gray-400">Planos, pagamentos, redes sociais e contacto</p>
         </div>
         <button onClick={handleSave} disabled={saving}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 font-semibold transition-colors disabled:opacity-60">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+          className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-2.5 font-semibold transition-colors disabled:opacity-60">
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
           {saving ? "A guardar..." : saved ? "Guardado!" : "Guardar"}
         </button>
       </div>

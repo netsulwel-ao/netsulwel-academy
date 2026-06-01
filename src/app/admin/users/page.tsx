@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   collection, getDocs, doc, updateDoc, orderBy, query,
 } from "firebase/firestore";
 import {
   Users, Search, Shield, ShieldOff, Loader2, ChevronDown,
-  Mail, Calendar, BookOpen, MoreVertical, X, CheckCircle2,
-  AlertCircle, UserCheck, UserX, Filter,
+  Mail, Calendar, BookOpen, MoreVertical, UserCheck, UserX, Filter, X,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface Student {
   id: string;
@@ -27,21 +29,20 @@ type SortBy = "name" | "date" | "role";
 export default function UsersPage() {
   const [users, setUsers] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const { isAdmin } = useAuth();
+
+  useEffect(() => {
+    if (!isAdmin) router.replace("/dashboard");
+  }, [isAdmin, router]);
+
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [sortBy, setSortBy] = useState<SortBy>("date");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
-  const [selectedUser, setSelectedUser] = useState<Student | null>(null);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<Student | null>(null);
 
-  // ── Toast ─────────────────────────────────────────────────
-  const showToast = (msg: string, type: "success" | "error") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
-  };
-
-  // ── Fetch ─────────────────────────────────────────────────
   const fetchUsers = async () => {
     try {
       const q = query(collection(db, "users"), orderBy("createdAt", "desc"));
@@ -54,7 +55,7 @@ export default function UsersPage() {
       setUsers(data);
     } catch (err) {
       console.error(err);
-      showToast("Erro ao carregar utilizadores.", "error");
+      toast.error("Erro ao carregar utilizadores.");
     } finally {
       setLoading(false);
     }
@@ -73,14 +74,13 @@ export default function UsersPage() {
       await updateDoc(doc(db, "users", user.id), { role: newRole });
       setUsers((prev) => prev.map((u) => u.id === user.id ? { ...u, role: newRole } : u));
       if (selectedUser?.id === user.id) setSelectedUser((prev) => prev ? { ...prev, role: newRole } : null);
-      showToast(
+      toast.success(
         newRole === "admin"
           ? `${user.name || user.email} promovido a Admin.`
-          : `${user.name || user.email} voltou a Aluno.`,
-        "success"
+          : `${user.name || user.email} voltou a Aluno.`
       );
     } catch {
-      showToast("Erro ao alterar permissão.", "error");
+      toast.error("Erro ao alterar permissão.");
     } finally {
       setActionLoading(null);
     }
@@ -121,19 +121,6 @@ export default function UsersPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500">
-
-      {/* ── Toast ── */}
-      {toast && (
-        <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 text-sm font-medium shadow-xl border animate-in slide-in-from-top-2 duration-300 ${
-          toast.type === "success"
-            ? "bg-green-500/10 border-green-500/30 text-green-400"
-            : "bg-red-500/10 border-red-500/30 text-red-400"
-        }`}>
-          {toast.type === "success" ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
-          {toast.msg}
-          <button onClick={() => setToast(null)}><X className="h-4 w-4 ml-2" /></button>
-        </div>
-      )}
 
       {/* ── Header ── */}
       <div>
@@ -190,7 +177,7 @@ export default function UsersPage() {
           {(["all", "aluno", "admin"] as RoleFilter[]).map((r) => (
             <button key={r} onClick={() => setRoleFilter(r)}
               className={`px-4 py-2.5 text-sm font-medium transition-colors ${
-                roleFilter === r ? "bg-blue-600 text-white" : "bg-gray-900 text-gray-400 hover:text-white hover:bg-gray-800"
+                roleFilter === r ? "bg-purple text-white" : "bg-gray-900 text-gray-400 hover:text-white hover:bg-gray-800"
               }`}>
               {r === "all" ? "Todos" : r === "aluno" ? "Alunos" : "Admins"}
             </button>
@@ -213,7 +200,7 @@ export default function UsersPage() {
       {/* ── Table ── */}
       {loading ? (
         <div className="flex items-center justify-center py-24">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-purple" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 bg-gray-900/40 text-center">
@@ -280,7 +267,7 @@ export default function UsersPage() {
                 {/* Actions menu */}
                 <div className="relative flex justify-center">
                   {actionLoading === user.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-blue-400" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <>
                       <button

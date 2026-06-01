@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/api-auth";
 
 export async function POST(req: NextRequest) {
   try {
+    const { uid, error } = await verifyAuth(req);
+    if (!uid) return NextResponse.json({ error }, { status: 401 });
+
     const { type, title, target } = await req.json();
 
     if (!type) {

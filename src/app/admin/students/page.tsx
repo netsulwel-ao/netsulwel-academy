@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { collection, query, where, getDocs, doc, updateDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
-import { Search, ArrowUpDown, Loader2, GraduationCap, Shield, X, Mail, Calendar, BookOpen, UserCheck, Award } from "lucide-react";
+import { Search, ArrowUpDown, Loader2, GraduationCap, Shield, Mail, Calendar, BookOpen, UserCheck, Award, X } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface Student {
   id: string;
@@ -25,13 +26,7 @@ export default function AdminStudentsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"name" | "recent">("recent");
-  const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-
-  const showToast = (type: "success" | "error", msg: string) => {
-    setToast({ type, msg });
-    setTimeout(() => setToast(null), 3000);
-  };
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -90,9 +85,9 @@ export default function AdminStudentsPage() {
       await updateDoc(doc(db, "users", student.id), { role: "teacher" });
       setStudents((prev) => prev.filter((s) => s.id !== student.id));
       setSelectedStudent(null);
-      showToast("success", `${student.name} promovido a Professor.`);
+      toast.success(`${student.name} promovido a Professor.`);
     } catch {
-      showToast("error", "Erro ao promover.");
+      toast.error("Erro ao promover.");
     }
   };
 
@@ -107,12 +102,6 @@ export default function AdminStudentsPage() {
 
   return (
     <div className="max-w-[100rem] mx-auto space-y-6 animate-in fade-in duration-500">
-      {toast && (
-        <div className={`fixed top-6 right-6 z-50 px-5 py-3 text-sm font-medium ${toast.type === "success" ? "bg-emerald-600 text-white" : "bg-red-600 text-white"}`}>
-          {toast.msg}
-        </div>
-      )}
-
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white">Alunos</h1>
@@ -131,20 +120,20 @@ export default function AdminStudentsPage() {
           <input
             type="text" placeholder="Pesquisar aluno..." value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-[#13131f] border border-[#1e1e30] py-2.5 pl-10 pr-4 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-purple"
+            className="w-full bg-gray-900 border border-gray-800 py-2.5 pl-10 pr-4 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-purple"
           />
         </div>
         <button onClick={() => setSortBy(sortBy === "recent" ? "name" : "recent")}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#13131f] border border-[#1e1e30] text-sm text-gray-400 hover:text-white transition-colors">
+          className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 border border-gray-800 text-sm text-gray-400 hover:text-white transition-colors">
           <ArrowUpDown className="h-4 w-4" />
           {sortBy === "recent" ? "Nome" : "Recentes"}
         </button>
       </div>
 
       {/* Table */}
-      <div className="bg-[#13131f] border border-[#1e1e30] overflow-hidden">
+      <div className="bg-gray-900 border border-gray-800 overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-purple-500" /></div>
+          <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16">
             <GraduationCap className="h-12 w-12 text-gray-600 mx-auto mb-4" />
@@ -154,7 +143,7 @@ export default function AdminStudentsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#1e1e30] text-left text-xs uppercase tracking-wider text-gray-500">
+                <tr className="border-b border-gray-800 text-left text-xs uppercase tracking-wider text-gray-500">
                   <th className="py-4 px-6 font-medium">Aluno</th>
                   <th className="py-4 px-6 font-medium">Email</th>
                   <th className="py-4 px-6 font-medium">Plano</th>
@@ -163,7 +152,7 @@ export default function AdminStudentsPage() {
                   {isAdmin && <th className="py-4 px-6 font-medium">Acções</th>}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1e1e30]">
+              <tbody className="divide-y divide-gray-800">
                 {filtered.map((student) => (
                   <tr key={student.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="py-4 px-6">
@@ -213,7 +202,7 @@ export default function AdminStudentsPage() {
       {selectedStudent && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div className="absolute inset-0 bg-black/50" onClick={() => setSelectedStudent(null)} />
-          <div className="relative w-96 bg-[#13131f] border-l border-[#1e1e30] p-8 overflow-y-auto animate-in slide-in-from-right duration-300">
+          <div className="relative w-96 bg-gray-900 border-l border-gray-800 p-8 overflow-y-auto animate-in slide-in-from-right duration-300">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-lg font-bold text-white">Detalhes</h3>
               <button onClick={() => setSelectedStudent(null)} className="text-gray-500 hover:text-white transition-colors">
@@ -255,7 +244,7 @@ export default function AdminStudentsPage() {
             </div>
 
             {isAdmin && (
-              <div className="mt-8 pt-6 border-t border-[#1e1e30]">
+              <div className="mt-8 pt-6 border-t border-gray-800">
                 <button onClick={() => { handlePromoteToTeacher(selectedStudent); }}
                   className="w-full py-3 text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors">
                   Promover a Professor
