@@ -9,61 +9,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email é obrigatório." }, { status: 400 });
     }
 
-    // 1. Gerar link de redefinição
-    let resetLink: string;
-
-    try {
-      const { getFirebaseAdmin } = await import("@/lib/firebase-admin");
-      const admin = getFirebaseAdmin();
-      resetLink = await admin.auth().generatePasswordResetLink(email);
-    } catch (adminErr) {
-      console.warn("Firebase Admin falhou, a tentar REST API:", adminErr);
-
-      const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-      const resetResp = await fetch(
-        `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            requestType: "PASSWORD_RESET",
-            email,
-            returnOobLink: true,
-          }),
-        }
-      );
-
-      const resetData = await resetResp.json();
-
-      if (!resetResp.ok) {
-        const fbError = resetData?.error?.message || "";
-        console.error("Firebase OOB error:", resetData);
-
-        if (fbError === "EMAIL_NOT_FOUND") {
-          return NextResponse.json(
-            { error: "Email não encontrado na autenticação." },
-            { status: 404 }
-          );
-        }
-
-        if (fbError === "INSUFFICIENT_PERMISSION") {
-          return NextResponse.json(
-            {
-              error:
-                "API Identity Toolkit não ativada. Pede ao admin para ativar em console.cloud.google.com/apis/library/identitytoolkit.googleapis.com",
-            },
-            { status: 500 }
-          );
-        }
-
-        return NextResponse.json(
-          { error: `Erro ao gerar link: ${fbError}` },
-          { status: 500 }
-        );
-      }
-
-      resetLink = resetData.oobLink;
-    }
+    // 1. Gerar link de redefinição via Firebase Admin SDK
+    const { getFirebaseAdmin } = await import("@/lib/firebase-admin");
+    const admin = getFirebaseAdmin();
+    const resetLink = await admin.auth().generatePasswordResetLink(email);
 
     // 2. Configurar transporte SMTP
     const transporter = nodemailer.createTransport({
