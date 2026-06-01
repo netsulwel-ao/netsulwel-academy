@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT),
-      secure: false,
+      secure: true,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -123,8 +123,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Forgot password error:", err);
+    const msg = err instanceof Error ? err.message : "Erro desconhecido";
     return NextResponse.json(
-      { error: "Erro ao enviar email de recuperação." },
+      { error: "Erro ao enviar email de recuperação.", detail: msg },
       { status: 500 }
     );
   }
