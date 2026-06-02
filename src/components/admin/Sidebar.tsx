@@ -43,11 +43,17 @@ const navSections = [
  }
 ];
 
+// Rotas acessíveis a professores (não apenas admins)
 const teacherAllowed = new Set([
   "/admin", "/admin/courses", "/admin/courses/new",
   "/admin/trails", "/admin/schedules", "/admin/lives",
-  "/admin/announcements",
+  "/admin/students", "/admin/announcements",
 ]);
+
+// Secção extra só para admins (gestão de sistema)
+const adminOnlyItems = [
+  { icon: Users, label: "Utilizadores", href: "/admin/users" },
+];
 
 export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen, theme, onToggleTheme }: SidebarProps) {
    const pathname = usePathname();
@@ -73,7 +79,19 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
          items: section.items.filter(item => teacherAllowed.has(item.href)),
        })).filter(section => section.items.length > 0);
 
-   const filteredSections = roleFiltered.map(section => ({
+   // Adiciona secção de sistema só para admins
+   const sectionsWithAdminOnly = isAdmin
+     ? [
+         ...roleFiltered.slice(0, 1), // GESTÃO
+         {
+           title: "GESTÃO AVANÇADA",
+           items: adminOnlyItems,
+         },
+         ...roleFiltered.slice(1), // SISTEMA
+       ]
+     : roleFiltered;
+
+   const filteredSections = sectionsWithAdminOnly.map(section => ({
      ...section,
      items: section.items.filter(item =>
        item.label.toLowerCase().includes(searchQuery.toLowerCase())
