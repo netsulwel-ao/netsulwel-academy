@@ -116,7 +116,6 @@ export default function AdminCommunityPage() {
           icon={MessageSquare}
           title={search ? "Nenhuma publicação encontrada" : "Nenhuma publicação na comunidade"}
           description={search ? "Tenta pesquisar por outro termo." : "As publicações dos alunos aparecerão aqui."}
-          action={!search ? { label: "Ver comunidade", href: "/dashboard/community", icon: ExternalLink } as const : undefined}
           compact
         />
       ) : (

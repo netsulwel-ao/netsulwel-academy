@@ -9,10 +9,9 @@ import {
   doc, serverTimestamp, orderBy, query, where, arrayUnion, arrayRemove,
 } from "firebase/firestore";
 import {
-  DollarSign, TrendingUp, Users, ShoppingCart, Plus,
-  Search, Filter, XCircle, CheckCircle2, Clock, Pencil,
-  Trash2, Loader2, X, Save, AlertCircle, ChevronDown,
-  Download, Eye, FileText, ExternalLink, CreditCard,
+  DollarSign, TrendingUp, ShoppingCart,
+  Search, XCircle, CheckCircle2, Clock,
+  Trash2, Loader2, FileText,
 } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import type { Sale } from "@/types/settings";
@@ -28,14 +27,6 @@ const TYPE_LABELS: Record<string, string> = {
   standalone: "Curso Avulso", smart: "Plano Smart", golden: "Plano Golden",
 };
 
-const PAYMENT_METHODS = ["Transferência Bancária", "Multicaixa", "PayPal", "Stripe", "Outro"];
-
-const EMPTY_SALE: Omit<Sale, "id" | "createdAt" | "updatedAt"> = {
-  userId: "", userName: "", userEmail: "", type: "standalone",
-  itemId: "", itemTitle: "", amount: 0, paymentMethod: "Transferência Bancária",
-  status: "pending", reference: "", notes: "",
-};
-
 export default function SalesPage() {
   const router = useRouter();
   const { isAdminOrTeacher } = useAuth();
@@ -46,24 +37,23 @@ export default function SalesPage() {
 
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ ...EMPTY_SALE });
-  const [viewReceipt, setViewReceipt] = useState<string | null>(null);
 
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | Sale["status"]>("all");
   const [filterType, setFilterType] = useState<"all" | Sale["type"]>("all");
-  const [courses, setCourses] = useState<{ id: string; title: string }[]>([]);
 
   const fetchSales = async () => {
     try {
-      const q = query(collection(db, "sales"), orderBy("createdAt", "desc"));
-      const snap = await getDocs(q);
-      setSales(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Sale)));
+      const [studentsSnap, salesSnap] = await Promise.all([
+        getDocs(query(collection(db, "users"), where("role", "==", "aluno"))),
+        getDocs(query(collection(db, "sales"), orderBy("createdAt", "desc"))),
+      ]);
+      const studentIds = new Set(studentsSnap.docs.map((d) => d.id));
+      setSales(
+        salesSnap.docs
+          .map((d) => ({ id: d.id, ...d.data() } as Sale))
+          .filter((s) => studentIds.has(s.userId))
+      );
     } catch { toast.error("Erro ao carregar vendas."); }
     finally { setLoading(false); }
   };
@@ -71,48 +61,7 @@ export default function SalesPage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSales();
-    getDocs(query(collection(db, "courses"), where("status", "==", "published")))
-      .then(s => setCourses(s.docs.map(d => ({ id: d.id, title: d.data().title || "" }))))
-      .catch(() => {});
   }, []);
-
-  const openCreate = () => { setForm({ ...EMPTY_SALE }); setEditingId(null); setError(""); setModalOpen(true); setViewReceipt(null); };
-  const openEdit = (s: Sale) => {
-    setForm({
-      userId: s.userId, userName: s.userName, userEmail: s.userEmail,
-      type: s.type, itemId: s.itemId ?? "", itemTitle: s.itemTitle ?? "", amount: s.amount,
-      paymentMethod: s.paymentMethod, status: s.status,
-      reference: s.reference ?? "", notes: s.notes ?? "",
-    });
-    setEditingId(s.id!); setError(""); setModalOpen(true);
-    setViewReceipt(s.receiptUrl ?? null);
-  };
-
-  const handleSave = async () => {
-    if (!form.userName.trim() || !form.amount) { setError("Nome e valor são obrigatórios."); return; }
-    setSaving(true); setError("");
-    try {
-      const payload = { ...form, updatedAt: serverTimestamp() };
-      const userRef = doc(db, "users", form.userId || "__none__");
-      if (editingId) {
-        await updateDoc(doc(db, "sales", editingId), payload);
-        toast.success("Venda atualizada.");
-      } else {
-        await addDoc(collection(db, "sales"), { ...payload, createdAt: serverTimestamp() });
-        // Grant access immediately if confirmed on creation
-        if (form.status === "confirmed" && form.userId) {
-          if (form.type === "standalone" && form.itemId) {
-            await updateDoc(userRef, { enrolledCourses: arrayUnion(form.itemId) });
-          } else if (form.type === "smart" || form.type === "golden") {
-            await updateDoc(userRef, { plan: form.type });
-          }
-        }
-        toast.success("Venda registada.");
-      }
-      setModalOpen(false); fetchSales();
-    } catch (e) { console.error("Save sale error:", e); setError("Erro ao guardar: " + (e instanceof Error ? e.message : "erro desconhecido")); }
-    finally { setSaving(false); }
-  };
 
   const updateStatus = async (id: string, newStatus: Sale["status"]) => {
     try {
@@ -212,10 +161,6 @@ export default function SalesPage() {
           <h1 className="text-3xl font-bold text-white">Vendas</h1>
           <p className="mt-1 text-gray-400">Gestão de pagamentos e subscrições</p>
         </div>
-        <button onClick={openCreate}
-          className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-2.5 font-semibold transition-colors">
-          <Plus className="w-4 h-4" /> Registar Venda
-        </button>
       </div>
 
       {/* Stats */}
@@ -270,7 +215,6 @@ export default function SalesPage() {
           icon={ShoppingCart}
           title={search ? "Nenhuma venda encontrada" : "Ainda não há vendas"}
           description={search ? "Tenta pesquisar por outro termo." : "As vendas aparecerão aqui depois de os alunos comprarem cursos ou planos."}
-          action={!search ? { label: "Registar venda", href: "#", icon: CreditCard } as const : undefined}
           compact
         />
       ) : (
@@ -316,9 +260,6 @@ export default function SalesPage() {
                         <FileText className="h-3.5 w-3.5" />
                       </a>
                     )}
-                    <button onClick={() => openEdit(sale)} className="p-1.5 text-gray-500 hover:text-white transition-colors">
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
                     <button onClick={() => handleDelete(sale.id!)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -332,125 +273,6 @@ export default function SalesPage() {
           </div>
           </div>
         </div>
-      )}
-
-      {/* Modal */}
-      {modalOpen && (
-        <>
-          <div className="fixed inset-0 z-40 bg-gray-950/80 backdrop-blur-sm" onClick={() => { setModalOpen(false); setViewReceipt(null); }} />
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="bg-gray-900 border border-gray-800 w-full max-w-lg shadow-2xl">
-              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-800">
-                <h2 className="text-lg font-bold text-white">{editingId ? "Editar Venda" : "Registar Venda"}</h2>
-                <button onClick={() => setModalOpen(false)} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"><X className="h-5 w-5" /></button>
-              </div>
-              <div className="p-6 space-y-4">
-                {error && <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400"><AlertCircle className="h-4 w-4 shrink-0" />{error}</div>}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nome *</label>
-                    <input type="text" value={form.userName} onChange={(e) => setForm((f) => ({ ...f, userName: e.target.value }))}
-                      placeholder="Nome do aluno"
-                      className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Email</label>
-                    <input type="email" value={form.userEmail} onChange={(e) => setForm((f) => ({ ...f, userEmail: e.target.value }))}
-                      placeholder="email@exemplo.com"
-                      className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tipo</label>
-                    <select value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as Sale["type"] }))}
-                      className="w-full bg-gray-950 border border-gray-800 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer">
-                      <option value="standalone">Curso Avulso</option>
-                      <option value="smart">Plano Smart</option>
-                      <option value="golden">Plano Golden</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Valor (Kz) *</label>
-                    <input type="number" min="0" value={form.amount || ""} onChange={(e) => setForm((f) => ({ ...f, amount: parseFloat(e.target.value) || 0 }))}
-                      placeholder="0"
-                      className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
-                  </div>
-                </div>
-
-                {form.type === "standalone" && (
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Curso</label>
-                    <select value={form.itemId ?? ""} onChange={(e) => {
-                      const selected = courses.find(c => c.id === e.target.value);
-                      setForm((f) => ({ ...f, itemId: e.target.value, itemTitle: selected?.title ?? "" }));
-                    }}
-                      className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer">
-                      <option value="">Selecionar curso...</option>
-                      {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-                    </select>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Método de Pagamento</label>
-                    <select value={form.paymentMethod} onChange={(e) => setForm((f) => ({ ...f, paymentMethod: e.target.value }))}
-                      className="w-full bg-gray-950 border border-gray-800 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer">
-                      {PAYMENT_METHODS.map((m) => <option key={m} value={m}>{m}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status</label>
-                    <select value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as Sale["status"] }))}
-                      className="w-full bg-gray-950 border border-gray-800 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer">
-                      <option value="pending">Pendente</option>
-                      <option value="confirmed">Confirmado</option>
-                      <option value="cancelled">Cancelado</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Referência</label>
-                  <input type="text" value={form.reference ?? ""} onChange={(e) => setForm((f) => ({ ...f, reference: e.target.value }))}
-                    placeholder="Nº de referência ou comprovativo"
-                    className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
-                </div>
-
-                {viewReceipt && (
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Comprovativo</label>
-                    <div className="border border-gray-800 bg-gray-950/50 p-2">
-                      <img src={viewReceipt} alt="Comprovativo" className="max-h-64 object-contain mx-auto cursor-pointer" onClick={() => window.open(viewReceipt, "_blank")} />
-                    </div>
-                    <a href={viewReceipt} target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 mt-2 text-xs text-blue-400 hover:text-blue-300 transition-colors">
-                      <ExternalLink className="h-3 w-3" /> Abrir em nova aba
-                    </a>
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Notas</label>
-                  <textarea rows={2} value={form.notes ?? ""} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-                    placeholder="Observações internas..."
-                    className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all resize-none" />
-                </div>
-              </div>
-              <div className="flex gap-3 px-6 py-5 border-t border-gray-800">
-                <button onClick={() => { setModalOpen(false); setViewReceipt(null); }} className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium transition-colors">Cancelar</button>
-                <button onClick={handleSave} disabled={saving}
-                  className="flex flex-1 items-center justify-center gap-2 py-3 bg-purple hover:bg-purple-light text-white font-bold transition-colors disabled:opacity-60">
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                  {editingId ? "Atualizar" : "Registar"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
       )}
     </div>
   );

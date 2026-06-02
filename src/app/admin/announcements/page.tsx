@@ -38,7 +38,7 @@ async function uploadToR2(file: File, folder: string): Promise<string> {
 
 // -- Config ------------------------------------------------
 const TYPE_CONFIG: Record<AnnouncementType, { label: string; icon: React.ElementType; color: string; bg: string; accent: string }> = {
-  promo:      { label: "Promo��o",     icon: Zap,      color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/30", accent: "bg-yellow-500 text-gray-900" },
+  promo:      { label: "Promoção",     icon: Zap,      color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/30", accent: "bg-yellow-500 text-gray-900" },
   new_course: { label: "Novo Curso",   icon: BookOpen, color: "text-blue-400",   bg: "bg-blue-500/10 border-blue-500/30",   accent: "bg-purple text-white" },
   live:       { label: "Aula ao Vivo", icon: Radio,    color: "text-red-400",    bg: "bg-red-500/10 border-red-500/30",     accent: "bg-red-600 text-white" },
   general:    { label: "Aviso Geral",  icon: Megaphone,color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/30", accent: "bg-purple-600 text-white" },
@@ -104,7 +104,7 @@ export default function AnnouncementsPage() {
         }
         setAnnouncements(list);
       })
-      .catch(()=>toast.error("Erro ao carregar an�ncios."))
+      .catch(()=>toast.error("Erro ao carregar anúncios."))
       .finally(()=>setLoadingAnn(false));
     getDocs(query(collection(db,"countdownBanners"), orderBy("createdAt","desc")))
       .then(s => setCountdowns(s.docs.map(d=>({id:d.id,...d.data()} as CountdownBanner))))
@@ -142,7 +142,7 @@ export default function AnnouncementsPage() {
       });
       const data = await res.json();
       if(!res.ok) throw new Error(data.error??"Erro");
-      // Converte emojis em nomes de �cones se necess�rio
+      // Converte emojis em nomes de ícones se necessário
       const benefits = (data.benefits??[]).map((b:{ icon?:string; title:string; desc?:string }, i:number) => ({
         icon: AVAILABLE_ICONS[i % AVAILABLE_ICONS.length].name,
         title: b.title, desc: b.desc,
@@ -155,14 +155,14 @@ export default function AnnouncementsPage() {
 
   // -- Save announcement -------------------------------------
   const handleSaveAnn = async () => {
-    if(!annForm.title.trim()) { setAnnError("O t�tulo � obrigat�rio."); return; }
-    if(!annForm.body.trim()) { setAnnError("A mensagem � obrigat�ria."); return; }
+    if(!annForm.title.trim()) { setAnnError("O título ? obrigatório."); return; }
+    if(!annForm.body.trim()) { setAnnError("A mensagem ? obrigatória."); return; }
     setSavingAnn(true); setAnnError("");
     try {
       if(editingAnnId) {
         const payload = {...annForm, title:annForm.title.trim(), body:annForm.body.trim(), updatedAt:serverTimestamp()};
         await updateDoc(doc(db,"announcements",editingAnnId),payload);
-        toast.success("An�ncio atualizado.");
+        toast.success("Anúncio atualizado.");
       } else {
         const payload = {
           ...annForm, title:annForm.title.trim(), body:annForm.body.trim(),
@@ -171,7 +171,7 @@ export default function AnnouncementsPage() {
           createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
         };
         await addDoc(collection(db,"announcements"), payload);
-        toast.success(isAdmin ? "An�ncio criado." : "An�ncio enviado para aprova��o.");
+        toast.success(isAdmin ? "Anúncio criado." : "Anúncio enviado para aprovação.");
       }
       setAnnModalOpen(false);
       const s = await getDocs(query(collection(db,"announcements"),orderBy("createdAt","desc")));
@@ -188,7 +188,7 @@ export default function AnnouncementsPage() {
     try {
       await updateDoc(doc(db, "announcements", id), { status: "approved", updatedAt: serverTimestamp() });
       setAnnouncements(p => p.map(a => a.id === id ? { ...a, status: "approved" } : a));
-      toast.success("An�ncio aprovado.");
+      toast.success("Anúncio aprovado.");
     } catch { toast.error("Erro ao aprovar."); }
   };
 
@@ -196,7 +196,7 @@ export default function AnnouncementsPage() {
     try {
       await updateDoc(doc(db, "announcements", id), { status: "rejected", updatedAt: serverTimestamp() });
       setAnnouncements(p => p.map(a => a.id === id ? { ...a, status: "rejected" } : a));
-      toast.success("An�ncio rejeitado.");
+      toast.success("Anúncio rejeitado.");
     } catch { toast.error("Erro ao rejeitar."); }
   };
 
@@ -208,13 +208,13 @@ export default function AnnouncementsPage() {
   };
 
   const deleteAnn = async (id:string) => {
-    toast("Apagar este an�ncio?", {
+    toast("Apagar este anúncio?", {
       action: { label: "Apagar", onClick: async () => {
         try {
           await deleteDoc(doc(db,"announcements",id));
           setAnnouncements(p=>p.filter(x=>x.id!==id));
-          toast.success("An�ncio apagado.");
-        } catch { toast.error("Erro ao apagar an�ncio."); }
+          toast.success("Anúncio apagado.");
+        } catch { toast.error("Erro ao apagar anúncio."); }
       }},
       cancel: "Cancelar",
       duration: Infinity,
@@ -238,8 +238,8 @@ export default function AnnouncementsPage() {
   };
 
   const handleSaveCD = async () => {
-    if(!cdForm.label.trim()) { setCdError("O texto � obrigat�rio."); return; }
-    if(!cdForm.endsAt) { setCdError("A data/hora de fim � obrigat�ria."); return; }
+    if(!cdForm.label.trim()) { setCdError("O texto ? obrigatório."); return; }
+    if(!cdForm.endsAt) { setCdError("A data/hora de fim ? obrigatória."); return; }
     setSavingCD(true); setCdError("");
     try {
       const payload = {...cdForm, label:cdForm.label.trim(), updatedAt:serverTimestamp()};
@@ -281,19 +281,19 @@ export default function AnnouncementsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Marketing & Comunica��o</h1>
-          <p className="mt-1 text-gray-400">Popups, an�ncios e banners de contagem regressiva</p>
+          <h1 className="text-3xl font-bold text-white">Marketing & Comunica??o</h1>
+          <p className="mt-1 text-gray-400">Popups, anúncios e banners de contagem regressiva</p>
         </div>
         <button onClick={tab==="announcements"?openCreateAnn:openCreateCD}
           className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-2.5 font-semibold transition-colors">
           <Plus className="w-4 h-4"/>
-          {tab==="announcements"?"Novo An�ncio":"Novo Banner"}
+          {tab==="announcements"?"Novo Anúncio":"Novo Banner"}
         </button>
       </div>
 
       {/* Tabs */}
       <div className="flex border-b border-gray-800">
-        {([["announcements","An�ncios & Popups",Bell],["countdowns","Contagem Regressiva",Timer]] as const).map(([t,l,Icon])=>(
+        {([["announcements","Anúncios & Popups",Bell],["countdowns","Contagem Regressiva",Timer]] as const).map(([t,l,Icon])=>(
           <button key={t} onClick={()=>setTab(t)}
             className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${tab===t?"border-blue-500 text-white":"border-transparent text-gray-500 hover:text-gray-300"}`}>
             <Icon className="h-4 w-4"/>{l}
@@ -362,7 +362,7 @@ export default function AnnouncementsPage() {
                         )}
                         <span className="text-xs text-gray-500 border border-gray-700 px-2 py-0.5">{TARGET_LABELS[a.target]}</span>
                         {a.showOnce&&<span className="text-xs text-gray-500 border border-gray-700 px-2 py-0.5">1x por user</span>}
-                        {(a.benefits??[]).length>0&&<span className="text-xs text-gray-500 border border-gray-700 px-2 py-0.5">{a.benefits!.length} benef�cios</span>}
+                        {(a.benefits??[]).length>0&&<span className="text-xs text-gray-500 border border-gray-700 px-2 py-0.5">{a.benefits!.length} benefícios</span>}
                       </div>
                       <p className="text-white font-semibold mt-1 truncate">{a.title}</p>
                       <p className="text-gray-400 text-sm truncate">{a.body}</p>
@@ -403,7 +403,7 @@ export default function AnnouncementsPage() {
             <Timer className="h-6 w-6 text-blue-400 shrink-0 mt-0.5"/>
             <div>
               <p className="text-white font-semibold">Como funciona</p>
-              <p className="text-gray-400 text-sm mt-1">Os banners de contagem regressiva aparecem no topo do dashboard dos alunos com um contador ao vivo. Ideal para promo��es com prazo, aulas ao vivo ou lan�amentos.</p>
+              <p className="text-gray-400 text-sm mt-1">Os banners de contagem regressiva aparecem no topo do dashboard dos alunos com um contador ao vivo. Ideal para promoções com prazo, aulas ao vivo ou lançamentos.</p>
             </div>
           </div>
 
@@ -463,7 +463,7 @@ export default function AnnouncementsPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="bg-gray-900 border border-gray-800 w-full max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl">
               <div className="flex items-center justify-between px-6 py-5 border-b border-gray-800 sticky top-0 bg-gray-900 z-10">
-                <h2 className="text-lg font-bold text-white">{editingAnnId?"Editar An�ncio":"Novo An�ncio"}</h2>
+                <h2 className="text-lg font-bold text-white">{editingAnnId?"Editar Anúncio":"Novo Anúncio"}</h2>
                 <button onClick={()=>setAnnModalOpen(false)} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"><X className="h-5 w-5"/></button>
               </div>
               <div className="p-6 space-y-6">
@@ -489,14 +489,14 @@ export default function AnnouncementsPage() {
                 {/* IA */}
                 <button type="button" onClick={handleGenerateAI} disabled={generatingAI}
                   className="w-full flex items-center justify-center gap-2 py-3 border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 font-semibold text-sm transition-all disabled:opacity-50">
-                  {generatingAI?<><Loader2 className="h-4 w-4 animate-spin"/>A gerar...</>:<><Sparkles className="w-4 h-4"/>Gerar an�ncio completo com IA</>}
+                  {generatingAI?<><Loader2 className="h-4 w-4 animate-spin"/>A gerar...</>:<><Sparkles className="w-4 h-4"/>Gerar anúncio completo com IA</>}
                 </button>
 
-                {/* T�tulo */}
+                {/* Título */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">T�tulo *</label>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Título *</label>
                   <input type="text" value={annForm.title} onChange={e=>setAnnForm(f=>({...f,title:e.target.value}))}
-                    placeholder="Ex: ?? Aula ao Vivo come�a em 10 minutos!"
+                    placeholder="Ex: ?? Aula ao Vivo começa em 10 minutos!"
                     className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
                 </div>
 
@@ -504,7 +504,7 @@ export default function AnnouncementsPage() {
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Mensagem *</label>
                   <textarea rows={3} value={annForm.body} onChange={e=>setAnnForm(f=>({...f,body:e.target.value}))}
-                    placeholder="Descreve o an�ncio..."
+                    placeholder="Descreve o anúncio..."
                     className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all resize-none"/>
                 </div>
 
@@ -512,7 +512,7 @@ export default function AnnouncementsPage() {
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Badge (opcional)</label>
                   <input type="text" value={annForm.badgeLabel??""} onChange={e=>setAnnForm(f=>({...f,badgeLabel:e.target.value}))}
-                    placeholder="Ex: Oferta por 24h � Poupa 40%"
+                    placeholder="Ex: Oferta por 24h ? Poupa 40%"
                     className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
                 </div>
 
@@ -540,26 +540,26 @@ export default function AnnouncementsPage() {
                     {imageUploading&&<div className="absolute inset-0 bg-gray-950/70 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-purple"/></div>}
                   </div>
                   <input ref={imageInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleImageChange}/>
-                  {annForm.imageUrl&&!imageUploading&&<p className="mt-2 text-xs text-green-400 flex items-center gap-1"><CheckCircle2 className="h-3 w-3"/>Upload conclu�do</p>}
+                  {annForm.imageUrl&&!imageUploading&&<p className="mt-2 text-xs text-green-400 flex items-center gap-1"><CheckCircle2 className="h-3 w-3"/>Upload concluído</p>}
                 </div>
 
                 {/* CTA */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Bot�o</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Botão</label>
                     <input type="text" value={annForm.ctaLabel??""} onChange={e=>setAnnForm(f=>({...f,ctaLabel:e.target.value}))}
                       placeholder="Ex: Entrar na Aula"
                       className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">URL do Bot�o</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">URL do Botão</label>
                     <input type="text" value={annForm.ctaUrl??""} onChange={e=>setAnnForm(f=>({...f,ctaUrl:e.target.value}))}
                       placeholder="/dashboard/courses ou https://..."
                       className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
                   </div>
                 </div>
 
-                {/* Target + Expira��o */}
+                {/* Target + Expira??o */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Mostrar para</label>
@@ -577,7 +577,7 @@ export default function AnnouncementsPage() {
 
                 {/* Toggles */}
                 <div className="flex flex-col gap-3">
-                  {[{key:"active",label:"An�ncio ativo",desc:"Vis�vel para os alunos agora"},{key:"showOnce",label:"Mostrar apenas uma vez",desc:"Cada aluno v� s� na primeira sess�o"}].map(({key,label,desc})=>(
+                  {[{key:"active",label:"Anúncio ativo",desc:"Vis?vel para os alunos agora"},{key:"showOnce",label:"Mostrar apenas uma vez",desc:"Cada aluno vê só na primeira sess?o"}].map(({key,label,desc})=>(
                     <button key={key} type="button" onClick={()=>setAnnForm(f=>({...f,[key]:!f[key as keyof typeof f]}))}
                       className={`flex items-center gap-4 px-4 py-3 border text-left transition-all ${(annForm[key as keyof typeof annForm] as boolean)?"border-blue-500/40 bg-blue-500/10":"border-gray-800 bg-gray-950/50 hover:border-gray-700"}`}>
                       <div className={`h-5 w-9 rounded-full transition-colors relative shrink-0 ${(annForm[key as keyof typeof annForm] as boolean)?"bg-blue-500":"bg-gray-700"}`}>
@@ -591,13 +591,13 @@ export default function AnnouncementsPage() {
                 {/* Benefits com icon picker */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Benef�cios / Features</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Benefícios / Features</label>
                     <button type="button" onClick={()=>setAnnForm(f=>({...f,benefits:[...(f.benefits??[]),{icon:"CheckCircle2",title:"",desc:""}]}))}
                       className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors">
                       <Plus className="h-3.5 w-3.5"/>Adicionar
                     </button>
                   </div>
-                  {(annForm.benefits??[]).length===0&&<p className="text-xs text-gray-600 italic">Nenhum benef�cio ainda.</p>}
+                  {(annForm.benefits??[]).length===0&&<p className="text-xs text-gray-600 italic">Nenhum benefício ainda.</p>}
                   <div className="space-y-2">
                     {(annForm.benefits??[]).map((b,i)=>(
                       <div key={i} className="flex items-start gap-2 bg-gray-950/60 border border-gray-800 p-3">
@@ -612,10 +612,10 @@ export default function AnnouncementsPage() {
                           )}
                         </div>
                         <div className="flex-1 space-y-1.5">
-                          <input type="text" value={b.title} placeholder="T�tulo do benef�cio"
+                          <input type="text" value={b.title} placeholder="Título do benefício"
                             onChange={e=>{const arr=[...(annForm.benefits??[])];arr[i]={...arr[i],title:e.target.value};setAnnForm(f=>({...f,benefits:arr}));}}
                             className="w-full bg-gray-900 border border-gray-800 py-1.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none"/>
-                          <input type="text" value={b.desc??""} placeholder="Descri��o curta (opcional)"
+                          <input type="text" value={b.desc??""} placeholder="Descri??o curta (opcional)"
                             onChange={e=>{const arr=[...(annForm.benefits??[])];arr[i]={...arr[i],desc:e.target.value};setAnnForm(f=>({...f,benefits:arr}));}}
                             className="w-full bg-gray-900 border border-gray-800 py-1.5 px-3 text-gray-400 placeholder-gray-600 text-xs focus:outline-none"/>
                         </div>
@@ -630,11 +630,11 @@ export default function AnnouncementsPage() {
                 <button type="button" onClick={()=>setPreviewOpen(!previewOpen)}
                   className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors">
                   {previewOpen?<ChevronUp className="h-4 w-4"/>:<ChevronDown className="h-4 w-4"/>}
-                  {previewOpen?"Ocultar":"Ver"} pr�-visualiza��o
+                  {previewOpen?"Ocultar":"Ver"} pr?-visualiza??o
                 </button>
                 {previewOpen&&(
                   <div className="border border-gray-700 bg-gray-950 p-4">
-                    <p className="text-xs text-gray-500 mb-3 uppercase tracking-wider font-bold">Pr�-visualiza��o</p>
+                    <p className="text-xs text-gray-500 mb-3 uppercase tracking-wider font-bold">Pr?-visualiza??o</p>
                     <AnnouncementModal announcement={{...annForm,id:"preview"}} onClose={()=>{}} preview/>
                   </div>
                 )}
@@ -644,7 +644,7 @@ export default function AnnouncementsPage() {
                 <button onClick={handleSaveAnn} disabled={savingAnn||imageUploading}
                   className="flex flex-1 items-center justify-center gap-2 py-3 bg-purple hover:bg-purple-light text-white font-bold transition-colors disabled:opacity-60">
                   {savingAnn?<Loader2 className="h-4 w-4 animate-spin"/>:<Save className="h-4 w-4"/>}
-                  {editingAnnId?"Atualizar":"Criar An�ncio"}
+                  {editingAnnId?"Atualizar":"Criar Anúncio"}
                 </button>
               </div>
             </div>
@@ -664,7 +664,7 @@ export default function AnnouncementsPage() {
                 <button onClick={()=>setCdModalOpen(false)} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"><X className="h-5 w-5"/></button>
               </div>
 
-              {/* Scrollable body � no visible scrollbar */}
+              {/* Scrollable body ? no visible scrollbar */}
               <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <div className="p-6 space-y-5">
                   {cdError&&<div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400"><AlertCircle className="h-4 w-4 shrink-0"/>{cdError}</div>}
@@ -672,7 +672,7 @@ export default function AnnouncementsPage() {
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Banner *</label>
                     <input type="text" value={cdForm.label} onChange={e=>setCdForm(f=>({...f,label:e.target.value}))}
-                      placeholder="Ex: Promo��o termina em � Aula ao vivo come�a em"
+                      placeholder="Ex: Promoção termina em ? Aula ao vivo começa em"
                       className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
                   </div>
 
@@ -707,11 +707,11 @@ export default function AnnouncementsPage() {
                         {cdImageUploading&&<div className="absolute inset-0 bg-gray-950/70 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-purple"/></div>}
                       </div>
                       <input ref={cdImageInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleCdImageChange}/>
-                      {cdForm.imageUrl&&!cdImageUploading&&<p className="mt-2 text-xs text-green-400 flex items-center gap-1"><CheckCircle2 className="h-3 w-3"/>Upload conclu�do</p>}
+                      {cdForm.imageUrl&&!cdImageUploading&&<p className="mt-2 text-xs text-green-400 flex items-center gap-1"><CheckCircle2 className="h-3 w-3"/>Upload concluído</p>}
                       <div className="mt-3">
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Badge</label>
                         <input type="text" value={cdForm.badgeLabel ?? ""} onChange={e => setCdForm(f => ({ ...f, badgeLabel: e.target.value }))}
-                          placeholder="Ex: 82% OFF � Promo��o � Limitado"
+                          placeholder="Ex: 82% OFF ? Promoção ? Limitado"
                           className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
                       </div>
                     </div>
@@ -719,13 +719,13 @@ export default function AnnouncementsPage() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Bot�o</label>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Botão</label>
                       <input type="text" value={cdForm.ctaLabel??""} onChange={e=>setCdForm(f=>({...f,ctaLabel:e.target.value}))}
-                        placeholder="Ex: Ver Promo��o"
+                        placeholder="Ex: Ver Promoção"
                         className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">URL do Bot�o</label>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">URL do Botão</label>
                       <input type="text" value={cdForm.ctaUrl??""} onChange={e=>setCdForm(f=>({...f,ctaUrl:e.target.value}))}
                         placeholder="/dashboard/finances"
                         className="w-full bg-gray-950 border border-gray-800 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
@@ -809,4 +809,4 @@ export default function AnnouncementsPage() {
   );
 }
 
-// -- AnnouncementModal extra�do para components/admin/AnnouncementModal.tsx --
+// -- AnnouncementModal extraído para components/admin/AnnouncementModal.tsx --

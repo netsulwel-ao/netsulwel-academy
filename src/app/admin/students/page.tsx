@@ -140,8 +140,7 @@ export default function AdminStudentsPage() {
             icon={GraduationCap}
             title={search ? "Nenhum aluno encontrado" : "Ainda não há alunos"}
             description={search ? "Tenta pesquisar por outro termo." : "Os alunos aparecerão aqui depois de se registarem na plataforma."}
-            action={!search ? { label: "Convidar alunos", href: "/dashboard/community", icon: UserPlus } as const : undefined}
-            compact
+          compact
           />
         ) : (
           <div className="overflow-x-auto">

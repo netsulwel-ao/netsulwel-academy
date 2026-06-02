@@ -11,7 +11,7 @@ async function main() {
       console.log("Document does NOT exist. Creating...");
       await ref.set({
         email: "ekctiandrog@gmail.com",
-        name: "Ekctiandro Gonçalo",
+        name: "Ekctiandro Gon\u00e7alo",
         role: "admin",
         plan: "golden",
         createdAt: new Date(),
@@ -19,13 +19,19 @@ async function main() {
       console.log("Created admin document with role: admin");
     } else {
       const data = doc.data();
-      console.log("Current data:", JSON.stringify(data, null, 2));
-      if (data.role !== "admin" || data.plan !== "golden") {
-        console.log("Updating role & plan...");
-        await ref.update({ role: "admin", plan: "golden" });
-        console.log("Updated!");
+      if (!data) {
+        console.log("Document exists but data() returned undefined, creating...");
+        await ref.set({ role: "admin", plan: "golden", email: "ekctiandrog@gmail.com" });
+        console.log("Created!");
       } else {
-        console.log("Admin doc is correct. No changes needed.");
+        console.log("Current data:", JSON.stringify(data, null, 2));
+        if (data.role !== "admin" || data.plan !== "golden") {
+          console.log("Updating role & plan...");
+          await ref.update({ role: "admin", plan: "golden" });
+          console.log("Updated!");
+        } else {
+          console.log("Admin doc is correct. No changes needed.");
+        }
       }
     }
   } catch (err) {
