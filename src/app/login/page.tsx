@@ -111,12 +111,13 @@ export default function LoginPage() {
   if (view === "login") {
   await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
- const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
- 
-  if (userDoc.exists() && userDoc.data().role === "admin") {
-  router.push(redirectTo === "/dashboard" ? "/admin" : redirectTo);
+  const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
+  const role = userDoc.exists() ? userDoc.data().role : "aluno";
+
+  if (role === "admin" || role === "teacher") {
+    router.push(redirectTo === "/dashboard" ? "/admin" : redirectTo);
   } else {
-  router.push(redirectTo);
+    router.push(redirectTo);
   }
  
   } else if (view === "register") {
@@ -249,10 +250,13 @@ export default function LoginPage() {
   }),
   });
   router.push(redirectTo);
-  } else if (userDoc.data().role === "admin") {
-  router.push(redirectTo === "/dashboard" ? "/admin" : redirectTo);
   } else {
-  router.push(redirectTo);
+  const role = userDoc.data().role;
+  if (role === "admin" || role === "teacher") {
+    router.push(redirectTo === "/dashboard" ? "/admin" : redirectTo);
+  } else {
+    router.push(redirectTo);
+  }
   }
   
   } catch (err: unknown) {
