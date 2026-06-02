@@ -15,10 +15,6 @@ export default function EditCoursePage() {
   const router = useRouter();
   const { isAdminOrTeacher } = useAuth();
 
-  useEffect(() => {
-    if (!isAdminOrTeacher) router.replace("/dashboard");
-  }, [isAdminOrTeacher, router]);
-
   const [initialData, setInitialData] = useState<Partial<Course> | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

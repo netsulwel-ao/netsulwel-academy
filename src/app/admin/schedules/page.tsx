@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { collection, getDocs, doc, updateDoc, query, orderBy, serverTimestamp } from "firebase/firestore";
@@ -44,12 +43,7 @@ function emptySession(): TrailLiveSession {
 }
 
 export default function SchedulesPage() {
-  const router = useRouter();
   const { isAdminOrTeacher } = useAuth();
-
-  useEffect(() => {
-    if (!isAdminOrTeacher) router.replace("/dashboard");
-  }, [isAdminOrTeacher, router]);
 
   const [trails, setTrails] = useState<Trail[]>([]);
   const [loading, setLoading] = useState(true);

@@ -15,10 +15,6 @@ export default function EditTrailPage() {
   const router = useRouter();
   const { isAdminOrTeacher } = useAuth();
 
-  useEffect(() => {
-    if (!isAdminOrTeacher) router.replace("/dashboard");
-  }, [isAdminOrTeacher, router]);
-
   const [loading, setLoading] = useState(true);
   const [trail, setTrail] = useState<Trail | null>(null);
   const [allCourses, setAllCourses] = useState<Course[]>([]);

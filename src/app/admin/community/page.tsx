@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { collection, query, orderBy, onSnapshot, doc, deleteDoc } from "firebase/firestore";
@@ -15,12 +14,7 @@ import type { CommunityPost } from "@/types/community";
 import { toast } from "sonner";
 
 export default function AdminCommunityPage() {
-  const router = useRouter();
   const { isAdminOrTeacher } = useAuth();
-
-  useEffect(() => {
-    if (!isAdminOrTeacher) router.replace("/dashboard");
-  }, [isAdminOrTeacher, router]);
 
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(true);
