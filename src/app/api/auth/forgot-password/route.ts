@@ -216,6 +216,38 @@ export async function POST(req: NextRequest) {
     } catch (fbErr: unknown) {
       const msg = fbErr instanceof Error ? fbErr.message : "";
       console.error("generatePasswordResetLink error:", msg);
+
+      // Fallback: usar Firebase Auth REST API directamente
+      if (msg.includes("INTERNAL ASSERT") || msg.includes("action link")) {
+        try {
+          const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+          if (!apiKey) throw new Error("API key não configurada");
+          const restRes = await fetch(
+            `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${apiKey}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                requestType: "PASSWORD_RESET",
+                email,
+              }),
+            }
+          );
+          const restData = await restRes.json();
+          if (!restRes.ok) {
+            const errCode = restData?.error?.message ?? "UNKNOWN";
+            if (errCode === "EMAIL_NOT_FOUND") return NextResponse.json({ success: true });
+            throw new Error(errCode);
+          }
+          // Firebase enviou o email directamente via REST — não precisamos do SMTP
+          return NextResponse.json({ success: true });
+        } catch (restErr) {
+          const restMsg = restErr instanceof Error ? restErr.message : String(restErr);
+          console.error("REST fallback error:", restMsg);
+          return NextResponse.json({ error: "Erro ao enviar email de recuperação.", detail: restMsg }, { status: 500 });
+        }
+      }
+
       if (msg.includes("user-not-found") || msg.includes("EMAIL_NOT_FOUND")) {
         return NextResponse.json({ success: true });
       }
