@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   collection, getDocs, addDoc, updateDoc, deleteDoc,
   doc, serverTimestamp, orderBy, query, where, arrayUnion, arrayRemove,
@@ -28,13 +26,6 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 export default function SalesPage() {
-  const router = useRouter();
-  const { isAdminOrTeacher } = useAuth();
-
-  useEffect(() => {
-    if (!isAdminOrTeacher) router.replace("/dashboard");
-  }, [isAdminOrTeacher, router]);
-
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
 

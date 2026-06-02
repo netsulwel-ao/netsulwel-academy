@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   collection, getDocs, doc, updateDoc, orderBy, query,
 } from "firebase/firestore";
@@ -30,12 +28,6 @@ type SortBy = "name" | "date" | "role";
 export default function UsersPage() {
   const [users, setUsers] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  const { isAdmin } = useAuth();
-
-  useEffect(() => {
-    if (!isAdmin) router.replace("/dashboard");
-  }, [isAdmin, router]);
 
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");

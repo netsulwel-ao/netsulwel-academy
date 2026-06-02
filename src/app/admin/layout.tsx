@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import Sidebar from "@/components/admin/Sidebar";
 import Header from "@/components/admin/Header";
@@ -11,8 +10,7 @@ export default function AdminLayout({
 }: {
  children: React.ReactNode;
 }) {
- const router = useRouter();
-  const { isAdminOrTeacher, loading } = useAuth();
+  const { loading } = useAuth();
  const [isCollapsed, setIsCollapsed] = useState(false);
  const [mobileOpen, setMobileOpen] = useState(false);
  const [theme, setTheme] = useState<"dark" | "light">("dark");
@@ -22,12 +20,7 @@ export default function AdminLayout({
     if (saved) setTheme(saved);
   }, []);
 
-  useEffect(() => {
-    if (loading) return;
-    if (!isAdminOrTeacher) router.replace("/dashboard");
-  }, [isAdminOrTeacher, loading, router]);
-
-  if (loading || !isAdminOrTeacher) {
+  if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-950">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-500 border-t-purple" />

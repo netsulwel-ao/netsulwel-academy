@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { useAuth } from "@/contexts/AuthContext";
 import { collection, getDocs, deleteDoc, doc, orderBy, query } from "firebase/firestore";
 import { Plus, Trash2, Pencil, Loader2, BookOpen, AlertTriangle, X, Layers, Radio } from "lucide-react";
 import Link from "next/link";
@@ -17,13 +15,6 @@ const TYPE_COLORS = {
 };
 
 export default function TrailsPage() {
-  const router = useRouter();
-  const { isAdminOrTeacher } = useAuth();
-
-  useEffect(() => {
-    if (!isAdminOrTeacher) router.replace("/dashboard");
-  }, [isAdminOrTeacher, router]);
-
   const [trails, setTrails] = useState<Trail[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);

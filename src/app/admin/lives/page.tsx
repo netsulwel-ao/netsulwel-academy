@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   collection,
   getDocs,
@@ -58,13 +56,6 @@ const TARGET_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export default function AdminLivesPage() {
-  const router = useRouter();
-  const { isAdminOrTeacher } = useAuth();
-
-  useEffect(() => {
-    if (!isAdminOrTeacher) router.replace("/dashboard");
-  }, [isAdminOrTeacher, router]);
-
   const [lives, setLives] = useState<LiveSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);

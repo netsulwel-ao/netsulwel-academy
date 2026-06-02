@@ -6,17 +6,20 @@ import { useRouter } from "next/navigation";
 import { Mail, Loader2, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { sendEmailVerification } from "firebase/auth";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
+  const { user, loading } = useAuth();
   const [resending, setResending] = useState(false);
   const [checking, setChecking] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!auth.currentUser) router.replace("/login");
-  }, [router]);
+    if (loading) return;
+    if (!user) router.replace("/login");
+  }, [loading, user, router]);
 
   const handleResend = async () => {
     if (!auth.currentUser) return;
