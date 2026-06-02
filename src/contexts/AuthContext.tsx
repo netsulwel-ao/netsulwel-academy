@@ -35,24 +35,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [role, setRole] = useState<UserRole>("aluno");
   const [plan, setPlan] = useState<UserPlan>("free");
   const [loading, setLoading] = useState(true);
-  const [adminLoaded, setAdminLoaded] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
   const router = useRouter();
   const pathname = usePathname();
 
-  const prevRole = useRef<UserRole>("aluno");
-  const prevPlan = useRef<UserPlan>("free");
+  // Usar refs para evitar re-renders desnecessários no effect de redirect
+  const redirectingRef = useRef(false);
 
   const isAdmin = role === "admin";
   const isTeacher = role === "teacher";
   const isAdminOrTeacher = isAdmin || isTeacher;
-  const needsEmailVerification = !!user && !user.emailVerified;
 
   const logout = async () => {
     document.cookie = "auth-uid=;path=/;max-age=0";
     setUser(null);
     setRole("aluno");
     setPlan("free");
-    setAdminLoaded(false);
+    setProfileLoaded(false);
+    redirectingRef.current = false;
     await firebaseSignOut(auth);
     router.replace("/login");
   };
@@ -60,77 +61,105 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const refreshUser = async () => {
     if (!user) return;
     try {
-      await user.reload();
       const snap = await getDoc(doc(db, "users", user.uid));
       if (!snap.exists()) return;
       const data = snap.data();
       setRole(data.role === "admin" ? "admin" : data.role === "teacher" ? "teacher" : "aluno");
       setPlan(data.plan === "smart" || data.plan === "golden" ? data.plan : "free");
-    } catch {
-      // silencia erro de refresh
-    }
+    } catch { /* silencia */ }
   };
 
+  // ── Auth state ────────────────────────────────────────────
   useEffect(() => {
     const unsubscribe = onIdTokenChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         document.cookie = `auth-uid=${currentUser.uid};path=/;max-age=86400;SameSite=Lax`;
-        setLoading(false);
       } else {
         document.cookie = "auth-uid=;path=/;max-age=0";
         setUser(null);
         setRole("aluno");
         setPlan("free");
+        setProfileLoaded(false);
         setLoading(false);
       }
     });
     return () => unsubscribe();
   }, []);
 
+  // ── Firestore profile ─────────────────────────────────────
   useEffect(() => {
     if (!user) return;
-    const unsub = onSnapshot(doc(db, "users", user.uid), (snap) => {
-      if (!snap.exists()) {
-        setAdminLoaded(true);
-        return;
+    const unsub = onSnapshot(
+      doc(db, "users", user.uid),
+      (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          const r: UserRole = data.role === "admin" ? "admin" : data.role === "teacher" ? "teacher" : "aluno";
+          const p: UserPlan = data.plan === "smart" || data.plan === "golden" ? data.plan : "free";
+          setRole(r);
+          setPlan(p);
+        }
+        setProfileLoaded(true);
+        setLoading(false);
+      },
+      () => {
+        // Erro de permissão — considera carregado com defaults
+        setProfileLoaded(true);
+        setLoading(false);
       }
-      const data = snap.data();
-      const r = data.role === "admin" ? "admin" : data.role === "teacher" ? "teacher" : "aluno";
-      prevRole.current = r;
-      prevPlan.current = data.plan === "smart" || data.plan === "golden" ? data.plan : "free";
-      setRole(r);
-      setPlan(data.plan === "smart" || data.plan === "golden" ? data.plan : "free");
-      setAdminLoaded(true);
-    }, () => {
-      setRole(prevRole.current);
-      setPlan(prevPlan.current);
-      setAdminLoaded(true);
-    });
+    );
     return () => unsub();
-  }, [user]);
+  }, [user?.uid]); // só re-executa se o UID mudar, não o objeto user inteiro
 
+  // ── Redirect logic — separado e com guard anti-loop ───────
   useEffect(() => {
+    // Aguarda loading terminar
     if (loading) return;
-    if (!user && (pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin"))) {
+    // Aguarda profile se em rota protegida
+    if (user && !profileLoaded && (pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin"))) return;
+
+    // Evita múltiplos redirects simultâneos
+    if (redirectingRef.current) return;
+
+    const isProtected = pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin");
+    const isAdminRoute = pathname?.startsWith("/admin");
+    const isAuthPage = pathname === "/login" || pathname === "/";
+
+    if (!user && isProtected) {
+      // Não logado a tentar aceder rota protegida
+      redirectingRef.current = true;
       router.replace("/login");
-    } else if (user && pathname?.startsWith("/admin") && adminLoaded && !isAdminOrTeacher) {
-      router.replace("/dashboard");
-    } else if (user && !user.emailVerified && pathname !== "/verify-email" && !pathname?.startsWith("/api")) {
-      router.replace("/verify-email");
+      setTimeout(() => { redirectingRef.current = false; }, 1000);
+      return;
     }
-  }, [user, loading, isAdminOrTeacher, adminLoaded, pathname, router]);
+
+    if (user && profileLoaded && isAdminRoute && !isAdminOrTeacher) {
+      // Logado mas sem permissão admin
+      redirectingRef.current = true;
+      router.replace("/dashboard");
+      setTimeout(() => { redirectingRef.current = false; }, 1000);
+      return;
+    }
+
+    // NÃO redirecionar por verificação de email — causa loops
+    // NÃO redirecionar se já está na página correta
+  }, [loading, user, profileLoaded, isAdminOrTeacher, pathname]);
+  // router intencionalmente omitido — é estável e causava loops
 
   const isProtectedRoute = pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin");
-  const needsAdminCheck = pathname?.startsWith("/admin") && !adminLoaded && !!user;
+  const stillLoading = loading || (user && !profileLoaded && isProtectedRoute);
 
-  const ctx = { user, loading, role, isAdmin, isTeacher, isAdminOrTeacher, plan, logout, refreshUser };
+  const ctx: AuthContextType = {
+    user, loading, role, isAdmin, isTeacher, isAdminOrTeacher, plan, logout, refreshUser,
+  };
 
-  if ((loading || needsAdminCheck || (!user && isProtectedRoute)) && isProtectedRoute) {
+  // Mostra spinner apenas em rotas protegidas enquanto carrega
+  if (stillLoading && isProtectedRoute) {
     return (
       <AuthContext.Provider value={ctx}>
         <div className="flex items-center justify-center min-h-screen bg-gray-950">
-          <Loader2 className="h-8 w-8 animate-spin text-purple" />
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         </div>
       </AuthContext.Provider>
     );
