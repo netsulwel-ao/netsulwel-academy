@@ -61,7 +61,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!user) return;
     const unsub = onSnapshot(doc(db, "users", user.uid), (snap) => {
-      if (!snap.exists()) return;
+      if (!snap.exists()) {
+        setAdminLoaded(true);
+        return;
+      }
       const data = snap.data();
       const r = data.role === "admin" ? "admin" : data.role === "teacher" ? "teacher" : "aluno";
       prevRole.current = r;

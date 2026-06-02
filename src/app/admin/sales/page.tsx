@@ -110,7 +110,7 @@ export default function SalesPage() {
         toast.success("Venda registada.");
       }
       setModalOpen(false); fetchSales();
-    } catch { setError("Erro ao guardar."); }
+    } catch (e) { console.error("Save sale error:", e); setError("Erro ao guardar: " + (e instanceof Error ? e.message : "erro desconhecido")); }
     finally { setSaving(false); }
   };
 
