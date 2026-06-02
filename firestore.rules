@@ -7,11 +7,22 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function getRole() {
+      return isAuth() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        : null;
+    }
+
     function isAdmin() {
-      // exists() evita erro quando o documento ainda não existe (ex: registo novo)
-      return isAuth() &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+      return getRole() == "admin";
+    }
+
+    function isTeacher() {
+      return getRole() == "teacher";
+    }
+
+    function isAdminOrTeacher() {
+      return getRole() == "admin" || getRole() == "teacher";
     }
 
     function isOwner(uid) {
@@ -20,90 +31,92 @@ service cloud.firestore {
 
     // ── users ─────────────────────────────────────────────
     match /users/{uid} {
-      // CRÍTICO: leitura pública para autenticados — necessário para o AuthContext
-      // ler o próprio perfil logo após registo (antes do token estar totalmente propagado)
       allow read: if isAuth();
-
-      // Criação: só o próprio user (no registo) — sem restrições adicionais
-      // para evitar race condition entre criação do doc e validação das regras
       allow create: if isOwner(uid);
-
-      // Update: admin pode tudo; user pode atualizar os seus dados mas NÃO role/plan
       allow update: if isAdmin() ||
         (isOwner(uid) && !request.resource.data.diff(resource.data).affectedKeys()
           .hasAny(["role", "plan"]));
-
       allow delete: if isAdmin();
 
-      // ── Subcoleções do user ──────────────────────────────
       match /notifications/{notifId} {
         allow read: if isOwner(uid);
-        // Sistema (admin) pode criar notificações; aluno só tipos permitidos
         allow create: if isAdmin() ||
           (isAuth() && request.resource.data.uid == uid &&
            request.resource.data.type in [
              "community_like", "community_comment",
              "payment_approved", "course_complete", "certificate_ready"
            ]);
-        allow update: if isOwner(uid); // marcar como lida
+        allow update: if isOwner(uid);
         allow delete: if isAdmin() || isOwner(uid);
       }
     }
 
     // ── courses ───────────────────────────────────────────
     match /courses/{courseId} {
-      // Cursos publicados: qualquer pessoa (incluindo não autenticada) pode ver
-      // para funcionar na landing page e páginas de preview
-      allow read: if resource.data.status == "published" || isAdmin();
-      allow create, update, delete: if isAdmin();
+      allow read: if resource.data.status == "published" || isAdminOrTeacher();
+      // Teacher pode criar/editar apenas os seus próprios cursos
+      allow create: if isAdminOrTeacher();
+      allow update: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
+      allow delete: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
     }
 
     // ── trails ────────────────────────────────────────────
     match /trails/{trailId} {
-      allow read: if resource.data.status == "published" || isAdmin();
-      allow create, update, delete: if isAdmin();
+      allow read: if resource.data.status == "published" || isAdminOrTeacher();
+      allow create: if isAdminOrTeacher();
+      allow update: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
+      allow delete: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
     }
 
     // ── announcements ─────────────────────────────────────
     match /announcements/{announcementId} {
-      allow read: if isAdmin() ||
+      allow read: if isAdminOrTeacher() ||
         (isAuth() && resource.data.active == true);
-      allow create, update, delete: if isAdmin();
+      allow create: if isAdminOrTeacher();
+      allow update: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
+      allow delete: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
     }
 
     // ── countdownBanners ──────────────────────────────────
     match /countdownBanners/{bannerId} {
-      allow read: if isAdmin() ||
+      allow read: if isAdminOrTeacher() ||
         (isAuth() && resource.data.active == true);
       allow create, update, delete: if isAdmin();
     }
 
     // ── lives ─────────────────────────────────────────────
     match /lives/{liveId} {
-      // Alunos veem todas as lives (scheduled, live, ended) para histórico
-      allow read: if isAuth() || isAdmin();
-      allow create, update, delete: if isAdmin();
+      allow read: if isAuth() || isAdminOrTeacher();
+      allow create: if isAdminOrTeacher();
+      allow update: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
+      allow delete: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
 
-      // Chat
       match /chat/{msgId} {
         allow read: if isAuth();
         allow create: if isAuth() && (
           request.resource.data.uid == request.auth.uid ||
-          (isAdmin() && request.resource.data.type == "system")
+          (isAdminOrTeacher() && request.resource.data.type == "system")
         );
-        allow update, delete: if isAdmin();
+        allow update, delete: if isAdminOrTeacher();
       }
 
-      // Speakers
       match /speakers/{speakerId} {
         allow read: if isAuth();
-        allow write: if isAdmin();
+        allow write: if isAdminOrTeacher();
       }
     }
 
     // ── enrollments ───────────────────────────────────────
     match /enrollments/{enrollmentId} {
-      allow read: if isAdmin() ||
+      allow read: if isAdminOrTeacher() ||
         (isAuth() && resource.data.userId == request.auth.uid);
       allow create: if isAuth() &&
         request.resource.data.userId == request.auth.uid;
@@ -112,7 +125,7 @@ service cloud.firestore {
 
     // ── progress ──────────────────────────────────────────
     match /progress/{progressId} {
-      allow read: if isAdmin() ||
+      allow read: if isAdminOrTeacher() ||
         (isAuth() && resource.data.userId == request.auth.uid);
       allow create: if isAuth() &&
         request.resource.data.userId == request.auth.uid;
@@ -122,14 +135,14 @@ service cloud.firestore {
 
     // ── certificates ──────────────────────────────────────
     match /certificates/{certId} {
-      allow read: if isAdmin() ||
+      allow read: if isAdminOrTeacher() ||
         (isAuth() && resource.data.userId == request.auth.uid);
       allow create, update, delete: if isAdmin();
     }
 
     // ── sales ─────────────────────────────────────────────
     match /sales/{saleId} {
-      allow read: if isAdmin() ||
+      allow read: if isAdminOrTeacher() ||
         (isAuth() && resource.data.userId == request.auth.uid);
       allow create: if isAuth() &&
         request.resource.data.userId == request.auth.uid;
@@ -137,7 +150,6 @@ service cloud.firestore {
     }
 
     // ── settings ──────────────────────────────────────────
-    // Leitura pública — contém apenas SEO/meta/contacto, nada sensível
     match /settings/{docId} {
       allow read: if true;
       allow write: if isAdmin();
@@ -148,9 +160,9 @@ service cloud.firestore {
       allow read: if isAuth();
       allow create: if isAuth() &&
         request.resource.data.authorId == request.auth.uid;
-      allow update: if isAdmin() ||
+      allow update: if isAdminOrTeacher() ||
         request.auth.uid == resource.data.authorId;
-      allow delete: if isAdmin() ||
+      allow delete: if isAdminOrTeacher() ||
         request.auth.uid == resource.data.authorId;
 
       match /likes/{userId} {
@@ -162,9 +174,9 @@ service cloud.firestore {
         allow read: if isAuth();
         allow create: if isAuth() &&
           request.resource.data.authorId == request.auth.uid;
-        allow update: if isAdmin() ||
+        allow update: if isAdminOrTeacher() ||
           request.auth.uid == resource.data.authorId;
-        allow delete: if isAdmin() ||
+        allow delete: if isAdminOrTeacher() ||
           request.auth.uid == resource.data.authorId;
       }
     }
@@ -179,7 +191,7 @@ service cloud.firestore {
     // ── broadcasts ────────────────────────────────────────
     match /broadcasts/{broadcastId} {
       allow read: if isAuth();
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if isAdminOrTeacher();
     }
 
     // Bloqueia tudo o resto
