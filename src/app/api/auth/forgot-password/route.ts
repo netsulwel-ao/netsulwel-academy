@@ -203,24 +203,25 @@ export async function POST(req: NextRequest) {
       admin = getFirebaseAdmin();
     } catch (initErr) {
       const initMsg = initErr instanceof Error ? initErr.message : "erro desconhecido";
+      console.error("Firebase Admin init error:", initErr);
       return NextResponse.json(
-        { error: "Serviço de autenticação indisponível (Admin SDK).", detail: initMsg },
+        { error: "Serviço de autenticação indisponível. Contacta o suporte.", detail: process.env.NODE_ENV === "development" ? initMsg : undefined },
         { status: 500 }
       );
     }
 
     let resetLink: string;
     try {
-      resetLink = await admin.auth().generatePasswordResetLink(email);
+      resetLink = await admin.auth().generatePasswordResetLink(email, {
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://academia.netsulwel.tech"}/login`,
+      });
     } catch (fbErr: unknown) {
       const msg = fbErr instanceof Error ? fbErr.message : "";
-      if (msg.includes("EMAIL_NOT_FOUND")) {
-        return NextResponse.json(
-          { error: "Email não encontrado na autenticação." },
-          { status: 404 }
-        );
+      console.error("generatePasswordResetLink error:", msg);
+      if (msg.includes("EMAIL_NOT_FOUND") || msg.includes("user-not-found")) {
+        // Não revelar se o email existe — resposta genérica
+        return NextResponse.json({ success: true });
       }
-      console.error("Firebase generatePasswordResetLink error:", fbErr);
       return NextResponse.json(
         { error: "Erro ao gerar link de recuperação." },
         { status: 500 }

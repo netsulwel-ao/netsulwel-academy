@@ -52,9 +52,16 @@ export default function NewLivePage() {
 
     setUploadingThumb(true);
     try {
+      // Obter token de autenticação para a API protegida
+      const { auth } = await import("@/lib/firebase");
+      const token = auth.currentUser ? await auth.currentUser.getIdToken() : "";
+
       const res = await fetch("/api/upload/presign", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           filename: file.name,
           contentType: file.type,
@@ -62,6 +69,7 @@ export default function NewLivePage() {
         }),
       });
 
+      if (!res.ok) throw new Error(`Erro ${res.status}`);
       const { presignedUrl, publicUrl } = await res.json();
 
       await fetch(presignedUrl, {
@@ -73,7 +81,7 @@ export default function NewLivePage() {
       setThumbnail(publicUrl);
     } catch (err) {
       console.error("Erro ao fazer upload:", err);
-      alert("Erro ao fazer upload da thumbnail.");
+      setError("Erro ao fazer upload da thumbnail. Tenta novamente.");
     } finally {
       setUploadingThumb(false);
     }
@@ -81,9 +89,10 @@ export default function NewLivePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
     if (!title || !scheduledAt || !user) {
-      alert("Preencha todos os campos obrigatórios.");
+      setError("Preencha o título e a data/hora.");
       return;
     }
 
@@ -91,7 +100,7 @@ export default function NewLivePage() {
     try {
       const roomName = generateRoomName(title);
 
-      await addDoc(collection(db, "lives"), {
+      const docRef = await addDoc(collection(db, "lives"), {
         title,
         description,
         thumbnail,
@@ -106,10 +115,11 @@ export default function NewLivePage() {
         updatedAt: serverTimestamp(),
       });
 
+      // Navegar com o ID real da live criada
       router.push("/admin/lives");
     } catch (err) {
       console.error("Erro ao criar live:", err);
-      alert("Erro ao criar a live.");
+      setError("Erro ao criar a live. Tenta novamente.");
     } finally {
       setSaving(false);
     }
@@ -156,6 +166,12 @@ export default function NewLivePage() {
           </p>
         </div>
       </div>
+
+      {error && (
+        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+          <AlertCircle className="h-4 w-4 shrink-0" />{error}
+        </div>
+      )}
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
