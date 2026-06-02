@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { User, Mail, Lock, Loader2, AlertCircle, Eye, EyeOff, CheckCircle2, Sun, Moon } from "lucide-react";
+import { User, Mail, Lock, Loader2, AlertCircle, Eye, EyeOff, CheckCircle2, Sun, Moon, Home, Phone, Globe, MapPin, Calendar } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, type AuthProvider } from "firebase/auth";
@@ -54,6 +54,12 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [morada, setMorada] = useState("");
+  const [idade, setIdade] = useState("");
+  const [genero, setGenero] = useState("");
+  const [nacionalidade, setNacionalidade] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [pais, setPais] = useState("");
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -83,6 +89,13 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
     if (!name.trim()) { setError("O nome é obrigatório."); return; }
+    if (/\d/.test(name)) { setError("O nome não pode conter números."); return; }
+    if (!morada.trim()) { setError("A morada é obrigatória."); return; }
+    if (!idade.trim() || isNaN(Number(idade)) || Number(idade) < 1 || Number(idade) > 150) { setError("Indique uma idade válida."); return; }
+    if (!genero) { setError("Selecione o género."); return; }
+    if (!nacionalidade.trim()) { setError("A nacionalidade é obrigatória."); return; }
+    if (!telefone.trim()) { setError("O número de telefone é obrigatório."); return; }
+    if (!pais.trim()) { setError("O país é obrigatório."); return; }
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -92,6 +105,12 @@ export default function RegisterPage() {
         name,
         role: "aluno",
         createdAt: new Date(),
+        morada,
+        idade: Number(idade),
+        genero,
+        nacionalidade,
+        telefone,
+        pais,
       });
       router.push(redirectTo);
     } catch {
@@ -239,6 +258,88 @@ export default function RegisterPage() {
                       className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 focus:outline-none disabled:opacity-50">
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-800 pt-5 mt-5">
+                  <p className="text-sm font-medium text-gray-400 mb-4">Dados pessoais</p>
+
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-gray-300" htmlFor="morada">Morada</label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <Home className="h-5 w-5 text-gray-500" />
+                      </div>
+                      <input id="morada" type="text" required disabled={loading} placeholder="Rua Principal, 123"
+                        value={morada} onChange={(e) => setMorada(e.target.value)}
+                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mt-4">
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-gray-300" htmlFor="idade">Idade</label>
+                      <div className="relative">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                          <Calendar className="h-5 w-5 text-gray-500" />
+                        </div>
+                        <input id="idade" type="number" required disabled={loading} placeholder="18" min="1" max="150"
+                          value={idade} onChange={(e) => setIdade(e.target.value)}
+                          className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-gray-300" htmlFor="genero">Género</label>
+                      <div className="relative">
+                        <select id="genero" required disabled={loading}
+                          value={genero} onChange={(e) => setGenero(e.target.value)}
+                          className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-3 pr-3 text-white transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50 appearance-none">
+                          <option value="" disabled>Selecionar</option>
+                          <option value="Masculino">Masculino</option>
+                          <option value="Feminino">Feminino</option>
+                          <option value="Outro">Outro</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mt-4">
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-gray-300" htmlFor="nacionalidade">Nacionalidade</label>
+                      <div className="relative">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                          <MapPin className="h-5 w-5 text-gray-500" />
+                        </div>
+                        <input id="nacionalidade" type="text" required disabled={loading} placeholder="Angolana"
+                          value={nacionalidade} onChange={(e) => setNacionalidade(e.target.value)}
+                          className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-gray-300" htmlFor="pais">País</label>
+                      <div className="relative">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                          <Globe className="h-5 w-5 text-gray-500" />
+                        </div>
+                        <input id="pais" type="text" required disabled={loading} placeholder="Angola"
+                          value={pais} onChange={(e) => setPais(e.target.value)}
+                          className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 mt-4">
+                    <label className="text-sm font-medium text-gray-300" htmlFor="telefone">Número de telefone</label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <Phone className="h-5 w-5 text-gray-500" />
+                      </div>
+                      <input id="telefone" type="tel" required disabled={loading} placeholder="+244 900 000 000"
+                        value={telefone} onChange={(e) => setTelefone(e.target.value)}
+                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
+                    </div>
                   </div>
                 </div>
 
