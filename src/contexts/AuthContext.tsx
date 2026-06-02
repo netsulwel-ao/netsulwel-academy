@@ -13,6 +13,7 @@ export type UserPlan = "free" | "smart" | "golden";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  profileLoaded: boolean;
   role: UserRole;
   isAdmin: boolean;
   isTeacher: boolean;
@@ -23,26 +24,39 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType>({
-  user: null, loading: true,
+  user: null, loading: true, profileLoaded: false,
   role: "aluno", isAdmin: false, isTeacher: false, isAdminOrTeacher: false,
   plan: "free",
   logout: async () => {},
   refreshUser: async () => {},
 });
 
+// Estado de perfil combinado — atualizado num único setState para evitar renders intermédios
+interface ProfileState {
+  role: UserRole;
+  plan: UserPlan;
+  profileLoaded: boolean;
+}
+
+const DEFAULT_PROFILE: ProfileState = { role: "aluno", plan: "free", profileLoaded: false };
+
+function parseProfile(data: Record<string, unknown>): { role: UserRole; plan: UserPlan } {
+  const role: UserRole = data.role === "admin" ? "admin" : data.role === "teacher" ? "teacher" : "aluno";
+  const plan: UserPlan = data.plan === "smart" || data.plan === "golden" ? data.plan as UserPlan : "free";
+  return { role, plan };
+}
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<UserRole>("aluno");
-  const [plan, setPlan] = useState<UserPlan>("free");
+  const [profile, setProfile] = useState<ProfileState>(DEFAULT_PROFILE);
   const [loading, setLoading] = useState(true);
-  const [profileLoaded, setProfileLoaded] = useState(false);
 
   const router = useRouter();
   const pathname = usePathname();
 
-  // Usar refs para evitar re-renders desnecessários no effect de redirect
   const redirectingRef = useRef(false);
 
+  const { role, plan, profileLoaded } = profile;
   const isAdmin = role === "admin";
   const isTeacher = role === "teacher";
   const isAdminOrTeacher = isAdmin || isTeacher;
@@ -50,9 +64,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = async () => {
     document.cookie = "auth-uid=;path=/;max-age=0";
     setUser(null);
-    setRole("aluno");
-    setPlan("free");
-    setProfileLoaded(false);
+    setProfile(DEFAULT_PROFILE);
+    setLoading(false);
     redirectingRef.current = false;
     await firebaseSignOut(auth);
     router.replace("/login");
@@ -63,9 +76,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const snap = await getDoc(doc(db, "users", user.uid));
       if (!snap.exists()) return;
-      const data = snap.data();
-      setRole(data.role === "admin" ? "admin" : data.role === "teacher" ? "teacher" : "aluno");
-      setPlan(data.plan === "smart" || data.plan === "golden" ? data.plan : "free");
+      const { role, plan } = parseProfile(snap.data() as Record<string, unknown>);
+      setProfile((prev) => ({ ...prev, role, plan }));
     } catch { /* silencia */ }
   };
 
@@ -78,9 +90,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         document.cookie = "auth-uid=;path=/;max-age=0";
         setUser(null);
-        setRole("aluno");
-        setPlan("free");
-        setProfileLoaded(false);
+        setProfile(DEFAULT_PROFILE);
         setLoading(false);
       }
     });
@@ -93,24 +103,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     let cancelled = false;
 
-    // Primeira leitura com getDoc — mais fiável logo após login/registo
+    // Primeira leitura com getDoc — atualiza role+plan+profileLoaded num único setState
     const loadProfile = async () => {
       try {
         const snap = await getDoc(doc(db, "users", user.uid));
         if (cancelled) return;
         if (snap.exists()) {
-          const data = snap.data();
-          const r: UserRole = data.role === "admin" ? "admin" : data.role === "teacher" ? "teacher" : "aluno";
-          const p: UserPlan = data.plan === "smart" || data.plan === "golden" ? data.plan : "free";
-          setRole(r);
-          setPlan(p);
+          const { role, plan } = parseProfile(snap.data() as Record<string, unknown>);
+          // Um único setState → sem renders com estado parcial
+          setProfile({ role, plan, profileLoaded: true });
+        } else {
+          setProfile({ role: "aluno", plan: "free", profileLoaded: true });
         }
-        setProfileLoaded(true);
         setLoading(false);
       } catch {
         if (!cancelled) {
-          // Sem permissão ou erro — continua com defaults
-          setProfileLoaded(true);
+          setProfile({ role: "aluno", plan: "free", profileLoaded: true });
           setLoading(false);
         }
       }
@@ -123,13 +131,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       doc(db, "users", user.uid),
       (snap) => {
         if (!snap.exists()) return;
-        const data = snap.data();
-        const r: UserRole = data.role === "admin" ? "admin" : data.role === "teacher" ? "teacher" : "aluno";
-        const p: UserPlan = data.plan === "smart" || data.plan === "golden" ? data.plan : "free";
-        setRole(r);
-        setPlan(p);
+        const { role, plan } = parseProfile(snap.data() as Record<string, unknown>);
+        setProfile((prev) => ({ ...prev, role, plan }));
       },
-      () => { /* ignora erros do listener — já temos os dados do getDoc */ }
+      () => { /* ignora erros do listener */ }
     );
 
     return () => {
@@ -138,46 +143,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [user?.uid]);
 
-  // ── Redirect logic — separado e com guard anti-loop ───────
+  // ── Redirect logic ────────────────────────────────────────
   useEffect(() => {
-    // Aguarda loading terminar
-    if (loading) return;
-    // Aguarda profile se em rota protegida
-    if (user && !profileLoaded && (pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin"))) return;
-
-    // Evita múltiplos redirects simultâneos
+    // Aguarda loading E profile antes de qualquer decisão
+    if (loading || !profileLoaded) return;
     if (redirectingRef.current) return;
 
     const isProtected = pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin");
     const isAdminRoute = pathname?.startsWith("/admin");
-    const isAuthPage = pathname === "/login" || pathname === "/";
 
     if (!user && isProtected) {
-      // Não logado a tentar aceder rota protegida
       redirectingRef.current = true;
       router.replace("/login");
       setTimeout(() => { redirectingRef.current = false; }, 1000);
       return;
     }
 
-    if (user && profileLoaded && isAdminRoute && !isAdminOrTeacher) {
-      // Logado mas sem permissão admin
+    if (user && isAdminRoute && !isAdminOrTeacher) {
       redirectingRef.current = true;
       router.replace("/dashboard");
       setTimeout(() => { redirectingRef.current = false; }, 1000);
       return;
     }
-
-    // NÃO redirecionar por verificação de email — causa loops
-    // NÃO redirecionar se já está na página correta
-  }, [loading, user, profileLoaded, isAdminOrTeacher, pathname]);
-  // router intencionalmente omitido — é estável e causava loops
+  }, [loading, profileLoaded, user, isAdminOrTeacher, pathname]);
+  // router intencionalmente omitido — é estável
 
   const isProtectedRoute = pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin");
   const stillLoading = loading || (user && !profileLoaded && isProtectedRoute);
 
   const ctx: AuthContextType = {
-    user, loading, role, isAdmin, isTeacher, isAdminOrTeacher, plan, logout, refreshUser,
+    user, loading, profileLoaded, role, isAdmin, isTeacher, isAdminOrTeacher, plan, logout, refreshUser,
   };
 
   // Mostra spinner apenas em rotas protegidas enquanto carrega

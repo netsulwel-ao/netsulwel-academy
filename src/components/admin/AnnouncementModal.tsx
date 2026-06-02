@@ -34,7 +34,7 @@ export function AnnouncementModal({ announcement, onClose, preview=false }:
             </div>
             <div>
               <h3 className="text-3xl font-bold text-white leading-tight">{announcement.title||"Título"}</h3>
-              <p className="mt-2 text-[#a8a8b3] text-base leading-relaxed">{announcement.body}</p>
+              <p className="mt-2 text-gray-400 text-base leading-relaxed">{announcement.body}</p>
             </div>
             <ul className="space-y-4 flex-1">
               {(announcement.benefits??[]).map((b,i)=>{
@@ -44,7 +44,7 @@ export function AnnouncementModal({ announcement, onClose, preview=false }:
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center border ${cfg.bg}`}>
                       {BIcon?<BIcon className={`h-5 w-5 ${cfg.color}`}/>:null}
                     </div>
-                    <div><p className="text-base font-semibold text-white">{b.title}</p>{b.desc&&<p className="text-sm text-[#7c7c8a] mt-0.5">{b.desc}</p>}</div>
+                    <div><p className="text-base font-semibold text-white">{b.title}</p>{b.desc&&<p className="text-sm text-gray-500 mt-0.5">{b.desc}</p>}</div>
                   </li>
                 );
               })}
@@ -78,7 +78,7 @@ export function AnnouncementModal({ announcement, onClose, preview=false }:
               {announcement.type==="live"&&<span className="flex h-2 w-2 relative ml-1"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"/><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"/></span>}
             </div>
             <h3 className="text-3xl font-bold text-white leading-tight">{announcement.title||"Título"}</h3>
-            <p className="text-[#c4c4cc] text-base leading-relaxed">{announcement.body||"Mensagem aqui."}</p>
+            <p className="text-gray-400 text-base leading-relaxed">{announcement.body||"Mensagem aqui."}</p>
             {hasBenefits&&(
               <ul className="space-y-4 pt-2">
                 {(announcement.benefits??[]).map((b,i)=>{
@@ -88,7 +88,7 @@ export function AnnouncementModal({ announcement, onClose, preview=false }:
                       <div className={`flex h-10 w-10 shrink-0 items-center justify-center border ${cfg.bg}`}>
                         {BIcon?<BIcon className={`h-5 w-5 ${cfg.color}`}/>:null}
                       </div>
-                      <div><p className="text-base font-semibold text-white">{b.title}</p>{b.desc&&<p className="text-sm text-[#7c7c8a] mt-0.5">{b.desc}</p>}</div>
+                      <div><p className="text-base font-semibold text-white">{b.title}</p>{b.desc&&<p className="text-sm text-gray-500 mt-0.5">{b.desc}</p>}</div>
                     </li>
                   );
                 })}

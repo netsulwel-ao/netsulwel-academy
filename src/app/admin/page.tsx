@@ -52,6 +52,15 @@ export default function AdminDashboardPage() {
   const [userGrowth, setUserGrowth] = useState<DailyCount[]>([]);
   const [revenueHistory, setRevenueHistory] = useState<MonthlyRevenue[]>([]);
   const [courseTypeDist, setCourseTypeDist] = useState<{ name: string; value: number }[]>([]);
+  const [isLightMode, setIsLightMode] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsLightMode(document.documentElement.getAttribute("data-theme") === "light");
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -251,10 +260,10 @@ export default function AdminDashboardPage() {
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={userGrowth}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e30" />
-                <XAxis dataKey="date" stroke="#4a4a6a" tick={{ fontSize: 11 }} />
-                <YAxis stroke="#4a4a6a" tick={{ fontSize: 11 }} allowDecimals={false} />
-                <Tooltip contentStyle={{ backgroundColor: "#1a1a2e", border: "1px solid #2e2e50", borderRadius: 8, color: "#fff" }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={isLightMode ? "#e2e8f0" : "#1e1e30"} />
+                <XAxis dataKey="date" stroke={isLightMode ? "#94a3b8" : "#4a4a6a"} tick={{ fontSize: 11, fill: isLightMode ? "#64748b" : "#6b7280" }} />
+                <YAxis stroke={isLightMode ? "#94a3b8" : "#4a4a6a"} tick={{ fontSize: 11, fill: isLightMode ? "#64748b" : "#6b7280" }} allowDecimals={false} />
+                <Tooltip contentStyle={{ backgroundColor: isLightMode ? "#ffffff" : "#1a1a2e", border: isLightMode ? "1px solid #e2e8f0" : "1px solid #2e2e50", borderRadius: 8, color: isLightMode ? "#0f172a" : "#fff" }} />
                 <Line type="monotone" dataKey="count" stroke="#7c3aed" strokeWidth={2} dot={{ fill: "#7c3aed", r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
@@ -274,7 +283,7 @@ export default function AdminDashboardPage() {
                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: "#1a1a2e", border: "1px solid #2e2e50", borderRadius: 8, color: "#fff" }} />
+                  <Tooltip contentStyle={{ backgroundColor: isLightMode ? "#ffffff" : "#1a1a2e", border: isLightMode ? "1px solid #e2e8f0" : "1px solid #2e2e50", borderRadius: 8, color: isLightMode ? "#0f172a" : "#fff" }} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
@@ -291,10 +300,10 @@ export default function AdminDashboardPage() {
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={revenueHistory}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e1e30" />
-              <XAxis dataKey="month" stroke="#4a4a6a" tick={{ fontSize: 11 }} />
-              <YAxis stroke="#4a4a6a" tick={{ fontSize: 11 }} />
-              <Tooltip contentStyle={{ backgroundColor: "#1a1a2e", border: "1px solid #2e2e50", borderRadius: 8, color: "#fff" }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={isLightMode ? "#e2e8f0" : "#1e1e30"} />
+              <XAxis dataKey="month" stroke={isLightMode ? "#94a3b8" : "#4a4a6a"} tick={{ fontSize: 11, fill: isLightMode ? "#64748b" : "#6b7280" }} />
+              <YAxis stroke={isLightMode ? "#94a3b8" : "#4a4a6a"} tick={{ fontSize: 11, fill: isLightMode ? "#64748b" : "#6b7280" }} />
+              <Tooltip contentStyle={{ backgroundColor: isLightMode ? "#ffffff" : "#1a1a2e", border: isLightMode ? "1px solid #e2e8f0" : "1px solid #2e2e50", borderRadius: 8, color: isLightMode ? "#0f172a" : "#fff" }} />
               <Bar dataKey="revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

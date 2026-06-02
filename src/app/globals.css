@@ -232,6 +232,109 @@
 [data-theme="light"] .recharts-cartesian-grid-horizontal line,
 [data-theme="light"] .recharts-cartesian-grid-vertical line { stroke: #e2e8f0 !important; }
 
+/* ── Drawers laterais e modais ─────────────────── */
+[data-theme="light"] .bg-gray-900.border-l        { background-color: #ffffff !important; border-color: #e2e8f0 !important; box-shadow: -4px 0 24px rgba(15,23,42,0.08) !important; }
+[data-theme="light"] .bg-gray-900.border.shadow-2xl { background-color: #ffffff !important; border-color: #e2e8f0 !important; box-shadow: 0 20px 60px rgba(15,23,42,0.12) !important; }
+[data-theme="light"] .bg-gray-900.border-gray-800.p-8 { background-color: #ffffff !important; border-color: #e2e8f0 !important; }
+
+/* ── Overlay de modal escuro (não alterar) ─────── */
+[data-theme="light"] .bg-gray-950\/70  { background-color: rgba(15,23,42,0.6) !important; }
+[data-theme="light"] .bg-gray-950\/80  { background-color: rgba(15,23,42,0.65) !important; }
+[data-theme="light"] .bg-black\/50     { background-color: rgba(15,23,42,0.5) !important; }
+[data-theme="light"] .backdrop-blur-sm { /* manter */ }
+
+/* ── Sticky bars de formulários (CourseForm, AnnouncementModal) */
+[data-theme="light"] .bg-gray-950\/90  { background-color: rgba(255,255,255,0.97) !important; }
+
+/* ── Tabelas — row hover ───────────────────────── */
+[data-theme="light"] .hover\:bg-white\/\[0\.02\]:hover { background-color: rgba(15,23,42,0.025) !important; }
+[data-theme="light"] .hover\:bg-gray-800\/30:hover     { background-color: rgba(226,232,240,0.6) !important; }
+[data-theme="light"] .hover\:bg-gray-900\/60:hover     { background-color: rgba(248,250,252,0.9) !important; }
+[data-theme="light"] .hover\:bg-gray-700:hover         { background-color: #e2e8f0 !important; }
+
+/* ── Tabs (Settings, Announcements) ───────────── */
+[data-theme="light"] .border-b.border-gray-800         { border-color: #e2e8f0 !important; }
+[data-theme="light"] .border-b-2.border-blue-500       { border-color: #2563eb !important; }
+[data-theme="light"] .border-transparent.text-gray-500 { color: #64748b !important; }
+
+/* ── Action buttons coloridos — manter texto branco sobre fundo colorido */
+[data-theme="light"] .bg-purple     { color: #ffffff !important; }
+[data-theme="light"] .bg-blue-600   { color: #ffffff !important; }
+[data-theme="light"] .bg-red-600    { color: #ffffff !important; }
+[data-theme="light"] .bg-green-600  { color: #ffffff !important; }
+[data-theme="light"] .bg-emerald-600 { color: #ffffff !important; }
+[data-theme="light"] .bg-purple-600 { color: #ffffff !important; }
+[data-theme="light"] .bg-amber-600  { color: #ffffff !important; }
+
+/* ── Badges de status (manter cores semânticas) ── */
+[data-theme="light"] .bg-blue-500\/10   { background-color: #eff6ff !important; }
+[data-theme="light"] .bg-blue-500\/15   { background-color: #dbeafe !important; }
+[data-theme="light"] .bg-blue-500\/20   { background-color: #dbeafe !important; }
+[data-theme="light"] .border-blue-500\/20 { border-color: #bfdbfe !important; }
+[data-theme="light"] .border-blue-500\/25 { border-color: #bfdbfe !important; }
+[data-theme="light"] .border-blue-500\/30 { border-color: #93c5fd !important; }
+[data-theme="light"] .border-blue-500\/50 { border-color: #60a5fa !important; }
+
+[data-theme="light"] .bg-purple-500\/10  { background-color: #f5f3ff !important; }
+[data-theme="light"] .bg-purple-500\/15  { background-color: #ede9fe !important; }
+[data-theme="light"] .bg-purple-500\/20  { background-color: #ede9fe !important; }
+[data-theme="light"] .border-purple-500\/20 { border-color: #ddd6fe !important; }
+[data-theme="light"] .border-purple-500\/25 { border-color: #c4b5fd !important; }
+[data-theme="light"] .border-purple-500\/30 { border-color: #a78bfa !important; }
+
+[data-theme="light"] .bg-amber-500\/10  { background-color: #fffbeb !important; }
+[data-theme="light"] .bg-amber-500\/15  { background-color: #fef3c7 !important; }
+[data-theme="light"] .bg-amber-500\/20  { background-color: #fef3c7 !important; }
+[data-theme="light"] .border-amber-500\/30 { border-color: #fcd34d !important; }
+
+[data-theme="light"] .bg-yellow-500\/10  { background-color: #fefce8 !important; }
+[data-theme="light"] .bg-yellow-500\/15  { background-color: #fef9c3 !important; }
+[data-theme="light"] .bg-yellow-500\/20  { background-color: #fef9c3 !important; }
+[data-theme="light"] .border-yellow-500\/20 { border-color: #fde047 !important; }
+[data-theme="light"] .border-yellow-500\/30 { border-color: #fbbf24 !important; }
+
+[data-theme="light"] .bg-emerald-500\/10 { background-color: #ecfdf5 !important; }
+[data-theme="light"] .bg-emerald-500\/20 { background-color: #d1fae5 !important; }
+[data-theme="light"] .border-emerald-500\/20 { border-color: #a7f3d0 !important; }
+
+[data-theme="light"] .bg-pink-500\/10   { background-color: #fdf2f8 !important; }
+[data-theme="light"] .bg-rose-500\/10   { background-color: #fff1f2 !important; }
+[data-theme="light"] .bg-indigo-500\/10 { background-color: #eef2ff !important; }
+
+/* ── Cores de texto semânticas nos badges ──────── */
+[data-theme="light"] .text-emerald-400  { color: #059669 !important; }
+[data-theme="light"] .text-pink-400     { color: #db2777 !important; }
+[data-theme="light"] .text-rose-400     { color: #e11d48 !important; }
+[data-theme="light"] .text-indigo-400   { color: #4f46e5 !important; }
+[data-theme="light"] .text-cyan-400     { color: #0891b2 !important; }
+
+/* ── Menus dropdown ────────────────────────────── */
+[data-theme="light"] .bg-gray-900.border-gray-700 { background-color: #ffffff !important; border-color: #e2e8f0 !important; box-shadow: 0 4px 16px rgba(15,23,42,0.10) !important; }
+[data-theme="light"] .hover\:bg-gray-800.hover\:text-white:hover { background-color: #f1f5f9 !important; color: #0f172a !important; }
+
+/* ── Elementos de bg-transparent com text visível ─ */
+[data-theme="light"] .bg-transparent { background-color: transparent !important; }
+
+/* ── Backdrop blur backdrops (overlays) ────────── */
+[data-theme="light"] .bg-black\/60.backdrop-blur-sm { background-color: rgba(15,23,42,0.55) !important; }
+[data-theme="light"] .bg-gray-950\/80.backdrop-blur-sm { background-color: rgba(15,23,42,0.6) !important; }
+
+/* ── Gradiente de thumbnail placeholder ─────────── */
+[data-theme="light"] .from-blue-900\/40.to-gray-900 { --tw-gradient-from: #eff6ff !important; --tw-gradient-to: #f8fafc !important; }
+[data-theme="light"] .from-gray-800.to-gray-900     { --tw-gradient-from: #f1f5f9 !important; --tw-gradient-to: #f8fafc !important; }
+
+/* ── Schedules / CourseForm — inputs com bg-gray-800 ─────── */
+[data-theme="light"] .bg-gray-800.border.border-gray-700 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* ── Hover em accordion de cronograma ───────────── */
+[data-theme="light"] .hover\:bg-gray-800\/40:hover { background-color: rgba(226,232,240,0.5) !important; }
+
+/* ── bg-gray-950\/50 em cabeçalhos de módulos ─── */
+[data-theme="light"] .bg-gray-950\/50 { background-color: #f8fafc !important; }
+
 
 
 html {
