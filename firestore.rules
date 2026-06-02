@@ -40,8 +40,11 @@ service cloud.firestore {
 
       match /notifications/{notifId} {
         allow read: if isOwner(uid);
+        // Sistema (admin/teacher) pode criar qualquer notificação
+        // Aluno só pode criar notificações na sua própria subcoleção e de tipos permitidos
         allow create: if isAdmin() ||
-          (isAuth() && request.resource.data.uid == uid &&
+          (isOwner(uid) &&
+           request.resource.data.uid == uid &&
            request.resource.data.type in [
              "community_like", "community_comment",
              "payment_approved", "course_complete", "certificate_ready"

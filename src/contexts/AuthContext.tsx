@@ -145,8 +145,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // ── Redirect logic ────────────────────────────────────────
   useEffect(() => {
-    // Aguarda loading E profile antes de qualquer decisão
-    if (loading || !profileLoaded) return;
+    // Para utilizador não autenticado, basta loading=false
+    // Para utilizador autenticado, aguarda também profileLoaded
+    if (loading) return;
+    if (user && !profileLoaded) return;
     if (redirectingRef.current) return;
 
     const isProtected = pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin");
@@ -169,7 +171,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // router intencionalmente omitido — é estável
 
   const isProtectedRoute = pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin");
-  const stillLoading = loading || (user && !profileLoaded && isProtectedRoute);
+  // Só mostra spinner se autenticado mas ainda a carregar o perfil
+  const stillLoading = loading || (!!user && !profileLoaded && isProtectedRoute);
 
   const ctx: AuthContextType = {
     user, loading, profileLoaded, role, isAdmin, isTeacher, isAdminOrTeacher, plan, logout, refreshUser,

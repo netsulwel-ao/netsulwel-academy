@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Necessário para Hostinger Node.js Hosting (standalone output)
+  output: "standalone",
+
   // Images
   images: {
     remotePatterns: [

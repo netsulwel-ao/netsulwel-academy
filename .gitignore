@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+/.lighthouseci
+/playwright-report
+/test-results
 
 # next.js
 /.next/
@@ -29,16 +32,24 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
 
-# env files (can opt-in for committing if needed)
+# env files — NUNCA commitar
 .env*
-.rules*
-# service account keys
+!.env.production.example
+
+# service account keys — NUNCA commitar
 *-firebase-adminsdk-*.json
 *service-account*.json
+
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# k6 results
+*.k6.json
