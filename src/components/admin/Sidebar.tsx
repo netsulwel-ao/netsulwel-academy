@@ -7,8 +7,6 @@ import {
   LayoutDashboard, Users, Settings, LogOut, Search, 
   PanelLeftClose, PanelLeft, Sun, Moon, Video, DollarSign, Folders, Layers, Megaphone, Radio, Calendar, MessageSquare, GraduationCap
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
@@ -55,7 +53,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
    const pathname = usePathname();
    const searchRef = useRef<HTMLInputElement>(null);
    const [searchQuery, setSearchQuery] = useState("");
-   const { isAdmin, isTeacher } = useAuth();
+   const { isAdmin, isTeacher, logout } = useAuth();
 
    useEffect(() => {
      const handleKeyDown = (e: KeyboardEvent) => {
@@ -83,11 +81,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
    })).filter(section => section.items.length > 0);
 
    const handleLogout = async () => {
-   try {
-   await signOut(auth);
-   } catch (error) {
-   console.error("Erro ao fazer logout:", error);
-   }
+   await logout();
    };
 
   return (

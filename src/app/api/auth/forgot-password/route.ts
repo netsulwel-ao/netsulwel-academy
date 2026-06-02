@@ -1,6 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
+const RATE_LIMIT_WINDOW = 15 * 60 * 1000;
+const RATE_LIMIT_MAX = 3;
+const rateMap = new Map<string, number[]>();
+
+function checkRateLimit(ip: string): { allowed: boolean; retryAfter: number } {
+  const now = Date.now();
+  const timestamps = (rateMap.get(ip) || []).filter((t) => now - t < RATE_LIMIT_WINDOW);
+  if (timestamps.length >= RATE_LIMIT_MAX) {
+    const oldest = timestamps[0];
+    const retryAfter = Math.ceil((oldest + RATE_LIMIT_WINDOW - now) / 1000);
+    return { allowed: false, retryAfter };
+  }
+  timestamps.push(now);
+  rateMap.set(ip, timestamps);
+  return { allowed: true, retryAfter: 0 };
+}
+
 function buildResetEmailHtml(resetLink: string, siteUrl: string): string {
   return `<!DOCTYPE html>
 <html lang="pt">
@@ -165,6 +182,15 @@ function buildResetEmailHtml(resetLink: string, siteUrl: string): string {
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown";
+    const { allowed, retryAfter } = checkRateLimit(ip);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: `Muitas tentativas. Tente novamente em ${retryAfter} segundos.` },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
     const { email } = await req.json();
 
     if (!email) {
@@ -211,7 +237,21 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const siteUrl = "https://academia.netsulwel.tech";
+    const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+
+    const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_SITE_URL;
+    const siteUrl = origin || `https://${req.headers.get("host") || "academia.netsulwel.tech"}`;
+
+    if (!smtpConfigured) {
+      console.log("SMTP não configurado. Link de recuperação (apenas desenvolvimento):", resetLink);
+      if (process.env.NODE_ENV === "development") {
+        return NextResponse.json({ success: true, devResetLink: resetLink });
+      }
+      return NextResponse.json(
+        { error: "Serviço de email temporariamente indisponível. Contacte o administrador." },
+        { status: 500 }
+      );
+    }
 
     await transporter.sendMail({
       from: process.env.EMAIL_FROM,

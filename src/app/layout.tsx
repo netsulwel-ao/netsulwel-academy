@@ -74,7 +74,7 @@ export default function RootLayout({
  children: React.ReactNode;
 }>) {
  return (
- <html lang="pt-BR" className={`${inter.variable} ${pressStart.variable} scroll-smooth`}>
+ <html lang="pt-AO" className={`${inter.variable} ${pressStart.variable} scroll-smooth`}>
  <body className="min-h-screen bg-background text-foreground antialiased">
   <AuthProvider>
   {children}

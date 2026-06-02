@@ -12,7 +12,7 @@ export default function AdminLayout({
  children: React.ReactNode;
 }) {
  const router = useRouter();
- const { isAdminOrTeacher } = useAuth();
+  const { isAdminOrTeacher, loading } = useAuth();
  const [isCollapsed, setIsCollapsed] = useState(false);
  const [mobileOpen, setMobileOpen] = useState(false);
  const [theme, setTheme] = useState<"dark" | "light">("dark");
@@ -22,9 +22,18 @@ export default function AdminLayout({
     if (saved) setTheme(saved);
   }, []);
 
- useEffect(() => {
-   if (!isAdminOrTeacher) router.replace("/dashboard");
- }, [isAdminOrTeacher, router]);
+  useEffect(() => {
+    if (loading) return;
+    if (!isAdminOrTeacher) router.replace("/dashboard");
+  }, [isAdminOrTeacher, loading, router]);
+
+  if (loading || !isAdminOrTeacher) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-950">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-500 border-t-purple" />
+      </div>
+    );
+  }
 
  const toggleTheme = () => {
    setTheme(prev => {

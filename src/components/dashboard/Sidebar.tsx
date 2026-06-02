@@ -6,8 +6,6 @@ import {
   Home, BookOpen, CreditCard, Users, Settings, LogOut,
   PanelLeftClose, PanelLeft, Sun, Moon, ChevronRight, FileText, Layers, Award
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
@@ -42,14 +40,10 @@ const navSections = [
 
 export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen, theme, onToggleTheme }: SidebarProps) {
    const pathname = usePathname();
-   const { plan, isAdmin } = useAuth();
+   const { plan, isAdmin, logout } = useAuth();
 
    const handleLogout = async () => {
-   try {
-   await signOut(auth);
-   } catch (error) {
-   console.error("Erro ao fazer logout:", error);
-   }
+   await logout();
    };
 
   return (

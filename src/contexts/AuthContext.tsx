@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { doc, onSnapshot } from "firebase/firestore";
+import { onIdTokenChanged, signOut as firebaseSignOut, User } from "firebase/auth";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { useRouter, usePathname } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -18,12 +18,16 @@ interface AuthContextType {
   isTeacher: boolean;
   isAdminOrTeacher: boolean;
   plan: UserPlan;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null, loading: true,
   role: "aluno", isAdmin: false, isTeacher: false, isAdminOrTeacher: false,
-  plan: "free"
+  plan: "free",
+  logout: async () => {},
+  refreshUser: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -41,19 +45,45 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const isAdmin = role === "admin";
   const isTeacher = role === "teacher";
   const isAdminOrTeacher = isAdmin || isTeacher;
+  const needsEmailVerification = !!user && !user.emailVerified;
+
+  const logout = async () => {
+    document.cookie = "auth-uid=;path=/;max-age=0";
+    setUser(null);
+    setRole("aluno");
+    setPlan("free");
+    setAdminLoaded(false);
+    await firebaseSignOut(auth);
+    router.replace("/login");
+  };
+
+  const refreshUser = async () => {
+    if (!user) return;
+    try {
+      await user.reload();
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (!snap.exists()) return;
+      const data = snap.data();
+      setRole(data.role === "admin" ? "admin" : data.role === "teacher" ? "teacher" : "aluno");
+      setPlan(data.plan === "smart" || data.plan === "golden" ? data.plan : "free");
+    } catch {
+      // silencia erro de refresh
+    }
+  };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onIdTokenChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        document.cookie = `auth-uid=${currentUser.uid};path=/;max-age=86400;SameSite=Strict`;
+        document.cookie = `auth-uid=${currentUser.uid};path=/;max-age=86400;SameSite=Lax`;
+        setLoading(false);
       } else {
-        setUser(null);
         document.cookie = "auth-uid=;path=/;max-age=0";
+        setUser(null);
         setRole("aluno");
         setPlan("free");
+        setLoading(false);
       }
-      setLoading(false);
     });
     return () => unsubscribe();
   }, []);
@@ -82,24 +112,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (loading) return;
-
-    if (pathname?.startsWith("/admin")) {
-      if (!user) {
-        router.push("/login");
-      } else if (adminLoaded && !isAdminOrTeacher) {
-        router.push("/dashboard");
-      }
-    } else if (!user && pathname?.startsWith("/dashboard")) {
-      router.push("/login");
+    if (!user && (pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin"))) {
+      router.replace("/login");
+    } else if (user && pathname?.startsWith("/admin") && adminLoaded && !isAdminOrTeacher) {
+      router.replace("/dashboard");
+    } else if (user && !user.emailVerified && pathname !== "/verify-email" && !pathname?.startsWith("/api")) {
+      router.replace("/verify-email");
     }
   }, [user, loading, isAdminOrTeacher, adminLoaded, pathname, router]);
 
   const isProtectedRoute = pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin");
   const needsAdminCheck = pathname?.startsWith("/admin") && !adminLoaded && !!user;
 
-  if ((!user || loading || needsAdminCheck) && isProtectedRoute) {
+  const ctx = { user, loading, role, isAdmin, isTeacher, isAdminOrTeacher, plan, logout, refreshUser };
+
+  if ((loading || needsAdminCheck || (!user && isProtectedRoute)) && isProtectedRoute) {
     return (
-      <AuthContext.Provider value={{ user, loading, role, isAdmin, isTeacher, isAdminOrTeacher, plan }}>
+      <AuthContext.Provider value={ctx}>
         <div className="flex items-center justify-center min-h-screen bg-gray-950">
           <Loader2 className="h-8 w-8 animate-spin text-purple" />
         </div>
@@ -108,7 +137,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, role, isAdmin, isTeacher, isAdminOrTeacher, plan }}>
+    <AuthContext.Provider value={ctx}>
       {children}
     </AuthContext.Provider>
   );
