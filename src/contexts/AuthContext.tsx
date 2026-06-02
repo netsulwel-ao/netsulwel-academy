@@ -90,9 +90,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // ── Firestore profile ─────────────────────────────────────
   useEffect(() => {
     if (!user) return;
-    const unsub = onSnapshot(
-      doc(db, "users", user.uid),
-      (snap) => {
+
+    let cancelled = false;
+
+    // Primeira leitura com getDoc — mais fiável logo após login/registo
+    const loadProfile = async () => {
+      try {
+        const snap = await getDoc(doc(db, "users", user.uid));
+        if (cancelled) return;
         if (snap.exists()) {
           const data = snap.data();
           const r: UserRole = data.role === "admin" ? "admin" : data.role === "teacher" ? "teacher" : "aluno";
@@ -102,15 +107,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
         setProfileLoaded(true);
         setLoading(false);
-      },
-      () => {
-        // Erro de permissão — considera carregado com defaults
-        setProfileLoaded(true);
-        setLoading(false);
+      } catch {
+        if (!cancelled) {
+          // Sem permissão ou erro — continua com defaults
+          setProfileLoaded(true);
+          setLoading(false);
+        }
       }
+    };
+
+    loadProfile();
+
+    // Listener em tempo real para mudanças de role/plan (ex: admin promove aluno)
+    const unsub = onSnapshot(
+      doc(db, "users", user.uid),
+      (snap) => {
+        if (!snap.exists()) return;
+        const data = snap.data();
+        const r: UserRole = data.role === "admin" ? "admin" : data.role === "teacher" ? "teacher" : "aluno";
+        const p: UserPlan = data.plan === "smart" || data.plan === "golden" ? data.plan : "free";
+        setRole(r);
+        setPlan(p);
+      },
+      () => { /* ignora erros do listener — já temos os dados do getDoc */ }
     );
-    return () => unsub();
-  }, [user?.uid]); // só re-executa se o UID mudar, não o objeto user inteiro
+
+    return () => {
+      cancelled = true;
+      unsub();
+    };
+  }, [user?.uid]);
 
   // ── Redirect logic — separado e com guard anti-loop ───────
   useEffect(() => {

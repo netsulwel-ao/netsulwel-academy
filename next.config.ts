@@ -1,10 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Necessário para hosting Node.js (Hostinger, Render, Railway, etc.)
-  output: "standalone",
-
-  // Suprime erros de imagens externas (R2, Pexels, Firebase, etc.)
+  // Images
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**.r2.dev" },

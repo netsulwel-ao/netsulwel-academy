@@ -16,6 +16,7 @@ import {
   Loader2,
   Save,
   Sparkles,
+  AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
 import type { LiveTarget } from "@/types/live";
@@ -24,6 +25,7 @@ export default function NewLivePage() {
   const router = useRouter();
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");

@@ -8,7 +8,7 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      // Sem exists(), um user sem documento em `users` faz o get falhar e regras negam tudo.
+      // exists() evita erro quando o documento ainda não existe (ex: registo novo)
       return isAuth() &&
         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
@@ -20,24 +20,47 @@ service cloud.firestore {
 
     // ── users ─────────────────────────────────────────────
     match /users/{uid} {
+      // CRÍTICO: leitura pública para autenticados — necessário para o AuthContext
+      // ler o próprio perfil logo após registo (antes do token estar totalmente propagado)
       allow read: if isAuth();
+
+      // Criação: só o próprio user (no registo) — sem restrições adicionais
+      // para evitar race condition entre criação do doc e validação das regras
       allow create: if isOwner(uid);
+
+      // Update: admin pode tudo; user pode atualizar os seus dados mas NÃO role/plan
       allow update: if isAdmin() ||
         (isOwner(uid) && !request.resource.data.diff(resource.data).affectedKeys()
           .hasAny(["role", "plan"]));
+
       allow delete: if isAdmin();
+
+      // ── Subcoleções do user ──────────────────────────────
+      match /notifications/{notifId} {
+        allow read: if isOwner(uid);
+        // Sistema (admin) pode criar notificações; aluno só tipos permitidos
+        allow create: if isAdmin() ||
+          (isAuth() && request.resource.data.uid == uid &&
+           request.resource.data.type in [
+             "community_like", "community_comment",
+             "payment_approved", "course_complete", "certificate_ready"
+           ]);
+        allow update: if isOwner(uid); // marcar como lida
+        allow delete: if isAdmin() || isOwner(uid);
+      }
     }
 
     // ── courses ───────────────────────────────────────────
     match /courses/{courseId} {
-      allow read: if isAdmin() || resource.data.status == "published";
+      // Cursos publicados: qualquer pessoa (incluindo não autenticada) pode ver
+      // para funcionar na landing page e páginas de preview
+      allow read: if resource.data.status == "published" || isAdmin();
       allow create, update, delete: if isAdmin();
     }
 
     // ── trails ────────────────────────────────────────────
     match /trails/{trailId} {
-      allow read: if isAdmin() ||
-        (isAuth() && resource.data.status == "published");
+      allow read: if resource.data.status == "published" || isAdmin();
       allow create, update, delete: if isAdmin();
     }
 
@@ -57,12 +80,11 @@ service cloud.firestore {
 
     // ── lives ─────────────────────────────────────────────
     match /lives/{liveId} {
-      // Alunos: agenda + ao vivo + histórico (a UI lista também "ended")
-      allow read: if isAdmin() ||
-        (isAuth() && (resource.data.status == "scheduled" || resource.data.status == "live" || resource.data.status == "ended"));
+      // Alunos veem todas as lives (scheduled, live, ended) para histórico
+      allow read: if isAuth() || isAdmin();
       allow create, update, delete: if isAdmin();
 
-      // Chat — qualquer autenticado pode ler e escrever
+      // Chat
       match /chat/{msgId} {
         allow read: if isAuth();
         allow create: if isAuth() && (
@@ -72,14 +94,14 @@ service cloud.firestore {
         allow update, delete: if isAdmin();
       }
 
-      // Speakers — permissão para falar (teacher toggles)
-      match /speakers/{uid} {
+      // Speakers
+      match /speakers/{speakerId} {
         allow read: if isAuth();
         allow write: if isAdmin();
       }
     }
 
-    // ── enrollments (compras standalone) ──────────────────
+    // ── enrollments ───────────────────────────────────────
     match /enrollments/{enrollmentId} {
       allow read: if isAdmin() ||
         (isAuth() && resource.data.userId == request.auth.uid);
@@ -88,7 +110,7 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
-    // ── progress (progresso das aulas) ────────────────────
+    // ── progress ──────────────────────────────────────────
     match /progress/{progressId} {
       allow read: if isAdmin() ||
         (isAuth() && resource.data.userId == request.auth.uid);
@@ -107,60 +129,57 @@ service cloud.firestore {
 
     // ── sales ─────────────────────────────────────────────
     match /sales/{saleId} {
-      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
-      allow read: if isAdmin() || (isAuth() && resource.data.userId == request.auth.uid);
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow read: if isAdmin() ||
+        (isAuth() && resource.data.userId == request.auth.uid);
+      allow create: if isAuth() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
     }
 
     // ── settings ──────────────────────────────────────────
+    // Leitura pública — contém apenas SEO/meta/contacto, nada sensível
     match /settings/{docId} {
-      allow read: if isAuth();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
-    // ── ratings (follow professor) ─────────────────────────
+    // ── community ─────────────────────────────────────────
+    match /community/{postId} {
+      allow read: if isAuth();
+      allow create: if isAuth() &&
+        request.resource.data.authorId == request.auth.uid;
+      allow update: if isAdmin() ||
+        request.auth.uid == resource.data.authorId;
+      allow delete: if isAdmin() ||
+        request.auth.uid == resource.data.authorId;
+
+      match /likes/{userId} {
+        allow read: if isAuth();
+        allow write: if isAuth() && request.auth.uid == userId;
+      }
+
+      match /comments/{commentId} {
+        allow read: if isAuth();
+        allow create: if isAuth() &&
+          request.resource.data.authorId == request.auth.uid;
+        allow update: if isAdmin() ||
+          request.auth.uid == resource.data.authorId;
+        allow delete: if isAdmin() ||
+          request.auth.uid == resource.data.authorId;
+      }
+    }
+
+    // ── ratings ───────────────────────────────────────────
     match /ratings/{docId} {
       allow read: if isAuth();
       allow create, update: if isAuth();
       allow delete: if isAdmin();
     }
 
-    // ── notifications ──────────────────────────────────────
-    match /users/{uid}/notifications/{notifId} {
-      allow read: if isOwner(uid);
-      allow create: if isAdmin() ||
-        (isAuth() && request.resource.data.uid == uid &&
-         request.resource.data.type in ["community_like", "community_comment"]);
-      allow update: if isOwner(uid);        // marcar como lida
-      allow delete: if isAdmin();
-    }
-
-    // ── broadcasts ─────────────────────────────────────────
+    // ── broadcasts ────────────────────────────────────────
     match /broadcasts/{broadcastId} {
       allow read: if isAuth();
-      allow create: if isAdmin();
-      allow update, delete: if isAdmin();
-    }
-
-    // ── community ──────────────────────────────────────────
-    match /community/{postId} {
-      allow read: if isAuth();
-      allow create: if isAuth() && request.resource.data.authorId == request.auth.uid;
-      allow update: if isAdmin() || request.auth.uid == resource.data.authorId;
-      allow delete: if isAdmin() || request.auth.uid == resource.data.authorId;
-
-      match /likes/{userId} {
-        allow read: if isAuth();
-        allow write: if request.auth.uid == userId;
-      }
-
-      match /comments/{commentId} {
-        allow read: if isAuth();
-        allow create: if isAuth() && request.resource.data.authorId == request.auth.uid;
-        allow update: if isAdmin() || request.auth.uid == resource.data.authorId;
-        allow delete: if isAdmin() || request.auth.uid == resource.data.authorId;
-      }
+      allow create, update, delete: if isAdmin();
     }
 
     // Bloqueia tudo o resto
