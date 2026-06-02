@@ -38,6 +38,10 @@
   ],
   "exclude": [
     "node_modules",
-    ".next"
+    ".next",
+    "vitest.config.ts",
+    "playwright.config.ts",
+    "lighthouserc.js",
+    "src/__tests__"
   ]
 }
