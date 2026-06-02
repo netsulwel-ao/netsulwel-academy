@@ -212,14 +212,11 @@ export async function POST(req: NextRequest) {
 
     let resetLink: string;
     try {
-      resetLink = await admin.auth().generatePasswordResetLink(email, {
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://academia.netsulwel.tech"}/login`,
-      });
+      resetLink = await admin.auth().generatePasswordResetLink(email);
     } catch (fbErr: unknown) {
       const msg = fbErr instanceof Error ? fbErr.message : "";
       console.error("generatePasswordResetLink error:", msg);
-      if (msg.includes("EMAIL_NOT_FOUND") || msg.includes("user-not-found")) {
-        // Não revelar se o email existe — resposta genérica
+      if (msg.includes("user-not-found") || msg.includes("EMAIL_NOT_FOUND")) {
         return NextResponse.json({ success: true });
       }
       return NextResponse.json(

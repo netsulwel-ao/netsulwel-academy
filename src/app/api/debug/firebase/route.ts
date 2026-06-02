@@ -22,13 +22,12 @@ export async function GET() {
     info.admin_init = "OK";
     info.apps_count = admin.apps.length;
 
-    // Testar generatePasswordResetLink com um email de teste
+    // Testar generatePasswordResetLink sem continueUrl
     try {
       await admin.auth().generatePasswordResetLink("test-nonexistent@netsulwel.tech");
       info.reset_link_test = "OK";
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      // user-not-found é esperado — significa que a API funciona
       if (msg.includes("user-not-found") || msg.includes("EMAIL_NOT_FOUND")) {
         info.reset_link_test = "OK (email não existe — esperado)";
       } else {
