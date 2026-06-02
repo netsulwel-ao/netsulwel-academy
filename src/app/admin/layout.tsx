@@ -24,6 +24,11 @@ export default function AdminLayout({
   }, []);
 
   useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    return () => { document.documentElement.removeAttribute("data-theme"); };
+  }, [theme]);
+
+  useEffect(() => {
     if (!loading && !isAdminOrTeacher) {
       router.replace("/dashboard");
     }
@@ -47,11 +52,11 @@ export default function AdminLayout({
   };
 
   return (
-    <div data-theme={theme} className="flex min-h-screen bg-gray-950">
+    <div className="flex min-h-screen bg-background">
       <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} theme={theme} onToggleTheme={toggleTheme} />
       <div className={`flex-1 flex flex-col h-screen overflow-y-auto transition-all duration-300 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'}`}>
-        <Header onMenuClick={() => setMobileOpen(true)} />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-gray-950">
+        <Header onMenuClick={() => setMobileOpen(true)} theme={theme} />
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-background">
           {children}
         </main>
       </div>

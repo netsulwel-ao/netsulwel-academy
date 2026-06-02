@@ -17,6 +17,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
    if (saved) setTheme(saved);
  }, []);
 
+ useEffect(() => {
+   document.documentElement.setAttribute("data-theme", theme);
+   return () => { document.documentElement.removeAttribute("data-theme"); };
+ }, [theme]);
+
  const toggleTheme = () => {
    setTheme((prev) => {
      const next = prev === "dark" ? "light" : "dark";
@@ -26,7 +31,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
  };
 
  return (
- <div className="flex min-h-screen bg-gray-950" data-theme={theme}>
+ <div className="flex min-h-screen bg-background">
  <Sidebar
    isCollapsed={isCollapsed}
    setIsCollapsed={setIsCollapsed}
@@ -38,8 +43,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
  <div className={`flex-1 flex flex-col transition-all duration-300 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'}`}>
   <CountdownBanner />
-  <Header onMenuClick={() => setMobileOpen(true)} />
-    <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gray-950">
+  <Header onMenuClick={() => setMobileOpen(true)} theme={theme} />
+    <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-background">
    {children}
    </main>
  </div>
