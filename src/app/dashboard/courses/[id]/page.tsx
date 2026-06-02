@@ -263,6 +263,19 @@ export default function CourseDetailPage() {
         hours: estHours,
         certificateId: certId,
       });
+      // Notificar o aluno que o certificado está disponível
+      await setDoc(
+        doc(db, "users", user.uid, "notifications", `cert_${course.id}`),
+        {
+          uid: user.uid,
+          type: "certificate_ready",
+          title: "Certificado disponível!",
+          message: `Concluíste "${course.title}". O teu certificado está pronto.`,
+          link: `/dashboard/certificates/${course.id}`,
+          read: false,
+          createdAt: serverTimestamp(),
+        }
+      );
     }
 
     // Auto-avançar para a próxima aula não concluída
