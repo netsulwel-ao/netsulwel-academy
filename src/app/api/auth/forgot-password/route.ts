@@ -223,7 +223,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true });
       }
       return NextResponse.json(
-        { error: "Erro ao gerar link de recuperação." },
+        { error: "Erro ao gerar link de recuperação.", detail: msg },
         { status: 500 }
       );
     }
