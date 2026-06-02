@@ -21,7 +21,11 @@ export default function AnnouncementPopup() {
     const fetchAnnouncements = async () => {
       try {
         const [snap, userDoc] = await Promise.all([
-          getDocs(query(collection(db, "announcements"), where("active", "==", true))),
+          getDocs(query(
+            collection(db, "announcements"),
+            where("active", "==", true),
+            where("status", "==", "approved")
+          )),
           getDoc(doc(db, "users", user.uid)),
         ]);
 

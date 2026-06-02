@@ -472,7 +472,7 @@ export default function StudioPage() {
 
         const res = await fetch("/api/livekit/token", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ roomName: liveData.roomName, identity: user.uid, name: user.displayName || "Admin", isHost: true }),
+          body: JSON.stringify({ roomName: liveData.roomName, name: user.displayName || "Admin" }),
         });
         const data = await res.json();
         if (data.error) throw new Error(data.error);

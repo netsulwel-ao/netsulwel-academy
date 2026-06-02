@@ -25,6 +25,8 @@ const adminQuickActions = [
 const teacherQuickActions = [
   { icon: Video, label: "Criar Curso", href: "/admin/courses/new", color: "bg-purple-500/10 text-purple-400 hover:bg-purple-500/20" },
   { icon: Radio, label: "Aula ao Vivo", href: "/admin/lives/new", color: "bg-pink-500/10 text-pink-400 hover:bg-pink-500/20" },
+  { icon: Users, label: "Os Meus Alunos", href: "/admin/students", color: "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20" },
+  { icon: DollarSign, label: "As Minhas Vendas", href: "/admin/sales", color: "bg-green-500/10 text-green-400 hover:bg-green-500/20" },
   { icon: Megaphone, label: "Anúncio", href: "/admin/announcements", color: "bg-rose-500/10 text-rose-400 hover:bg-rose-500/20" },
   { icon: Layers, label: "Trilhas", href: "/admin/trails", color: "bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20" },
 ];
@@ -192,7 +194,9 @@ export default function AdminDashboardPage() {
 
         const typeMap: Record<string, number> = {};
         coursesSnap.forEach((doc) => {
-          const t = doc.data().type || "free";
+          // Normalizar "free" (legado) para "standalone"
+          const raw = doc.data().type || "standalone";
+          const t = raw === "free" ? "standalone" : raw;
           typeMap[t] = (typeMap[t] || 0) + 1;
         });
         setCourseTypeDist(Object.entries(typeMap).map(([name, value]) => ({ name, value })));

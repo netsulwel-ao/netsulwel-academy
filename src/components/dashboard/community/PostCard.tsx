@@ -38,26 +38,31 @@ export default function PostCard({ post }: { post: CommunityPost }) {
     if (!user) return;
     const ref = doc(db, "community", post.id, "likes", user.uid);
     const postRef = doc(db, "community", post.id);
-    if (liked) {
-      await deleteDoc(ref);
-      await updateDoc(postRef, { likesCount: increment(-1) });
-      setLiked(false);
-    } else {
-      await setDoc(ref, {});
-      await updateDoc(postRef, { likesCount: increment(1) });
-      setLiked(true);
-
-      if (post.authorId !== user.uid) {
-        await setDoc(doc(db, "users", post.authorId, "notifications", `${post.id}_like_${user.uid}`), {
-          uid: post.authorId,
-          type: "community_like",
-          title: "Novo gosto",
-          message: `${user.displayName || "Alguém"} gostou do teu post "${post.title}"`,
-          link: `/dashboard/community/${post.id}`,
-          read: false,
-          createdAt: serverTimestamp(),
-        });
+    // Optimistic update
+    const wasLiked = liked;
+    setLiked(!liked);
+    try {
+      if (wasLiked) {
+        await deleteDoc(ref);
+        await updateDoc(postRef, { likesCount: increment(-1) });
+      } else {
+        await setDoc(ref, {});
+        await updateDoc(postRef, { likesCount: increment(1) });
+        if (post.authorId !== user.uid) {
+          await setDoc(doc(db, "users", post.authorId, "notifications", `${post.id}_like_${user.uid}`), {
+            uid: post.authorId,
+            type: "community_like",
+            title: "Novo gosto",
+            message: `${user.displayName || "Alguém"} gostou do teu post "${post.title}"`,
+            link: `/dashboard/community/${post.id}`,
+            read: false,
+            createdAt: serverTimestamp(),
+          });
+        }
       }
+    } catch {
+      // Rollback on error
+      setLiked(wasLiked);
     }
   };
 

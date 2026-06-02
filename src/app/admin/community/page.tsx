@@ -20,6 +20,7 @@ export default function AdminCommunityPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     const q = query(collection(db, "community"), orderBy("createdAt", "desc"));
@@ -31,7 +32,7 @@ export default function AdminCommunityPage() {
   }, []);
 
   const handleDelete = async (postId: string) => {
-    if (!confirm("Tens a certeza que queres apagar esta publicação?")) return;
+    setConfirmDeleteId(null);
     setDeleting(postId);
     try {
       await deleteDoc(doc(db, "community", postId));
@@ -161,7 +162,7 @@ export default function AdminCommunityPage() {
                       <ExternalLink className="h-4 w-4" />
                     </Link>
                     <button
-                      onClick={() => handleDelete(post.id)}
+                      onClick={() => setConfirmDeleteId(post.id)}
                       disabled={deleting === post.id}
                       className="p-1.5 text-gray-600 hover:text-red-400 hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-30"
                     >
@@ -174,6 +175,37 @@ export default function AdminCommunityPage() {
 
             <div className="px-5 py-3 border-t border-gray-800 text-xs text-gray-500">
               {filtered.length} de {posts.length} publicações
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal de confirmação de apagar */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/80 backdrop-blur-sm">
+          <div className="bg-gray-900 border border-gray-800 p-8 max-w-sm w-full mx-4 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-10 w-10 items-center justify-center bg-red-500/10">
+                <Trash2 className="h-5 w-5 text-red-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white">Apagar Publicação</h3>
+            </div>
+            <p className="text-gray-400 text-sm mb-6">
+              Tens a certeza que queres apagar esta publicação? Esta ação é irreversível.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleDelete(confirmDeleteId)}
+                className="flex flex-1 items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2.5 font-bold transition-colors"
+              >
+                Apagar
+              </button>
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                className="flex flex-1 items-center justify-center bg-gray-800 hover:bg-gray-700 text-white py-2.5 font-medium transition-colors"
+              >
+                Cancelar
+              </button>
             </div>
           </div>
         </div>

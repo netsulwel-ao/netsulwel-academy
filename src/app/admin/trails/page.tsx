@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, deleteDoc, doc, orderBy, query } from "firebase/firestore";
-import { Plus, Trash2, Pencil, Loader2, BookOpen, AlertTriangle, X, Layers, Radio } from "lucide-react";
+import { collection, getDocs, deleteDoc, doc, orderBy, query, where } from "firebase/firestore";
+import { Plus, Trash2, Pencil, Loader2, BookOpen, AlertTriangle, Layers, Radio } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Trail } from "@/types/course";
 
 const TYPE_LABELS = { golden: "Golden", smart: "Smart", standalone: "Standalone" };
@@ -15,6 +16,7 @@ const TYPE_COLORS = {
 };
 
 export default function TrailsPage() {
+  const { isAdmin, isTeacher, user } = useAuth();
   const [trails, setTrails] = useState<Trail[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -22,7 +24,11 @@ export default function TrailsPage() {
 
   const fetchTrails = async () => {
     try {
-      const q = query(collection(db, "trails"), orderBy("createdAt", "desc"));
+      // Teacher vê apenas as suas trilhas
+      const constraints = isTeacher && user?.uid
+        ? [orderBy("createdAt", "desc"), where("createdBy", "==", user.uid)]
+        : [orderBy("createdAt", "desc")];
+      const q = query(collection(db, "trails"), ...constraints);
       const snap = await getDocs(q);
       setTrails(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Trail)));
     } catch (err) {
@@ -33,9 +39,8 @@ export default function TrailsPage() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchTrails();
-  }, []);
+  }, [isTeacher, user?.uid]);
 
   const handleDelete = async (id: string) => {
     setDeletingId(id);
@@ -109,7 +114,7 @@ export default function TrailsPage() {
                     className="flex flex-1 items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 text-white py-2 text-sm font-medium transition-colors">
                     <Pencil className="h-4 w-4" /> Editar
                   </Link>
-                  <button onClick={() => setConfirmDelete(trail.id!)}
+        <button onClick={() => setConfirmDelete(trail.id!)}
                     className="flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-3 py-2 text-sm transition-colors">
                     <Trash2 className="h-4 w-4" />
                   </button>

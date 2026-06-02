@@ -14,6 +14,7 @@ import {
 import { EmptyState } from "@/components/shared/EmptyState";
 import type { Sale } from "@/types/settings";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const STATUS_CONFIG = {
   pending:   { label: "Pendente",   color: "text-amber-400",  bg: "bg-amber-500/10 border-amber-500/30",  icon: Clock },
@@ -26,6 +27,7 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 export default function SalesPage() {
+  const { isAdmin, isTeacher, user } = useAuth();
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,24 +37,42 @@ export default function SalesPage() {
 
   const fetchSales = async () => {
     try {
-      const [studentsSnap, salesSnap] = await Promise.all([
-        getDocs(query(collection(db, "users"), where("role", "==", "aluno"))),
-        getDocs(query(collection(db, "sales"), orderBy("createdAt", "desc"))),
-      ]);
-      const studentIds = new Set(studentsSnap.docs.map((d) => d.id));
-      setSales(
-        salesSnap.docs
-          .map((d) => ({ id: d.id, ...d.data() } as Sale))
-          .filter((s) => studentIds.has(s.userId))
-      );
+      if (isTeacher && user?.uid) {
+        // Teacher: busca só cursos seus e filtra as vendas por itemId
+        const coursesSnap = await getDocs(
+          query(collection(db, "courses"), where("createdBy", "==", user.uid))
+        );
+        const myCourseIds = coursesSnap.docs.map(d => d.id);
+        if (myCourseIds.length === 0) { setSales([]); return; }
+
+        const salesSnap = await getDocs(
+          query(
+            collection(db, "sales"),
+            where("itemId", "in", myCourseIds.slice(0, 30)),
+            orderBy("createdAt", "desc")
+          )
+        );
+        setSales(salesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Sale)));
+      } else {
+        // Admin: vê todas as vendas de alunos
+        const [studentsSnap, salesSnap] = await Promise.all([
+          getDocs(query(collection(db, "users"), where("role", "==", "aluno"))),
+          getDocs(query(collection(db, "sales"), orderBy("createdAt", "desc"))),
+        ]);
+        const studentIds = new Set(studentsSnap.docs.map(d => d.id));
+        setSales(
+          salesSnap.docs
+            .map(d => ({ id: d.id, ...d.data() } as Sale))
+            .filter(s => studentIds.has(s.userId))
+        );
+      }
     } catch { toast.error("Erro ao carregar vendas."); }
     finally { setLoading(false); }
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSales();
-  }, []);
+  }, [isTeacher, user?.uid]);
 
   const updateStatus = async (id: string, newStatus: Sale["status"]) => {
     try {
@@ -149,8 +169,14 @@ export default function SalesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Vendas</h1>
-          <p className="mt-1 text-gray-400">Gestão de pagamentos e subscrições</p>
+          <h1 className="text-3xl font-bold text-white">
+            {isTeacher ? "As Minhas Vendas" : "Vendas"}
+          </h1>
+          <p className="mt-1 text-gray-400">
+            {isTeacher
+              ? "Vendas confirmadas dos teus cursos."
+              : "Gestão de pagamentos e subscrições"}
+          </p>
         </div>
       </div>
 
@@ -234,15 +260,21 @@ export default function SalesPage() {
                   <span className="text-xs text-gray-400">{TYPE_LABELS[sale.type]}</span>
                   <span className="text-sm font-bold text-white">{formatKz(sale.amount)}</span>
                   <span className="text-xs text-gray-400 truncate">{sale.paymentMethod}</span>
-                  {/* Status dropdown */}
+                  {/* Status — admin pode alterar, teacher só vê */}
                   <div className="relative">
-                    <select value={sale.status}
-                      onChange={(e) => updateStatus(sale.id!, e.target.value as Sale["status"])}
-                      className={`w-full text-xs font-bold px-2 py-1.5 border appearance-none cursor-pointer focus:outline-none ${sc.bg} ${sc.color}`}>
-                      <option value="pending">Pendente</option>
-                      <option value="confirmed">Confirmado</option>
-                      <option value="cancelled">Cancelado</option>
-                    </select>
+                    {isAdmin ? (
+                      <select value={sale.status}
+                        onChange={(e) => updateStatus(sale.id!, e.target.value as Sale["status"])}
+                        className={`w-full text-xs font-bold px-2 py-1.5 border appearance-none cursor-pointer focus:outline-none ${sc.bg} ${sc.color}`}>
+                        <option value="pending">Pendente</option>
+                        <option value="confirmed">Confirmado</option>
+                        <option value="cancelled">Cancelado</option>
+                      </select>
+                    ) : (
+                      <span className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-1.5 border ${sc.bg} ${sc.color}`}>
+                        <StatusIcon className="h-3 w-3" />{sc.label}
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-1">
                     {sale.receiptUrl && (
@@ -251,9 +283,11 @@ export default function SalesPage() {
                         <FileText className="h-3.5 w-3.5" />
                       </a>
                     )}
-                    <button onClick={() => handleDelete(sale.id!)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    {isAdmin && (
+                      <button onClick={() => handleDelete(sale.id!)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
               );

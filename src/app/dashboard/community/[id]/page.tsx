@@ -56,25 +56,29 @@ export default function CommunityPostDetailPage() {
     if (!user || !post) return;
     const ref = doc(db, "community", id, "likes", user.uid);
     const postRef = doc(db, "community", id);
-    if (liked) {
-      await deleteDoc(ref);
-      await updateDoc(postRef, { likesCount: increment(-1) });
-      setLiked(false);
-    } else {
-      await setDoc(ref, {});
-      await updateDoc(postRef, { likesCount: increment(1) });
-      setLiked(true);
-      if (post.authorId !== user.uid) {
-        await setDoc(doc(db, "users", post.authorId, "notifications", `${id}_like_${user.uid}`), {
-          uid: post.authorId,
-          type: "community_like",
-          title: "Novo gosto",
-          message: `${user.displayName || "Alguém"} gostou do teu post "${post.title}"`,
-          link: `/dashboard/community/${id}`,
-          read: false,
-          createdAt: serverTimestamp(),
-        });
+    const wasLiked = liked;
+    setLiked(!liked);
+    try {
+      if (wasLiked) {
+        await deleteDoc(ref);
+        await updateDoc(postRef, { likesCount: increment(-1) });
+      } else {
+        await setDoc(ref, {});
+        await updateDoc(postRef, { likesCount: increment(1) });
+        if (post.authorId !== user.uid) {
+          await setDoc(doc(db, "users", post.authorId, "notifications", `${id}_like_${user.uid}`), {
+            uid: post.authorId,
+            type: "community_like",
+            title: "Novo gosto",
+            message: `${user.displayName || "Alguém"} gostou do teu post "${post.title}"`,
+            link: `/dashboard/community/${id}`,
+            read: false,
+            createdAt: serverTimestamp(),
+          });
+        }
       }
+    } catch {
+      setLiked(wasLiked);
     }
   };
 

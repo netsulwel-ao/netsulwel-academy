@@ -27,6 +27,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "filename e contentType são obrigatórios." }, { status: 400 });
     }
 
+    // Whitelist de pastas permitidas — evitar path traversal
+    const ALLOWED_FOLDERS = new Set([
+      "thumbnails", "videos", "uploads", "announcements",
+      "countdowns", "lives/thumbnails", "avatars",
+    ]);
+    if (!ALLOWED_FOLDERS.has(folder)) {
+      return NextResponse.json({ error: "Pasta de upload inválida." }, { status: 400 });
+    }
+
     const ext = filename.split(".").pop();
     const key = `${folder}/${randomUUID()}.${ext}`;
 

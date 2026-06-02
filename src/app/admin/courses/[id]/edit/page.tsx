@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { Loader2, CheckCircle2, AlertCircle, Radio } from "lucide-react";
 import CourseForm from "@/components/admin/CourseForm";
+import { syncCourseTrail } from "@/lib/trail-sync";
 import type { Course } from "@/types/course";
 
 export default function EditCoursePage() {
@@ -39,10 +40,15 @@ export default function EditCoursePage() {
   const handleSave = async (data: Omit<Course, "id" | "createdAt" | "updatedAt">) => {
     setSaving(true);
     try {
+      const previousTrailId = initialData?.trailId;
       await updateDoc(doc(db, "courses", id), {
         ...data,
         updatedAt: serverTimestamp(),
       });
+      // Sincronizar Trail.courseIds se o trailId mudou
+      if (data.trailId !== previousTrailId) {
+        await syncCourseTrail(id, data.trailId, previousTrailId, data.trailOrder);
+      }
       setSuccess(true);
       setTimeout(() => router.push("/admin/courses"), 1500);
     } catch (err) {

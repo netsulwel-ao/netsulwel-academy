@@ -48,6 +48,7 @@ const teacherAllowed = new Set([
   "/admin", "/admin/courses", "/admin/courses/new",
   "/admin/trails", "/admin/schedules", "/admin/lives",
   "/admin/students", "/admin/announcements",
+  "/admin/sales", "/admin/community",
 ]);
 
 // Secção extra só para admins (gestão de sistema)

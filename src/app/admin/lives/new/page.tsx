@@ -99,6 +99,7 @@ export default function NewLivePage() {
         target,
         status: "scheduled",
         createdBy: user.uid,
+        hostName: user.displayName || user.email || "Professor",
         roomName,
         participantCount: 0,
         createdAt: serverTimestamp(),

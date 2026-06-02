@@ -1,17 +1,18 @@
 import { NextRequest } from "next/server";
 import { AccessToken, TrackSource } from "livekit-server-sdk";
 import { verifyAuth } from "@/lib/api-auth";
+import { getFirebaseAdmin } from "@/lib/firebase-admin";
 
 export async function POST(req: NextRequest) {
   try {
     const { uid, error } = await verifyAuth(req);
     if (!uid) return Response.json({ error }, { status: 401 });
 
-    const { roomName, identity, name, isHost } = await req.json();
+    const { roomName, name } = await req.json();
 
-    if (!roomName || !identity || !name) {
+    if (!roomName || !name) {
       return Response.json(
-        { error: "roomName, identity e name são obrigatórios." },
+        { error: "roomName e name são obrigatórios." },
         { status: 400 }
       );
     }
@@ -26,8 +27,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Verificar role do utilizador no Firestore Admin SDK
+    // para determinar se é host (admin/teacher) sem confiar no cliente
+    let isHost = false;
+    try {
+      const admin = getFirebaseAdmin();
+      const userDoc = await admin.firestore().collection("users").doc(uid).get();
+      if (userDoc.exists) {
+        const role = userDoc.data()?.role;
+        isHost = role === "admin" || role === "teacher";
+      }
+    } catch {
+      // Se não conseguir verificar o role, nega privilégios de host
+      isHost = false;
+    }
+
     const at = new AccessToken(apiKey, apiSecret, {
-      identity,
+      identity: uid,   // sempre o UID verificado — nunca user-supplied
       name,
       ttl: "6h",
     });
@@ -36,6 +52,7 @@ export async function POST(req: NextRequest) {
       roomJoin: true,
       room: roomName,
       canPublish: true,
+      // Host (admin/teacher) publica tudo; aluno só microfone
       canPublishSources: isHost ? undefined : [TrackSource.MICROPHONE],
       canPublishData: true,
       canSubscribe: true,
@@ -43,7 +60,7 @@ export async function POST(req: NextRequest) {
 
     const token = await at.toJwt();
 
-    return Response.json({ token });
+    return Response.json({ token, isHost });
   } catch (error) {
     console.error("Erro ao gerar token LiveKit:", error);
     return Response.json(

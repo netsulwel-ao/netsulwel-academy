@@ -7,6 +7,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import CourseForm from "@/components/admin/CourseForm";
 import { useAuth } from "@/contexts/AuthContext";
+import { syncCourseTrail } from "@/lib/trail-sync";
 import type { Course } from "@/types/course";
 
 export default function NewCoursePage() {
@@ -18,12 +19,16 @@ export default function NewCoursePage() {
   const handleSave = async (data: Omit<Course, "id" | "createdAt" | "updatedAt">) => {
     setSaving(true);
     try {
-      await addDoc(collection(db, "courses"), {
+      const docRef = await addDoc(collection(db, "courses"), {
         ...data,
         createdBy: user?.uid ?? null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+      // Sincronizar Trail.courseIds se o curso foi atribuído a uma trilha
+      if (data.trailId) {
+        await syncCourseTrail(docRef.id, data.trailId, undefined, data.trailOrder);
+      }
       setSuccess(true);
       setTimeout(() => router.push("/admin/courses"), 1500);
     } catch (err) {

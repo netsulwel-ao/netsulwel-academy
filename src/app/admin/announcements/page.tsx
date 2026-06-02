@@ -160,9 +160,12 @@ export default function AnnouncementsPage() {
     setSavingAnn(true); setAnnError("");
     try {
       if(editingAnnId) {
-        const payload = {...annForm, title:annForm.title.trim(), body:annForm.body.trim(), updatedAt:serverTimestamp()};
+        const payload = {...annForm, title:annForm.title.trim(), body:annForm.body.trim(), updatedAt:serverTimestamp(),
+          // Se não é admin, repor para pending ao editar para re-aprovação
+          ...(!isAdmin ? { status: "pending", active: false } : {}),
+        };
         await updateDoc(doc(db,"announcements",editingAnnId),payload);
-        toast.success("Anúncio atualizado.");
+        toast.success(isAdmin ? "Anúncio atualizado." : "Anúncio reenviado para aprovação.");
       } else {
         const payload = {
           ...annForm, title:annForm.title.trim(), body:annForm.body.trim(),
@@ -200,7 +203,12 @@ export default function AnnouncementsPage() {
     } catch { toast.error("Erro ao rejeitar."); }
   };
 
-  const toggleAnnActive = async (a:Announcement) => {
+  const toggleAnnActive = async (a: Announcement) => {
+    // Não permitir ativar anúncios rejeitados
+    if (!a.active && a.status === "rejected") {
+      toast.error("Não é possível ativar um anúncio rejeitado.");
+      return;
+    }
     try {
       await updateDoc(doc(db,"announcements",a.id!),{active:!a.active,updatedAt:serverTimestamp()});
       setAnnouncements(p=>p.map(x=>x.id===a.id?{...x,active:!x.active}:x));

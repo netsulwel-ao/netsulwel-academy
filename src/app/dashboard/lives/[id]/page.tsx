@@ -227,8 +227,10 @@ function ViewerInterior({ live }: { live: LiveSession }) {
     }
   }, [canSpeak, localParticipant]);
 
+  const viewedRef = useRef(false);
   useEffect(() => {
-    if (!user || !live.id) return;
+    if (!user || !live.id || viewedRef.current) return;
+    viewedRef.current = true;
     updateDoc(doc(db, "lives", live.id), { views: increment(1) }).catch(() => {});
   }, [live.id, user]);
 

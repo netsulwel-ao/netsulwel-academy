@@ -195,6 +195,8 @@ export default function CourseDetailPage() {
     if (!user || !course?.id) return;
     const totalLessons = course.modules?.reduce((acc, m) => acc + m.videos.length, 0) ?? 0;
     await setDoc(doc(db, "progress", user.uid, "courses", course.id), {
+      userId: user.uid,
+      courseId: course.id,
       currentMi: mi,
       currentVi: vi,
       currentTime: time ?? currentTimeRef.current,
@@ -237,6 +239,8 @@ export default function CourseDetailPage() {
 
     // Save immediately
     await setDoc(doc(db, "progress", user.uid, "courses", course.id), {
+      userId: user.uid,
+      courseId: course.id,
       currentMi: mi,
       currentVi: vi,
       completed: newCompleted,

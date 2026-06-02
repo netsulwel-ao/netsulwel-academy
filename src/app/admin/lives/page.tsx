@@ -4,24 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
 import {
-  collection,
-  getDocs,
-  query,
-  orderBy,
-  deleteDoc,
-  doc,
+  collection, getDocs, query, orderBy, deleteDoc, doc, where,
 } from "firebase/firestore";
 import {
-  Plus,
-  Radio,
-  Calendar,
-  Users,
-  Trash2,
-  Play,
-  Eye,
-  Loader2,
-  Clock,
+  Plus, Radio, Calendar, Users, Trash2, Play, Loader2, Clock,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import type { LiveSession } from "@/types/live";
 import { toast } from "sonner";
 
@@ -56,30 +44,28 @@ const TARGET_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export default function AdminLivesPage() {
+  const { isTeacher, user } = useAuth();
   const [lives, setLives] = useState<LiveSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
 
   async function fetchLives() {
     try {
-      const snap = await getDocs(
-        query(collection(db, "lives"), orderBy("scheduledAt", "desc"))
-      );
-      const data = snap.docs.map(
-        (d) => ({ id: d.id, ...d.data() } as LiveSession)
-      );
-      setLives(data);
+      const constraints = isTeacher && user?.uid
+        ? [orderBy("scheduledAt", "desc"), where("createdBy", "==", user.uid)]
+        : [orderBy("scheduledAt", "desc")];
+      const snap = await getDocs(query(collection(db, "lives"), ...constraints));
+      setLives(snap.docs.map((d) => ({ id: d.id, ...d.data() } as LiveSession)));
     } catch (err) {
       console.error("Erro ao carregar lives:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchLives();
-  }, []);
+  }, [isTeacher, user?.uid]);
 
   const handleDelete = async (id: string) => {
     toast("Tem a certeza que deseja eliminar esta live?", {

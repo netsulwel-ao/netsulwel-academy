@@ -124,20 +124,26 @@ service cloud.firestore {
     }
 
     // ── progress ──────────────────────────────────────────
-    match /progress/{progressId} {
-      allow read: if isAdminOrTeacher() ||
-        (isAuth() && resource.data.userId == request.auth.uid);
-      allow create: if isAuth() &&
-        request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAdmin() ||
-        (isAuth() && resource.data.userId == request.auth.uid);
+    match /progress/{userId} {
+      // Subcoleção de progresso por curso
+      match /courses/{courseId} {
+        allow read, write: if isAdminOrTeacher() || isOwner(userId);
+      }
+      // Documento raiz (compatibilidade)
+      allow read: if isAdminOrTeacher() || isOwner(userId);
+      allow write: if isOwner(userId);
     }
 
     // ── certificates ──────────────────────────────────────
-    match /certificates/{certId} {
-      allow read: if isAdminOrTeacher() ||
-        (isAuth() && resource.data.userId == request.auth.uid);
-      allow create, update, delete: if isAdmin();
+    match /certificates/{userId} {
+      // Subcoleção de certificados por curso
+      match /courses/{courseId} {
+        allow read: if isAdminOrTeacher() || isOwner(userId);
+        allow write: if isOwner(userId); // aluno cria o próprio certificado ao completar
+      }
+      // Documento raiz
+      allow read: if isAdminOrTeacher() || isOwner(userId);
+      allow write: if isAdmin();
     }
 
     // ── sales ─────────────────────────────────────────────

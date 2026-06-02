@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { auth, db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
-import { collection, getDocs, doc, updateDoc, query, orderBy, serverTimestamp } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, query, orderBy, serverTimestamp, where } from "firebase/firestore";
 import { Calendar, Loader2, ChevronDown, ChevronRight, Plus, Trash2, ImagePlus, Save, AlertCircle, CheckCircle2, X, Layers, Radio, Crown, Zap, Coins } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import type { Trail, TrailLiveSession } from "@/types/course";
@@ -43,7 +43,7 @@ function emptySession(): TrailLiveSession {
 }
 
 export default function SchedulesPage() {
-  const { isAdminOrTeacher } = useAuth();
+  const { isTeacher, user } = useAuth();
 
   const [trails, setTrails] = useState<Trail[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +57,10 @@ export default function SchedulesPage() {
   useEffect(() => {
     const fetchTrails = async () => {
       try {
-        const q = query(collection(db, "trails"), orderBy("createdAt", "desc"));
+        const constraints = isTeacher && user?.uid
+          ? [orderBy("createdAt", "desc"), where("createdBy", "==", user.uid)]
+          : [orderBy("createdAt", "desc")];
+        const q = query(collection(db, "trails"), ...constraints);
         const snap = await getDocs(q);
         const all = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Trail));
         setTrails(all);
@@ -71,7 +74,7 @@ export default function SchedulesPage() {
       }
     };
     fetchTrails();
-  }, []);
+  }, [isTeacher, user?.uid]);
 
   const toggleExpand = (id: string) => {
     setExpanded((prev) => {
