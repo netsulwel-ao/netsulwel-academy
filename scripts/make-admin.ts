@@ -9,6 +9,6 @@ try {
   await admin.firestore().collection("users").doc(user.uid).update({ role: "admin" });
   console.log(`✓ ${email} (${user.uid}) → admin`);
 } catch (err) {
-  console.error("Erro:", err.message);
+  console.error("Erro:", err instanceof Error ? err.message : String(err));
   process.exit(1);
 }
