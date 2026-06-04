@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, Users, Settings, LogOut, Search, 
-  PanelLeftClose, PanelLeft, Sun, Moon, Video, DollarSign, Folders, Layers, Megaphone, Radio, Calendar, MessageSquare, GraduationCap
+  PanelLeftClose, PanelLeft, Sun, Moon, Video, DollarSign, Folders, Layers, Megaphone, Radio, Calendar, MessageSquare, GraduationCap, BookOpen
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -37,8 +37,9 @@ const navSections = [
  {
  title: "SISTEMA",
  items: [
- { icon: Settings, label: "Configurações", href: "/admin/settings" },
- { icon: Megaphone, label: "Anúncios", href: "/admin/announcements" },
+  { icon: Settings, label: "Configurações", href: "/admin/settings" },
+  { icon: Megaphone, label: "Anúncios", href: "/admin/announcements" },
+  { icon: BookOpen, label: "Manual do Admin", href: "/admin/manual" },
  ]
  }
 ];
@@ -49,6 +50,7 @@ const teacherAllowed = new Set([
   "/admin/trails", "/admin/schedules", "/admin/lives",
   "/admin/students", "/admin/announcements",
   "/admin/sales", "/admin/community",
+  "/admin/manual",
 ]);
 
 // Secção extra só para admins (gestão de sistema)
