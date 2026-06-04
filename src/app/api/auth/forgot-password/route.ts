@@ -58,50 +58,53 @@ function buildResetEmailHtml(resetLink: string, siteUrl: string): string {
 
         <!-- CARD PRINCIPAL -->
         <tr>
-          <td style="background-color:#13131f;border:1px solid #1e1e30;border-radius:16px;overflow:hidden;">
+          <td style="background-color:#13131f;border:1px solid #1e1e30;border-radius:16px;">
 
             <!-- ILUSTRAÇÃO -->
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
               <tr>
-                <td style="background-color:#0a0a18;padding:0;text-align:center;height:200px;position:relative;">
-                  <div style="background-color:#0a0a18;padding:24px 0 0;text-align:center;">
-                    <!--[if !mso]><!-->
-                    <svg width="480" height="180" viewBox="0 0 480 180" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;">
-                      <ellipse cx="240" cy="220" rx="220" ry="140" fill="#130d2a"/>
-                      <ellipse cx="240" cy="200" rx="150" ry="100" fill="#1a0f38"/>
-                      <!-- monitor -->
-                      <rect x="120" y="30" width="240" height="150" rx="10" fill="#1a1530" stroke="#2e2060" stroke-width="1.5"/>
-                      <rect x="120" y="30" width="240" height="24" rx="10" fill="#231b45"/>
-                      <rect x="120" y="42" width="240" height="12" fill="#231b45"/>
-                      <circle cx="135" cy="42" r="4" fill="#3a1a6e"/>
-                      <circle cx="149" cy="42" r="4" fill="#3a1a6e"/>
-                      <circle cx="163" cy="42" r="4" fill="#4a2a8e"/>
-                      <!-- conteudo tela -->
-                      <rect x="138" y="66" width="90" height="7" rx="3" fill="#2a2050"/>
-                      <rect x="138" y="80" width="130" height="5" rx="2.5" fill="#221a40"/>
-                      <rect x="138" y="91" width="110" height="5" rx="2.5" fill="#221a40"/>
-                      <rect x="138" y="106" width="75" height="26" rx="6" fill="#7c3aed"/>
-                      <text x="175" y="123" font-size="9" fill="white" font-family="Arial,sans-serif" font-weight="700" text-anchor="middle">REDEFINIR</text>
-                      <!-- cadeado -->
-                      <rect x="275" y="78" width="58" height="44" rx="5" fill="#1e1840" stroke="#2e2060" stroke-width="1"/>
-                      <circle cx="304" cy="93" r="8" fill="none" stroke="#7c3aed" stroke-width="2"/>
-                      <rect x="300" y="98" width="8" height="16" rx="2" fill="#7c3aed"/>
-                      <!-- personagem -->
-                      <circle cx="348" cy="118" r="13" fill="#c084fc"/>
-                      <path d="M335 178 L335 155 Q348 147 361 155 L361 178" fill="#7c3aed"/>
-                      <rect x="330" y="176" width="36" height="4" rx="2" fill="#5a2aad"/>
-                      <line x1="354" y1="160" x2="368" y2="144" stroke="#9d4ffa" stroke-width="2" stroke-linecap="round"/>
-                      <circle cx="370" cy="142" r="4" fill="#7c3aed"/>
-                      <!-- base -->
-                      <path d="M130 178 L350 178" stroke="#1e1840" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.5"/>
-                      <!-- partículas -->
-                      <circle cx="75" cy="60" r="2" fill="#7c3aed" opacity="0.4"/>
-                      <circle cx="415" cy="90" r="2" fill="#7c3aed" opacity="0.4"/>
-                      <circle cx="90" cy="130" r="1.5" fill="#a855f7" opacity="0.3"/>
-                      <circle cx="400" cy="50" r="1.5" fill="#a855f7" opacity="0.3"/>
-                    </svg>
-                    <!--<![endif]-->
-                  </div>
+                <td style="background-color:#0a0a18;padding:36px 20px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
+                  <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                    <tr>
+                      <td style="font-size:28px;color:#7c3aed;line-height:1;padding-bottom:8px;text-align:center;">&#9679; &#9679; &#9679;</td>
+                    </tr>
+                    <tr>
+                      <td style="font-size:11px;color:#7070a0;letter-spacing:2px;text-transform:uppercase;padding-bottom:16px;text-align:center;">Recupera&ccedil;&atilde;o de senha</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align:center;">
+                        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;background-color:#1a1530;border:1px solid #2e2060;width:280px;">
+                          <tr>
+                            <td style="background-color:#231b45;padding:8px 12px;text-align:left;font-size:0;">
+                              <span style="display:inline-block;width:7px;height:7px;background-color:#3a1a6e;margin-right:5px;">&nbsp;</span>
+                              <span style="display:inline-block;width:7px;height:7px;background-color:#3a1a6e;margin-right:5px;">&nbsp;</span>
+                              <span style="display:inline-block;width:7px;height:7px;background-color:#4a2a8e;">&nbsp;</span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding:16px;text-align:center;">
+                              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 8px;width:60%;">
+                                <tr><td style="background-color:#2a2050;height:5px;font-size:0;">&nbsp;</td></tr>
+                              </table>
+                              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 6px;width:80%;">
+                                <tr><td style="background-color:#221a40;height:3px;font-size:0;">&nbsp;</td></tr>
+                              </table>
+                              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 12px;width:70%;">
+                                <tr><td style="background-color:#221a40;height:3px;font-size:0;">&nbsp;</td></tr>
+                              </table>
+                              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;background-color:#7c3aed;">
+                                <tr>
+                                  <td style="padding:8px 20px;text-align:center;">
+                                    <span style="color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;">REDEFINIR</span>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
                 </td>
               </tr>
             </table>
