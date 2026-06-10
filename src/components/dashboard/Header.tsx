@@ -8,7 +8,8 @@ import {
   collection, query, orderBy, limit, onSnapshot,
   doc, updateDoc, writeBatch,
 } from "firebase/firestore";
-import { Bell, Menu, CheckCheck, Radio, CreditCard, Heart, MessageCircle, Award, DollarSign, Mail, Video } from "lucide-react";
+
+import { Bell, Menu, CheckCheck, Radio, CreditCard, Heart, MessageCircle, Award, DollarSign, Mail, Video, Building2 } from "lucide-react";
 import Link from "next/link";
 import type { AppNotification } from "@/types/notification";
 
@@ -53,7 +54,16 @@ function markAllBroadcastsRead(ids: string[]) {
 }
 
 export default function Header({ onMenuClick, theme = "dark" }: HeaderProps) {
-  const { user } = useAuth();
+  const { user, isInstitution, institutionId } = useAuth();
+  const [institutionName, setInstitutionName] = useState("");
+
+  useEffect(() => {
+    if (!institutionId) { setInstitutionName(""); return; }
+    const unsub = onSnapshot(doc(db, "institutions", institutionId), snap => {
+      if (snap.exists()) setInstitutionName(snap.data().name || "");
+    });
+    return () => unsub();
+  }, [institutionId]);
   const router = useRouter();
   const [userNotifs, setUserNotifs] = useState<AppNotification[]>([]);
   const [broadcasts, setBroadcasts] = useState<AppNotification[]>([]);
@@ -288,16 +298,35 @@ export default function Header({ onMenuClick, theme = "dark" }: HeaderProps) {
         {/* ── User info ── */}
         <div className="flex items-center gap-3">
           <div className="hidden text-right sm:block">
-            <p className={`text-sm font-semibold ${theme === "light" ? "text-slate-800" : "text-white"}`}>
-              {user?.displayName || "Utilizador"}
-            </p>
-            <p className={`text-xs ${theme === "light" ? "text-slate-400" : "text-gray-500"}`}>
-              {user?.email}
-            </p>
+            {isInstitution ? (
+              <>
+                <p className={`text-sm font-semibold ${theme === "light" ? "text-slate-800" : "text-white"}`}>
+                  {institutionName || user?.displayName || "Instituição"}
+                </p>
+                <p className={`text-xs ${theme === "light" ? "text-slate-400" : "text-gray-500"}`}>
+                  {user?.email}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className={`text-sm font-semibold ${theme === "light" ? "text-slate-800" : "text-white"}`}>
+                  {user?.displayName || "Utilizador"}
+                </p>
+                <p className={`text-xs ${theme === "light" ? "text-slate-400" : "text-gray-500"}`}>
+                  {user?.email}
+                </p>
+              </>
+            )}
           </div>
-          <div className="flex h-9 w-9 items-center justify-center bg-gradient-to-br from-purple to-purple-dark text-white text-sm font-bold shadow-md">
+          <div className={`flex h-9 w-9 items-center justify-center text-sm font-bold shadow-md ${
+            isInstitution
+              ? "bg-gradient-to-br from-cyan-600 to-cyan-800 text-white"
+              : "bg-gradient-to-br from-purple to-purple-dark text-white"
+          }`}>
             {user?.photoURL ? (
               <img src={user.photoURL} alt="Avatar" className="h-full w-full object-cover" />
+            ) : isInstitution ? (
+              <Building2 className="h-4 w-4" />
             ) : (
               getInitials(user?.displayName)
             )}

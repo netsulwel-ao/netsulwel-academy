@@ -10,6 +10,9 @@ import {
   BarChart3, Megaphone
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface SidebarProps {
  isCollapsed: boolean;
@@ -41,7 +44,16 @@ const institutionNav = [
 
 export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen, theme, onToggleTheme }: SidebarProps) {
    const pathname = usePathname();
-   const { role, isAdmin, isTeacher, isInstitution, logout } = useAuth();
+   const { role, isAdmin, isTeacher, isInstitution, institutionId, logout } = useAuth();
+   const [institutionName, setInstitutionName] = useState("");
+
+   useEffect(() => {
+     if (!institutionId) { setInstitutionName(""); return; }
+     const unsub = onSnapshot(doc(db, "institutions", institutionId), snap => {
+       if (snap.exists()) setInstitutionName(snap.data().name || "");
+     });
+     return () => unsub();
+   }, [institutionId]);
 
    const handleLogout = async () => {
    await logout();
@@ -94,7 +106,12 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
   {isInstitution && (
     <div>
       {!isCollapsed && (
-        <h3 className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-purple-400">INSTITUIÇÃO</h3>
+        <>
+          {institutionName && (
+            <p className="px-3 mb-1 text-sm font-medium text-purple-300 truncate">{institutionName}</p>
+          )}
+          <h3 className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-purple-400">INSTITUIÇÃO</h3>
+        </>
       )}
       <ul className="space-y-1">
         {institutionNav.map((item) => {
