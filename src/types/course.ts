@@ -1,4 +1,4 @@
-export type CourseType = "golden" | "smart" | "standalone";
+export type CourseType = "standalone" | "smart" | "golden";
 export type CourseLevel = "beginner" | "intermediate" | "advanced";
 export type CourseCategory = "tech" | "finance" | "investments" | "other";
 export type CourseStatus = "draft" | "published";
@@ -42,6 +42,8 @@ export interface Course {
   lessonsCount: number;
   totalDuration?: string;    // calculado
   createdBy?: string;          // UID do admin que criou
+  sellerId?: string;          // UID do professor/instituição que vende (para taxas)
+  feePercentage?: number;     // Taxa da plataforma para este curso (ex: 10 para 10%)
   views?: number;
   createdAt?: unknown;
   updatedAt?: unknown;
@@ -52,8 +54,10 @@ export interface TrailLiveSession {
   description: string;
   thumbnail: string;
   scheduledAt: string;       // ISO datetime
-  target: "free" | "smart" | "golden" | "standalone";
-  price: number;             // usado apenas se target === "standalone"
+  price: number;
+  target?: "free" | "smart" | "golden" | "standalone";
+  sellerId?: string;         // UID do professor/instituição que vende
+  feePercentage?: number;    // Taxa da plataforma
 }
 
 export interface Trail {
@@ -61,7 +65,7 @@ export interface Trail {
   title: string;
   description: string;
   thumbnail: string;
-  type: CourseType;          // acesso mínimo necessário
+  type?: "smart" | "golden" | "standalone";
   category: CourseCategory;
   level: CourseLevel;
   status: CourseStatus;

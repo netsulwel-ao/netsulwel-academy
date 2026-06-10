@@ -23,13 +23,23 @@ import type { Course } from "@/types/course";
 import type { LiveSession } from "@/types/live";
 
 export default function DashboardPage() {
-  const { user, plan, isAdmin } = useAuth();
-  const { planLabel, canAccessCourse } = useAccess();
+  const { user, isAdmin } = useAuth();
+  const { canAccessCourse } = useAccess();
 
   const [loading, setLoading] = useState(true);
   const [courses, setCourses] = useState<Course[]>([]);
   const [enrolledCourses, setEnrolledCourses] = useState<string[]>([]);
   const [nextLive, setNextLive] = useState<LiveSession | null>(null);
+
+  const rolePill = isAdmin ? (
+    <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-bold border bg-purple-500/15 text-purple-300 border-purple-500/25">
+      <Crown className="h-4 w-4" /> Admin
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-bold border bg-blue-500/15 text-blue-300 border-blue-500/25">
+      <GraduationCap className="h-4 w-4" /> Aluno
+    </span>
+  );
 
   useEffect(() => {
     const load = async () => {
@@ -76,25 +86,6 @@ export default function DashboardPage() {
     [courses, enrolledCourses, canAccessCourse]
   );
 
-  const planPill =
-    isAdmin ? (
-      <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-bold border bg-purple-500/15 text-purple-300 border-purple-500/25">
-        <Crown className="h-4 w-4" /> Admin
-      </span>
-    ) : plan === "golden" ? (
-      <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-bold border bg-yellow-500/15 text-yellow-300 border-yellow-500/25">
-        <Crown className="h-4 w-4" /> {planLabel[plan]}
-      </span>
-    ) : plan === "smart" ? (
-      <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-bold border bg-green-500/15 text-green-300 border-green-500/25">
-        <Zap className="h-4 w-4" /> {planLabel[plan]}
-      </span>
-    ) : (
-      <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-bold border bg-gray-500/10 text-gray-300 border-gray-700/60">
-        <Lock className="h-4 w-4" /> {planLabel[plan]}
-      </span>
-    );
-
  return (
  <div className="max-w-[100rem] mx-auto animate-in fade-in duration-500">
       <div className="flex items-start justify-between gap-6 flex-wrap">
@@ -102,7 +93,7 @@ export default function DashboardPage() {
           <h1 className="text-4xl font-bold text-white">Olá{user?.displayName ? `, ${user.displayName.split(" ")[0]}` : ""}</h1>
           <p className="mt-1 text-gray-400">Bem-vindo ao teu painel. Aqui tens um resumo rápido do teu progresso.</p>
           <div className="mt-4 flex items-center gap-3 flex-wrap">
-            {planPill}
+            {rolePill}
             <span className="text-sm text-gray-500">Email: {user?.email}</span>
           </div>
         </div>
@@ -306,9 +297,9 @@ export default function DashboardPage() {
                 <BookOpen className="h-6 w-6 text-gray-500" />
               </div>
               <p className="text-base text-gray-400">Ainda não tens cursos disponíveis para ver agora.</p>
-              <p className="mt-1 text-sm text-gray-600">Faz upgrade do teu plano ou compra um curso avulso.</p>
-              <Link href="/dashboard/finances" className="mt-4 inline-flex items-center gap-2 text-sm text-purple hover:text-purple-light font-bold transition-colors">
-                Ver planos <span aria-hidden>→</span>
+              <p className="mt-1 text-sm text-gray-600">Compra um curso para começar a aprender.</p>
+              <Link href="/dashboard/courses" className="mt-4 inline-flex items-center gap-2 text-sm text-purple hover:text-purple-light font-bold transition-colors">
+                Ver cursos <span aria-hidden>→</span>
               </Link>
             </div>
           )}

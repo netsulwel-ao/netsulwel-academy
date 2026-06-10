@@ -72,10 +72,8 @@ function getServiceAccount(): admin.ServiceAccount | null {
   return null;
 }
 
-let initialized = false;
-
 export function getFirebaseAdmin() {
-  if (initialized && admin.apps.length) return admin;
+  if (admin.apps.length) return admin;
 
   const serviceAccount = getServiceAccount();
 
@@ -89,6 +87,5 @@ export function getFirebaseAdmin() {
     });
   }
 
-  initialized = true;
   return admin;
 }

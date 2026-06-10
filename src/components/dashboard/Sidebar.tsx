@@ -4,7 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home, BookOpen, CreditCard, Users, Settings, LogOut,
-  PanelLeftClose, PanelLeft, Sun, Moon, ChevronRight, FileText, Layers, Award
+  PanelLeftClose, PanelLeft, Sun, Moon, ChevronRight, FileText, Layers, Award,
+  Crown, GraduationCap, Building2, User,
+  LayoutDashboard, UserPlus, Link2, Mail,
+  BarChart3, Megaphone
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -17,30 +20,28 @@ interface SidebarProps {
  onToggleTheme: () => void;
 }
 
-const navSections = [
- {
- title: "NAVEGAÇÃO",
- items: [
- { icon: Home, label: "Início", href: "/dashboard" },
+const studentNav = [
+  { icon: Home, label: "Início", href: "/dashboard" },
   { icon: BookOpen, label: "Meus Cursos", href: "/dashboard/courses" },
   { icon: Layers, label: "Trilhas", href: "/dashboard/trails" },
   { icon: FileText, label: "Avaliações", href: "/dashboard/exams" },
   { icon: Award, label: "Certificados", href: "/dashboard/certificates" },
   { icon: Users, label: "Comunidade", href: "/dashboard/community" },
-  ]
- },
- {
- title: "SISTEMA",
- items: [
- { icon: CreditCard, label: "Finanças", href: "/dashboard/finances" },
- { icon: Settings, label: "Definições", href: "/dashboard/settings" },
- ]
- }
+];
+
+const institutionNav = [
+  { icon: LayoutDashboard, label: "Visão Geral", href: "/dashboard/institution" },
+  { icon: Users, label: "Membros", href: "/dashboard/institution/members" },
+  { icon: BookOpen, label: "Cursos", href: "/dashboard/institution/courses" },
+  { icon: GraduationCap, label: "Turmas", href: "/dashboard/institution/classes" },
+  { icon: BarChart3, label: "Relatórios", href: "/dashboard/institution/reports" },
+  { icon: Megaphone, label: "Comunicados", href: "/dashboard/institution/announcements" },
+  { icon: Settings, label: "Definições", href: "/dashboard/institution/settings" },
 ];
 
 export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen, theme, onToggleTheme }: SidebarProps) {
    const pathname = usePathname();
-   const { plan, isAdmin, logout } = useAuth();
+   const { role, isAdmin, isTeacher, isInstitution, logout } = useAuth();
 
    const handleLogout = async () => {
    await logout();
@@ -88,112 +89,128 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
 
  <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4 hide-scrollbar">
 
-  {/* 2. Navegação com Categorias */}
- <div className="space-y-6 px-4">
- {navSections.map((section, idx) => (
- <div key={idx}>
- {!isCollapsed && (
- <h3 className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-gray-500">
- {section.title}
- </h3>
- )}
+  <div className="space-y-6 px-4">
+  {/* Secção para Instituições */}
+  {isInstitution && (
+    <div>
+      {!isCollapsed && (
+        <h3 className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-purple-400">INSTITUIÇÃO</h3>
+      )}
+      <ul className="space-y-1">
+        {institutionNav.map((item) => {
+          const isActive = item.href === "/dashboard/institution"
+            ? pathname === item.href
+            : pathname.startsWith(item.href);
+          return (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                title={isCollapsed ? item.label : ""}
+                className={`group flex items-center px-3 py-2.5 transition-all relative ${isActive
+                  ? theme === "light"
+                    ? "bg-purple text-white shadow-sm"
+                    : "bg-purple text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+                  : theme === "light"
+                    ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    : "text-gray-400 hover:bg-gray-900 hover:text-gray-200"
+                }`}
+              >
+                <item.icon className={`h-6 w-6 shrink-0 ${isCollapsed ? "mx-auto" : "mr-3"} ${
+                  isActive
+                    ? "text-white drop-shadow-md"
+                    : theme === "light"
+                      ? "text-slate-400 group-hover:text-slate-700"
+                      : "text-gray-500 group-hover:text-gray-300"
+                }`} />
+                {!isCollapsed && (
+                  <span className="text-base font-medium whitespace-nowrap">{item.label}</span>
+                )}
+                {isCollapsed && (
+                  <div className={`absolute left-14 hidden group-hover:block px-2 py-1 text-sm whitespace-nowrap z-50 ${
+                    theme === "light" ? "bg-slate-800 text-white" : "bg-gray-800 text-white"
+                  }`}>
+                    {item.label}
+                  </div>
+                )}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  )}
 
- <ul className="space-y-1">
- {section.items.map((item) => {
- const isActive = pathname === item.href;
- return (
- <li key={item.href}>
- <Link
- href={item.href}
- title={isCollapsed ? item.label : ""}
- className={`group flex items-center px-3 py-2.5 transition-all relative ${isActive
-   ? theme === "light"
-     ? "bg-purple text-white shadow-sm"
-     : "bg-purple text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]"
-   : theme === "light"
-     ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-     : "text-gray-400 hover:bg-gray-900 hover:text-gray-200"
- }`}
- >
- <item.icon className={`h-6 w-6 shrink-0 ${isCollapsed ? "mx-auto" : "mr-3"} ${
-   isActive
-     ? "text-white drop-shadow-md"
-     : theme === "light"
-       ? "text-slate-400 group-hover:text-slate-700"
-       : "text-gray-500 group-hover:text-gray-300"
- }`} />
-
- {!isCollapsed && (
- <span className="text-base font-medium whitespace-nowrap">{item.label}</span>
- )}
-
- {/* Tooltip para modo fechado */}
- {isCollapsed && (
- <div className={`absolute left-14 hidden group-hover:block px-2 py-1 text-sm whitespace-nowrap z-50 ${
-   theme === "light" ? "bg-slate-800 text-white" : "bg-gray-800 text-white"
- }`}>
- {item.label}
+  {/* Secção de Navegação (aluno/professor) ou extra */}
+  {!isInstitution && (
+    <div>
+      {!isCollapsed && (
+        <h3 className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-gray-500">NAVEGAÇÃO</h3>
+      )}
+      <ul className="space-y-1">
+        {studentNav.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                title={isCollapsed ? item.label : ""}
+                className={`group flex items-center px-3 py-2.5 transition-all relative ${isActive
+                  ? theme === "light"
+                    ? "bg-purple text-white shadow-sm"
+                    : "bg-purple text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+                  : theme === "light"
+                    ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    : "text-gray-400 hover:bg-gray-900 hover:text-gray-200"
+                }`}
+              >
+                <item.icon className={`h-6 w-6 shrink-0 ${isCollapsed ? "mx-auto" : "mr-3"} ${
+                  isActive
+                    ? "text-white drop-shadow-md"
+                    : theme === "light"
+                      ? "text-slate-400 group-hover:text-slate-700"
+                      : "text-gray-500 group-hover:text-gray-300"
+                }`} />
+                {!isCollapsed && (
+                  <span className="text-base font-medium whitespace-nowrap">{item.label}</span>
+                )}
+                {isCollapsed && (
+                  <div className={`absolute left-14 hidden group-hover:block px-2 py-1 text-sm whitespace-nowrap z-50 ${
+                    theme === "light" ? "bg-slate-800 text-white" : "bg-gray-800 text-white"
+                  }`}>
+                    {item.label}
+                  </div>
+                )}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  )}
  </div>
- )}
- </Link>
- </li>
- );
- })}
- </ul>
- </div>
- ))}
- </div>
 
-  {/* 4. Card de Plano / Upgrade (Escondido se fechado) */}
+  {/* 4. Card de Role (Escondido se fechado) */}
   {!isCollapsed && (() => {
-  const planData = isAdmin ? { label: "Admin", color: "from-purple-900/80 to-purple-600/40", colorLight: "from-purple-50 to-purple-100/60 border-purple-200", pct: 100, suffix: "acesso total" }
-  : plan === "golden" ? { label: "Golden", color: "from-yellow-900/80 to-yellow-600/40", colorLight: "from-yellow-50 to-amber-100/60 border-amber-200", pct: 100, suffix: "acesso completo" }
-  : plan === "smart" ? { label: "Smart", color: "from-green-900/80 to-green-600/40", colorLight: "from-green-50 to-emerald-100/60 border-emerald-200", pct: 60, suffix: "dos recursos usados" }
-  : { label: "Grátis", color: "from-gray-900/80 to-gray-600/40", colorLight: "from-slate-50 to-slate-100/60 border-slate-200", pct: 20, suffix: "dos recursos usados" };
-  const showUpgrade = !isAdmin && plan !== "golden";
+  const roleData = isAdmin ? { label: "Admin", color: "from-purple-900/80 to-purple-600/40", colorLight: "from-purple-50 to-purple-100/60 border-purple-200", icon: Crown }
+  : isTeacher ? { label: "Professor", color: "from-green-900/80 to-green-600/40", colorLight: "from-green-50 to-emerald-100/60 border-emerald-200", icon: GraduationCap }
+  : isInstitution ? { label: "Instituição", color: "from-cyan-900/80 to-cyan-600/40", colorLight: "from-cyan-50 to-cyan-100/60 border-cyan-200", icon: Building2 }
+  : { label: "Aluno", color: "from-blue-900/80 to-blue-600/40", colorLight: "from-blue-50 to-blue-100/60 border-blue-200", icon: User };
+  const RoleIcon = roleData.icon;
   return (
   <div className={`mx-4 mt-10 p-4 bg-gradient-to-br relative overflow-hidden group border ${
-    theme === "light" ? planData.colorLight : planData.color + " border-transparent"
+    theme === "light" ? roleData.colorLight : roleData.color + " border-transparent"
   }`}>
   <div className="absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 bg-white blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
 
   <div className={`relative z-10 flex items-center justify-center w-10 h-10 mb-3 backdrop-blur-sm ${
     theme === "light" ? "bg-slate-200/60" : "bg-white/10"
   }`}>
-  <img src="/logo.svg" alt="Icon" className={`w-5 h-5 brightness-0 ${theme === "light" ? "" : "invert"}`} />
+  <RoleIcon className={`w-5 h-5 ${theme === "light" ? "text-slate-700" : "text-white"}`} />
   </div>
 
-  <h4 className={`font-bold text-base ${theme === "light" ? "text-slate-800" : "text-white"}`}>Plano {planData.label}</h4>
-  <div className={`mt-1 flex justify-between items-center text-sm ${theme === "light" ? "text-slate-500" : "text-white/70"}`}>
-  <span>{planData.pct}% — {planData.suffix}</span>
-  </div>
-
-  <div className={`mt-2 h-1.5 w-full overflow-hidden sidebar-progress-bar ${theme === "light" ? "bg-slate-200" : "bg-black/30"}`}>
-  <div style={{ width: `${planData.pct}%` }} className={`h-full relative ${theme === "light" ? "bg-purple" : "bg-white"}`}>
-  <div className={`absolute right-0 top-0 bottom-0 w-1 shadow-[0_0_5px_white] ${theme === "light" ? "bg-white" : "bg-gray-900"}`}></div>
-  </div>
-  </div>
-
-  <div className="mt-4 space-y-2">
-  <Link href="/dashboard/courses"
-    className={`block w-full py-2 px-4 text-sm font-semibold backdrop-blur-sm transition-colors text-center ${
-      theme === "light"
-        ? "bg-slate-200/60 hover:bg-slate-300/60 text-slate-800"
-        : "bg-white/10 hover:bg-white/20 text-white"
-    }`}>
-  Saber mais
-  </Link>
-  {showUpgrade && (
-  <Link href="/dashboard/finances"
-    className={`flex w-full py-2 px-4 text-sm font-bold transition-colors items-center justify-between ${
-      theme === "light"
-        ? "bg-purple text-white hover:bg-purple-dark"
-        : "bg-gray-950 text-white hover:bg-black"
-    }`}>
-  Fazer Upgrade
-  <ChevronRight className="w-4 h-4" />
-  </Link>
-  )}
+  <h4 className={`font-bold text-base ${theme === "light" ? "text-slate-800" : "text-white"}`}>{roleData.label}</h4>
+  <div className={`mt-1 text-sm ${theme === "light" ? "text-slate-500" : "text-white/70"}`}>
+  {isAdmin ? "Acesso total ao sistema" : isTeacher ? "Gere os teus cursos" : isInstitution ? "Gere a tua instituição" : "Acesso aos cursos"}
   </div>
   </div>
   );

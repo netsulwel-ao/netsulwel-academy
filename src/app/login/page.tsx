@@ -2,12 +2,19 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { User, Mail, Lock, Loader2, AlertCircle, Eye, EyeOff, CheckCircle2, Sun, Moon, Home, Phone, Globe, MapPin, Calendar } from "lucide-react";
+import { User, Mail, Lock, Loader2, AlertCircle, Eye, EyeOff, CheckCircle2, Sun, Moon, Home, Phone, Globe, MapPin, Calendar, Building2 } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, addDoc, updateDoc } from "firebase/firestore";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, setPersistence, browserLocalPersistence, browserSessionPersistence, sendPasswordResetEmail, type AuthProvider } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { GoogleIcon, GithubIcon } from "@/components/ui/AuthIcons";
+import RegisterForm from "@/components/auth/RegisterForm";
+import InstitutionForm from "@/components/auth/InstitutionForm";
+import AuthForm from "@/components/AuthForm";
+import SocialLogin from "@/components/SocialLogin";
+import LoginCarousel from "@/components/LoginCarousel";
+import LoginHeader from "@/components/LoginHeader";
+import LoginFooter from "@/components/LoginFooter";
 
 const carouselSlides = [
  {
@@ -31,8 +38,7 @@ const carouselSlides = [
 ];
 
 export default function LoginPage() {
-  const [view, setView] = useState<"login" | "register" | "forgot">("login");
-  const [slideIndex, setSlideIndex] = useState(0);
+  const [view, setView] = useState<"login" | "register" | "register-institution" | "forgot">("login");
   
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -54,6 +60,7 @@ export default function LoginPage() {
   const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [providerLoading, setProviderLoading] = useState<string | null>(null);
+  const [slideIndex, setSlideIndex] = useState(0);
   const [redirectTo, setRedirectTo] = useState("/dashboard");
   const router = useRouter();
 
@@ -83,11 +90,11 @@ export default function LoginPage() {
     const r = params.get("redirect");
     if (r && r.startsWith("/") && !r.startsWith("//") && !r.includes("://")) setRedirectTo(r);
     const v = params.get("view");
-    if (v === "forgot" || v === "register") setView(v);
+    if (v === "forgot" || v === "register" || v === "register-institution") setView(v);
   }, []);
 
   // Mudar de vista sem limpar o email (útil se o utilizador já o preencheu)
-  const toggleView = (newView: "login" | "register" | "forgot") => {
+  const toggleView = (newView: "login" | "register" | "register-institution" | "forgot") => {
   setView(newView);
   setError("");
   setSuccessMsg("");
@@ -153,6 +160,24 @@ export default function LoginPage() {
 
   await sendEmailVerification(userCredential.user);
   router.push("/verify-email");
+      } else if (view === "register-institution") {
+	  if (!name.trim()) { setError("O nome da instituição é obrigatório."); setLoading(false); return; }
+
+	  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+	  if (name) {
+	  await updateProfile(userCredential.user, { displayName: name });
+	  }
+
+	  // Regista o utilizador como "institution" (instituição será criada no passo seguinte)
+	  await setDoc(doc(db, "users", userCredential.user.uid), {
+	  email: email,
+	  name: name,
+	  role: "institution",
+	  createdAt: new Date(),
+	  });
+
+	  await sendEmailVerification(userCredential.user);
+	  router.push("/register/institution");
 
   } else if (view === "forgot") {
   const res = await fetch("/api/auth/forgot-password", {
@@ -235,10 +260,11 @@ export default function LoginPage() {
   const userDoc = await getDoc(userDocRef);
   
   if (!userDoc.exists()) {
+  const isInstRegister = view === "register-institution";
   await setDoc(userDocRef, {
   email: userCredential.user.email,
   name: name || userCredential.user.displayName,
-  role: "aluno",
+  role: isInstRegister ? "institution" : "aluno",
   createdAt: new Date(),
   ...(view === "register" && {
     morada,
@@ -249,7 +275,7 @@ export default function LoginPage() {
     pais,
   }),
   });
-  router.push(redirectTo);
+  router.push(isInstRegister ? "/register/institution" : redirectTo);
   } else {
   const role = userDoc.data().role;
   if (role === "admin" || role === "teacher") {
@@ -345,9 +371,14 @@ export default function LoginPage() {
   {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
   </button>
   {view === "login" ? (
-  <button onClick={() => toggleView("register")} className="text-sm font-medium text-white px-6 py-2.5 border border-gray-800 bg-gray-900/60 backdrop-blur-md hover:bg-gray-800 hover:border-gray-600 transition-all">
+  <>
+  <button onClick={() => toggleView("register")} className="text-sm font-medium text-white px-4 py-2.5 border border-gray-800 bg-gray-900/60 backdrop-blur-md hover:bg-gray-800 hover:border-gray-600 transition-all">
   Criar conta
   </button>
+  <button onClick={() => toggleView("register-institution")} className="text-sm font-medium text-white px-4 py-2.5 border border-purple-800 bg-purple-900/60 backdrop-blur-md hover:bg-purple-800 hover:border-purple-600 transition-all">
+  Instituição
+  </button>
+  </>
   ) : (
   <button onClick={() => toggleView("login")} className="text-sm font-medium text-white px-6 py-2.5 border border-gray-800 bg-gray-900/60 backdrop-blur-md hover:bg-gray-800 hover:border-gray-600 transition-all">
   Iniciar sessão
@@ -362,11 +393,13 @@ export default function LoginPage() {
  <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white mt-8 lg:mt-0 transition-all">
  {view === "login" && "Bem-vindo de volta!"}
  {view === "register" && "Comece a sua jornada."}
+ {view === "register-institution" && "Registe a sua instituição"}
  {view === "forgot" && "Recuperar senha."}
  </h2>
  <p className="mt-2 text-sm text-gray-400 mb-8 transition-all">
  {view === "login" && "Inicie sessão na sua conta Netsulwel"}
  {view === "register" && "Crie uma conta gratuita em poucos segundos"}
+ {view === "register-institution" && "Registe a sua instituição educacional"}
  {view === "forgot" && "Insira o seu email para receber um link de recuperação"}
  </p>
 
@@ -390,176 +423,53 @@ export default function LoginPage() {
  <form className="space-y-5 relative z-10" onSubmit={handleAuthSubmit}>
  
  {view === "register" && (
- <div className="space-y-1.5 animate-in slide-in-from-top-4 fade-in duration-300">
- <label className="text-sm font-medium text-gray-300" htmlFor="name">Nome completo</label>
- <div className="relative">
- <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
- <User className="h-5 w-5 text-gray-500" />
- </div>
- <input
- id="name"
- type="text"
- required={view === "register"}
- disabled={loading}
- placeholder="João Silva"
- value={name}
- onChange={(e) => setName(e.target.value)}
- className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50"
+ <RegisterForm
+ name={name}
+ setName={setName}
+ morada={morada}
+ setMorada={setMorada}
+ idade={idade}
+ setIdade={setIdade}
+ genero={genero}
+ setGenero={setGenero}
+ nacionalidade={nacionalidade}
+ setNacionalidade={setNacionalidade}
+ telefone={telefone}
+ setTelefone={setTelefone}
+ pais={pais}
+ setPais={setPais}
+ password={password}
+ confirmPassword={confirmPassword}
+ showPassword={showPassword}
+ showConfirmPassword={showConfirmPassword}
+ setShowPassword={setShowPassword}
+ setShowConfirmPassword={setShowConfirmPassword}
+ setPassword={setPassword}
+ setConfirmPassword={setConfirmPassword}
+ loading={loading}
  />
- </div>
- </div>
  )}
 
- <div className="space-y-1.5">
- <label className="text-sm font-medium text-gray-300" htmlFor="email">Seu Email</label>
- <div className="relative">
- <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
- <Mail className="h-5 w-5 text-gray-500" />
- </div>
- <input
- id="email"
- type="email"
- required
- disabled={loading}
- placeholder="email@exemplo.com"
- value={email}
- onChange={(e) => setEmail(e.target.value)}
- className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50"
+ {view === "register-institution" && (
+ <InstitutionForm
+ name={name}
+ setName={setName}
+ loading={loading}
  />
- </div>
- </div>
+ )}
 
- {view !== "forgot" && (
- <div className="space-y-1.5 animate-in slide-in-from-bottom-2 fade-in duration-300">
- <label className="text-sm font-medium text-gray-300" htmlFor="password">Palavra-passe</label>
- <div className="relative">
- <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
- <Lock className="h-5 w-5 text-gray-500" />
- </div>
- <input
- id="password"
- type={showPassword ? "text" : "password"}
- required
- disabled={loading}
- placeholder="••••••••"
- value={password}
- onChange={(e) => setPassword(e.target.value)}
- className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-10 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50"
+ {view !== "register" && (
+ <AuthForm
+ email={email}
+ setEmail={setEmail}
+ password={password}
+ setPassword={setPassword}
+ showPassword={showPassword}
+ setShowPassword={setShowPassword}
+ loading={loading}
+ showPasswordField={view !== "forgot"}
  />
- <button
- type="button"
- disabled={loading}
- onClick={() => setShowPassword(!showPassword)}
- className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 focus:outline-none disabled:opacity-50"
- >
- {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
- </button>
- </div>
-  </div>
-    )}
-
-  {view === "register" && (
-  <div className="space-y-1.5 animate-in slide-in-from-top-4 fade-in duration-300">
-  <p className="text-xs text-gray-500">Mínimo de 6 caracteres</p>
-  <label className="text-sm font-medium text-gray-300" htmlFor="reg-confirmPassword">Confirmar palavra-passe</label>
-  <div className="relative">
-  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-  <Lock className="h-5 w-5 text-gray-500" />
-  </div>
-  <input id="reg-confirmPassword" type={showConfirmPassword ? "text" : "password"} required disabled={loading}
-  placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-  className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-10 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-  <button type="button" disabled={loading} onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 focus:outline-none disabled:opacity-50">
-  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-  </button>
-  </div>
-  </div>
-  )}
-
-  {view === "register" && (
-  <div className="border-t border-gray-800 pt-5 mt-5 animate-in slide-in-from-top-4 fade-in duration-300">
-  <p className="text-sm font-medium text-gray-400 mb-4">Dados pessoais</p>
-
-  <div className="space-y-1.5">
-  <label className="text-sm font-medium text-gray-300" htmlFor="reg-morada">Morada</label>
-  <div className="relative">
-  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-  <Home className="h-5 w-5 text-gray-500" />
-  </div>
-  <input id="reg-morada" type="text" required={view === "register"} disabled={loading} placeholder="Rua Principal, 123"
-  value={morada} onChange={(e) => setMorada(e.target.value)}
-  className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-  </div>
-  </div>
-
-  <div className="grid grid-cols-2 gap-3 mt-4">
-  <div className="space-y-1.5">
-  <label className="text-sm font-medium text-gray-300" htmlFor="reg-idade">Idade</label>
-  <div className="relative">
-  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-  <Calendar className="h-5 w-5 text-gray-500" />
-  </div>
-  <input id="reg-idade" type="number" required={view === "register"} disabled={loading} placeholder="18" min="1" max="150"
-  value={idade} onChange={(e) => setIdade(e.target.value)}
-  className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-  </div>
-  </div>
-
-  <div className="space-y-1.5">
-  <label className="text-sm font-medium text-gray-300" htmlFor="reg-genero">Género</label>
-  <div className="relative">
-  <select id="reg-genero" required={view === "register"} disabled={loading}
-  value={genero} onChange={(e) => setGenero(e.target.value)}
-  className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-3 pr-3 text-white transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50 appearance-none">
-  <option value="" disabled>Selecionar</option>
-  <option value="Masculino">Masculino</option>
-  <option value="Feminino">Feminino</option>
-  <option value="Outro">Outro</option>
-  </select>
-  </div>
-  </div>
-  </div>
-
-  <div className="grid grid-cols-2 gap-3 mt-4">
-  <div className="space-y-1.5">
-  <label className="text-sm font-medium text-gray-300" htmlFor="reg-nacionalidade">Nacionalidade</label>
-  <div className="relative">
-  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-  <MapPin className="h-5 w-5 text-gray-500" />
-  </div>
-  <input id="reg-nacionalidade" type="text" required={view === "register"} disabled={loading} placeholder="Angolana"
-  value={nacionalidade} onChange={(e) => setNacionalidade(e.target.value)}
-  className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-  </div>
-  </div>
-
-  <div className="space-y-1.5">
-  <label className="text-sm font-medium text-gray-300" htmlFor="reg-pais">País</label>
-  <div className="relative">
-  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-  <Globe className="h-5 w-5 text-gray-500" />
-  </div>
-  <input id="reg-pais" type="text" required={view === "register"} disabled={loading} placeholder="Angola"
-  value={pais} onChange={(e) => setPais(e.target.value)}
-  className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-  </div>
-  </div>
-  </div>
-
-  <div className="space-y-1.5 mt-4">
-  <label className="text-sm font-medium text-gray-300" htmlFor="reg-telefone">Número de telefone</label>
-  <div className="relative">
-  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-  <Phone className="h-5 w-5 text-gray-500" />
-  </div>
-  <input id="reg-telefone" type="tel" required={view === "register"} disabled={loading} placeholder="+244 900 000 000"
-  value={telefone} onChange={(e) => setTelefone(e.target.value)}
-  className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-  </div>
-  </div>
-  </div>
-  )}
+ )}
 
   {view === "login" && (
   <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
@@ -592,55 +502,25 @@ export default function LoginPage() {
  <>
  {view === "login" && "Entrar"}
  {view === "register" && "Criar Conta Grátis"}
+ {view === "register-institution" && "Registar Instituição"}
  {view === "forgot" && "Enviar link de recuperação"}
  </>
  )}
  </button>
  </form>
 
- {view !== "forgot" && (
- <div className="animate-in fade-in duration-500">
- <div className="mt-8 mb-6 flex items-center relative z-10">
- <div className="w-full border-t border-gray-800"></div>
- <div className="px-4 text-xs font-medium text-gray-500 whitespace-nowrap">Ou com Google / GitHub</div>
- <div className="w-full border-t border-gray-800"></div>
- </div>
-
-  <div className="grid grid-cols-2 gap-3 relative z-10">
-  <button
-  type="button"
-  disabled={!!providerLoading}
-  onClick={() => handleProviderLogin(new GoogleAuthProvider(), "Google")}
-  className="flex w-full items-center justify-center gap-2 border border-gray-700 bg-gray-950/50 py-2.5 text-sm font-semibold text-white transition-all hover:border-gray-500 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-  >
-  {providerLoading === "Google" ? <Loader2 className="h-5 w-5 animate-spin" /> : <GoogleIcon className="h-5 w-5" />}
-  Google
-  </button>
-  <button
-  type="button"
-  disabled={!!providerLoading}
-  onClick={() => handleProviderLogin(new GithubAuthProvider(), "GitHub")}
-  className="flex w-full items-center justify-center gap-2 border border-gray-700 bg-gray-950/50 py-2.5 text-sm font-semibold text-white transition-all hover:border-gray-500 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-  >
-  {providerLoading === "GitHub" ? <Loader2 className="h-5 w-5 animate-spin" /> : <GithubIcon className="h-5 w-5" />}
-  GitHub
-  </button>
-  </div>
- </div>
+ <SocialLogin
+ loading={loading}
+ handleSocialLogin={(provider) => handleProviderLogin(
+ provider === "google" ? new GoogleAuthProvider() : new GithubAuthProvider(),
+ provider === "google" ? "Google" : "GitHub"
  )}
+ providerLoading={providerLoading}
+ view={view}
+ />
  </div>
  
- <p className="mt-8 text-center text-sm text-gray-400 relative z-20">
- {view === "login" && (
- <>Não tem nenhuma conta? <button onClick={() => toggleView("register")} className="font-semibold text-purple-light hover:text-purple transition-colors">Registar agora</button></>
- )}
- {view === "register" && (
- <>Já tem uma conta? <button onClick={() => toggleView("login")} className="font-semibold text-purple-light hover:text-purple transition-colors">Iniciar sessão</button></>
- )}
- {view === "forgot" && (
- <>Lembrou-se da senha? <button onClick={() => toggleView("login")} className="font-semibold text-purple-light hover:text-purple transition-colors">Voltar ao Login</button></>
- )}
- </p>
+ <LoginFooter view={view} toggleView={toggleView} />
  </div>
  </div>
  </div>

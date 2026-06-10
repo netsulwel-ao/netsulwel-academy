@@ -8,7 +8,7 @@ import {
   collection, query, orderBy, limit, onSnapshot,
   doc, updateDoc, writeBatch,
 } from "firebase/firestore";
-import { Bell, Menu, CheckCheck, Radio, CreditCard, Heart, MessageCircle, Award } from "lucide-react";
+import { Bell, Menu, CheckCheck, Radio, CreditCard, Heart, MessageCircle, Award, DollarSign, Mail, Video } from "lucide-react";
 import Link from "next/link";
 import type { AppNotification } from "@/types/notification";
 
@@ -18,12 +18,16 @@ interface HeaderProps {
 }
 
 const NOTIF_ICONS: Record<string, React.ReactNode> = {
-  payment_approved:    <CreditCard    className="h-4 w-4 text-green-400" />,
-  live_started:        <Radio         className="h-4 w-4 text-purple-400" />,
-  course_live_started: <Radio         className="h-4 w-4 text-purple-400" />,
-  community_like:      <Heart         className="h-4 w-4 text-red-400" />,
-  community_comment:   <MessageCircle className="h-4 w-4 text-blue-400" />,
-  certificate_ready:   <Award         className="h-4 w-4 text-amber-400" />,
+  payment_approved:     <CreditCard    className="h-4 w-4 text-green-400" />,
+  sale_completed:       <DollarSign    className="h-4 w-4 text-green-400" />,
+  fee_applied:          <DollarSign    className="h-4 w-4 text-yellow-400" />,
+  live_started:         <Radio         className="h-4 w-4 text-purple-400" />,
+  course_live_started:  <Radio         className="h-4 w-4 text-purple-400" />,
+  community_like:       <Heart         className="h-4 w-4 text-red-400" />,
+  community_comment:    <MessageCircle className="h-4 w-4 text-blue-400" />,
+  certificate_ready:    <Award         className="h-4 w-4 text-amber-400" />,
+  institution_invitation: <Mail         className="h-4 w-4 text-cyan-400" />,
+  course_published:     <Video         className="h-4 w-4 text-purple-400" />,
 };
 
 // IDs de broadcasts já lidos guardados em localStorage (sem escrever no Firestore)

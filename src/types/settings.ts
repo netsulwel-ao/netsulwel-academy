@@ -1,11 +1,8 @@
-export interface PlatformSettings {
-  // Planos e preços
+﻿export interface PlatformSettings {
   plans: {
     smart: { price: number; label: string; description: string; features: string[] };
     golden: { price: number; label: string; description: string; features: string[] };
   };
-
-  // Métodos de pagamento
   paymentMethods: {
     bankTransfer: { enabled: boolean; bankName: string; iban: string; accountHolder: string; reference: string };
     multicaixa: { enabled: boolean; entity: string; reference: string };
@@ -13,7 +10,6 @@ export interface PlatformSettings {
     stripe: { enabled: boolean; publicKey: string };
   };
 
-  // Redes sociais
   socials: {
     instagram: string;
     youtube: string;
@@ -25,7 +21,6 @@ export interface PlatformSettings {
     tiktok: string;
   };
 
-  // Contacto
   contact: {
     email: string;
     phone: string;
@@ -33,10 +28,14 @@ export interface PlatformSettings {
     supportEmail: string;
   };
 
-  // SEO / Meta
   meta: {
     description: string;
     keywords: string;
+  };
+
+  fees: {
+    defaultCourseFee: number;
+    defaultVideoFee: number;
   };
 
   updatedAt?: unknown;
@@ -51,6 +50,11 @@ export interface Sale {
   itemId?: string;
   itemTitle?: string;
   amount: number;
+  fee: number;
+  netAmount: number;
+  sellerId?: string;
+  sellerName?: string;
+  sellerType?: "teacher" | "institution";
   paymentMethod: string;
   status: "pending" | "confirmed" | "cancelled";
   reference?: string;
@@ -58,5 +62,15 @@ export interface Sale {
   notes?: string;
   paypalTransactionId?: string;
   createdAt?: unknown;
+  updatedAt?: unknown;
+}
+
+export interface Wallet {
+  userId: string;
+  userName: string;
+  balance: number;
+  totalSales: number;
+  totalFees: number;
+  sales: Sale[];
   updatedAt?: unknown;
 }

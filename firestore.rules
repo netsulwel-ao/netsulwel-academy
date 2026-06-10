@@ -29,13 +29,23 @@ service cloud.firestore {
       return isAuth() && request.auth.uid == uid;
     }
 
+    function getInstitutionId() {
+      return isAuth() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.institutionId
+        : null;
+    }
+
+    function isInstitutionAdmin() {
+      return getRole() == "institution";
+    }
+
     // ── users ─────────────────────────────────────────────
     match /users/{uid} {
       allow read: if isAuth();
       allow create: if isOwner(uid);
       allow update: if isAdmin() ||
         (isOwner(uid) && !request.resource.data.diff(resource.data).affectedKeys()
-          .hasAny(["role", "plan"]));
+          .hasAny(["role"]));
       allow delete: if isAdmin();
 
       match /notifications/{notifId} {
@@ -45,10 +55,11 @@ service cloud.firestore {
         allow create: if isAdmin() ||
           (isOwner(uid) &&
            request.resource.data.uid == uid &&
-           request.resource.data.type in [
-             "community_like", "community_comment",
-             "payment_approved", "course_complete", "certificate_ready"
-           ]);
+            request.resource.data.type in [
+              "community_like", "community_comment",
+              "payment_approved", "course_complete", "certificate_ready",
+              "institution_approved"
+            ]);
         allow update: if isOwner(uid);
         allow delete: if isAdmin() || isOwner(uid);
       }
@@ -152,7 +163,9 @@ service cloud.firestore {
     // ── sales ─────────────────────────────────────────────
     match /sales/{saleId} {
       allow read: if isAdminOrTeacher() ||
-        (isAuth() && resource.data.userId == request.auth.uid);
+        (isAuth() && resource.data.userId == request.auth.uid) ||
+        (isAuth() && resource.data.sellerId == request.auth.uid) ||
+        (isInstitutionAdmin() && resource.data.sellerId == getInstitutionId());
       allow create: if isAuth() &&
         request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAdmin();
@@ -201,6 +214,50 @@ service cloud.firestore {
     match /broadcasts/{broadcastId} {
       allow read: if isAuth();
       allow create, update, delete: if isAdminOrTeacher();
+    }
+
+    // ── institutions ─────────────────────────────────────
+    match /institutions/{institutionId} {
+      allow read: if isAuth();
+      allow create: if isAdmin(); // Only admin creates via backend API
+      allow update: if isAdmin() ||
+        (isAuth() && resource.data.adminId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // ── institutionInvitations ────────────────────────────
+    match /institutionInvitations/{invitationId} {
+      allow read: if isAdmin() ||
+        (isAuth() && (
+          resource.data.email == request.auth.token.email ||
+          resource.data.invitedBy == request.auth.uid
+        ));
+      allow create: if isAdmin() ||
+        (isAuth() && request.resource.data.invitedBy == request.auth.uid);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── institutionInviteLinks ────────────────────────────
+    match /institutionInviteLinks/{linkId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() || isInstitutionAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── institutionClasses ────────────────────────────────
+    match /institutionClasses/{classId} {
+      allow read: if isAuth();
+      allow create: if isAdmin() || isInstitutionAdmin();
+      allow update, delete: if isAdmin() || isInstitutionAdmin();
+    }
+
+    // ── institutionAnnouncements ──────────────────────────
+    match /institutionAnnouncements/{announcementId} {
+      allow read: if isAuth();
+      allow create: if isAdmin() || isInstitutionAdmin();
+      allow update, delete: if isAdmin() || isInstitutionAdmin();
     }
 
     // Bloqueia tudo o resto

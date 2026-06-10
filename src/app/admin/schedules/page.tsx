@@ -8,7 +8,7 @@ import { Calendar, Loader2, ChevronDown, ChevronRight, Plus, Trash2, ImagePlus, 
 import { EmptyState } from "@/components/shared/EmptyState";
 import type { Trail, TrailLiveSession } from "@/types/course";
 
-const TARGET_OPTIONS: { value: TrailLiveSession["target"]; label: string; icon: typeof Crown; color: string }[] = [
+const TARGET_OPTIONS: { value: NonNullable<TrailLiveSession["target"]>; label: string; icon: typeof Crown; color: string }[] = [
   { value: "free", label: "Grátis", icon: Radio, color: "text-green-400 bg-green-500/10 border-green-500/20" },
   { value: "smart", label: "Smart", icon: Zap, color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
   { value: "golden", label: "Golden", icon: Crown, color: "text-yellow-400 bg-yellow-500/10 border-yellow-500/20" },

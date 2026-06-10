@@ -24,6 +24,7 @@ const DEFAULT_SETTINGS: PlatformSettings = {
   socials: { instagram: "", youtube: "", facebook: "", twitter: "", linkedin: "", discord: "", whatsapp: "", tiktok: "" },
   contact: { email: "", phone: "", address: "", supportEmail: "" },
   meta: { description: "", keywords: "" },
+  fees: { defaultCourseFee: 0, defaultVideoFee: 0 },
 };
 
 type TabId = "plans" | "payments" | "socials" | "contact" | "meta";
