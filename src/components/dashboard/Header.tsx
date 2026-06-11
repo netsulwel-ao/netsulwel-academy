@@ -223,7 +223,7 @@ export default function Header({ onMenuClick, theme = "dark" }: HeaderProps) {
           </button>
 
           {open && (
-            <div className={`absolute right-0 top-10 w-80 sm:w-96 shadow-2xl z-50 max-h-[70vh] flex flex-col ${
+            <div className={`fixed inset-x-3 top-16 sm:absolute sm:inset-auto sm:right-0 sm:top-10 w-auto sm:w-96 shadow-2xl z-50 max-h-[70vh] flex flex-col ${
               theme === "light"
                 ? "bg-white border border-slate-200 shadow-xl"
                 : "bg-gray-900 border border-gray-800"

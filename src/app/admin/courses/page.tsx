@@ -87,7 +87,7 @@ export default function CoursesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Cursos</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold text-white">Cursos</h1>
           <p className="mt-1 text-gray-400">
             {loading ? "A carregar..." : `${courses.length} curso${courses.length !== 1 ? "s" : ""} na plataforma`}
           </p>

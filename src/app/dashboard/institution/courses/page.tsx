@@ -61,28 +61,28 @@ export default function InstitutionCoursesPage() {
   return (
     <div className="max-w-[100rem] space-y-8 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900/80 to-gray-950/80 border border-gray-800/60 p-8">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900/80 to-gray-950/80 border border-gray-800/60 p-6 sm:p-8">
         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/5 blur-3xl rounded-full" />
         <div className="relative">
           <div className="flex items-center gap-3 mb-2">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center shadow-lg shadow-purple-500/20">
-              <BookOpen className="h-6 w-6 text-white" />
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center shadow-lg shadow-purple-500/20 shrink-0">
+              <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">Cursos</h1>
-              <p className="text-gray-400">Cursos dos professores da tua instituição</p>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">Cursos</h1>
+              <p className="text-sm sm:text-base text-gray-400">Cursos dos professores da tua instituição</p>
             </div>
           </div>
         </div>
       </div>
 
       {courses.length === 0 ? (
-        <div className="rounded-xl bg-gradient-to-br from-gray-900/60 to-gray-950/60 border border-gray-800/70 p-16 text-center">
-          <div className="relative inline-flex mb-6">
+        <div className="rounded-xl bg-gradient-to-br from-gray-900/60 to-gray-950/60 border border-gray-800/70 p-8 sm:p-16 text-center">
+          <div className="relative inline-flex mb-4 sm:mb-6">
             <div className="absolute inset-0 bg-purple-500/10 blur-2xl rounded-full" />
-            <BookOpen className="h-16 w-16 text-gray-600 relative" />
+            <BookOpen className="h-12 w-12 sm:h-16 sm:w-16 text-gray-600 relative" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">Nenhum curso encontrado</h3>
+          <h3 className="text-lg sm:text-xl font-bold text-white mb-2">Nenhum curso encontrado</h3>
           <p className="text-gray-400 max-w-md mx-auto">
             Os cursos criados pelos professores da tua instituição aparecerão aqui.
             Certifica-te de que já convidaste professores.
@@ -96,11 +96,11 @@ export default function InstitutionCoursesPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {courses.map(course => (
             <Link key={course.id} href={`/admin/courses/${course.id}/edit`}
               className="group rounded-xl bg-gradient-to-br from-gray-900/60 to-gray-950/60 border border-gray-800/70 hover:border-purple/30 overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/5">
-              <div className="relative h-44 bg-gray-800 overflow-hidden">
+              <div className="relative h-36 sm:h-44 bg-gray-800 overflow-hidden">
                 {course.thumbnail ? (
                   <img src={course.thumbnail} alt={course.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 ) : (

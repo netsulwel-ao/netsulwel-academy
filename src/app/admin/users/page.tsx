@@ -117,7 +117,7 @@ export default function UsersPage() {
 
       {/* ── Header ── */}
       <div>
-        <h1 className="text-3xl font-bold text-white">Alunos</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold text-white">Alunos</h1>
         <p className="mt-1 text-gray-400">Gestão de utilizadores da plataforma</p>
       </div>
 

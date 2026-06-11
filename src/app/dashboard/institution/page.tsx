@@ -122,35 +122,33 @@ export default function InstitutionOverviewPage() {
   return (
     <div className="max-w-[100rem] space-y-8 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900/80 to-gray-950/80 border border-gray-800/60 p-8">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900/80 to-gray-950/80 border border-gray-800/60 p-6 sm:p-8">
         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/5 blur-3xl rounded-full" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 blur-3xl rounded-full" />
-        <div className="relative flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center shadow-lg shadow-purple-500/20">
-                <Building2 className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-white">{institution?.name}</h1>
-                <p className="text-gray-400">Visão geral da tua instituição</p>
-              </div>
+        <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center shadow-lg shadow-purple-500/20 shrink-0">
+              <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white truncate">{institution?.name}</h1>
+              <p className="text-sm sm:text-base text-gray-400">Visão geral da tua instituição</p>
             </div>
           </div>
           <Link
             href="/dashboard/institution/members"
-            className="inline-flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-6 py-3 font-bold rounded-xl transition-all hover:shadow-lg hover:shadow-purple-500/25"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-2.5 sm:px-6 sm:py-3 font-bold rounded-xl transition-all hover:shadow-lg hover:shadow-purple-500/25 text-sm sm:text-base"
           >
-            <Mail className="h-5 w-5" />
+            <Mail className="h-4 w-4 sm:h-5 sm:w-5" />
             Convidar Membros
           </Link>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
         {statsConfig.map((stat, i) => (
-          <div key={i} className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900/60 to-gray-950/60 border border-gray-800/70 p-6 hover:border-purple/30 transition-all duration-300">
+          <div key={i} className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900/60 to-gray-950/60 border border-gray-800/70 p-4 sm:p-6 hover:border-purple/30 transition-all duration-300">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl rounded-full" style={{ backgroundImage: `linear-gradient(to bottom right, ${stat.color.replace("from-", "").split(" ")[0]}, transparent)` }} />
             <div className="relative">
               <div className={`inline-flex p-3 rounded-lg ${stat.bg} mb-3`}>
@@ -166,14 +164,14 @@ export default function InstitutionOverviewPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Members */}
         <div className="rounded-xl bg-gradient-to-br from-gray-900/60 to-gray-950/60 border border-gray-800/70 overflow-hidden hover:border-purple/20 transition-colors">
-          <div className="p-6 border-b border-gray-800/70 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                <Users className="h-4 w-4 text-purple-400" />
+          <div className="p-4 sm:p-6 border-b border-gray-800/70 flex items-center justify-between">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-400" />
               </div>
-              <h2 className="text-lg font-bold text-white">Membros Recentes</h2>
+              <h2 className="text-base sm:text-lg font-bold text-white">Membros Recentes</h2>
             </div>
-            <Link href="/dashboard/institution/members" className="group flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 font-bold transition-colors">
+            <Link href="/dashboard/institution/members" className="group flex items-center gap-1 text-xs sm:text-sm text-purple-400 hover:text-purple-300 font-bold transition-colors">
               Ver todos
               <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
             </Link>
@@ -191,7 +189,7 @@ export default function InstitutionOverviewPage() {
           ) : (
             <div className="divide-y divide-gray-800/50">
               {members.slice(0, 5).map((member) => (
-                <div key={member.id} className="p-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
+                <div key={member.id} className="p-3 sm:p-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500/20 to-purple-700/20 flex items-center justify-center text-purple-400 font-bold text-sm border border-purple-500/10">
                       {member.name?.charAt(0).toUpperCase() || "?"}
@@ -217,20 +215,20 @@ export default function InstitutionOverviewPage() {
 
         {/* Sales */}
         <div className="rounded-xl bg-gradient-to-br from-gray-900/60 to-gray-950/60 border border-gray-800/70 overflow-hidden hover:border-purple/20 transition-colors">
-          <div className="p-6 border-b border-gray-800/70 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-                <DollarSign className="h-4 w-4 text-green-400" />
+          <div className="p-4 sm:p-6 border-b border-gray-800/70 flex items-center justify-between">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-400" />
               </div>
-              <h2 className="text-lg font-bold text-white">Vendas Recentes</h2>
+              <h2 className="text-base sm:text-lg font-bold text-white">Vendas Recentes</h2>
             </div>
-            <Link href="/dashboard/wallet" className="group flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 font-bold transition-colors">
+            <Link href="/dashboard/wallet" className="group flex items-center gap-1 text-xs sm:text-sm text-purple-400 hover:text-purple-300 font-bold transition-colors">
               Ver carteira
               <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
           {sales.length === 0 ? (
-            <div className="p-12 text-center">
+            <div className="p-8 sm:p-12 text-center">
               <div className="h-16 w-16 rounded-full bg-gray-800/50 flex items-center justify-center mx-auto mb-4">
                 <DollarSign className="h-8 w-8 text-gray-600" />
               </div>

@@ -44,7 +44,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
  <div className={`flex-1 flex flex-col transition-all duration-300 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'}`}>
   <CountdownBanner />
   <Header onMenuClick={() => setMobileOpen(true)} theme={theme} />
-    <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-background">
+    <main className="flex-1 overflow-y-auto p-3 sm:p-5 md:p-6 lg:p-8 bg-background">
    {children}
    </main>
  </div>

@@ -33,8 +33,8 @@ export default function TrailsPage() {
   return (
     <div className="max-w-[100rem] mx-auto space-y-8 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-4xl font-bold text-white flex items-center gap-3">
-          <Layers className="h-10 w-10 text-purple" />
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white flex items-center gap-2 sm:gap-3">
+          <Layers className="h-7 w-7 sm:h-10 sm:w-10 text-purple" />
           Trilhas de Aprendizagem
         </h1>
         <p className="mt-2 text-gray-400">

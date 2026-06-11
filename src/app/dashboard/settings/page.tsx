@@ -9,13 +9,13 @@ export default function DashboardSettingsPage() {
 
   return (
     <div className="max-w-[100rem] mx-auto animate-in fade-in duration-500">
-      <div className="flex items-start gap-4">
-        <div className="h-12 w-12 bg-gray-500/10 border border-gray-700/60 flex items-center justify-center shrink-0">
-          <Settings className="h-6 w-6 text-gray-300" />
+      <div className="flex items-start gap-3 sm:gap-4">
+        <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gray-500/10 border border-gray-700/60 flex items-center justify-center shrink-0">
+          <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-gray-300" />
         </div>
         <div className="min-w-0">
-          <h1 className="text-4xl font-bold text-white">Definições</h1>
-          <p className="mt-1 text-gray-400">Dados do perfil e preferências da conta.</p>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Definições</h1>
+          <p className="mt-1 text-sm sm:text-base text-gray-400">Dados do perfil e preferências da conta.</p>
         </div>
       </div>
 

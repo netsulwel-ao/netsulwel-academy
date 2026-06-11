@@ -73,12 +73,21 @@ function InviteContent() {
   if (accepted) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-gray-900/60 border border-gray-800 p-8 text-center">
-          <div className="h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
-            <Check className="h-8 w-8 text-green-400" />
+        <div className="relative overflow-hidden max-w-lg w-full bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800/70 p-10 text-center shadow-2xl">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/10 blur-3xl rounded-full" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 blur-3xl rounded-full" />
+          <div className="relative animate-in zoom-in-95 duration-500">
+            <div className="h-20 w-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6 border border-green-500/30 shadow-lg shadow-green-500/20">
+              <Check className="h-10 w-10 text-green-400" />
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2">Bem-vindo!</h1>
+            <p className="text-gray-300 mb-2">Foste adicionado com sucesso a</p>
+            <p className="text-xl font-bold text-green-400 mb-6">{institution?.name}</p>
+            <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              A redirecionar para o teu painel...
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Bem-vindo!</h1>
-          <p className="text-gray-400">Foste adicionado à instituição com sucesso. A redirecionar...</p>
         </div>
       </div>
     );

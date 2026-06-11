@@ -74,7 +74,7 @@ export default function InstitutionRegisterPage() {
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <Building2 className="h-16 w-16 text-purple-400 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-white mb-2">Registar Instituição</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">Registar Instituição</h1>
           <p className="text-gray-400">Regista a tua instituição educativa para gerir alunos e professores.</p>
         </div>
 

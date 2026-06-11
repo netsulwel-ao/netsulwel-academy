@@ -87,7 +87,7 @@ export default function TeacherDashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Painel do Professor</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold text-white">Painel do Professor</h1>
           <p className="mt-1 text-gray-400">Gere os teus cursos e vê o teu desempenho.</p>
         </div>
         <Link

@@ -72,7 +72,7 @@ export default function AdminFeesPage() {
     <div className="max-w-6xl mx-auto animate-in fade-in duration-500 space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white">Gestão de Taxas</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold text-white">Gestão de Taxas</h1>
         <p className="mt-1 text-gray-400">Define as taxas da plataforma para cada curso.</p>
       </div>
 

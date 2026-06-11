@@ -169,7 +169,7 @@ export default function SalesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">
+          <h1 className="text-2xl lg:text-3xl font-bold text-white">
             {isTeacher ? "As Minhas Vendas" : "Vendas"}
           </h1>
           <p className="mt-1 text-gray-400">

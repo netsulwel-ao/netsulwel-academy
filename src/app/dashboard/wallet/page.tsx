@@ -95,7 +95,7 @@ export default function WalletPage() {
     <div className="max-w-6xl mx-auto animate-in fade-in duration-500 space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white">Minha Carteira</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold text-white">Minha Carteira</h1>
         <p className="mt-1 text-gray-400">Gere os teus ganhos e vê o histórico de vendas.</p>
       </div>
 

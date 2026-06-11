@@ -158,8 +158,8 @@ export default function SchedulesPage() {
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <Calendar className="h-8 w-8 text-orange-400" />
+          <h1 className="text-2xl lg:text-3xl font-bold text-white flex items-center gap-2 lg:gap-3">
+            <Calendar className="h-6 w-6 lg:h-8 lg:w-8 text-orange-400" />
             Cronograma — Aulas ao Vivo
           </h1>
           <p className="mt-1 text-gray-400">Cria o cronograma de aulas ao vivo para cada trilha, como se fossem módulos de um curso</p>

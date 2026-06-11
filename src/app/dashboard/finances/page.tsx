@@ -185,7 +185,7 @@ export default function DashboardFinancesPage() {
           <CreditCard className="h-6 w-6 text-blue-400" />
         </div>
         <div className="min-w-0">
-          <h1 className="text-4xl font-bold text-white">Checkout</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Checkout</h1>
           <p className="mt-1 text-gray-400">Escolhe o plano e o método de pagamento.</p>
           <div className="mt-3">{planPill}</div>
         </div>
@@ -215,8 +215,8 @@ export default function DashboardFinancesPage() {
             <p className="text-sm text-gray-500 uppercase tracking-wider mb-1">Curso Avulso</p>
             <h2 className="text-3xl font-bold text-white mb-2">{course.title}</h2>
             <p className="text-gray-400 text-base mb-4">{course.description}</p>
-            <p className="text-4xl font-bold text-white">
-              {(course.price ?? 0).toLocaleString("pt-AO")} <span className="text-xl text-gray-500 font-normal">Kz</span>
+            <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
+              {(course.price ?? 0).toLocaleString("pt-AO")} <span className="text-lg sm:text-xl text-gray-500 font-normal">Kz</span>
             </p>
           </div>
         </section>
@@ -252,8 +252,8 @@ export default function DashboardFinancesPage() {
                     {isCurrent && <span className="text-sm font-bold text-green-400 border border-green-500/30 px-2 py-1">Atual</span>}
                   </div>
                   <p className="text-gray-400 text-base mb-4">{plan.description}</p>
-                  <p className="text-4xl font-bold text-white mb-4">
-                    {plan.price.toLocaleString("pt-AO")} <span className="text-xl text-gray-500 font-normal">Kz</span>
+                  <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
+                    {plan.price.toLocaleString("pt-AO")} <span className="text-lg sm:text-xl text-gray-500 font-normal">Kz</span>
                   </p>
                   {plan.features.length > 0 && (
                     <ul className="space-y-2">

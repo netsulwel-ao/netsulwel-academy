@@ -101,9 +101,13 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
      )
    })).filter(section => section.items.length > 0);
 
-   const handleLogout = async () => {
-   await logout();
-   };
+    const handleNavClick = () => {
+      if (mobileOpen) setMobileOpen(false);
+    };
+
+    const handleLogout = async () => {
+    await logout();
+    };
 
   return (
   <>
@@ -183,9 +187,10 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
  const isActive = pathname === item.href;
  return (
  <li key={item.href}>
- <Link
- href={item.href}
- title={isCollapsed ? item.label : ""}
+              <Link
+                  href={item.href}
+                  onClick={handleNavClick}
+                  title={isCollapsed ? item.label : ""}
  className={`group flex items-center px-3 py-2.5 transition-all relative ${
  isActive 
    ? theme === "light"

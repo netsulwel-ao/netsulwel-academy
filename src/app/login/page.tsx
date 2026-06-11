@@ -366,25 +366,25 @@ export default function LoginPage() {
   <img src="/logo.svg" alt="Netsulwel" className="h-6 w-auto brightness-0 invert" />
   </Link>
   </div>
-  <div className="flex items-center gap-3">
-  <button onClick={togglePublicTheme} className="flex items-center justify-center h-9 w-9 rounded-lg border border-gray-800 bg-gray-900/60 backdrop-blur-md hover:bg-gray-800 hover:border-gray-600 transition-all text-gray-400 hover:text-white">
-  {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-  </button>
-  {view === "login" ? (
-  <>
-  <button onClick={() => toggleView("register")} className="text-sm font-medium text-white px-4 py-2.5 border border-gray-800 bg-gray-900/60 backdrop-blur-md hover:bg-gray-800 hover:border-gray-600 transition-all">
-  Criar conta
-  </button>
-  <button onClick={() => toggleView("register-institution")} className="text-sm font-medium text-white px-4 py-2.5 border border-purple-800 bg-purple-900/60 backdrop-blur-md hover:bg-purple-800 hover:border-purple-600 transition-all">
-  Instituição
-  </button>
-  </>
-  ) : (
-  <button onClick={() => toggleView("login")} className="text-sm font-medium text-white px-6 py-2.5 border border-gray-800 bg-gray-900/60 backdrop-blur-md hover:bg-gray-800 hover:border-gray-600 transition-all">
-  Iniciar sessão
-  </button>
-  )}
-  </div>
+   <div className="flex items-center gap-1.5 sm:gap-3">
+   <button onClick={togglePublicTheme} className="flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 rounded-lg border border-gray-800 bg-gray-900/60 backdrop-blur-md hover:bg-gray-800 hover:border-gray-600 transition-all text-gray-400 hover:text-white">
+   {theme === "dark" ? <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <Moon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+   </button>
+   {view === "login" ? (
+   <>
+   <button onClick={() => toggleView("register")} className="text-xs sm:text-sm font-medium text-white px-2.5 sm:px-4 py-2 border sm:py-2.5 border-gray-800 bg-gray-900/60 backdrop-blur-md hover:bg-gray-800 hover:border-gray-600 transition-all whitespace-nowrap">
+   Criar conta
+   </button>
+   <button onClick={() => toggleView("register-institution")} className="text-xs sm:text-sm font-medium text-white px-2.5 sm:px-4 py-2 border sm:py-2.5 border-purple-800 bg-purple-900/60 backdrop-blur-md hover:bg-purple-800 hover:border-purple-600 transition-all whitespace-nowrap">
+   Instituição
+   </button>
+   </>
+   ) : (
+   <button onClick={() => toggleView("login")} className="text-xs sm:text-sm font-medium text-white px-4 sm:px-6 py-2 sm:py-2.5 border border-gray-800 bg-gray-900/60 backdrop-blur-md hover:bg-gray-800 hover:border-gray-600 transition-all whitespace-nowrap">
+   Iniciar sessão
+   </button>
+   )}
+   </div>
   </div>
 
  <div className="flex-1 flex flex-col justify-center px-6 sm:px-16 lg:px-24 z-20 pb-12 lg:pb-0">

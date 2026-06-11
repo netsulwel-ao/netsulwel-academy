@@ -32,6 +32,13 @@ const studentNav = [
   { icon: Users, label: "Comunidade", href: "/dashboard/community" },
 ];
 
+const studentInstitutionNav = [
+  { icon: LayoutDashboard, label: "Painel", href: "/dashboard/instituicao" },
+  { icon: BookOpen, label: "Cursos", href: "/dashboard/courses" },
+  { icon: Megaphone, label: "Comunicados", href: "/dashboard/instituicao/comunicados" },
+  { icon: GraduationCap, label: "Turmas", href: "/dashboard/instituicao/turmas" },
+];
+
 const institutionNav = [
   { icon: LayoutDashboard, label: "Visão Geral", href: "/dashboard/institution" },
   { icon: Users, label: "Membros", href: "/dashboard/institution/members" },
@@ -55,8 +62,12 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
      return () => unsub();
    }, [institutionId]);
 
+   const handleNavClick = () => {
+     if (mobileOpen) setMobileOpen(false);
+   };
+
    const handleLogout = async () => {
-   await logout();
+    await logout();
    };
 
   return (
@@ -122,6 +133,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
             <li key={item.href}>
               <Link
                 href={item.href}
+                onClick={handleNavClick}
                 title={isCollapsed ? item.label : ""}
                 className={`group flex items-center px-3 py-2.5 transition-all relative ${isActive
                   ? theme === "light"
@@ -170,6 +182,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
             <li key={item.href}>
               <Link
                 href={item.href}
+                onClick={handleNavClick}
                 title={isCollapsed ? item.label : ""}
                 className={`group flex items-center px-3 py-2.5 transition-all relative ${isActive
                   ? theme === "light"
@@ -204,14 +217,68 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
       </ul>
     </div>
   )}
+
+  {/* Secção para alunos vinculados a uma instituição */}
+  {!isInstitution && institutionId && (
+    <div>
+      {!isCollapsed && (
+        <>
+          {institutionName && (
+            <p className="px-3 mb-1 text-sm font-medium text-cyan-300 truncate">{institutionName}</p>
+          )}
+          <h3 className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-cyan-400">MINHA INSTITUIÇÃO</h3>
+        </>
+      )}
+      <ul className="space-y-1">
+        {studentInstitutionNav.map((item) => {
+          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          return (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                onClick={handleNavClick}
+                title={isCollapsed ? item.label : ""}
+                className={`group flex items-center px-3 py-2.5 transition-all relative ${isActive
+                  ? theme === "light"
+                    ? "bg-cyan-600 text-white shadow-sm"
+                    : "bg-cyan-600 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                  : theme === "light"
+                    ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    : "text-gray-400 hover:bg-gray-900 hover:text-gray-200"
+                }`}
+              >
+                <item.icon className={`h-6 w-6 shrink-0 ${isCollapsed ? "mx-auto" : "mr-3"} ${
+                  isActive
+                    ? "text-white drop-shadow-md"
+                    : theme === "light"
+                      ? "text-slate-400 group-hover:text-slate-700"
+                      : "text-gray-500 group-hover:text-gray-300"
+                }`} />
+                {!isCollapsed && (
+                  <span className="text-base font-medium whitespace-nowrap">{item.label}</span>
+                )}
+                {isCollapsed && (
+                  <div className={`absolute left-14 hidden group-hover:block px-2 py-1 text-sm whitespace-nowrap z-50 ${
+                    theme === "light" ? "bg-slate-800 text-white" : "bg-gray-800 text-white"
+                  }`}>
+                    {item.label}
+                  </div>
+                )}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  )}
  </div>
 
   {/* 4. Card de Role (Escondido se fechado) */}
   {!isCollapsed && (() => {
-  const roleData = isAdmin ? { label: "Admin", color: "from-purple-900/80 to-purple-600/40", colorLight: "from-purple-50 to-purple-100/60 border-purple-200", icon: Crown }
-  : isTeacher ? { label: "Professor", color: "from-green-900/80 to-green-600/40", colorLight: "from-green-50 to-emerald-100/60 border-emerald-200", icon: GraduationCap }
-  : isInstitution ? { label: "Instituição", color: "from-cyan-900/80 to-cyan-600/40", colorLight: "from-cyan-50 to-cyan-100/60 border-cyan-200", icon: Building2 }
-  : { label: "Aluno", color: "from-blue-900/80 to-blue-600/40", colorLight: "from-blue-50 to-blue-100/60 border-blue-200", icon: User };
+  const roleData = isAdmin ? { label: "Admin", color: "from-purple-900/80 to-purple-600/40", colorLight: "bg-white border-purple-200 shadow-sm", icon: Crown }
+  : isTeacher ? { label: "Professor", color: "from-green-900/80 to-green-600/40", colorLight: "bg-white border-emerald-200 shadow-sm", icon: GraduationCap }
+  : isInstitution ? { label: "Instituição", color: "from-cyan-900/80 to-cyan-600/40", colorLight: "bg-white border-cyan-200 shadow-sm", icon: Building2 }
+  : { label: "Aluno", color: "from-blue-900/80 to-blue-600/40", colorLight: "bg-white border-blue-200 shadow-sm", icon: User };
   const RoleIcon = roleData.icon;
   return (
   <div className={`mx-4 mt-10 p-4 bg-gradient-to-br relative overflow-hidden group border ${

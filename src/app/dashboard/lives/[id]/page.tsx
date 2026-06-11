@@ -270,30 +270,29 @@ function ViewerInterior({ live }: { live: LiveSession }) {
     <div className="flex flex-col h-dvh bg-[#0e0e10] overflow-hidden">
 
       {/* Top bar */}
-      <div className="flex items-center gap-4 px-4 py-2.5 bg-[#18181b] border-b border-gray-800 shrink-0">
+      <div className="flex items-center gap-1 sm:gap-4 px-2 sm:px-4 py-2 bg-[#18181b] border-b border-gray-800 shrink-0">
         <Link href="/dashboard/lives"
-          className="flex items-center justify-center h-10 w-10 bg-gray-800 text-gray-400 hover:text-white transition-colors">
-          <ArrowLeft className="h-5 w-5" />
+          className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-gray-800 text-gray-400 hover:text-white transition-colors shrink-0">
+          <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
         </Link>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          <span className="text-base font-bold text-white truncate max-w-xs">{live.title}</span>
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
+          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
+          <span className="text-sm sm:text-base font-bold text-white truncate max-w-[100px] sm:max-w-xs">{live.title}</span>
         </div>
-        <div className="flex-1" />
-        <div className="flex border border-gray-700 overflow-hidden">
+        <div className="flex border border-gray-700 overflow-hidden shrink-0">
           <div
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium ${canSpeak ? "bg-green-600/30 text-green-400" : "bg-gray-800 text-gray-500"}`}
+            className={`flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium ${canSpeak ? "bg-green-600/30 text-green-400" : "bg-gray-800 text-gray-500"}`}
             title={canSpeak ? "Podes falar" : "Microfone desativado"}
           >
-            {canSpeak ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+            {canSpeak ? <Mic className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <MicOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
           </div>
           <button onClick={() => setSidePanel("chat")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${sidePanel === "chat" ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"}`}>
-            <MessageSquare className="h-4 w-4" /> Chat
+            className={`flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors ${sidePanel === "chat" ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"}`}>
+            <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> <span className="hidden sm:inline">Chat</span>
           </button>
           <button onClick={() => setSidePanel("participants")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${sidePanel === "participants" ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"}`}>
-            <Users className="h-4 w-4" /> {participants.length}
+            className={`flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors ${sidePanel === "participants" ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"}`}>
+            <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> <span className="sm:hidden text-xs">{participants.length}</span><span className="hidden sm:inline">{participants.length}</span>
           </button>
         </div>
       </div>

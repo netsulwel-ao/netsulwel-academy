@@ -228,7 +228,7 @@ export default function AdminDashboardPage() {
     <div className="max-w-[100rem] mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Painel de Controlo</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold text-white">Painel de Controlo</h1>
           <p className="mt-2 text-gray-400">Visão geral da plataforma.</p>
         </div>
         {isAdmin && (

@@ -88,32 +88,32 @@ export default function DashboardPage() {
 
  return (
  <div className="max-w-[100rem] mx-auto animate-in fade-in duration-500">
-      <div className="flex items-start justify-between gap-6 flex-wrap">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
         <div className="min-w-0">
-          <h1 className="text-4xl font-bold text-white">Olá{user?.displayName ? `, ${user.displayName.split(" ")[0]}` : ""}</h1>
-          <p className="mt-1 text-gray-400">Bem-vindo ao teu painel. Aqui tens um resumo rápido do teu progresso.</p>
-          <div className="mt-4 flex items-center gap-3 flex-wrap">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Olá{user?.displayName ? `, ${user.displayName.split(" ")[0]}` : ""}</h1>
+          <p className="mt-1 text-sm sm:text-base text-gray-400">Bem-vindo ao teu painel. Aqui tens um resumo rápido do teu progresso.</p>
+          <div className="mt-3 sm:mt-4 flex items-center gap-3 flex-wrap">
             {rolePill}
-            <span className="text-sm text-gray-500">Email: {user?.email}</span>
+            <span className="text-xs sm:text-sm text-gray-500 truncate">Email: {user?.email}</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           <Link
             href="/dashboard/courses"
-            className="inline-flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-3 font-bold transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-purple hover:bg-purple-light text-white px-4 sm:px-5 py-2.5 sm:py-3 text-sm sm:text-base font-bold transition-colors"
           >
-            <BookOpen className="h-5 w-5" />
+            <BookOpen className="h-4 w-4 sm:h-5 sm:w-5" />
             Ver cursos
-            <ArrowUpRight className="h-5 w-5" />
+            <ArrowUpRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </Link>
           <Link
             href="/dashboard/lives"
-            className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-5 py-3 font-bold transition-colors border border-gray-800"
+            className="inline-flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-4 sm:px-5 py-2.5 sm:py-3 text-sm sm:text-base font-bold transition-colors border border-gray-800"
           >
-            <Radio className="h-5 w-5 text-red-400" />
+            <Radio className="h-4 w-4 sm:h-5 sm:w-5 text-red-400" />
             Aulas ao vivo
-            <ArrowUpRight className="h-5 w-5 text-gray-400" />
+            <ArrowUpRight className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
           </Link>
         </div>
       </div>
@@ -312,9 +312,9 @@ export default function DashboardPage() {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="bg-gray-950/40 border border-gray-800/70 p-5">
-      <p className="text-sm font-bold uppercase tracking-wide text-gray-500 whitespace-nowrap">{label}</p>
-      <p className="mt-2 text-4xl font-extrabold text-white tabular-nums">{value}</p>
+    <div className="bg-gray-950/40 border border-gray-800/70 p-4 sm:p-5">
+      <p className="text-xs sm:text-sm font-bold uppercase tracking-wide text-gray-500 whitespace-nowrap">{label}</p>
+      <p className="mt-1.5 sm:mt-2 text-2xl sm:text-4xl font-extrabold text-white tabular-nums">{value}</p>
     </div>
   );
 }

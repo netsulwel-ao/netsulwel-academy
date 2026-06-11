@@ -289,7 +289,7 @@ export default function AnnouncementsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Marketing & Comunica??o</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold text-white">Marketing & Comunicação</h1>
           <p className="mt-1 text-gray-400">Popups, anúncios e banners de contagem regressiva</p>
         </div>
         <button onClick={tab==="announcements"?openCreateAnn:openCreateCD}

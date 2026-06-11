@@ -165,7 +165,7 @@ export default function InstitutionDetailPage() {
             <ArrowLeft className="h-5 w-5 text-gray-400" />
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-white">{institution?.name}</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-white">{institution?.name}</h1>
             <p className="mt-2 text-gray-400">Gerir membros da instituição.</p>
           </div>
         </div>

@@ -66,15 +66,15 @@ export default function InstitutionSettingsPage() {
   return (
     <div className="max-w-3xl space-y-8 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900/80 to-gray-950/80 border border-gray-800/60 p-8">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900/80 to-gray-950/80 border border-gray-800/60 p-6 sm:p-8">
         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/5 blur-3xl rounded-full" />
         <div className="relative flex items-center gap-3">
-          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center shadow-lg shadow-purple-500/20">
-            <Building2 className="h-6 w-6 text-white" />
+          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center shadow-lg shadow-purple-500/20 shrink-0">
+            <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-white">Definições</h1>
-            <p className="text-gray-400">Actualiza os dados da tua instituição</p>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">Definições</h1>
+            <p className="text-sm sm:text-base text-gray-400">Actualiza os dados da tua instituição</p>
           </div>
         </div>
       </div>
@@ -82,18 +82,18 @@ export default function InstitutionSettingsPage() {
       {/* Form Card */}
       <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900/60 to-gray-950/60 border border-gray-800/70">
         <div className="absolute top-0 right-0 w-48 h-48 bg-purple-500/5 blur-3xl rounded-full" />
-        <div className="relative p-8 space-y-6">
-          <div className="flex items-center gap-3 pb-6 border-b border-gray-800/70">
-            <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-              <Building2 className="h-5 w-5 text-purple-400" />
+        <div className="relative p-4 sm:p-8 space-y-5 sm:space-y-6">
+          <div className="flex items-center gap-3 pb-5 sm:pb-6 border-b border-gray-800/70">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+              <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">Informação da Instituição</h2>
-              <p className="text-sm text-gray-400">Gerir os dados principais da instituição</p>
+              <h2 className="text-base sm:text-lg font-bold text-white">Informação da Instituição</h2>
+              <p className="text-xs sm:text-sm text-gray-400">Gerir os dados principais da instituição</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-300 mb-1.5">Nome da Instituição</label>
               <div className="relative">
@@ -134,9 +134,9 @@ export default function InstitutionSettingsPage() {
             </div>
           </div>
 
-          <div className="pt-6 border-t border-gray-800/70 flex justify-end">
+          <div className="pt-5 sm:pt-6 border-t border-gray-800/70 flex justify-end">
             <button onClick={handleSave} disabled={saving}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-bold py-2.5 px-8 rounded-lg transition-all disabled:opacity-50 hover:shadow-lg hover:shadow-purple-500/25">
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-bold py-2.5 px-8 rounded-lg transition-all disabled:opacity-50 hover:shadow-lg hover:shadow-purple-500/25">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               Salvar Alterações
             </button>
@@ -146,13 +146,13 @@ export default function InstitutionSettingsPage() {
 
       {/* Status Card */}
       {institution && (
-        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900/60 to-gray-950/60 border border-gray-800/70 p-6">
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900/60 to-gray-950/60 border border-gray-800/70 p-4 sm:p-6">
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl rounded-full" />
           <div className="relative flex items-center gap-3">
-            <div className={`h-3 w-3 rounded-full ${institution.status === "approved" ? "bg-green-500" : institution.status === "pending" ? "bg-yellow-500" : "bg-red-500"}`} />
+            <div className={`h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full ${institution.status === "approved" ? "bg-green-500" : institution.status === "pending" ? "bg-yellow-500" : "bg-red-500"}`} />
             <div>
-              <p className="text-sm text-gray-400">Estado da Instituição</p>
-              <p className="font-medium text-white capitalize">{institution.status === "approved" ? "Aprovada" : institution.status === "pending" ? "Pendente" : "Suspensa"}</p>
+              <p className="text-xs sm:text-sm text-gray-400">Estado da Instituição</p>
+              <p className="text-sm sm:text-base font-medium text-white capitalize">{institution.status === "approved" ? "Aprovada" : institution.status === "pending" ? "Pendente" : "Suspensa"}</p>
             </div>
           </div>
         </div>

@@ -135,7 +135,7 @@ export default function AdminInstitutionsPage() {
     <div className="max-w-[100rem] mx-auto space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Instituições</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold text-white">Instituições</h1>
           <p className="mt-2 text-gray-400">Gerir instituições educativas registadas na plataforma.</p>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-400">

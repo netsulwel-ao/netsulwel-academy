@@ -11,7 +11,7 @@ export default function DashboardExamsPage() {
           <FileText className="h-6 w-6 text-purple-light" />
         </div>
         <div className="min-w-0">
-          <h1 className="text-4xl font-bold text-white">Avaliações</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Avaliações</h1>
           <p className="mt-1 text-gray-400">
             Aqui vão aparecer os teus testes, quizzes e avaliações por curso.
           </p>

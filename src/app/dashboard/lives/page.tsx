@@ -140,11 +140,11 @@ export default function DashboardLivesPage() {
     <div className="max-w-[100rem] mx-auto space-y-10 animate-in fade-in duration-500">
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-bold text-white flex items-center gap-3">
-          <Radio className="h-10 w-10 text-red-400" />
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white flex items-center gap-2 sm:gap-3">
+          <Radio className="h-7 w-7 sm:h-10 sm:w-10 text-red-400" />
           Aulas ao Vivo
         </h1>
-        <p className="mt-2 text-gray-400">
+        <p className="mt-1.5 sm:mt-2 text-sm sm:text-base text-gray-400">
           Assista às aulas em direto e interaja com o professor em tempo real.
         </p>
       </div>
