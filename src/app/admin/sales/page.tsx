@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { db } from "@/lib/firebase";
 import {
   collection, getDocs, addDoc, updateDoc, deleteDoc,
-  doc, serverTimestamp, orderBy, query, where, arrayUnion, arrayRemove,
+  doc, getDoc, serverTimestamp, orderBy, query, where, arrayUnion, arrayRemove,
 } from "firebase/firestore";
 import {
   DollarSign, TrendingUp, ShoppingCart,
@@ -23,7 +23,7 @@ const STATUS_CONFIG = {
 };
 
 const TYPE_LABELS: Record<string, string> = {
-  standalone: "Curso Avulso", smart: "Plano Smart", golden: "Plano Golden",
+  standalone: "Curso Avulso", smart: "Plano Smart", golden: "Plano Golden", live: "Aula Avulsa",
 };
 
 export default function SalesPage() {
@@ -79,32 +79,89 @@ export default function SalesPage() {
       const sale = sales.find((s) => s.id === id);
       if (!sale) return;
       const userRef = doc(db, "users", sale.userId);
+      const saleRef = doc(db, "sales", id);
 
       if (newStatus === "confirmed" && sale.status !== "confirmed") {
         if (sale.type === "standalone" && sale.itemId) {
           await updateDoc(userRef, { enrolledCourses: arrayUnion(sale.itemId) });
+        } else if (sale.type === "live" && sale.itemId) {
+          await updateDoc(userRef, { enrolledLives: arrayUnion(sale.itemId) });
         } else if (sale.type === "smart" || sale.type === "golden") {
           await updateDoc(userRef, { plan: sale.type });
         }
+
+        // ── Calcular taxa para cursos/lives avulsos ──
+        if ((sale.type === "standalone" || sale.type === "live") && sale.itemId) {
+          let feePct = 0;
+          let sellerId = "";
+          let sellerName = "";
+          let sellerType: "teacher" | "institution" = "teacher";
+
+          // Buscar curso/live para obter sellerId e feePercentage
+          const sourceSnap = sale.type === "live"
+            ? await getDoc(doc(db, "lives", sale.itemId))
+            : await getDoc(doc(db, "courses", sale.itemId));
+          if (sourceSnap.exists()) {
+            const sourceData = sourceSnap.data();
+            sellerId = sourceData.sellerId || sourceData.createdBy || "";
+            feePct = sourceData.feePercentage ?? feePct;
+          }
+
+          // Se não tem feePercentage definido, usar o padrão das settings
+          if (!feePct) {
+            const settingsSnap = await getDoc(doc(db, "settings", "platform"));
+            if (settingsSnap.exists()) {
+              const settingsData = settingsSnap.data();
+              feePct = settingsData.fees?.defaultCourseFee ?? 0;
+            }
+          }
+
+          // Buscar nome do vendedor
+          if (sellerId) {
+            const sellerSnap = await getDoc(doc(db, "users", sellerId));
+            if (sellerSnap.exists()) {
+              const sellerData = sellerSnap.data();
+              sellerName = sellerData.displayName || sellerData.name || "";
+              sellerType = sellerData.role === "institution" ? "institution" : "teacher";
+            }
+          }
+
+          const fee = sale.amount * (feePct / 100);
+          const netAmount = sale.amount - fee;
+
+          await updateDoc(saleRef, {
+            fee: Math.round(fee * 100) / 100,
+            netAmount: Math.round(netAmount * 100) / 100,
+            sellerId,
+            sellerName,
+            sellerType,
+            updatedAt: serverTimestamp(),
+          });
+        }
+
         await addDoc(collection(db, "users", sale.userId, "notifications"), {
           uid: sale.userId,
           type: "payment_approved",
           title: "Pagamento Confirmado",
           message: `O teu pagamento para "${sale.itemTitle || sale.type}" foi aprovado.`,
-          link: sale.type === "standalone" && sale.itemId ? `/dashboard/courses/${sale.itemId}` : "/dashboard",
+          link: sale.type === "standalone" && sale.itemId ? `/dashboard/courses/${sale.itemId}`
+            : sale.type === "live" && sale.itemId ? `/dashboard/lives/${sale.itemId}`
+            : "/dashboard",
           read: false,
           createdAt: serverTimestamp(),
         });
       } else if (newStatus !== "confirmed" && sale.status === "confirmed") {
         if (sale.type === "standalone" && sale.itemId) {
           await updateDoc(userRef, { enrolledCourses: arrayRemove(sale.itemId) });
+        } else if (sale.type === "live" && sale.itemId) {
+          await updateDoc(userRef, { enrolledLives: arrayRemove(sale.itemId) });
         } else if (sale.type === "smart" || sale.type === "golden") {
           await updateDoc(userRef, { plan: "free" });
         }
       }
 
-      await updateDoc(doc(db, "sales", id), { status: newStatus, updatedAt: serverTimestamp() });
-      setSales((p) => p.map((s) => s.id === id ? { ...s, status: newStatus } : s));
+      await updateDoc(saleRef, { status: newStatus, updatedAt: serverTimestamp() });
+      fetchSales();
       toast.success(newStatus === "confirmed" ? "Pagamento confirmado — acesso atribuído." : "Status atualizado.");
     } catch { toast.error("Erro ao atualizar status."); }
   };
@@ -219,6 +276,7 @@ export default function SalesPage() {
           className="bg-gray-900 border border-gray-800 text-gray-300 text-sm py-2.5 px-4 focus:outline-none appearance-none cursor-pointer">
           <option value="all">Todos os tipos</option>
           <option value="standalone">Curso Avulso</option>
+          <option value="live">Aula Avulsa</option>
           <option value="smart">Plano Smart</option>
           <option value="golden">Plano Golden</option>
         </select>
@@ -236,12 +294,13 @@ export default function SalesPage() {
         />
       ) : (
         <div className="bg-gray-900/40 backdrop-blur-xl overflow-x-auto">
-          <div className="min-w-[700px]">
-          <div className="grid grid-cols-[1fr_120px_120px_140px_120px_80px] gap-4 px-5 py-3 border-b border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
+          <div className="min-w-[900px]">
+          <div className="grid grid-cols-[1fr_100px_100px_120px_120px_100px_70px] gap-2 px-5 py-3 border-b border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
             <span>Cliente / Item</span>
+            <span>Líquido</span>
+            <span>Taxa</span>
             <span>Tipo</span>
-            <span>Valor</span>
-            <span>Pagamento</span>
+            <span>Bruto</span>
             <span>Status</span>
             <span></span>
           </div>
@@ -250,16 +309,20 @@ export default function SalesPage() {
               const sc = STATUS_CONFIG[sale.status];
               const StatusIcon = sc.icon;
               return (
-                <div key={sale.id} className="grid grid-cols-[1fr_120px_120px_140px_120px_80px] gap-4 px-5 py-4 items-center hover:bg-gray-800/30 transition-colors">
+                <div key={sale.id} className="grid grid-cols-[1fr_100px_100px_120px_120px_100px_70px] gap-2 px-5 py-4 items-center hover:bg-gray-800/30 transition-colors">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-white truncate">{sale.userName}</p>
                     <p className="text-xs text-gray-500 truncate">{sale.userEmail}</p>
                     {sale.itemTitle && <p className="text-xs text-gray-600 truncate mt-0.5">{sale.itemTitle}</p>}
                     <p className="text-xs text-gray-700 mt-0.5">{formatDate(sale.createdAt)}</p>
                   </div>
+                  <div>
+                    <p className="text-sm font-bold text-green-400">{formatKz(sale.netAmount ?? sale.amount)}</p>
+                    {sale.sellerName && <p className="text-[10px] text-gray-600 truncate">{sale.sellerName}</p>}
+                  </div>
+                  <span className="text-xs text-gray-400">{sale.fee ? formatKz(sale.fee) : "—"}</span>
                   <span className="text-xs text-gray-400">{TYPE_LABELS[sale.type]}</span>
                   <span className="text-sm font-bold text-white">{formatKz(sale.amount)}</span>
-                  <span className="text-xs text-gray-400 truncate">{sale.paymentMethod}</span>
                   {/* Status — admin pode alterar, teacher só vê */}
                   <div className="relative">
                     {isAdmin ? (

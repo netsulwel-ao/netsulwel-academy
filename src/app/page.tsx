@@ -3,6 +3,7 @@ import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
 import { Trails } from "@/components/Trails";
 import { PublicCourses } from "@/components/PublicCourses";
+import { Teachers } from "@/components/Teachers";
 import { Testimonials } from "@/components/Testimonials";
 import { Pricing } from "@/components/Pricing";
 import { FAQ } from "@/components/FAQ";
@@ -18,6 +19,7 @@ export default function Home() {
   <Features />
   <Trails />
   <PublicCourses />
+  <Teachers />
   <Testimonials />
   <Pricing />
   <FAQ />

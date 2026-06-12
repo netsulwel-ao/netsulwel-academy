@@ -7,7 +7,7 @@ import {
   PanelLeftClose, PanelLeft, Sun, Moon, ChevronRight, FileText, Layers, Award,
   Crown, GraduationCap, Building2, User,
   LayoutDashboard, UserPlus, Link2, Mail,
-  BarChart3, Megaphone
+  BarChart3, Megaphone, Video, DollarSign, TrendingUp
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
@@ -29,6 +29,7 @@ const studentNav = [
   { icon: Layers, label: "Trilhas", href: "/dashboard/trails" },
   { icon: FileText, label: "Avaliações", href: "/dashboard/exams" },
   { icon: Award, label: "Certificados", href: "/dashboard/certificates" },
+  { icon: GraduationCap, label: "Professores", href: "/dashboard/professores" },
   { icon: Users, label: "Comunidade", href: "/dashboard/community" },
 ];
 
@@ -37,6 +38,17 @@ const studentInstitutionNav = [
   { icon: BookOpen, label: "Cursos", href: "/dashboard/courses" },
   { icon: Megaphone, label: "Comunicados", href: "/dashboard/instituicao/comunicados" },
   { icon: GraduationCap, label: "Turmas", href: "/dashboard/instituicao/turmas" },
+];
+
+const teacherNav = [
+  { icon: LayoutDashboard, label: "Visão Geral", href: "/dashboard/teacher" },
+  { icon: BookOpen, label: "Cursos", href: "/dashboard/teacher/courses" },
+  { icon: FileText, label: "Avaliações", href: "/dashboard/teacher/exams" },
+  { icon: Video, label: "Aulas ao Vivo", href: "/dashboard/teacher/lives" },
+  { icon: Users, label: "Alunos", href: "/dashboard/teacher/students" },
+  { icon: TrendingUp, label: "Analytics", href: "/dashboard/teacher/analytics" },
+  { icon: DollarSign, label: "Carteira", href: "/dashboard/wallet" },
+  { icon: Settings, label: "Definições", href: "/dashboard/settings" },
 ];
 
 const institutionNav = [
@@ -169,8 +181,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
     </div>
   )}
 
-  {/* Secção de Navegação (aluno/professor) ou extra */}
-  {!isInstitution && (
+  {/* Secção de Navegação (apenas para alunos) */}
+  {!isInstitution && !isTeacher && (
     <div>
       {!isCollapsed && (
         <h3 className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-gray-500">NAVEGAÇÃO</h3>
@@ -272,6 +284,59 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
     </div>
   )}
  </div>
+
+  {/* Secção para Professores */}
+  {isTeacher && !isInstitution && (
+    <div>
+      {!isCollapsed && (
+        <>
+          <h3 className="px-3 pl-6 mb-2 text-xs font-bold uppercase tracking-widest text-green-400">PROFESSOR</h3>
+        </>
+      )}
+      <ul className="space-y-1">
+        {teacherNav.map((item) => {
+          const isActive = item.href === "/dashboard/teacher"
+            ? pathname === item.href
+            : pathname.startsWith(item.href);
+          return (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                onClick={handleNavClick}
+                title={isCollapsed ? item.label : ""}
+                className={`group flex items-center pl-6 py-2.5 pr-3 transition-all relative ${isActive
+                  ? theme === "light"
+                    ? "bg-green-600 text-white shadow-sm"
+                    : "bg-green-600 text-white shadow-[0_0_15px_rgba(34,197,94,0.3)]"
+                  : theme === "light"
+                    ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    : "text-gray-400 hover:bg-gray-900 hover:text-gray-200"
+                }`}
+              >
+                <item.icon className={`h-6 w-6 shrink-0 ${isCollapsed ? "mx-auto" : "mr-3"} ${
+                  isActive
+                    ? "text-white drop-shadow-md"
+                    : theme === "light"
+                      ? "text-slate-400 group-hover:text-slate-700"
+                      : "text-gray-500 group-hover:text-gray-300"
+                }`} />
+                {!isCollapsed && (
+                  <span className="text-base font-medium whitespace-nowrap">{item.label}</span>
+                )}
+                {isCollapsed && (
+                  <div className={`absolute left-14 hidden group-hover:block px-2 py-1 text-sm whitespace-nowrap z-50 ${
+                    theme === "light" ? "bg-slate-800 text-white" : "bg-gray-800 text-white"
+                  }`}>
+                    {item.label}
+                  </div>
+                )}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  )}
 
   {/* 4. Card de Role (Escondido se fechado) */}
   {!isCollapsed && (() => {

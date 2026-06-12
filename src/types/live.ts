@@ -1,5 +1,5 @@
 export type LiveStatus = "scheduled" | "live" | "ended";
-export type LiveTarget = "free" | "smart" | "golden";
+export type LiveTarget = "free" | "smart" | "golden" | "standalone";
 
 export interface LiveSession {
   id?: string;
@@ -8,6 +8,7 @@ export interface LiveSession {
   thumbnail: string;
   scheduledAt: string;        // ISO datetime
   target: LiveTarget;
+  price?: number;             // only for standalone
   status: LiveStatus;
   createdBy: string;          // admin UID (consistente com courses/trails)
   hostName?: string;

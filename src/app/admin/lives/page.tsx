@@ -41,6 +41,7 @@ const TARGET_LABELS: Record<string, { label: string; color: string }> = {
   free: { label: "Gratuito", color: "text-green-400 bg-green-500/10" },
   smart: { label: "Smart", color: "text-blue-400 bg-blue-500/10" },
   golden: { label: "Golden", color: "text-amber-400 bg-amber-500/10" },
+  standalone: { label: "Pago", color: "text-green-400 bg-green-500/10" },
 };
 
 export default function AdminLivesPage() {

@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     // Whitelist de pastas permitidas — evitar path traversal
     const ALLOWED_FOLDERS = new Set([
       "thumbnails", "videos", "uploads", "announcements",
-      "countdowns", "lives/thumbnails", "avatars",
+      "countdowns", "lives/thumbnails", "avatars", "receipts",
     ]);
     if (!ALLOWED_FOLDERS.has(folder)) {
       return NextResponse.json({ error: "Pasta de upload inválida." }, { status: 400 });

@@ -6,6 +6,7 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc, increment, updateDoc, onSnapshot, setDoc, serverTimestamp, Timestamp, collection } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAccess } from "@/hooks/useAccess";
+import { useTrack } from "@/hooks/useTrack";
 import {
   Lock, Play, BookOpen, Award, ChevronLeft, Clock,
   Loader2, CheckCircle2, ChevronDown, ChevronRight, Crown, Zap,
@@ -114,6 +115,7 @@ export default function CourseDetailPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { canAccessCourse, requiredPlanLabel } = useAccess();
+  const { track } = useTrack();
 
   const [course, setCourse] = useState<Course | null>(null);
   const [enrolledCourses, setEnrolledCourses] = useState<string[]>([]);
@@ -143,6 +145,7 @@ export default function CourseDetailPage() {
 
         if (snap.exists()) {
           updateDoc(doc(db, "courses", id), { views: increment(1) }).catch(() => {});
+          track("course_view", id, "course").catch(() => {});
         }
 
         // Abre automaticamente na primeira aula (ou restaura progresso)
@@ -249,8 +252,16 @@ export default function CourseDetailPage() {
       lastAccessedAt: serverTimestamp(),
     }, { merge: true });
 
+    // Track lesson complete
+    if (!isCompleted) {
+      track("lesson_complete", course.id, "course", { moduleIndex: mi, lessonIndex: vi });
+    }
+
     // Gerar certificado se completou 100% e o curso tem certificado ativo
     const justCompleted = !isCompleted && newCount >= totalLessons && totalLessons > 0;
+    if (justCompleted) {
+      track("course_complete", course.id, "course").catch(() => {});
+    }
     if (justCompleted && course.hasCertificate) {
       const certId = `CERT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
       const estHours = course.totalDuration ? parseInt(course.totalDuration) : course.lessonsCount ?? 0;

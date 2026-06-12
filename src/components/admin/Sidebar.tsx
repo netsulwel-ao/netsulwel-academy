@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, Users, Settings, LogOut, Search, 
-  PanelLeftClose, PanelLeft, Sun, Moon, Video, DollarSign, Folders, Layers, Megaphone, Radio, Calendar, MessageSquare, GraduationCap, BookOpen
+  PanelLeftClose, PanelLeft, Sun, Moon, Video, DollarSign, Folders, Layers, Megaphone, Radio, Calendar, MessageSquare, GraduationCap, BookOpen, MailQuestion
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -27,7 +27,8 @@ const navSections = [
  { icon: Video, label: "Criar Curso", href: "/admin/courses/new" },
    { icon: Layers, label: "Trilhas", href: "/admin/trails" },
    { icon: Calendar, label: "Cronograma", href: "/admin/schedules" },
-   { icon: Radio, label: "Aulas ao Vivo", href: "/admin/lives" },
+    { icon: Radio, label: "Aulas ao Vivo", href: "/admin/lives" },
+    { icon: MailQuestion, label: "Pedidos de Lives", href: "/admin/free-live-requests" },
    { icon: GraduationCap, label: "Professores", href: "/admin/teachers" },
    { icon: Users, label: "Alunos", href: "/admin/students" },
    { icon: DollarSign, label: "Vendas", href: "/admin/sales" },

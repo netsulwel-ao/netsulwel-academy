@@ -5,9 +5,10 @@ import { db } from "@/lib/firebase";
 import { collection, getDocs, query, orderBy, where, doc, getDoc } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAccess } from "@/hooks/useAccess";
+import { useTrack } from "@/hooks/useTrack";
 import {
   Lock, BookOpen, Award, Search, X,
-  Loader2, Play, ChevronRight, SlidersHorizontal,
+  Loader2, Play, ChevronRight, SlidersHorizontal, GraduationCap,
 } from "lucide-react";
 import Link from "next/link";
 import type { Course, CourseType, CourseCategory, CourseLevel } from "@/types/course";
@@ -74,6 +75,7 @@ const LEVELS: { value: CourseLevel; label: string }[] = [
 export default function CourseCatalogPage() {
   const { user, institutionId } = useAuth();
   const { canAccessCourse, requiredPlanLabel } = useAccess();
+  const { track } = useTrack();
 
   const [courses, setCourses] = useState<Course[]>([]);
   const [enrolledCourses, setEnrolledCourses] = useState<string[]>([]);
@@ -84,6 +86,7 @@ export default function CourseCatalogPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [institutionName, setInstitutionName] = useState("");
+  const [creatorNames, setCreatorNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -120,6 +123,19 @@ export default function CourseCatalogPage() {
             setEnrolledCourses(userDoc.data().enrolledCourses ?? []);
           }
         }
+
+        // Fetch creator names for profile links
+        const creatorIds = [...new Set(all.map(c => c.createdBy).filter(Boolean))] as string[];
+        if (creatorIds.length > 0) {
+          const nameMap: Record<string, string> = {};
+          const chunks: string[][] = [];
+          for (let i = 0; i < creatorIds.length; i += 30) chunks.push(creatorIds.slice(i, i + 30));
+          for (const chunk of chunks) {
+            const usersSnap = await getDocs(query(collection(db, "users"), where("__name__", "in", chunk)));
+            usersSnap.docs.forEach(d => { nameMap[d.id] = d.data().name || d.data().displayName || ""; });
+          }
+          setCreatorNames(nameMap);
+        }
       } catch (err) {
         console.error(err);
         setLoadError(
@@ -132,6 +148,15 @@ export default function CourseCatalogPage() {
     };
     fetchData();
   }, [user, institutionId]);
+
+  // Track searches with debounce
+  useEffect(() => {
+    if (!search.trim()) return;
+    const timer = setTimeout(() => {
+      track("search_query", undefined, undefined, { queryText: search.trim() });
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [search, track]);
 
   const setFilter = useCallback(<K extends keyof Filters>(key: K, value: Filters[K]) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -357,7 +382,7 @@ export default function CourseCatalogPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
             {accessible.map((course) => (
-              <CourseCard key={course.id} course={course} locked={false} enrolledCourses={enrolledCourses} />
+              <CourseCard key={course.id} course={course} locked={false} enrolledCourses={enrolledCourses} creatorNames={creatorNames} />
             ))}
           </div>
         </div>
@@ -378,6 +403,7 @@ export default function CourseCatalogPage() {
                 locked={true}
                 enrolledCourses={enrolledCourses}
                 requiredPlan={requiredPlanLabel(normalizeCourseType(course.type))}
+                creatorNames={creatorNames}
               />
             ))}
           </div>
@@ -403,12 +429,13 @@ function Chip({ selected, onClick, children }: { selected: boolean; onClick: () 
 
 // ── Course Card ───────────────────────────────────────────
 function CourseCard({
-  course, locked, enrolledCourses, requiredPlan,
+  course, locked, enrolledCourses, requiredPlan, creatorNames,
 }: {
   course: Course;
   locked: boolean;
   enrolledCourses: string[];
   requiredPlan?: string;
+  creatorNames?: Record<string, string>;
 }) {
   const normalizedType = normalizeCourseType(course.type);
   const badge = TYPE_BADGE[normalizedType] ?? DEFAULT_BADGE;
@@ -469,6 +496,14 @@ function CourseCard({
       <div className="flex flex-col flex-1 p-4 sm:p-5">
         <h3 className="font-bold text-white text-base sm:text-lg leading-snug line-clamp-2">{course.title}</h3>
         <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-400 line-clamp-2 flex-1">{course.description}</p>
+
+        {course.createdBy && creatorNames?.[course.createdBy] && (
+          <button onClick={(e) => { e.stopPropagation(); window.open(`/profile/${course.createdBy}`, '_self'); }}
+            className="mt-2 text-xs text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1 text-left">
+            <GraduationCap className="h-3 w-3 shrink-0" />
+            {creatorNames[course.createdBy]}
+          </button>
+        )}
 
         <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500">
           <span className="flex items-center gap-1"><BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4" />{course.modulesCount ?? 0} módulos</span>

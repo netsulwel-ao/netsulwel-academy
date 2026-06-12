@@ -46,7 +46,7 @@ export interface Sale {
   userId: string;
   userName: string;
   userEmail: string;
-  type: "standalone" | "smart" | "golden";
+  type: "standalone" | "smart" | "golden" | "live";
   itemId?: string;
   itemTitle?: string;
   amount: number;

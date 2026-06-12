@@ -10,10 +10,10 @@ import type { CommunityPostType } from "@/types/community";
 
 const TYPES: CommunityPostType[] = ["duvida", "projeto", "discussao", "dica"];
 
-async function uploadToR2(file: File): Promise<string> {
+async function uploadToR2(file: File, token: string): Promise<string> {
   const res = await fetch("/api/upload/presign", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
     body: JSON.stringify({ filename: file.name, contentType: file.type, folder: "community" }),
   });
   if (!res.ok) throw new Error("Falha ao obter URL.");
@@ -58,7 +58,8 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
 
     try {
       setUploading(true);
-      const uploaded = await Promise.all(images.map((f) => uploadToR2(f)));
+      const token = await user.getIdToken();
+      const uploaded = await Promise.all(images.map((f) => uploadToR2(f, token)));
       setUploading(false);
 
       const tags = tagsInput
