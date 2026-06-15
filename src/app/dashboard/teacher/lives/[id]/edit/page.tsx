@@ -114,7 +114,7 @@ export default function TeacherEditLivePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-purple" />
+        <Loader2 className="h-8 w-8 animate-spin text-green-400" />
       </div>
     );
   }
@@ -181,7 +181,7 @@ export default function TeacherEditLivePage() {
             </div>
           ) : (
             <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-700 hover:border-gray-600 bg-gray-900/30 cursor-pointer transition-colors">
-              {uploadingThumb ? <Loader2 className="h-8 w-8 animate-spin text-purple" />
+              {uploadingThumb ? <Loader2 className="h-8 w-8 animate-spin text-green-400" />
                 : <><ImageIcon className="h-8 w-8 text-gray-600 mb-2" /><span className="text-sm text-gray-500">Clique para enviar uma imagem</span></>}
               <input type="file" accept="image/*" onChange={handleThumbnailUpload} className="hidden" disabled={uploadingThumb} />
             </label>
@@ -191,7 +191,7 @@ export default function TeacherEditLivePage() {
         <div className="flex items-center gap-4 pt-4 border-t border-gray-800">
           <Link href="/dashboard/teacher/lives" className="px-6 py-3 text-sm font-medium text-gray-400 hover:text-white transition-colors">Cancelar</Link>
           <button type="submit" disabled={saving}
-            className="flex items-center gap-2 bg-purple hover:bg-purple-light disabled:bg-blue-800 disabled:opacity-50 text-white px-6 py-3 font-bold transition-colors ml-auto">
+            className="flex items-center gap-2 bg-green hover:bg-green-light disabled:bg-blue-800 disabled:opacity-50 text-white px-6 py-3 font-bold transition-colors ml-auto">
             {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
             {saving ? "A guardar..." : "Guardar Alterações"}
           </button>

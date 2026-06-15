@@ -52,6 +52,7 @@ export default function LoginPage() {
   const [nacionalidade, setNacionalidade] = useState("");
   const [telefone, setTelefone] = useState("");
   const [pais, setPais] = useState("");
+  const [provincia, setProvincia] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
  
   const [theme, setTheme] = useState<"dark" | "light">("dark");
@@ -106,6 +107,7 @@ export default function LoginPage() {
   setNacionalidade("");
   setTelefone("");
   setPais("");
+  setProvincia("");
   };
 
  const handleAuthSubmit = async (e: React.FormEvent) => {
@@ -137,6 +139,7 @@ export default function LoginPage() {
   if (!nacionalidade.trim()) { setError("A nacionalidade é obrigatória."); setLoading(false); return; }
   if (!telefone.trim()) { setError("O número de telefone é obrigatório."); setLoading(false); return; }
   if (!pais.trim()) { setError("O país é obrigatório."); setLoading(false); return; }
+  if (!provincia.trim()) { setError("A província é obrigatória."); setLoading(false); return; }
 
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   if (name) {
@@ -151,6 +154,7 @@ export default function LoginPage() {
   role: "aluno",
   createdAt: new Date(),
   morada,
+  provincia,
   idade: Number(idade),
   genero,
   nacionalidade,
@@ -247,6 +251,7 @@ export default function LoginPage() {
     if (!nacionalidade.trim()) { setError("A nacionalidade é obrigatória."); return; }
     if (!telefone.trim()) { setError("O número de telefone é obrigatório."); return; }
     if (!pais.trim()) { setError("O país é obrigatório."); return; }
+    if (!provincia.trim()) { setError("A província é obrigatória."); return; }
   }
 
   setProviderLoading(providerName);
@@ -268,6 +273,7 @@ export default function LoginPage() {
   createdAt: new Date(),
   ...(view === "register" && {
     morada,
+    provincia,
     idade: Number(idade),
     genero,
     nacionalidade,
@@ -422,33 +428,35 @@ export default function LoginPage() {
 
  <form className="space-y-5 relative z-10" onSubmit={handleAuthSubmit}>
  
- {view === "register" && (
- <RegisterForm
- name={name}
- setName={setName}
- morada={morada}
- setMorada={setMorada}
- idade={idade}
- setIdade={setIdade}
- genero={genero}
- setGenero={setGenero}
- nacionalidade={nacionalidade}
- setNacionalidade={setNacionalidade}
- telefone={telefone}
- setTelefone={setTelefone}
- pais={pais}
- setPais={setPais}
- password={password}
- confirmPassword={confirmPassword}
- showPassword={showPassword}
- showConfirmPassword={showConfirmPassword}
- setShowPassword={setShowPassword}
- setShowConfirmPassword={setShowConfirmPassword}
- setPassword={setPassword}
- setConfirmPassword={setConfirmPassword}
- loading={loading}
- />
- )}
+  {view === "register" && (
+  <RegisterForm
+  name={name}
+  setName={setName}
+  morada={morada}
+  setMorada={setMorada}
+  provincia={provincia}
+  setProvincia={setProvincia}
+  idade={idade}
+  setIdade={setIdade}
+  genero={genero}
+  setGenero={setGenero}
+  nacionalidade={nacionalidade}
+  setNacionalidade={setNacionalidade}
+  telefone={telefone}
+  setTelefone={setTelefone}
+  pais={pais}
+  setPais={setPais}
+  password={password}
+  confirmPassword={confirmPassword}
+  showPassword={showPassword}
+  showConfirmPassword={showConfirmPassword}
+  setShowPassword={setShowPassword}
+  setShowConfirmPassword={setShowConfirmPassword}
+  setPassword={setPassword}
+  setConfirmPassword={setConfirmPassword}
+  loading={loading}
+  />
+  )}
 
  {view === "register-institution" && (
  <InstitutionForm

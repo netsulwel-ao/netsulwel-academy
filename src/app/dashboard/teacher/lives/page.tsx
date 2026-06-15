@@ -57,7 +57,7 @@ export default function TeacherLivesPage() {
     if (typeof d === "object" && "toDate" in (d as object)) return (d as { toDate: () => Date }).toDate();
     return new Date(d as string);
   };
-  const active = lives.filter(l => l.status === "active");
+  const active = lives.filter(l => l.status === "live");
   const upcoming = lives.filter(l => l.status === "scheduled" && l.scheduledAt && toDate(l.scheduledAt)! > now);
   const past = lives.filter(l => l.status === "ended" || (l.scheduledAt && toDate(l.scheduledAt)! <= now));
 
@@ -76,19 +76,19 @@ export default function TeacherLivesPage() {
           <p className="mt-1 text-gray-400">{lives.length} aula{lives.length !== 1 ? "s" : ""}</p>
         </div>
         <Link href="/dashboard/teacher/lives/new"
-          className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-3 font-bold transition-colors">
+          className="inline-flex items-center gap-2 bg-green hover:bg-green-light text-white px-5 py-3 font-bold transition-colors">
           <Plus className="h-5 w-5" /> Nova Aula
         </Link>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>
+        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-green-400" /></div>
       ) : lives.length === 0 && requests.length === 0 ? (
         <div className="text-center py-20 bg-gray-900/40 border border-gray-800">
           <Radio className="h-12 w-12 text-gray-600 mx-auto mb-4" />
           <p className="text-gray-400 mb-4">Ainda não criaste nenhuma aula ao vivo.</p>
           <Link href="/dashboard/teacher/lives/new"
-            className="inline-flex items-center gap-2 text-red-400 hover:text-red-300 font-bold">
+            className="inline-flex items-center gap-2 text-green-400 hover:text-green-300 font-bold">
             <Plus className="h-4 w-4" /> Agendar primeira aula
           </Link>
         </div>
@@ -98,7 +98,7 @@ export default function TeacherLivesPage() {
           {requests.length > 0 && (
             <section className="space-y-3">
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <MailQuestion className="h-5 w-5 text-purple-400" /> Pedidos de Lives Gratuitas
+                <MailQuestion className="h-5 w-5 text-green-400" /> Pedidos de Lives Gratuitas
               </h2>
               <div className="grid gap-3">
                 {requests.map(r => (
@@ -143,8 +143,8 @@ export default function TeacherLivesPage() {
                       <h3 className="font-bold text-white">{l.title}</h3>
                       <p className="text-sm text-gray-400 mt-1">{l.description}</p>
                     </div>
-                    <Link href={`/admin/lives/${l.id}/studio`}
-                      className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 font-bold text-sm transition-colors text-center shrink-0">
+                    <Link href={`/lives/${l.id}/studio`}
+                      className="bg-green hover:bg-green-light text-white px-5 py-2 font-bold text-sm transition-colors text-center shrink-0">
                       Ir para Estúdio
                     </Link>
                   </div>
@@ -170,8 +170,8 @@ export default function TeacherLivesPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <Link href={`/admin/lives/${l.id}/studio`}
-                        className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 text-sm font-bold transition-colors">
+                      <Link href={`/lives/${l.id}/studio`}
+                        className="flex items-center gap-2 bg-green hover:bg-green-light text-white px-4 py-2 text-sm font-bold transition-colors">
                         <Play className="h-4 w-4" />
                         Iniciar Aula
                       </Link>

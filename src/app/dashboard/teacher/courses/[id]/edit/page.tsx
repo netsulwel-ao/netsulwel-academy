@@ -60,7 +60,7 @@ export default function TeacherEditCoursePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-purple" />
+        <Loader2 className="h-8 w-8 animate-spin text-green-400" />
       </div>
     );
   }
@@ -91,7 +91,7 @@ export default function TeacherEditCoursePage() {
       {initialData?.format === "live" && (
         <div className="max-w-5xl mx-auto mb-4">
           <Link href={`/admin/courses/${id}/live-studio`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold transition-colors">
+            className="inline-flex items-center gap-2 px-4 py-2 bg-green hover:bg-green-light text-white text-sm font-bold transition-colors">
             <Radio className="h-4 w-4" /> Gerir Aulas ao Vivo
           </Link>
         </div>

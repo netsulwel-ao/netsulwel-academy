@@ -55,7 +55,7 @@ export default function TeacherCoursesPage() {
           <p className="mt-1 text-gray-400">{courses.length} curso{courses.length !== 1 ? "s" : ""}</p>
         </div>
         <Link href="/dashboard/teacher/courses/new"
-          className="inline-flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-3 font-bold transition-colors">
+          className="inline-flex items-center gap-2 bg-green hover:bg-green-light text-white px-5 py-3 font-bold transition-colors">
           <Plus className="h-5 w-5" /> Novo Curso
         </Link>
       </div>
@@ -65,7 +65,7 @@ export default function TeacherCoursesPage() {
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
         <input type="text" value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Pesquisar curso..."
-          className="w-full bg-gray-900 border border-gray-800 focus:border-purple/50 py-2.5 pl-10 pr-9 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
+          className="w-full bg-gray-900 border border-gray-800 focus:border-green-500/50 py-2.5 pl-10 pr-9 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
         {search && (
           <button onClick={() => setSearch("")}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
@@ -76,14 +76,14 @@ export default function TeacherCoursesPage() {
 
       {/* Content */}
       {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>
+        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-green-400" /></div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-20 bg-gray-900/40 border border-gray-800">
           <BookOpen className="h-12 w-12 text-gray-600 mx-auto mb-4" />
           <p className="text-gray-400 mb-4">{search ? "Nenhum curso encontrado." : "Ainda não criaste nenhum curso."}</p>
           {!search && (
             <Link href="/dashboard/teacher/courses/new"
-              className="inline-flex items-center gap-2 text-purple hover:text-purple-light font-bold">
+              className="inline-flex items-center gap-2 text-green-400 hover:text-green-300 font-bold">
               <Plus className="h-4 w-4" /> Criar primeiro curso
             </Link>
           )}

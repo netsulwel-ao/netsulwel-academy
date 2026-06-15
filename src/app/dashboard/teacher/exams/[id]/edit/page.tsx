@@ -117,7 +117,7 @@ export default function EditExamPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-8 w-8 animate-spin text-purple" />
+        <Loader2 className="h-8 w-8 animate-spin text-green-400" />
       </div>
     );
   }
@@ -180,7 +180,7 @@ export default function EditExamPage() {
       <div className="space-y-4 mb-6">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-white uppercase tracking-wider">Perguntas</h2>
-          <button onClick={addQuestion} className="flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 font-bold transition-colors">
+          <button onClick={addQuestion} className="flex items-center gap-1 text-sm text-green-400 hover:text-green-300 font-bold transition-colors">
             <Plus className="h-4 w-4" /> Adicionar Pergunta
           </button>
         </div>

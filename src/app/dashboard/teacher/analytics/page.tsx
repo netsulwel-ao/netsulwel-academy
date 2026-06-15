@@ -90,14 +90,14 @@ export default function TeacherAnalyticsPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>
+        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-green-400" /></div>
       ) : (
         <>
           {/* Summary cards */}
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="bg-gray-900/40 border border-gray-800 p-5">
               <div className="flex items-center gap-2 mb-2">
-                <BookOpen className="h-5 w-5 text-purple-400" />
+                <BookOpen className="h-5 w-5 text-green-400" />
                 <span className="text-sm text-gray-400">Cursos</span>
               </div>
               <p className="text-2xl font-bold text-white">{totalCourses}</p>
@@ -145,8 +145,8 @@ export default function TeacherAnalyticsPage() {
                 return (
                   <div key={key} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
                     <span className="text-xs text-gray-500 font-bold">{val}</span>
-                    <div className="w-full bg-purple-500/20 rounded-t relative group" style={{ height: `${height}%` }}>
-                      <div className="absolute inset-0 bg-purple-500/40 group-hover:bg-purple-500/60 transition-colors rounded-t"></div>
+                    <div className="w-full bg-green-500/20 rounded-t relative group" style={{ height: `${height}%` }}>
+                      <div className="absolute inset-0 bg-green-500/40 group-hover:bg-green-500/60 transition-colors rounded-t"></div>
                     </div>
                     <span className="text-[10px] text-gray-600">{key.split("-")[1]}/{key.split("-")[0].slice(2)}</span>
                   </div>

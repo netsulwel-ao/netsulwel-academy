@@ -77,7 +77,7 @@ export default function TeacherDashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-purple" />
+        <Loader2 className="h-8 w-8 animate-spin text-green-400" />
       </div>
     );
   }
@@ -92,7 +92,7 @@ export default function TeacherDashboardPage() {
         </div>
         <Link
           href="/dashboard/teacher/courses/new"
-          className="inline-flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-3 font-bold transition-colors"
+          className="inline-flex items-center gap-2 bg-green hover:bg-green-light text-white px-5 py-3 font-bold transition-colors"
         >
           <Plus className="h-5 w-5" />
           Novo Curso
@@ -103,7 +103,7 @@ export default function TeacherDashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-gray-900/40 border border-gray-800 p-6">
           <div className="flex items-center gap-3 mb-2">
-            <BookOpen className="h-6 w-6 text-purple-400" />
+            <BookOpen className="h-6 w-6 text-green-400" />
             <p className="text-sm text-gray-400">Cursos</p>
           </div>
           <p className="text-3xl font-bold text-white">{stats.totalCourses}</p>
@@ -135,13 +135,13 @@ export default function TeacherDashboardPage() {
       <div className="bg-gray-900/40 border border-gray-800">
         <div className="p-6 border-b border-gray-800 flex items-center justify-between">
           <h2 className="text-lg font-bold text-white">Cursos Recentes</h2>
-          <Link href="/dashboard/teacher/courses" className="text-sm text-purple hover:text-purple-light">Ver todos</Link>
+          <Link href="/dashboard/teacher/courses" className="text-sm text-green-400 hover:text-green-300">Ver todos</Link>
         </div>
         {courses.length === 0 ? (
           <div className="p-12 text-center">
             <BookOpen className="h-12 w-12 text-gray-600 mx-auto mb-4" />
             <p className="text-gray-400">Ainda não criaste nenhum curso.</p>
-            <Link href="/dashboard/teacher/courses/new" className="mt-4 inline-flex items-center gap-2 text-sm text-purple hover:text-purple-light font-bold">
+            <Link href="/dashboard/teacher/courses/new" className="mt-4 inline-flex items-center gap-2 text-sm text-green-400 hover:text-green-300 font-bold">
               Criar primeiro curso
             </Link>
           </div>
@@ -175,7 +175,7 @@ export default function TeacherDashboardPage() {
       <div className="bg-gray-900/40 border border-gray-800">
         <div className="p-6 border-b border-gray-800 flex items-center justify-between">
           <h2 className="text-lg font-bold text-white">Vendas Recentes</h2>
-          <Link href="/dashboard/wallet" className="text-sm text-purple hover:text-purple-light">Ver carteira</Link>
+          <Link href="/dashboard/wallet" className="text-sm text-green-400 hover:text-green-300">Ver carteira</Link>
         </div>
         {sales.length === 0 ? (
           <div className="p-12 text-center">

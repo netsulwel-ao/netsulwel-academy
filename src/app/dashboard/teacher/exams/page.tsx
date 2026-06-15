@@ -50,7 +50,7 @@ export default function TeacherExamsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-8 w-8 animate-spin text-purple" />
+        <Loader2 className="h-8 w-8 animate-spin text-green-400" />
       </div>
     );
   }
@@ -64,7 +64,7 @@ export default function TeacherExamsPage() {
         </div>
         <Link
           href="/dashboard/teacher/exams/new"
-          className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-3 font-bold transition-colors shrink-0"
+          className="flex items-center gap-2 bg-green hover:bg-green-light text-white px-5 py-3 font-bold transition-colors shrink-0"
         >
           <Plus className="h-5 w-5" />
           Nova Avaliação
@@ -76,7 +76,7 @@ export default function TeacherExamsPage() {
           <FileText className="h-12 w-12 text-gray-600 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-white mb-2">Nenhuma avaliação criada</h2>
           <p className="text-gray-400 mb-6">Cria a tua primeira avaliação para os teus alunos.</p>
-          <Link href="/dashboard/teacher/exams/new" className="inline-flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-3 font-bold transition-colors">
+          <Link href="/dashboard/teacher/exams/new" className="inline-flex items-center gap-2 bg-green hover:bg-green-light text-white px-5 py-3 font-bold transition-colors">
             <Plus className="h-5 w-5" /> Criar Avaliação
           </Link>
         </div>

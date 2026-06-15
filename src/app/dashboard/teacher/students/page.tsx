@@ -111,7 +111,7 @@ export default function TeacherStudentsPage() {
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
         <input type="text" value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Pesquisar aluno..."
-          className="w-full bg-gray-900 border border-gray-800 focus:border-purple/50 py-2.5 pl-10 pr-9 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
+          className="w-full bg-gray-900 border border-gray-800 focus:border-green-500/50 py-2.5 pl-10 pr-9 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
         {search && (
           <button onClick={() => setSearch("")}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
@@ -121,7 +121,7 @@ export default function TeacherStudentsPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>
+        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-green-400" /></div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-20 bg-gray-900/40 border border-gray-800">
           <Users className="h-12 w-12 text-gray-600 mx-auto mb-4" />
@@ -131,8 +131,8 @@ export default function TeacherStudentsPage() {
         <div className="grid gap-3">
           {filtered.map((student) => (
             <div key={student.id} className="bg-gray-900/40 border border-gray-800 p-5 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
-                <span className="text-lg font-bold text-purple-300">{student.name[0]?.toUpperCase() || "?"}</span>
+              <div className="h-12 w-12 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
+                <span className="text-lg font-bold text-green-300">{student.name[0]?.toUpperCase() || "?"}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-white truncate">{student.name}</h3>

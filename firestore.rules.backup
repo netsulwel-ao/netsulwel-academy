@@ -126,13 +126,13 @@ service cloud.firestore {
         allow read: if isAuth();
         allow write: if isAdminOrTeacher();
       }
+    }
 
       match /handraises/{requestId} {
         allow read: if isAuth();
         allow create: if isAuth();
         allow update, delete: if isAdminOrTeacher();
       }
-    }
 
     // ── enrollments ───────────────────────────────────────
     match /enrollments/{enrollmentId} {
