@@ -47,7 +47,7 @@ export async function PUT(
     }
     
     const body = await req.json();
-    const { name, email, phone, address, logo, status } = body;
+    const { name, email, phone, address, logo, banner, description, website, status } = body;
     
     const docRef = db.collection("institutions").doc(id);
     const snapshot = await docRef.get();
@@ -65,6 +65,9 @@ export async function PUT(
     if (phone !== undefined) updateData.phone = phone;
     if (address !== undefined) updateData.address = address;
     if (logo !== undefined) updateData.logo = logo;
+    if (banner !== undefined) updateData.banner = banner;
+    if (description !== undefined) updateData.description = description;
+    if (website !== undefined) updateData.website = website;
     if (status !== undefined) updateData.status = status;
     
     await docRef.update(updateData);

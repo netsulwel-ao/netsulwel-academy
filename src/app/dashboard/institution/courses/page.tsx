@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
-import { BookOpen, Loader2, Users, Eye, ArrowRight } from "lucide-react";
+import { BookOpen, Loader2, Users, Eye, ArrowRight, Share2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import type { Course } from "@/types/course";
 
@@ -43,6 +43,22 @@ export default function InstitutionCoursesPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const handleShare = async (e: React.MouseEvent, courseId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = `${window.location.origin}/s/${courseId}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setCopiedId(courseId);
+        setTimeout(() => setCopiedId(null), 2500);
+      }
+    } catch { /* user cancelled */ }
   };
 
   if (loading) {
@@ -109,11 +125,17 @@ export default function InstitutionCoursesPage() {
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent" />
-                <span className={`absolute top-3 right-3 px-2.5 py-1 text-xs font-bold rounded-full border ${
-                  course.status === "published" ? "bg-green-500/15 text-green-400 border-green-500/30" : "bg-yellow-500/15 text-yellow-400 border-yellow-500/30"
-                }`}>
-                  {course.status === "published" ? "Publicado" : "Rascunho"}
-                </span>
+                <div className="absolute top-3 right-3 flex items-center gap-2">
+                  <button onClick={e => handleShare(e, course.id!)}
+                    className="p-1.5 bg-gray-900/80 border border-gray-700/50 hover:bg-gray-800 text-gray-400 hover:text-white transition-all" title="Copiar link de venda">
+                    {copiedId === course.id ? <CheckCircle2 className="h-3.5 w-3.5 text-green-400" /> : <Share2 className="h-3.5 w-3.5" />}
+                  </button>
+                  <span className={`px-2.5 py-1 text-xs font-bold rounded-full border ${
+                    course.status === "published" ? "bg-green-500/15 text-green-400 border-green-500/30" : "bg-yellow-500/15 text-yellow-400 border-yellow-500/30"
+                  }`}>
+                    {course.status === "published" ? "Publicado" : "Rascunho"}
+                  </span>
+                </div>
               </div>
               <div className="p-5">
                 <h3 className="font-bold text-white text-lg group-hover:text-purple-300 transition-colors line-clamp-1">{course.title}</h3>

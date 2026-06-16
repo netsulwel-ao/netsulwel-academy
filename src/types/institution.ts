@@ -10,6 +10,9 @@ export interface Institution {
   phone?: string;
   address?: string;
   logo?: string;
+  banner?: string;
+  description?: string;
+  website?: string;
   status: InstitutionStatus;
   adminId: string; // User ID of the institution admin
   createdAt?: unknown;

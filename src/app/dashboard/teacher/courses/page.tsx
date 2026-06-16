@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
-import { BookOpen, Plus, Edit, Loader2, Eye, Trash2, Search, X } from "lucide-react";
+import { BookOpen, Plus, Edit, Loader2, Eye, Trash2, Search, X, Share2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import type { Course } from "@/types/course";
 
@@ -37,6 +37,23 @@ export default function TeacherCoursesPage() {
   const filtered = search.trim()
     ? courses.filter(c => c.title.toLowerCase().includes(search.toLowerCase()))
     : courses;
+
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleShare = async (e: React.MouseEvent, courseId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = `${window.location.origin}/s/${courseId}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setCopiedId(courseId);
+        setTimeout(() => setCopiedId(null), 2500);
+      }
+    } catch { /* user cancelled */ }
+  };
 
   const formatKz = (v: number) => v.toLocaleString("pt-AO") + " Kz";
 
@@ -122,6 +139,10 @@ export default function TeacherCoursesPage() {
                     className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 transition-all" title="Editar">
                     <Edit className="h-4 w-4" />
                   </Link>
+                  <button onClick={e => handleShare(e, course.id!)}
+                    className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 transition-all" title="Copiar link de venda">
+                    {copiedId === course.id ? <CheckCircle2 className="h-4 w-4 text-green-400" /> : <Share2 className="h-4 w-4" />}
+                  </button>
                 </div>
               </div>
             </div>
