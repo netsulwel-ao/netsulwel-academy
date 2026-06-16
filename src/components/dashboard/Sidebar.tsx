@@ -7,7 +7,7 @@ import {
   PanelLeftClose, PanelLeft, Sun, Moon, ChevronRight, FileText, Layers, Award,
   Crown, GraduationCap, Building2, User,
   LayoutDashboard, UserPlus, Link2, Mail,
-  BarChart3, Megaphone, Video, DollarSign, TrendingUp
+  Video, DollarSign, TrendingUp
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
@@ -33,12 +33,7 @@ const studentNav = [
   { icon: Users, label: "Comunidade", href: "/dashboard/community" },
 ];
 
-const studentInstitutionNav = [
-  { icon: LayoutDashboard, label: "Painel", href: "/dashboard/instituicao" },
-  { icon: BookOpen, label: "Cursos", href: "/dashboard/courses" },
-  { icon: Megaphone, label: "Comunicados", href: "/dashboard/instituicao/comunicados" },
-  { icon: GraduationCap, label: "Turmas", href: "/dashboard/instituicao/turmas" },
-];
+// institution students: just a link to the public institution page
 
 const teacherNav = [
   { icon: LayoutDashboard, label: "Visão Geral", href: "/dashboard/teacher" },
@@ -55,9 +50,6 @@ const institutionNav = [
   { icon: LayoutDashboard, label: "Visão Geral", href: "/dashboard/institution" },
   { icon: Users, label: "Membros", href: "/dashboard/institution/members" },
   { icon: BookOpen, label: "Cursos", href: "/dashboard/institution/courses" },
-  { icon: GraduationCap, label: "Turmas", href: "/dashboard/institution/classes" },
-  { icon: BarChart3, label: "Relatórios", href: "/dashboard/institution/reports" },
-  { icon: Megaphone, label: "Comunicados", href: "/dashboard/institution/announcements" },
   { icon: Settings, label: "Definições", href: "/dashboard/institution/settings" },
 ];
 
@@ -230,7 +222,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
     </div>
   )}
 
-  {/* Secção para alunos vinculados a uma instituição */}
+  {/* Link simples para instituição (alunos vinculados) */}
   {!isInstitution && institutionId && (
     <div>
       {!isCollapsed && (
@@ -238,48 +230,36 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
           {institutionName && (
             <p className="px-3 mb-1 text-sm font-medium text-cyan-300 truncate">{institutionName}</p>
           )}
-          <h3 className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-cyan-400">MINHA INSTITUIÇÃO</h3>
+          <h3 className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-cyan-400">INSTITUIÇÃO</h3>
         </>
       )}
       <ul className="space-y-1">
-        {studentInstitutionNav.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-          return (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                onClick={handleNavClick}
-                title={isCollapsed ? item.label : ""}
-                className={`group flex items-center px-3 py-2.5 transition-all relative ${isActive
-                  ? theme === "light"
-                    ? "bg-cyan-600 text-white shadow-sm"
-                    : "bg-cyan-600 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)]"
-                  : theme === "light"
-                    ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                    : "text-gray-400 hover:bg-gray-900 hover:text-gray-200"
-                }`}
-              >
-                <item.icon className={`h-6 w-6 shrink-0 ${isCollapsed ? "mx-auto" : "mr-3"} ${
-                  isActive
-                    ? "text-white drop-shadow-md"
-                    : theme === "light"
-                      ? "text-slate-400 group-hover:text-slate-700"
-                      : "text-gray-500 group-hover:text-gray-300"
-                }`} />
-                {!isCollapsed && (
-                  <span className="text-base font-medium whitespace-nowrap">{item.label}</span>
-                )}
-                {isCollapsed && (
-                  <div className={`absolute left-14 hidden group-hover:block px-2 py-1 text-sm whitespace-nowrap z-50 ${
-                    theme === "light" ? "bg-slate-800 text-white" : "bg-gray-800 text-white"
-                  }`}>
-                    {item.label}
-                  </div>
-                )}
-              </Link>
-            </li>
-          );
-        })}
+        <li>
+          <Link
+            href={`/institution/${institutionId}`}
+            onClick={handleNavClick}
+            title={isCollapsed ? "Página Pública" : ""}
+            className={`group flex items-center px-3 py-2.5 transition-all relative ${
+              theme === "light"
+                ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                : "text-gray-400 hover:bg-gray-900 hover:text-gray-200"
+            }`}
+          >
+            <Building2 className={`h-6 w-6 shrink-0 ${isCollapsed ? "mx-auto" : "mr-3"} ${
+              theme === "light"
+                ? "text-slate-400 group-hover:text-slate-700"
+                : "text-gray-500 group-hover:text-gray-300"
+            }`} />
+            {!isCollapsed && (
+              <span className="text-base font-medium whitespace-nowrap">Página Pública</span>
+            )}
+            {isCollapsed && (
+              <div className="absolute left-14 hidden group-hover:block px-2 py-1 text-sm whitespace-nowrap z-50 bg-gray-800 text-white">
+                Página Pública
+              </div>
+            )}
+          </Link>
+        </li>
       </ul>
     </div>
   )}

@@ -25,12 +25,16 @@ export async function POST(
       return NextResponse.json({ error: "Sem permissão." }, { status: 403 });
     }
 
+    const body = await req.json().catch(() => ({}));
+    const role = body?.role === "teacher" ? "teacher" : "student";
+
     const token = randomBytes(24).toString("hex");
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     await db.collection("institutionInviteLinks").add({
       institutionId: id,
       token,
+      role,
       status: "active",
       createdBy: uid,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -39,7 +43,7 @@ export async function POST(
 
     const link = `https://academia.netsulwel.tech/invite?token=${token}`;
 
-    return NextResponse.json({ link, token, expiresAt });
+    return NextResponse.json({ link, token, role, expiresAt });
   } catch (error) {
     console.error("Error creating invite link:", error);
     return NextResponse.json({ error: "Failed to create invite link" }, { status: 500 });

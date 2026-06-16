@@ -231,39 +231,12 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // ── institutionInvitations ────────────────────────────
-    match /institutionInvitations/{invitationId} {
-      allow read: if isAdmin() ||
-        (isAuth() && (
-          resource.data.email == request.auth.token.email ||
-          resource.data.invitedBy == request.auth.uid
-        ));
-      allow create: if isAdmin() ||
-        (isAuth() && request.resource.data.invitedBy == request.auth.uid);
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
-    }
-
     // ── institutionInviteLinks ────────────────────────────
     match /institutionInviteLinks/{linkId} {
       allow read: if isAdmin();
       allow create: if isAdmin() || isInstitutionAdmin();
       allow update: if isAdmin();
       allow delete: if isAdmin();
-    }
-
-    // ── institutionClasses ────────────────────────────────
-    match /institutionClasses/{classId} {
-      allow read: if isAuth();
-      allow create: if isAdmin() || isInstitutionAdmin();
-      allow update, delete: if isAdmin() || isInstitutionAdmin();
-    }
-
-    // ── institutionAnnouncements ──────────────────────────
-    match /institutionAnnouncements/{announcementId} {
-      allow read: if isAuth();
-      allow create: if isAdmin() || isInstitutionAdmin();
-      allow update, delete: if isAdmin() || isInstitutionAdmin();
     }
 
     // ── freeLiveRequests ─────────────────────────────────────

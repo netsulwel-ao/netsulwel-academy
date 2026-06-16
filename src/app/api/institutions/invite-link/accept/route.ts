@@ -40,6 +40,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       token,
       institutionId: linkData.institutionId,
+      role: linkData.role || "student",
       institution: { id: instSnap.id, name: institution?.name, email: institution?.email },
     });
   } catch (error) {
@@ -95,9 +96,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Já pertences a uma instituição." }, { status: 400 });
     }
 
+    const inviteRole = linkData.role === "teacher" ? "teacher" : "student";
     await userSnap.ref.update({
       institutionId: linkData.institutionId,
-      institutionRole: "student",
+      institutionRole: inviteRole,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 

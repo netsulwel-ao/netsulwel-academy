@@ -170,7 +170,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (user && isAdminRoute && !isAdmin) {
       redirectingRef.current = true;
-      router.replace("/dashboard");
+      router.replace(role === "institution" ? "/dashboard/institution" : "/dashboard");
       setTimeout(() => { redirectingRef.current = false; }, 1000);
       return;
     }

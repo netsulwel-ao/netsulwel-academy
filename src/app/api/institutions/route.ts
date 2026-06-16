@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
     
     // Update the user to have institution admin role
     await db.collection("users").doc(adminId).update({
+      role: "institution",
       institutionId: docRef.id,
       institutionRole: "admin",
       updatedAt: admin.firestore.FieldValue.serverTimestamp()

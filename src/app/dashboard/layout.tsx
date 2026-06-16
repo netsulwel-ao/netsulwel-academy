@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import Sidebar from "@/components/dashboard/Sidebar";
 import Header from "@/components/dashboard/Header";
@@ -10,12 +10,19 @@ import CountdownBanner from "@/components/dashboard/CountdownBanner";
 import { OnboardingTour } from "@/components/dashboard/OnboardingTour";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
- const { isAdmin } = useAuth();
- const router = useRouter();
+  const { isAdmin, isInstitution } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
 
- useEffect(() => {
-   if (isAdmin) router.replace("/admin");
- }, [isAdmin, router]);
+  useEffect(() => {
+    if (isAdmin) router.replace("/admin");
+  }, [isAdmin, router]);
+
+  useEffect(() => {
+    if (isInstitution && !pathname?.startsWith("/dashboard/institution")) {
+      router.replace("/dashboard/institution");
+    }
+  }, [isInstitution, pathname, router]);
 
  const [isCollapsed, setIsCollapsed] = useState(false);
  const [mobileOpen, setMobileOpen] = useState(false);

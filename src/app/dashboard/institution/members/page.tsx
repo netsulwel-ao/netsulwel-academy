@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs, Timestamp } from "firebase/firestore";
-import { Users, Search, Loader2, Mail, UserPlus, Link2, Copy, CheckCheck, ArrowRight, Calendar } from "lucide-react";
+import { Users, Search, Loader2, Link2, Copy, CheckCheck, Calendar, GraduationCap, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 
@@ -22,8 +22,7 @@ export default function InstitutionMembersPage() {
   const [filtered, setFiltered] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviting, setInviting] = useState(false);
+  const [linkRole, setLinkRole] = useState<"student" | "teacher">("student");
   const [inviteLink, setInviteLink] = useState("");
   const [generatingLink, setGeneratingLink] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -64,36 +63,16 @@ export default function InstitutionMembersPage() {
     }
   };
 
-  const handleInviteTeacher = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inviteEmail || !institutionId) {
-      toast.error("Email é obrigatório.");
-      return;
-    }
-    setInviting(true);
-    try {
-      const res = await fetchWithAuth(`/api/institutions/${institutionId}/invite`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: inviteEmail, role: "teacher", invitedBy: user!.uid, inviterName: user!.displayName || "Administrador" }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Falha ao enviar convite");
-      }
-      toast.success("Convite enviado para o professor!");
-      setInviteEmail("");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao enviar convite.");
-    } finally {
-      setInviting(false);
-    }
-  };
-
-  const generateLink = async () => {
+  const generateLink = async (role: "student" | "teacher") => {
     if (!institutionId) return;
     setGeneratingLink(true);
+    setLinkRole(role);
     try {
-      const res = await fetchWithAuth(`/api/institutions/${institutionId}/invite-link`, { method: "POST" });
+      const res = await fetchWithAuth(`/api/institutions/${institutionId}/invite-link`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role }),
+      });
       if (!res.ok) throw new Error("Falha ao gerar link");
       const data = await res.json();
       setInviteLink(data.link);
@@ -115,10 +94,9 @@ export default function InstitutionMembersPage() {
     const map: Record<string, { color: string; label: string }> = {
       admin: { color: "bg-purple-500/10 text-purple-400 border-purple-500/20", label: "Admin" },
       teacher: { color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", label: "Professor" },
-      aluno: { color: "bg-blue-500/10 text-blue-400 border-blue-500/20", label: "Aluno" },
       student: { color: "bg-blue-500/10 text-blue-400 border-blue-500/20", label: "Aluno" },
     };
-    return map[role] || map.aluno;
+    return map[role] || map.student;
   };
 
   if (loading) {
@@ -155,50 +133,21 @@ export default function InstitutionMembersPage() {
 
       {/* Invite Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Invite Teacher by Email */}
-        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900/60 to-gray-950/60 border border-gray-800/70 p-4 sm:p-6 hover:border-emerald-500/30 transition-all duration-300 group">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="relative">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                <UserPlus className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400" />
-              </div>
-              <div>
-                <h3 className="text-base sm:text-lg font-bold text-white">Convidar Professor</h3>
-                <p className="text-xs sm:text-sm text-gray-400">Envia um convite por email</p>
-              </div>
-            </div>
-            <form onSubmit={handleInviteTeacher} className="flex flex-col sm:flex-row gap-3">
-              <div className="flex-1 relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <input type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)}
-                  placeholder="Email do professor" required
-                  className="w-full bg-gray-800/80 border border-gray-700/50 py-2.5 pl-10 pr-4 text-white placeholder-gray-500 rounded-lg focus:outline-none focus:border-emerald-500/50 focus:bg-gray-800 transition-all" />
-              </div>
-              <button type="submit" disabled={inviting}
-                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-5 rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 shrink-0 hover:shadow-lg hover:shadow-emerald-500/20">
-                {inviting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
-                Convidar
-              </button>
-            </form>
-          </div>
-        </div>
-
-        {/* Generate Invite Link for Students */}
+        {/* Invite Link for Students */}
         <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900/60 to-gray-950/60 border border-gray-800/70 p-4 sm:p-6 hover:border-blue-500/30 transition-all duration-300 group">
           <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <div className="relative">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <Link2 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" />
+                <UserPlus className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-white">Link de Convite para Alunos</h3>
-                <p className="text-xs sm:text-sm text-gray-400">Partilha o link com os alunos</p>
+                <h3 className="text-base sm:text-lg font-bold text-white">Link para Alunos</h3>
+                <p className="text-xs sm:text-sm text-gray-400">Partilha com os alunos para se registarem</p>
               </div>
             </div>
-            {!inviteLink ? (
-              <button onClick={generateLink} disabled={generatingLink}
+            {!inviteLink || linkRole !== "student" ? (
+              <button onClick={() => generateLink("student")} disabled={generatingLink}
                 className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-5 rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-blue-500/20">
                 {generatingLink ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
                 Gerar Link
@@ -213,7 +162,45 @@ export default function InstitutionMembersPage() {
                     {copied ? <CheckCheck className="h-5 w-5 text-green-400" /> : <Copy className="h-5 w-5" />}
                   </button>
                 </div>
-                <button onClick={generateLink} disabled={generatingLink}
+                <button onClick={() => generateLink("student")} disabled={generatingLink}
+                  className="text-sm text-gray-400 hover:text-gray-200 transition-colors">
+                  Gerar novo link
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Invite Link for Teachers */}
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900/60 to-gray-950/60 border border-gray-800/70 p-4 sm:p-6 hover:border-emerald-500/30 transition-all duration-300 group">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-white">Link para Professores</h3>
+                <p className="text-xs sm:text-sm text-gray-400">Partilha com professores para se associarem</p>
+              </div>
+            </div>
+            {!inviteLink || linkRole !== "teacher" ? (
+              <button onClick={() => generateLink("teacher")} disabled={generatingLink}
+                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-5 rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-emerald-500/20">
+                {generatingLink ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
+                Gerar Link
+              </button>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input type="text" value={inviteLink} readOnly
+                    className="flex-1 bg-gray-800/80 border border-gray-700/50 py-2.5 px-4 text-sm text-white rounded-lg focus:outline-none" />
+                  <button onClick={copyLink}
+                    className="w-full sm:w-auto bg-gray-700/80 hover:bg-gray-600 text-white p-2.5 rounded-lg transition-all flex items-center justify-center">
+                    {copied ? <CheckCheck className="h-5 w-5 text-green-400" /> : <Copy className="h-5 w-5" />}
+                  </button>
+                </div>
+                <button onClick={() => generateLink("teacher")} disabled={generatingLink}
                   className="text-sm text-gray-400 hover:text-gray-200 transition-colors">
                   Gerar novo link
                 </button>
