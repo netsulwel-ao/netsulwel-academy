@@ -11,6 +11,7 @@ export interface LiveSession {
   price?: number;             // only for standalone
   status: LiveStatus;
   createdBy: string;          // admin UID (consistente com courses/trails)
+  institutionId?: string;     // ID da instituição a que pertence
   hostName?: string;
   roomName: string;           // LiveKit room slug
   startedAt?: string;

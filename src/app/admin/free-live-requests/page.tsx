@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, addDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { Loader2, CheckCircle2, XCircle, MailQuestion, Trash2, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import type { LiveTarget } from "@/types/live";
@@ -41,6 +41,9 @@ export default function FreeLiveRequestsPage() {
     const req = requests.find(r => r.id === id);
     if (!req) return;
     try {
+      // Fetch teacher's institutionId
+      const teacherSnap = await getDoc(doc(db, "users", req.teacherId));
+      const teacherInstitutionId = teacherSnap.exists() ? teacherSnap.data()?.institutionId : null;
       await addDoc(collection(db, "lives"), {
         title: req.title,
         description: req.description || "",
@@ -50,6 +53,7 @@ export default function FreeLiveRequestsPage() {
         price: null,
         status: "scheduled",
         createdBy: req.teacherId,
+        institutionId: teacherInstitutionId || null,
         hostName: req.teacherName,
         roomName: generateRoomName(req.title),
         participantCount: 0,

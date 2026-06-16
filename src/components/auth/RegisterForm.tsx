@@ -28,6 +28,12 @@ interface RegisterFormProps {
   setPassword: (value: string) => void;
   setConfirmPassword: (value: string) => void;
   loading: boolean;
+  isTeacher: boolean;
+  setIsTeacher: (value: boolean) => void;
+  teacherBio: string;
+  setTeacherBio: (value: string) => void;
+  teacherSpecialty: string;
+  setTeacherSpecialty: (value: string) => void;
 }
 
 const inputClass = "w-full border border-gray-700 bg-gray-950/50 py-2.5 pl-9 pr-3 text-white placeholder-gray-600 text-sm transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50";
@@ -69,7 +75,10 @@ export default function RegisterForm({
   showPassword, showConfirmPassword,
   setShowPassword, setShowConfirmPassword,
   setPassword, setConfirmPassword,
-  loading
+  loading,
+  isTeacher, setIsTeacher,
+  teacherBio, setTeacherBio,
+  teacherSpecialty, setTeacherSpecialty,
 }: RegisterFormProps) {
   return (
     <div className="space-y-3">
@@ -77,6 +86,34 @@ export default function RegisterForm({
         <IconInput id="name" type="text" value={name} onChange={(e) => setName(e.target.value)}
           placeholder="João Silva" icon={User} disabled={loading} required />
       </Field>
+
+      <label className="flex items-center gap-3 cursor-pointer group py-2">
+        <div className="relative flex items-center">
+          <input type="checkbox" checked={isTeacher} onChange={(e) => setIsTeacher(e.target.checked)}
+            disabled={loading}
+            className="peer h-5 w-5 shrink-0 border-2 border-gray-600 bg-gray-900 text-green focus:ring-green focus:ring-offset-gray-900 disabled:opacity-50 transition-colors cursor-pointer" />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-sm font-semibold text-white group-hover:text-green transition-colors">Quero ser professor</span>
+          <span className="text-xs text-gray-500">Criar conta de professor para publicar cursos e dar aulas ao vivo</span>
+        </div>
+      </label>
+
+      {isTeacher && (
+        <div className="space-y-3 pl-8 border-l-2 border-green/30 py-2">
+          <Field label="Especialidade" id="reg-specialty">
+            <IconInput id="reg-specialty" type="text" value={teacherSpecialty}
+              onChange={(e) => setTeacherSpecialty(e.target.value)}
+              placeholder="Ex: Programação Web, Finanças" icon={Building2} disabled={loading} required />
+          </Field>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-gray-300" htmlFor="reg-bio">Biografia curta</label>
+            <textarea id="reg-bio" rows={3} disabled={loading} placeholder="Conte um pouco sobre a sua experiência..."
+              value={teacherBio} onChange={(e) => setTeacherBio(e.target.value)}
+              className="w-full border border-gray-700 bg-gray-950/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm transition-colors focus:border-green focus:outline-none focus:ring-1 focus:ring-green disabled:opacity-50 resize-none" />
+          </div>
+        </div>
+      )}
 
       <Field label="Morada" id="reg-morada">
         <IconInput id="reg-morada" type="text" value={morada} onChange={(e) => setMorada(e.target.value)}

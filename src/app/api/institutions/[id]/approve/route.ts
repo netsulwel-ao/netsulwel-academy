@@ -39,6 +39,8 @@ export async function POST(
     const institutionData = snapshot.data();
     if (institutionData?.adminId) {
       await db.collection("users").doc(institutionData.adminId).update({
+        institutionId: id,
+        institutionRole: "admin",
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       });
       await db.collection("notifications").add({

@@ -63,6 +63,9 @@ export default function LoginPage() {
   const [providerLoading, setProviderLoading] = useState<string | null>(null);
   const [slideIndex, setSlideIndex] = useState(0);
   const [redirectTo, setRedirectTo] = useState("/dashboard");
+  const [isTeacher, setIsTeacher] = useState(false);
+  const [teacherBio, setTeacherBio] = useState("");
+  const [teacherSpecialty, setTeacherSpecialty] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -108,6 +111,9 @@ export default function LoginPage() {
   setTelefone("");
   setPais("");
   setProvincia("");
+  setIsTeacher(false);
+  setTeacherBio("");
+  setTeacherSpecialty("");
   };
 
  const handleAuthSubmit = async (e: React.FormEvent) => {
@@ -141,29 +147,33 @@ export default function LoginPage() {
   if (!pais.trim()) { setError("O país é obrigatório."); setLoading(false); return; }
   if (!provincia.trim()) { setError("A província é obrigatória."); setLoading(false); return; }
 
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  if (name) {
-  // Atualiza o perfil na Firebase Auth
-  await updateProfile(userCredential.user, { displayName: name });
-  }
+   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+   if (name) {
+   await updateProfile(userCredential.user, { displayName: name });
+   }
 
-  // Regista o utilizador na coleção users como "aluno" por defeito
-  await setDoc(doc(db, "users", userCredential.user.uid), {
-  email: email,
-  name: name,
-  role: "aluno",
-  createdAt: new Date(),
-  morada,
-  provincia,
-  idade: Number(idade),
-  genero,
-  nacionalidade,
-  telefone,
-  pais,
-  });
+   const role = isTeacher ? "teacher" : "aluno";
+   await setDoc(doc(db, "users", userCredential.user.uid), {
+   email,
+   name,
+   role,
+   createdAt: new Date(),
+   morada,
+   provincia,
+   idade: Number(idade),
+   genero,
+   nacionalidade,
+   telefone,
+   pais,
+   ...(isTeacher && {
+     bio: teacherBio,
+     specialty: teacherSpecialty,
+     status: "pending",
+   }),
+   });
 
-  await sendEmailVerification(userCredential.user);
-  router.push("/verify-email");
+	  await sendEmailVerification(userCredential.user);
+	  router.push(`/verify-email${redirectTo !== "/dashboard" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`);
       } else if (view === "register-institution") {
 	  if (!name.trim()) { setError("O nome da instituição é obrigatório."); setLoading(false); return; }
 
@@ -264,24 +274,26 @@ export default function LoginPage() {
   const userDocRef = doc(db, "users", userCredential.user.uid);
   const userDoc = await getDoc(userDocRef);
   
-  if (!userDoc.exists()) {
-  const isInstRegister = view === "register-institution";
-  await setDoc(userDocRef, {
-  email: userCredential.user.email,
-  name: name || userCredential.user.displayName,
-  role: isInstRegister ? "institution" : "aluno",
-  createdAt: new Date(),
-  ...(view === "register" && {
-    morada,
-    provincia,
-    idade: Number(idade),
-    genero,
-    nacionalidade,
-    telefone,
-    pais,
-  }),
-  });
-  router.push(isInstRegister ? "/register/institution" : redirectTo);
+   if (!userDoc.exists()) {
+   const isInstRegister = view === "register-institution";
+   const isTeacherRegister = view === "register" && isTeacher;
+   await setDoc(userDocRef, {
+   email: userCredential.user.email,
+   name: name || userCredential.user.displayName,
+   role: isInstRegister ? "institution" : isTeacherRegister ? "teacher" : "aluno",
+   createdAt: new Date(),
+   ...(view === "register" && {
+     morada,
+     provincia,
+     idade: Number(idade),
+     genero,
+     nacionalidade,
+     telefone,
+     pais,
+     ...(isTeacher && { bio: teacherBio, specialty: teacherSpecialty, status: "pending" }),
+   }),
+   });
+   router.push(isInstRegister ? "/register/institution" : redirectTo);
   } else {
   const role = userDoc.data().role;
   if (role === "admin" || role === "teacher") {
@@ -428,35 +440,41 @@ export default function LoginPage() {
 
  <form className="space-y-5 relative z-10" onSubmit={handleAuthSubmit}>
  
-  {view === "register" && (
-  <RegisterForm
-  name={name}
-  setName={setName}
-  morada={morada}
-  setMorada={setMorada}
-  provincia={provincia}
-  setProvincia={setProvincia}
-  idade={idade}
-  setIdade={setIdade}
-  genero={genero}
-  setGenero={setGenero}
-  nacionalidade={nacionalidade}
-  setNacionalidade={setNacionalidade}
-  telefone={telefone}
-  setTelefone={setTelefone}
-  pais={pais}
-  setPais={setPais}
-  password={password}
-  confirmPassword={confirmPassword}
-  showPassword={showPassword}
-  showConfirmPassword={showConfirmPassword}
-  setShowPassword={setShowPassword}
-  setShowConfirmPassword={setShowConfirmPassword}
-  setPassword={setPassword}
-  setConfirmPassword={setConfirmPassword}
-  loading={loading}
-  />
-  )}
+   {view === "register" && (
+   <RegisterForm
+   name={name}
+   setName={setName}
+   morada={morada}
+   setMorada={setMorada}
+   provincia={provincia}
+   setProvincia={setProvincia}
+   idade={idade}
+   setIdade={setIdade}
+   genero={genero}
+   setGenero={setGenero}
+   nacionalidade={nacionalidade}
+   setNacionalidade={setNacionalidade}
+   telefone={telefone}
+   setTelefone={setTelefone}
+   pais={pais}
+   setPais={setPais}
+   password={password}
+   confirmPassword={confirmPassword}
+   showPassword={showPassword}
+   showConfirmPassword={showConfirmPassword}
+   setShowPassword={setShowPassword}
+   setShowConfirmPassword={setShowConfirmPassword}
+   setPassword={setPassword}
+   setConfirmPassword={setConfirmPassword}
+   loading={loading}
+   isTeacher={isTeacher}
+   setIsTeacher={setIsTeacher}
+   teacherBio={teacherBio}
+   setTeacherBio={setTeacherBio}
+   teacherSpecialty={teacherSpecialty}
+   setTeacherSpecialty={setTeacherSpecialty}
+   />
+   )}
 
  {view === "register-institution" && (
  <InstitutionForm

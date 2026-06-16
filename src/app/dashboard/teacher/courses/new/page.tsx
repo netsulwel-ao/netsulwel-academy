@@ -12,7 +12,7 @@ import type { Course } from "@/types/course";
 
 export default function TeacherNewCoursePage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, institutionId } = useAuth();
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -22,6 +22,7 @@ export default function TeacherNewCoursePage() {
       const docRef = await addDoc(collection(db, "courses"), {
         ...data,
         createdBy: user?.uid ?? null,
+        institutionId: institutionId || null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });

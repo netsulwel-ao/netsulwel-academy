@@ -51,6 +51,9 @@ export default function RegisterPage() {
   const [providerLoading, setProviderLoading] = useState<string | null>(null);
   const router = useRouter();
   const [redirectTo, setRedirectTo] = useState("/dashboard");
+  const [isTeacher, setIsTeacher] = useState(false);
+  const [teacherBio, setTeacherBio] = useState("");
+  const [teacherSpecialty, setTeacherSpecialty] = useState("");
 
   useEffect(() => {
     const saved = localStorage.getItem("public-theme") as "dark" | "light" | null;
@@ -97,7 +100,7 @@ export default function RegisterPage() {
       await setDoc(doc(db, "users", userCredential.user.uid), {
         email,
         name,
-        role: "aluno",
+        role: isTeacher ? "teacher" : "aluno",
         createdAt: new Date(),
         morada,
         idade: Number(idade),
@@ -105,9 +108,14 @@ export default function RegisterPage() {
         nacionalidade,
         telefone,
         pais,
+        ...(isTeacher && {
+          bio: teacherBio,
+          specialty: teacherSpecialty,
+          status: "pending",
+        }),
       });
       await sendEmailVerification(userCredential.user);
-      router.push("/verify-email");
+      router.push(`/verify-email${redirectTo !== "/dashboard" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`);
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code || "";
       const messages: Record<string, string> = {
@@ -149,7 +157,7 @@ export default function RegisterPage() {
         await setDoc(userDocRef, {
           email: userCredential.user.email || email,
           name: name || userCredential.user.displayName,
-          role: "aluno",
+          role: isTeacher ? "teacher" : "aluno",
           createdAt: new Date(),
           morada,
           idade: Number(idade),
@@ -157,6 +165,11 @@ export default function RegisterPage() {
           nacionalidade,
           telefone,
           pais,
+          ...(isTeacher && {
+            bio: teacherBio,
+            specialty: teacherSpecialty,
+            status: "pending",
+          }),
         });
       }
       router.push(redirectTo);
@@ -257,6 +270,38 @@ export default function RegisterPage() {
                       className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
                   </div>
                 </div>
+
+                <label className="flex items-center gap-3 cursor-pointer group py-2">
+                  <div className="relative flex items-center">
+                    <input type="checkbox" checked={isTeacher} onChange={(e) => setIsTeacher(e.target.checked)}
+                      disabled={loading}
+                      className="peer h-5 w-5 shrink-0 border-2 border-gray-600 bg-gray-900 text-green focus:ring-green focus:ring-offset-gray-900 disabled:opacity-50 transition-colors cursor-pointer" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-white group-hover:text-green transition-colors">Quero ser professor</span>
+                    <span className="text-xs text-gray-500">Criar conta de professor para publicar cursos e dar aulas ao vivo</span>
+                  </div>
+                </label>
+
+                {isTeacher && (
+                  <div className="space-y-3 pl-8 border-l-2 border-green/30 py-2">
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-gray-300" htmlFor="reg-specialty">Especialidade</label>
+                      <div className="relative">
+                        <input id="reg-specialty" type="text" required disabled={loading}
+                          placeholder="Ex: Programação Web, Finanças"
+                          value={teacherSpecialty} onChange={(e) => setTeacherSpecialty(e.target.value)}
+                          className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-3 pr-3 text-white placeholder-gray-600 transition-colors focus:border-green focus:outline-none focus:ring-1 focus:ring-green disabled:opacity-50" />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-gray-300" htmlFor="reg-bio">Biografia curta</label>
+                      <textarea id="reg-bio" rows={3} disabled={loading} placeholder="Conte um pouco sobre a sua experiência..."
+                        value={teacherBio} onChange={(e) => setTeacherBio(e.target.value)}
+                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 px-3 text-white placeholder-gray-600 transition-colors focus:border-green focus:outline-none focus:ring-1 focus:ring-green disabled:opacity-50 resize-none" />
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-gray-300" htmlFor="email">Seu Email</label>

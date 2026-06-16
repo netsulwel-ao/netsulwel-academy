@@ -17,6 +17,14 @@ function InviteContent() {
   const [accepted, setAccepted] = useState(false);
   const [error, setError] = useState("");
 
+  // Auto-accept when user is logged in and institution data is loaded
+  useEffect(() => {
+    if (loading) return;
+    if (!user || !institutionId || !token) return;
+    if (accepted || accepting) return;
+    handleAccept();
+  }, [user, loading, institutionId, token]);
+
   useEffect(() => {
     if (!token) { setError("Link inválido."); return; }
     fetch(`/api/institutions/invite-link/accept?token=${token}`)

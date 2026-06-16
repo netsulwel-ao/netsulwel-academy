@@ -24,7 +24,7 @@ import type { LiveTarget } from "@/types/live";
 
 export default function NewLivePage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, institutionId } = useAuth();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -111,6 +111,7 @@ export default function NewLivePage() {
         price: target === "standalone" && price ? Number(price) : null,
         status: "scheduled",
         createdBy: user.uid,
+        institutionId: institutionId || null,
         hostName: user.displayName || user.email || "Professor",
         roomName,
         participantCount: 0,
