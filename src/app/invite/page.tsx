@@ -41,9 +41,10 @@ function InviteContent() {
     if (!user || !token) return;
     setAccepting(true);
     try {
+      const idToken = await user.getIdToken();
       const res = await fetch("/api/institutions/invite-link/accept", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
         body: JSON.stringify({ token, userId: user.uid }),
       });
       const data = await res.json();
