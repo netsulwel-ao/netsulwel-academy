@@ -112,7 +112,11 @@ export function listenMessages(chatId: string, callback: (messages: ChatMessage[
   });
 }
 
-/** Escuta chats do utilizador em tempo real (para listagem) */
+/**
+ * Escuta chats do utilizador em tempo real (para listagem).
+ * Requer índice composto em courseChats: participants ARRAY, lastMessageAt DESC.
+ * Criar em: https://console.firebase.google.com/ → Firestore → Índices → Adicionar
+ */
 export function listenUserChats(uid: string, callback: (chats: CourseChat[]) => void) {
   const q = query(
     collection(db, "courseChats"),

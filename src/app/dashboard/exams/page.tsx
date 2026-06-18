@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { FileText, CheckCircle2, XCircle, Loader2, Clock, ArrowRight } from "lucide-react";
 import type { Exam, ExamResult } from "@/types/exam";
@@ -18,8 +18,16 @@ export default function StudentExamsPage() {
     if (!user) return;
     const load = async () => {
       try {
-        const snap = await getDocs(query(collection(db, "exams")));
-        const allExams = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Exam & { id: string }));
+        // Only show exams for courses the student is enrolled in
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        const enrolledCourses: string[] = userSnap.data()?.enrolledCourses || [];
+        const enrolledIds = enrolledCourses.slice(0, 10);
+
+        let allExams: (Exam & { id: string })[] = [];
+        if (enrolledIds.length > 0) {
+          const snap = await getDocs(query(collection(db, "exams"), where("courseId", "in", enrolledIds)));
+          allExams = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Exam & { id: string }));
+        }
         setExams(allExams);
 
         const resSnap = await getDocs(collection(db, "exam-results", user.uid, "exams"));

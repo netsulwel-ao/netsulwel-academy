@@ -106,7 +106,7 @@ service cloud.firestore {
 
     // ── lives ─────────────────────────────────────────────
     match /lives/{liveId} {
-      allow read: if isAuth() || isAdminOrTeacher();
+      allow read: if resource.data.status == "published" || isAdminOrTeacher();
       allow create: if isAdminOrTeacher();
       allow update: if isAdmin() ||
         (isTeacher() && resource.data.createdBy == request.auth.uid);
@@ -276,6 +276,51 @@ service cloud.firestore {
       }
       allow read: if isAdmin();
       allow write: if isAdmin();
+    }
+
+    // ── moduleQuizzes ──────────────────────────────────────
+    match /moduleQuizzes/{quizId} {
+      allow read: if isAdminOrTeacher() ||
+        (isAuth() && resource.data.courseId in
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.enrolledCourses);
+      allow create: if isAdminOrTeacher() &&
+        request.resource.data.createdBy == request.auth.uid;
+      allow update: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
+      allow delete: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
+    }
+
+    // ── moduleQuizResults ──────────────────────────────────
+    match /moduleQuizResults/{userId} {
+      match /quizzes/{resultId} {
+        allow read: if isAdminOrTeacher() || isOwner(userId);
+        allow create: if isOwner(userId) &&
+          request.resource.data.userId == request.auth.uid;
+        allow update: if isAdmin();
+        allow delete: if isAdmin();
+      }
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ── courseChats ────────────────────────────────────────
+    match /courseChats/{chatId} {
+      allow read: if isAuth() && request.auth.uid in resource.data.participants;
+      allow create: if isAuth() && request.auth.uid in request.resource.data.participants;
+      allow update: if isAuth() && request.auth.uid in resource.data.participants &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(["lastMessage", "lastMessageAt", "lastMessageBy", "lastMessageByName"]);
+      allow delete: if isAdmin();
+
+      match /messages/{msgId} {
+        allow read: if isAuth() && request.auth.uid in
+          get(/databases/$(database)/documents/courseChats/$(chatId)).data.participants;
+        allow create: if isAuth() &&
+          request.resource.data.uid == request.auth.uid;
+        allow update: if isAdmin();
+        allow delete: if isAdmin();
+      }
     }
 
     // Bloqueia tudo o resto

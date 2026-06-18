@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { auth, db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
-import { collection, getDocs, doc, updateDoc, query, orderBy, serverTimestamp, where } from "firebase/firestore";
+import { collection, getDocs, getDoc, doc, updateDoc, query, orderBy, serverTimestamp, where } from "firebase/firestore";
 import { Calendar, Loader2, ChevronDown, ChevronRight, Plus, Trash2, ImagePlus, Save, AlertCircle, CheckCircle2, X, Layers, Radio, Crown, Zap, Coins } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import type { Trail, TrailLiveSession } from "@/types/course";
@@ -128,16 +128,19 @@ export default function SchedulesPage() {
     setError("");
     try {
       const liveSessions = editing[trailId] || [];
-      const trail = trails.find((t) => t.id === trailId);
+      // Fetch fresh trail data to get current liveIds (avoid stale state)
+      const freshSnap = await getDoc(doc(db, "trails", trailId));
+      const freshData = freshSnap.data() as Trail | undefined;
+      const freshLiveIds = freshData?.liveIds?.length || 0;
       await updateDoc(doc(db, "trails", trailId), {
         liveSessions,
-        livesCount: (trail?.liveIds?.length || 0) + liveSessions.length,
+        livesCount: freshLiveIds + liveSessions.length,
         updatedAt: serverTimestamp(),
       });
       setTrails((prev) =>
-        prev.map((t) => (t.id === trailId ? { ...t, liveSessions, livesCount: (t.liveIds?.length || 0) + liveSessions.length } : t))
+        prev.map((t) => (t.id === trailId ? { ...t, liveSessions, livesCount: freshLiveIds + liveSessions.length } : t))
       );
-      setSuccess(`Cronograma "${trail?.title}" guardado.`);
+      setSuccess(`Cronograma "${freshData?.title}" guardado.`);
       setTimeout(() => setSuccess(""), 3000);
     } catch {
       setError("Erro ao guardar cronograma.");

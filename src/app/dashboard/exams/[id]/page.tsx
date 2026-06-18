@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, addDoc, collection, query, where, getDocs, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { ArrowLeft, Loader2, AlertCircle, Clock } from "lucide-react";
 import type { Exam, ExamResult } from "@/types/exam";
@@ -19,6 +19,7 @@ export default function TakeExamPage() {
   const [submitting, setSubmitting] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [error, setError] = useState("");
+  const autoSubmitted = useRef(false);
 
   // Load exam
   useEffect(() => {
@@ -31,14 +32,14 @@ export default function TakeExamPage() {
         setExam(data);
         if (data.timeLimit) setTimeLeft(data.timeLimit * 60);
 
-        // Check existing attempts
-        const resSnap = await getDoc(doc(db, "exam-results", user.uid, "exams", id));
-        if (resSnap.exists()) {
-          const attempts = 1; // simplified — only 1 attempt tracked for now
-          if (attempts >= data.maxAttempts) {
-            router.push(`/dashboard/exams/${id}/result`);
-            return;
-          }
+        // Check existing attempts — count actual result docs for this exam
+        const resSnap = await getDocs(
+          query(collection(db, "exam-results", user.uid, "exams"), where("examId", "==", id))
+        );
+        const attempts = resSnap.size;
+        if (attempts >= data.maxAttempts) {
+          router.push(`/dashboard/exams/${id}/result`);
+          return;
         }
       } catch { router.push("/dashboard/exams"); } finally {
         setLoading(false);
@@ -47,19 +48,25 @@ export default function TakeExamPage() {
     load();
   }, [id, user, router]);
 
-  // Timer
+  // Timer countdown
   useEffect(() => {
     if (timeLeft === null || timeLeft <= 0) return;
     const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev === null || prev <= 1) {
-          handleSubmit();
-          return 0;
-        }
-        return prev - 1;
-      });
+      setTimeLeft((prev) => (prev !== null ? prev - 1 : null));
     }, 1000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft]);
+
+  // Auto-submit when timer reaches 0 (exactly once)
+  useEffect(() => {
+    if (timeLeft !== 0) {
+      autoSubmitted.current = false;
+      return;
+    }
+    if (autoSubmitted.current) return;
+    autoSubmitted.current = true;
+    handleSubmit();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft]);
 

@@ -156,7 +156,22 @@ export default function SalesPage() {
         } else if (sale.type === "live" && sale.itemId) {
           await updateDoc(userRef, { enrolledLives: arrayRemove(sale.itemId) });
         } else if (sale.type === "smart" || sale.type === "golden") {
-          await updateDoc(userRef, { plan: "free" });
+          // Find the highest remaining plan from other active sales
+          const otherSales = await getDocs(
+            query(
+              collection(db, "sales"),
+              where("userId", "==", sale.userId),
+              where("status", "==", "confirmed")
+            )
+          );
+          let highestPlan: "free" | "smart" | "golden" = "free";
+          otherSales.docs.forEach((d) => {
+            if (d.id === id) return;
+            const t = d.data().type;
+            if (t === "golden") highestPlan = "golden";
+            else if (t === "smart" && highestPlan !== "golden") highestPlan = "smart";
+          });
+          await updateDoc(userRef, { plan: highestPlan });
         }
       }
 
