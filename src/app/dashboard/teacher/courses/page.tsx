@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
-import { BookOpen, Plus, Edit, Loader2, Eye, Trash2, Search, X, Share2, CheckCircle2 } from "lucide-react";
+import { BookOpen, Plus, Edit, Loader2, Eye, Trash2, Search, X, Share2, CheckCircle2, FileQuestion } from "lucide-react";
 import Link from "next/link";
 import type { Course } from "@/types/course";
 
@@ -138,6 +138,10 @@ export default function TeacherCoursesPage() {
                   <Link href={`/dashboard/teacher/courses/${course.id}/edit`}
                     className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 transition-all" title="Editar">
                     <Edit className="h-4 w-4" />
+                  </Link>
+                  <Link href={`/dashboard/teacher/courses/${course.id}/quizzes`}
+                    className="p-2 text-gray-500 hover:text-purple-400 hover:bg-gray-800 transition-all" title="Quizzes">
+                    <FileQuestion className="h-4 w-4" />
                   </Link>
                   <button onClick={e => handleShare(e, course.id!)}
                     className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 transition-all" title="Copiar link de venda">

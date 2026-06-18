@@ -7,7 +7,7 @@ import {
   PanelLeftClose, PanelLeft, Sun, Moon, ChevronRight, FileText, Layers, Award,
   Crown, GraduationCap, Building2, User,
   LayoutDashboard, UserPlus, Link2, Mail,
-  Video, DollarSign, TrendingUp
+  Video, DollarSign, TrendingUp, MessageCircle
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
@@ -30,6 +30,7 @@ const studentNav = [
   { icon: FileText, label: "Avaliações", href: "/dashboard/exams" },
   { icon: Award, label: "Certificados", href: "/dashboard/certificates" },
   { icon: GraduationCap, label: "Professores", href: "/dashboard/professores" },
+  { icon: MessageCircle, label: "Chats", href: "/dashboard/chats" },
   { icon: Users, label: "Comunidade", href: "/dashboard/community" },
 ];
 
@@ -41,6 +42,7 @@ const teacherNav = [
   { icon: FileText, label: "Avaliações", href: "/dashboard/teacher/exams" },
   { icon: Video, label: "Aulas ao Vivo", href: "/dashboard/teacher/lives" },
   { icon: Users, label: "Alunos", href: "/dashboard/teacher/students" },
+  { icon: MessageCircle, label: "Chats", href: "/dashboard/chats" },
   { icon: TrendingUp, label: "Analytics", href: "/dashboard/teacher/analytics" },
   { icon: DollarSign, label: "Carteira", href: "/dashboard/wallet" },
   { icon: Settings, label: "Definições", href: "/dashboard/settings" },
