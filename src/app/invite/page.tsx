@@ -13,6 +13,7 @@ function InviteContent() {
   const { user, loading } = useAuth();
   const [institution, setInstitution] = useState<any>(null);
   const [institutionId, setInstitutionId] = useState("");
+  const [inviteRole, setInviteRole] = useState<"student" | "teacher">("student");
   const [accepting, setAccepting] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const [error, setError] = useState("");
@@ -33,6 +34,7 @@ function InviteContent() {
         if (data.error) { setError(data.error); return; }
         setInstitution(data.institution);
         setInstitutionId(data.institutionId);
+        if (data.role === "teacher") setInviteRole("teacher");
       })
       .catch(() => setError("Erro ao validar link."));
   }, [token]);
@@ -125,7 +127,7 @@ function InviteContent() {
               className="flex items-center justify-center gap-2 w-full bg-purple hover:bg-purple-light text-white font-bold py-3 transition-colors">
               <LogIn className="h-5 w-5" />Fazer Login
             </Link>
-            <Link href={`/register?redirect=/invite?token=${token}`}
+            <Link href={`${inviteRole === "teacher" ? "/register/teacher" : "/register"}?redirect=/invite?token=${token}`}
               className="flex items-center justify-center gap-2 w-full bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 transition-colors border border-gray-700">
               <UserPlus className="h-5 w-5" />Criar Conta
             </Link>

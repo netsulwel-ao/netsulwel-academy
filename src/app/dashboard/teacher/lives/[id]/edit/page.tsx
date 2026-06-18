@@ -10,7 +10,9 @@ import {
   Image as ImageIcon, Loader2, Save, AlertCircle, DollarSign,
 } from "lucide-react";
 import Link from "next/link";
+import MaterialEditor from "@/components/shared/MaterialEditor";
 import type { LiveTarget, LiveSession } from "@/types/live";
+import type { CourseMaterial } from "@/types/course";
 
 export default function TeacherEditLivePage() {
   const router = useRouter();
@@ -29,6 +31,7 @@ export default function TeacherEditLivePage() {
   const [price, setPrice] = useState("");
   const [thumbnail, setThumbnail] = useState("");
   const [uploadingThumb, setUploadingThumb] = useState(false);
+  const [materials, setMaterials] = useState<CourseMaterial[]>([]);
   const [original, setOriginal] = useState<LiveSession | null>(null);
 
   useEffect(() => {
@@ -50,6 +53,7 @@ export default function TeacherEditLivePage() {
         setTarget(data.target || "smart");
         setPrice(data.price ? String(data.price) : "");
         setThumbnail(data.thumbnail || "");
+        setMaterials(data.materials || []);
       } catch (err) {
         console.error(err);
         setError("Erro ao carregar live.");
@@ -100,6 +104,7 @@ export default function TeacherEditLivePage() {
         scheduledAt,
         target,
         price: target === "standalone" && price ? Number(price) : null,
+        materials,
         updatedAt: serverTimestamp(),
       });
       router.push("/dashboard/teacher/lives");
@@ -186,6 +191,11 @@ export default function TeacherEditLivePage() {
               <input type="file" accept="image/*" onChange={handleThumbnailUpload} className="hidden" disabled={uploadingThumb} />
             </label>
           )}
+        </div>
+
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-300"><ImageIcon className="h-4 w-4 text-gray-500" /> Materiais de Apoio</label>
+          <MaterialEditor materials={materials} onChange={setMaterials} />
         </div>
 
         <div className="flex items-center gap-4 pt-4 border-t border-gray-800">

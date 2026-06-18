@@ -21,6 +21,7 @@ import {
   Mic, MicOff,
 } from "lucide-react";
 import { VideoPlayer } from "@/components/VideoPlayer";
+import MaterialsList from "@/components/shared/MaterialsList";
 import type { LiveSession, ChatMessage } from "@/types/live";
 import { playEntrySound } from "@/lib/entry-sound";
 
@@ -234,6 +235,12 @@ function ViewerInterior({ live }: { live: LiveSession }) {
                 </div>
               </div>
             </div>
+
+            {live.materials && live.materials.length > 0 && (
+              <div className="border-t border-gray-800 px-4 py-3">
+                <MaterialsList materials={live.materials} />
+              </div>
+            )}
           </div>
         </div>
 

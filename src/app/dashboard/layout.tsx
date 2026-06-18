@@ -10,9 +10,11 @@ import CountdownBanner from "@/components/dashboard/CountdownBanner";
 import { OnboardingTour } from "@/components/dashboard/OnboardingTour";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { isAdmin, isInstitution } = useAuth();
+  const { user, isAdmin, isInstitution } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+
+  if (!user) return null;
 
   useEffect(() => {
     if (isAdmin) router.replace("/admin");
@@ -46,24 +48,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
    });
  };
 
- return (
- <div className="flex min-h-screen bg-background">
- <Sidebar
-   isCollapsed={isCollapsed}
-   setIsCollapsed={setIsCollapsed}
-   mobileOpen={mobileOpen}
-   setMobileOpen={setMobileOpen}
-   theme={theme}
-   onToggleTheme={toggleTheme}
- />
+  return (
+  <div className="flex h-screen overflow-hidden bg-background">
+  <Sidebar
+    isCollapsed={isCollapsed}
+    setIsCollapsed={setIsCollapsed}
+    mobileOpen={mobileOpen}
+    setMobileOpen={setMobileOpen}
+    theme={theme}
+    onToggleTheme={toggleTheme}
+  />
 
- <div className={`flex-1 flex flex-col transition-all duration-300 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'}`}>
-  <CountdownBanner />
-  <Header onMenuClick={() => setMobileOpen(true)} theme={theme} />
+  <div className={`flex flex-1 flex-col transition-all duration-300 h-full overflow-hidden ${isCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'}`}>
+   <div className="shrink-0"><CountdownBanner /></div>
+   <Header onMenuClick={() => setMobileOpen(true)} theme={theme} />
     <main className="flex-1 overflow-y-auto p-3 sm:p-5 md:p-6 lg:p-8 bg-background">
    {children}
-   </main>
- </div>
+    </main>
+  </div>
 
   <AnnouncementPopup />
   <OnboardingTour />

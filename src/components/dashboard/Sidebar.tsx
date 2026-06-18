@@ -55,7 +55,7 @@ const institutionNav = [
 
 export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen, theme, onToggleTheme }: SidebarProps) {
    const pathname = usePathname();
-   const { role, isAdmin, isTeacher, isInstitution, institutionId, logout } = useAuth();
+   const { user, role, isAdmin, isTeacher, isInstitution, institutionId, logout } = useAuth();
    const [institutionName, setInstitutionName] = useState("");
 
    useEffect(() => {
@@ -74,15 +74,17 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
     await logout();
    };
 
-  return (
-  <>
-  {/* Mobile overlay */}
+  if (!user) return null;
+
+   return (
+   <>
+   {/* Mobile overlay */}
   {mobileOpen && (
   <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)} />
   )}
 
   <aside
-  className={`fixed left-0 top-0 h-screen backdrop-blur-2xl transition-all duration-300 flex flex-col ${
+  className={`fixed left-0 top-0 h-screen overflow-hidden backdrop-blur-2xl transition-all duration-300 flex flex-col ${
     isCollapsed ? "w-20" : "w-[280px]"
   } ${mobileOpen ? "translate-x-0 z-50" : "-translate-x-full invisible pointer-events-none"} lg:translate-x-0 lg:z-40 lg:visible lg:pointer-events-auto ${
     theme === "light"
@@ -173,8 +175,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
     </div>
   )}
 
-  {/* Secção de Navegação (apenas para alunos) */}
-  {!isInstitution && !isTeacher && (
+   {/* Secção de Navegação (apenas para alunos) */}
+   {!isAdmin && !isInstitution && !isTeacher && (
     <div>
       {!isCollapsed && (
         <h3 className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-gray-500">NAVEGAÇÃO</h3>
@@ -222,47 +224,6 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
     </div>
   )}
 
-  {/* Link simples para instituição (alunos vinculados) */}
-  {!isInstitution && institutionId && (
-    <div>
-      {!isCollapsed && (
-        <>
-          {institutionName && (
-            <p className="px-3 mb-1 text-sm font-medium text-cyan-300 truncate">{institutionName}</p>
-          )}
-          <h3 className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-cyan-400">INSTITUIÇÃO</h3>
-        </>
-      )}
-      <ul className="space-y-1">
-        <li>
-          <Link
-            href={`/institution/${institutionId}`}
-            onClick={handleNavClick}
-            title={isCollapsed ? "Página Pública" : ""}
-            className={`group flex items-center px-3 py-2.5 transition-all relative ${
-              theme === "light"
-                ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                : "text-gray-400 hover:bg-gray-900 hover:text-gray-200"
-            }`}
-          >
-            <Building2 className={`h-6 w-6 shrink-0 ${isCollapsed ? "mx-auto" : "mr-3"} ${
-              theme === "light"
-                ? "text-slate-400 group-hover:text-slate-700"
-                : "text-gray-500 group-hover:text-gray-300"
-            }`} />
-            {!isCollapsed && (
-              <span className="text-base font-medium whitespace-nowrap">Página Pública</span>
-            )}
-            {isCollapsed && (
-              <div className="absolute left-14 hidden group-hover:block px-2 py-1 text-sm whitespace-nowrap z-50 bg-gray-800 text-white">
-                Página Pública
-              </div>
-            )}
-          </Link>
-        </li>
-      </ul>
-    </div>
-  )}
  </div>
 
   {/* Secção para Professores */}

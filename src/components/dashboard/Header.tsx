@@ -186,7 +186,7 @@ export default function Header({ onMenuClick, theme = "dark" }: HeaderProps) {
   };
 
   return (
-    <header className={`sticky top-0 z-30 flex h-16 items-center justify-between px-4 sm:px-8 backdrop-blur-xl ${
+    <header className={`sticky top-0 z-30 shrink-0 flex h-16 items-center justify-between px-4 sm:px-8 backdrop-blur-xl ${
       theme === "light"
         ? "bg-white/95 border-b border-slate-200 shadow-sm"
         : "bg-gray-950/80"

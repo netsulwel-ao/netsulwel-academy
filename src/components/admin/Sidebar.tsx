@@ -63,7 +63,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
    const pathname = usePathname();
    const searchRef = useRef<HTMLInputElement>(null);
    const [searchQuery, setSearchQuery] = useState("");
-   const { isAdmin, isTeacher, logout } = useAuth();
+   const { user, isAdmin, isTeacher, logout } = useAuth();
 
    useEffect(() => {
      const handleKeyDown = (e: KeyboardEvent) => {
@@ -110,9 +110,11 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
     await logout();
     };
 
-  return (
-  <>
-  {/* Mobile overlay */}
+  if (!user) return null;
+
+   return (
+   <>
+   {/* Mobile overlay */}
   {mobileOpen && (
   <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)} />
   )}

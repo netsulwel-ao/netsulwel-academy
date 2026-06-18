@@ -9,7 +9,9 @@ import {
   Link as LinkIcon, Sparkles, Award, Tag, Radio,
 } from "lucide-react";
 import Link from "next/link";
-import type { Course, CourseModule, VideoItem, CourseType, CourseLevel, CourseCategory, CourseFormat, Trail } from "@/types/course";
+import type { Course, CourseModule, VideoItem, CourseType, CourseLevel, CourseCategory, CourseFormat, Trail, CourseMaterial } from "@/types/course";
+import MaterialEditor from "@/components/shared/MaterialEditor";
+import ExerciseEditor from "@/components/shared/ExerciseEditor";
 
 // -- Upload helpers ----------------------------------------
 async function uploadToR2WithProgress(file: File, folder: string, onProgress: (p: number) => void): Promise<string> {
@@ -212,9 +214,9 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
             title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") + "-" +
             Math.random().toString(36).substring(2, 8)
           );
-          return { title: v.title, url: "", duration: v.duration, scheduledAt: v.scheduledAt, roomName };
+          return { title: v.title, url: "", duration: v.duration, scheduledAt: v.scheduledAt, roomName, materials: v.materials || [], exercises: v.exercises || [] };
         }
-        return { title: v.title, url: v.url, duration: v.duration };
+        return { title: v.title, url: v.url, duration: v.duration, materials: v.materials || [], exercises: v.exercises || [] };
       }),
     }));
     const lessonsCount = cleanModules.reduce((a, m) => a + m.videos.length, 0);
@@ -556,7 +558,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                     return (
                       <div key={vi} className="bg-gray-950/60 border border-gray-800/60 p-3 space-y-2">
                         {format === "live" ? (
-                          /* -- Live lesson row -- */
+                           <>
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-gray-600 w-5 shrink-0 text-right">{vi + 1}.</span>
                             <input type="text" value={video.title} onChange={(e) => updateVideo(mi, vi, "title", e.target.value)}
@@ -574,8 +576,21 @@ placeholder="Título da aula"
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             )}
-                          </div>
-                        ) : (
+                           </div>
+                            <div className="pl-7">
+                              <MaterialEditor
+                                materials={video.materials ?? []}
+                                onChange={(mats) => updateVideo(mi, vi, "materials", mats)}
+                              />
+                            </div>
+                            <div className="pl-7">
+                              <ExerciseEditor
+                                exercises={video.exercises ?? []}
+                                onChange={(exs) => updateVideo(mi, vi, "exercises", exs)}
+                              />
+                            </div>
+                            </>
+                          ) : (
                           <>
                           <div className="flex items-center gap-2">
                            <span className="text-xs text-gray-600 w-5 shrink-0 text-right">{vi + 1}.</span>
@@ -654,9 +669,21 @@ placeholder="Título da aula"
                                  className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/40 py-1.5 pl-8 pr-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all" />
                              </div>
                            )}
-                           </div>
-                           </>
-                         )}
+                            </div>
+                             <div className="pl-7">
+                               <MaterialEditor
+                                 materials={video.materials ?? []}
+                                 onChange={(mats) => updateVideo(mi, vi, "materials", mats)}
+                               />
+                             </div>
+                             <div className="pl-7">
+                               <ExerciseEditor
+                                 exercises={video.exercises ?? []}
+                                 onChange={(exs) => updateVideo(mi, vi, "exercises", exs)}
+                               />
+                             </div>
+                             </>
+                           )}
                        </div>
                      );
                   })}

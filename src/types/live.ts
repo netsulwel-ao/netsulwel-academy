@@ -1,3 +1,5 @@
+import type { CourseMaterial } from "./course";
+
 export type LiveStatus = "scheduled" | "live" | "ended";
 export type LiveTarget = "free" | "smart" | "golden" | "standalone";
 
@@ -19,6 +21,7 @@ export interface LiveSession {
   participantCount?: number;
   views?: number;
   recordingUrl?: string;      // R2 URL after recording saved
+  materials?: CourseMaterial[];
   createdAt?: unknown;
   updatedAt?: unknown;
 }

@@ -15,7 +15,8 @@ import {
   Loader2, AlertTriangle, Radio, ArrowLeft, Eye, MessageSquare, Send, Hand, Volume2, Mic, MicOff,
 } from "lucide-react";
 import { VideoPlayer } from "@/components/VideoPlayer";
-import type { Course } from "@/types/course";
+import MaterialsList from "@/components/shared/MaterialsList";
+import type { Course, CourseMaterial } from "@/types/course";
 import { playEntrySound } from "@/lib/entry-sound";
 
 // ── Stage ─────────────────────────────────────────────────
@@ -136,6 +137,7 @@ export default function CourseLiveLessonPage() {
   const [error, setError] = useState("");
   const [lessonTitle, setLessonTitle] = useState("");
   const [roomName, setRoomName] = useState("");
+  const [lessonMaterials, setLessonMaterials] = useState<CourseMaterial[]>([]);
   const [canSpeak, setCanSpeak] = useState(false);
   const [hasRequested, setHasRequested] = useState(false);
 
@@ -152,6 +154,7 @@ export default function CourseLiveLessonPage() {
 
         setLessonTitle(lesson.title || `Aula ${vi + 1}`);
         setRoomName(lesson.roomName);
+        setLessonMaterials(lesson.materials || []);
 
         const now = new Date();
         const scheduledAt = new Date(lesson.scheduledAt);
@@ -251,6 +254,11 @@ export default function CourseLiveLessonPage() {
               <h2 className="text-sm font-bold text-white truncate">{lessonTitle}</h2>
               <p className="text-xs text-gray-500">Sala: {roomName}</p>
             </div>
+            {lessonMaterials.length > 0 && (
+              <div className="border-t border-gray-800 px-4 py-3">
+                <MaterialsList materials={lessonMaterials} />
+              </div>
+            )}
           </div>
           <div className="w-[340px] shrink-0 border-l border-gray-800 flex flex-col">
             <CourseLiveChat roomName={roomName} />

@@ -871,6 +871,48 @@ div:has(> img[alt*="Download"]) {
   position: absolute !important;
 }
 
+/* ── Focus: inputs no light mode devem mostrar roxo ─── */
+[data-theme="light"] input:focus,
+[data-theme="light"] textarea:focus,
+[data-theme="light"] select:focus {
+  border-color: #7c3aed !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px #7c3aed !important;
+}
+
+/* ══════════════════════════════════════════════════
+   LOGIN PAGE — Light mode overrides
+   Mantém o lado direito (carrossel) escuro mesmo no light
+   ══════════════════════════════════════════════════ */
+[data-theme="light"] .bg-gray-950\/20.carousel-overlay,
+[data-theme="light"] .carousel-overlay { background-color: rgba(9,9,11,0.4) !important; }
+[data-theme="light"] .carousel-gradient { background: linear-gradient(to top, #09090b, rgba(9,9,11,0.6), transparent) !important; }
+[data-theme="light"] .carousel-title { color: #ffffff !important; }
+[data-theme="light"] .carousel-desc { color: #d4d4d8 !important; }
+[data-theme="light"] .carousel-indicator { background-color: rgba(255,255,255,0.4) !important; }
+[data-theme="light"] .carousel-indicator-active { background-color: #ffffff !important; }
+
+/* Grid-bg pattern for login — fixar no light */
+[data-theme="light"] .grid-bg { opacity: 0.04 !important; }
+
+/* Login card no light — sombra suave */
+[data-theme="light"] .login-card { 
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04), 0 1px 2px rgba(15,23,42,0.03) !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Login card no dark — borda sutil + glow roxo */
+[data-theme="dark"] .login-card {
+  border-color: rgba(255,255,255,0.08) !important;
+  box-shadow: 0 0 0 1px rgba(124,58,237,0.08), 0 4px 24px rgba(124,58,237,0.06) !important;
+}
+
+/* Login card inner glow remover no light */
+[data-theme="light"] .login-card-glow { opacity: 0 !important; }
+
+/* Link de registo no light */
+[data-theme="light"] .login-register-text { color: #64748b !important; }
+
 @media (prefers-reduced-motion: reduce) {
   .animate-word-blur-in,
   .animate-word-blur-in-soft,

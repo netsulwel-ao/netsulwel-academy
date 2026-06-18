@@ -3,6 +3,24 @@ export type CourseLevel = "beginner" | "intermediate" | "advanced";
 export type CourseCategory = "tech" | "finance" | "investments" | "other";
 export type CourseStatus = "draft" | "published";
 export type CourseFormat = "recorded" | "live";
+export type MaterialType = "pdf" | "doc" | "link" | "image" | "video" | "other";
+export type ExerciseType = "multiple_choice" | "true_false" | "short_answer";
+
+export interface CourseMaterial {
+  title: string;
+  type: MaterialType;
+  url: string;
+  filename?: string;
+  size?: number;
+}
+
+export interface ExerciseItem {
+  question: string;
+  type: ExerciseType;
+  options?: string[];
+  correctAnswer: string;
+  explanation?: string;
+}
 
 export interface VideoItem {
   title: string;
@@ -14,6 +32,8 @@ export interface VideoItem {
   /** Apenas para cursos ao vivo (format === "live") */
   scheduledAt?: string;   // ISO datetime
   roomName?: string;      // LiveKit room slug
+  materials?: CourseMaterial[];
+  exercises?: ExerciseItem[];
 }
 
 export interface CourseModule {

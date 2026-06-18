@@ -10,7 +10,9 @@ import {
   Image as ImageIcon, Target, Loader2, Save, Sparkles, AlertCircle, MailQuestion, CheckCircle2, DollarSign,
 } from "lucide-react";
 import Link from "next/link";
+import MaterialEditor from "@/components/shared/MaterialEditor";
 import type { LiveTarget } from "@/types/live";
+import type { CourseMaterial } from "@/types/course";
 
 export default function TeacherNewLivePage() {
   const router = useRouter();
@@ -26,6 +28,7 @@ export default function TeacherNewLivePage() {
   const [price, setPrice] = useState("");
   const [thumbnail, setThumbnail] = useState("");
   const [uploadingThumb, setUploadingThumb] = useState(false);
+  const [materials, setMaterials] = useState<CourseMaterial[]>([]);
 
   const generateRoomName = (title: string) => {
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 30);
@@ -73,7 +76,7 @@ export default function TeacherNewLivePage() {
         status: "scheduled", createdBy: user.uid,
         institutionId: institutionId || null,
         hostName: user.displayName || user.email || "Professor",
-        roomName, participantCount: 0,
+        roomName, participantCount: 0, materials,
         createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
       });
       router.push("/dashboard/teacher/lives");
@@ -218,6 +221,11 @@ export default function TeacherNewLivePage() {
               <input type="file" accept="image/*" onChange={handleThumbnailUpload} className="hidden" disabled={uploadingThumb} />
             </label>
           )}
+        </div>
+
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-300"><ImageIcon className="h-4 w-4 text-gray-500" /> Materiais de Apoio</label>
+          <MaterialEditor materials={materials} onChange={setMaterials} />
         </div>
 
         <div className="flex items-center gap-4 pt-4 border-t border-gray-800">

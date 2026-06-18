@@ -67,6 +67,13 @@ export default function InstitutionRegisterPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, adminEmail, adminPassword);
       if (adminName) await updateProfile(userCredential.user, { displayName: adminName });
 
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        email: adminEmail,
+        name: adminName,
+        role: "institution",
+        createdAt: new Date(),
+      });
+
       const token = await userCredential.user.getIdToken();
 
       const res = await fetch("/api/institutions", {

@@ -15,8 +15,9 @@ import {
 import { EmptyState } from "@/components/shared/EmptyState";
 import Link from "next/link";
 import { VideoPlayer } from "@/components/VideoPlayer";
-import type { Course } from "@/types/course";
-import type { CourseType } from "@/types/course";
+import MaterialsList from "@/components/shared/MaterialsList";
+import ExerciseBlock from "@/components/shared/ExerciseBlock";
+import type { Course, CourseType } from "@/types/course";
 
 const LEVEL_LABEL: Record<string, string> = {
   beginner: "Iniciante", intermediate: "Intermédio", advanced: "Avançado",
@@ -551,6 +552,20 @@ export default function CourseDetailPage() {
                   {lessonCompleted ? <><CheckCircle2 className="h-4 w-4" /> Concluída</> : <><Circle className="h-4 w-4" /> Marcar conclusão</>}
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Materials */}
+          {hasAccess && currentVideo?.materials && currentVideo.materials.length > 0 && (
+            <div className="bg-gray-900/40 px-5 py-4 border border-gray-800">
+              <MaterialsList materials={currentVideo.materials} />
+            </div>
+          )}
+
+          {/* Exercises */}
+          {hasAccess && currentVideo?.exercises && currentVideo.exercises.length > 0 && (
+            <div className="bg-gray-900/40 px-5 py-4 border border-gray-800">
+              <ExerciseBlock exercises={currentVideo.exercises} />
             </div>
           )}
 

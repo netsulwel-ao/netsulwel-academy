@@ -72,10 +72,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     document.cookie = "auth-uid=;path=/;max-age=0";
     setUser(null);
     setProfile(DEFAULT_PROFILE);
-    setLoading(false);
+    setLoading(true);
     redirectingRef.current = false;
     await firebaseSignOut(auth);
-    router.replace("/login");
   };
 
   const refreshUser = async () => {
