@@ -18,7 +18,7 @@ import { VideoPlayer } from "@/components/VideoPlayer";
 import MaterialsList from "@/components/shared/MaterialsList";
 import ExerciseBlock from "@/components/shared/ExerciseBlock";
 import { getOrCreateGroupChat, getOrCreateIndividualChat, groupChatId } from "@/lib/chat";
-import { listenQuizResults } from "@/lib/quiz";
+import { listenQuizResults, getQuizModules } from "@/lib/quiz";
 import type { ModuleQuizResult } from "@/types/quiz";
 import type { Course, CourseType } from "@/types/course";
 
@@ -134,6 +134,7 @@ export default function CourseDetailPage() {
   const saveTimerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const currentTimeRef = useRef(0);
   const [quizResults, setQuizResults] = useState<ModuleQuizResult[]>([]);
+  const [quizModules, setQuizModules] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -178,13 +179,18 @@ export default function CourseDetailPage() {
           setProgressLoaded(true);
           if (data.modules?.[0]?.videos?.[0]) setActiveLesson({ mi: 0, vi: 0 });
         }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+      // Buscar quizzes do curso para saber que módulos têm quiz
+      try {
+        const modules = await getQuizModules(id);
+        setQuizModules(modules);
+      } catch {}
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchData();
   }, [id, user, router]);
 
   useEffect(() => {
@@ -715,8 +721,7 @@ export default function CourseDetailPage() {
                       {(() => {
                         const qr = quizResults.filter((r) => r.moduleIndex === mi);
                         const best = qr.reduce((b, r) => (r.score > (b?.score ?? 0) ? r : b), qr[0]);
-                        const hasQuiz = true;
-                        if (!hasQuiz) return null;
+                        if (!quizModules.includes(mi)) return null;
                         return (
                           <Link href={`/dashboard/courses/${course.id}/quiz/${mi}`}
                             className={`flex items-center gap-3 px-5 py-3 transition-colors border-l-2 ${

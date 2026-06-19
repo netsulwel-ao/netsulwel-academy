@@ -1,9 +1,9 @@
 import { db } from "@/lib/firebase";
 import {
-  doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc,
+  doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc,
   collection, query, where, orderBy, onSnapshot, serverTimestamp,
 } from "firebase/firestore";
-import type { ModuleQuiz, ModuleQuizResult, ModuleQuizQuestion } from "@/types/quiz";
+import type { ModuleQuiz, ModuleQuizResult } from "@/types/quiz";
 
 /** Busca quizzes de um curso */
 export function listenCourseQuizzes(courseId: string, callback: (quizzes: ModuleQuiz[]) => void) {
@@ -62,39 +62,39 @@ export function listenQuizResults(userId: string, courseId: string, callback: (r
   });
 }
 
-/** Submeter respostas e calcular nota */
+/** Retorna índices dos módulos que têm quiz num curso */
+export async function getQuizModules(courseId: string): Promise<number[]> {
+  const snap = await getDocs(query(
+    collection(db, "moduleQuizzes"),
+    where("courseId", "==", courseId),
+  ));
+  return snap.docs.map((d) => d.data().moduleIndex as number);
+}
+
+/** Submeter respostas via API (validação server-side) */
 export async function submitQuizAnswers(
   userId: string, userName: string,
   quiz: ModuleQuiz, answers: Record<string, number>,
-): Promise<{ score: number; passed: boolean; resultId: string }> {
-  let correct = 0;
-  quiz.questions.forEach((q) => {
-    if (answers[q.id] === q.correctAnswer) correct++;
+): Promise<{ score: number; passed: boolean; resultId: string; questionResults: { questionId: string; correct: boolean }[] }> {
+  const { getAuth } = await import("firebase/auth");
+  const token = await getAuth().currentUser?.getIdToken();
+
+  const res = await fetch("/api/quiz/submit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({
+      quizId: quiz.id,
+      answers,
+      userName,
+      courseId: quiz.courseId,
+      moduleIndex: quiz.moduleIndex,
+    }),
   });
-  const total = quiz.questions.length;
-  const score = total > 0 ? Math.round((correct / total) * 100) : 0;
-  const passed = score >= quiz.passingScore;
 
-  const resultsRef = collection(db, "moduleQuizResults", userId, "quizzes");
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || "Erro ao submeter quiz");
+  }
 
-  const existingSnap = await getDocs(
-    query(resultsRef, where("quizId", "==", quiz.id)),
-  );
-  const attempt = existingSnap.size + 1;
-
-  const resultData: Omit<ModuleQuizResult, "id"> & { completedAt: ReturnType<typeof serverTimestamp> } = {
-    quizId: quiz.id!,
-    courseId: quiz.courseId,
-    moduleIndex: quiz.moduleIndex,
-    userId,
-    userName,
-    score,
-    passed,
-    answers,
-    completedAt: serverTimestamp() as any,
-    attempt,
-  };
-
-  const ref = await addDoc(resultsRef, resultData);
-  return { score, passed, resultId: ref.id };
+  return res.json();
 }

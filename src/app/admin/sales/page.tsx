@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { db } from "@/lib/firebase";
 import {
   collection, getDocs, addDoc, updateDoc, deleteDoc,
-  doc, getDoc, serverTimestamp, orderBy, query, where, arrayUnion, arrayRemove,
+  doc, getDoc, setDoc, serverTimestamp, orderBy, query, where, arrayUnion, arrayRemove,
 } from "firebase/firestore";
 import {
   DollarSign, TrendingUp, ShoppingCart,
@@ -15,6 +15,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import type { Sale } from "@/types/settings";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { getOrCreateIndividualChat, groupChatId } from "@/lib/chat";
 
 const STATUS_CONFIG = {
   pending:   { label: "Pendente",   color: "text-amber-400",  bg: "bg-amber-500/10 border-amber-500/30",  icon: Clock },
@@ -84,6 +85,52 @@ export default function SalesPage() {
       if (newStatus === "confirmed" && sale.status !== "confirmed") {
         if (sale.type === "standalone" && sale.itemId) {
           await updateDoc(userRef, { enrolledCourses: arrayUnion(sale.itemId) });
+
+          // Auto-criar chat de grupo e individual com o professor
+          try {
+            const courseSnap = await getDoc(doc(db, "courses", sale.itemId));
+            if (courseSnap.exists()) {
+              const courseData = courseSnap.data();
+              const teacherUid = courseData.createdBy || courseData.sellerId;
+              if (teacherUid && teacherUid !== sale.userId) {
+                const teacherSnap = await getDoc(doc(db, "users", teacherUid));
+                const teacherData = teacherSnap.data();
+                const teacherName = teacherData?.displayName || teacherData?.name || "Professor";
+                const teacherPhoto = teacherData?.photoURL || "";
+                const courseTitle = courseData.title || sale.itemTitle || "Curso";
+
+                // Adicionar aluno ao chat de grupo
+                const chatRef = doc(db, "courseChats", groupChatId(sale.itemId));
+                const chatSnap = await getDoc(chatRef);
+                if (chatSnap.exists()) {
+                  await updateDoc(chatRef, {
+                    participants: arrayUnion(sale.userId),
+                    [`participantNames.${sale.userId}`]: sale.userName,
+                  });
+                } else {
+                  await setDoc(chatRef, {
+                    type: "group",
+                    courseId: sale.itemId,
+                    courseTitle,
+                    createdBy: teacherUid,
+                    createdAt: serverTimestamp(),
+                    participants: [teacherUid, sale.userId],
+                    participantNames: { [teacherUid]: teacherName, [sale.userId]: sale.userName },
+                    participantPhotos: teacherPhoto ? { [teacherUid]: teacherPhoto } : {},
+                  });
+                }
+
+                // Criar chat individual com o professor
+                await getOrCreateIndividualChat(
+                  sale.itemId, courseTitle,
+                  teacherUid, teacherName, teacherPhoto || undefined,
+                  sale.userId, sale.userName, undefined,
+                );
+              }
+            }
+          } catch (err) {
+            console.error("Erro ao criar chat do curso:", err);
+          }
         } else if (sale.type === "live" && sale.itemId) {
           await updateDoc(userRef, { enrolledLives: arrayUnion(sale.itemId) });
         } else if (sale.type === "smart" || sale.type === "golden") {

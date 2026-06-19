@@ -19,9 +19,9 @@ export function Header() {
   return (
     <header className="fixed top-0 z-50 w-full border-b border-gray-800/60 bg-gray-900/40 backdrop-blur-xl">
       <div className="mx-auto flex min-h-[5rem] max-w-6xl items-center justify-between px-6 py-2 sm:min-h-[6rem]">
-        <Link href="/" className="flex items-center gap-2 sm:gap-4">
-          <img src="/Logo-Academy-White.svg" alt="Netsulwel Academy" className="h-10 w-auto sm:h-16 lg:h-20" />
-          <span className="text-lg font-bold tracking-tight text-white sm:text-2xl lg:text-3xl">
+        <Link href="/" className="flex items-center gap-2 sm:gap-3">
+          <img src="/Logo-Academy-White.svg" alt="Netsulwel Academy" className="h-8 w-auto sm:h-10 lg:h-12" />
+          <span className="text-base font-bold tracking-tight text-white sm:text-lg lg:text-xl">
             Netsulwel Academy
           </span>
         </Link>
@@ -39,21 +39,21 @@ export function Header() {
  </nav>
 
  <div className="hidden items-center gap-4 md:flex">
- <Link
- href="/login"
- className="flex items-center gap-1.5 text-sm text-gray-300 transition-colors hover:text-gray-100"
- >
- <LogIn className="h-4 w-4" />
- Entrar
- </Link>
   <Link
-  href="/register"
-  className="flex items-center gap-1.5 bg-green px-4 py-2 text-sm font-semibold text-gray-900 transition-colors hover:bg-green-light"
+  href="/login"
+  className="flex items-center gap-1.5 whitespace-nowrap text-sm text-gray-300 transition-colors hover:text-gray-100"
   >
-  Criar conta grátis
-  <ArrowRight className="h-4 w-4" />
+  <LogIn className="h-4 w-4" />
+  Entrar
   </Link>
- </div>
+   <Link
+   href="/register"
+   className="flex items-center gap-1.5 whitespace-nowrap bg-green px-5 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-green-light"
+   >
+   Criar conta grátis
+   <ArrowRight className="h-4 w-4" />
+   </Link>
+  </div>
 
  <button
  type="button"

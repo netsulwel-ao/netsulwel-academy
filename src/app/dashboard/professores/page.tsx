@@ -34,15 +34,22 @@ export default function DashboardProfessoresPage() {
         const snap = await getDocs(q);
         const ids = snap.docs.map(d => d.id);
 
-        const [coursesSnap, livesSnap] = await Promise.all([
-          ids.length > 0 ? getDocs(query(collection(db, "courses"), where("createdBy", "in", ids.slice(0, 30)), where("status", "==", "published"))) : Promise.resolve({ docs: [] } as any),
-          ids.length > 0 ? getDocs(query(collection(db, "lives"), where("createdBy", "in", ids.slice(0, 30)))) : Promise.resolve({ docs: [] } as any),
-        ]);
+        let courseCounts: Record<string, number> = {};
+        let liveCounts: Record<string, number> = {};
 
-        const courseCounts: Record<string, number> = {};
-        coursesSnap.docs.forEach((d: { data: () => Record<string, unknown>; id: string }) => { const c = d.data().createdBy as string | undefined; if (c) courseCounts[c] = (courseCounts[c] || 0) + 1; });
-        const liveCounts: Record<string, number> = {};
-        livesSnap.docs.forEach((d: { data: () => Record<string, unknown>; id: string }) => { const c = d.data().createdBy as string | undefined; if (c) liveCounts[c] = (liveCounts[c] || 0) + 1; });
+        try {
+          const [coursesSnap, livesSnap] = await Promise.all([
+            ids.length > 0 ? getDocs(query(collection(db, "courses"), where("createdBy", "in", ids.slice(0, 30)), where("status", "==", "published"))) : Promise.resolve({ docs: [] } as any),
+            ids.length > 0 ? getDocs(query(collection(db, "lives"), where("createdBy", "in", ids.slice(0, 30)))) : Promise.resolve({ docs: [] } as any),
+          ]);
+
+          courseCounts = {};
+          coursesSnap.docs.forEach((d: { data: () => Record<string, unknown>; id: string }) => { const c = d.data().createdBy as string | undefined; if (c) courseCounts[c] = (courseCounts[c] || 0) + 1; });
+          liveCounts = {};
+          livesSnap.docs.forEach((d: { data: () => Record<string, unknown>; id: string }) => { const c = d.data().createdBy as string | undefined; if (c) liveCounts[c] = (liveCounts[c] || 0) + 1; });
+        } catch (err) {
+          console.error("Erro ao carregar contagens de cursos/aulas:", err);
+        }
 
         setTeachers(snap.docs.map(d => ({
           id: d.id,
@@ -53,7 +60,7 @@ export default function DashboardProfessoresPage() {
           liveCount: liveCounts[d.id] || 0,
         })));
       } catch (err) {
-        console.error(err);
+        console.error("Erro ao carregar professores:", err);
       } finally {
         setLoading(false);
       }

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { getQuiz, submitQuizAnswers, listenQuizResults } from "@/lib/quiz";
+import { submitQuizAnswers, listenQuizResults } from "@/lib/quiz";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Loader2, CheckCircle2, XCircle, Trophy, RotateCcw, BookOpen, ArrowLeft } from "lucide-react";
@@ -13,7 +13,6 @@ import type { ModuleQuiz, ModuleQuizResult } from "@/types/quiz";
 
 export default function ModuleQuizPage() {
   const params = useParams();
-  const router = useRouter();
   const courseId = params?.id as string;
   const moduleIndex = Number(params?.moduleIndex);
   const { user } = useAuth();
@@ -23,6 +22,7 @@ export default function ModuleQuizPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [lastResult, setLastResult] = useState<ModuleQuizResult | null>(null);
+  const [questionResults, setQuestionResults] = useState<{ questionId: string; correct: boolean }[]>([]);
   const [showResult, setShowResult] = useState(false);
 
   useEffect(() => {
@@ -35,7 +35,13 @@ export default function ModuleQuizPage() {
       );
       const snap = await getDocs(q);
       if (!snap.empty) {
-        setQuiz({ id: snap.docs[0].id, ...snap.docs[0].data() } as ModuleQuiz);
+        const data = snap.docs[0].data();
+        // Remove correctAnswer antes de enviar ao QuizPlayer
+        const safeQuestions = (data.questions || []).map((q: { correctAnswer?: number; [key: string]: unknown }) => {
+          const { correctAnswer, ...rest } = q;
+          return rest;
+        });
+        setQuiz({ id: snap.docs[0].id, ...data, questions: safeQuestions } as ModuleQuiz);
       }
       setLoading(false);
     };
@@ -66,6 +72,7 @@ export default function ModuleQuizPage() {
         answers,
         attempt: results.length + 1,
       });
+      setQuestionResults(result.questionResults || []);
       setShowResult(true);
     } catch {}
     setSubmitting(false);
@@ -121,7 +128,8 @@ export default function ModuleQuizPage() {
           <div className="space-y-4">
             {quiz.questions.map((q, qi) => {
               const userAnswer = lastResult!.answers[q.id];
-              const correct = userAnswer === q.correctAnswer;
+              const qr = questionResults.find((r) => r.questionId === q.id);
+              const correct = qr?.correct ?? false;
               return (
                 <div key={q.id} className={`border-l-4 p-4 ${
                   correct ? "border-green-600 bg-green-950/10" : "border-red-600 bg-red-950/10"
@@ -135,10 +143,9 @@ export default function ModuleQuizPage() {
                       <p className="text-sm font-medium text-white mb-2">{q.question}</p>
                       <div className="space-y-1">
                         {q.options.map((opt, oi) => {
-                          const isCorrect = oi === q.correctAnswer;
                           const isUserChoice = oi === userAnswer;
                           let className = "text-sm px-3 py-1.5 border ";
-                          if (isCorrect) className += "border-green-700 bg-green-950/20 text-green-300";
+                          if (correct && isUserChoice) className += "border-green-700 bg-green-950/20 text-green-300";
                           else if (isUserChoice && !correct) className += "border-red-700 bg-red-950/20 text-red-300";
                           else className += "border-gray-800 text-gray-500";
                           return <div key={oi} className={className}>{opt}</div>;
