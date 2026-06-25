@@ -99,7 +99,7 @@ export default function DashboardPage() {
  <div className="max-w-[100rem] mx-auto animate-in fade-in duration-500">
       <div className="flex items-start justify-between gap-6 flex-wrap">
         <div className="min-w-0">
-          <h1 className="text-4xl font-bold text-white">Olá{user?.displayName ? `, ${user.displayName.split(" ")[0]}` : ""}</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Olá{user?.displayName ? `, ${user.displayName.split(" ")[0]}` : ""}</h1>
           <p className="mt-1 text-gray-400">Bem-vindo ao teu painel. Aqui tens um resumo rápido do teu progresso.</p>
           <div className="mt-4 flex items-center gap-3 flex-wrap">
             {planPill}

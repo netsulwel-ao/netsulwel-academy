@@ -169,7 +169,7 @@ export default function SalesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">
             {isTeacher ? "As Minhas Vendas" : "Vendas"}
           </h1>
           <p className="mt-1 text-gray-400">
@@ -235,67 +235,125 @@ export default function SalesPage() {
           compact
         />
       ) : (
-        <div className="bg-gray-900/40 backdrop-blur-xl overflow-x-auto">
-          <div className="min-w-[700px]">
-          <div className="grid grid-cols-[1fr_120px_120px_140px_120px_80px] gap-4 px-5 py-3 border-b border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
-            <span>Cliente / Item</span>
-            <span>Tipo</span>
-            <span>Valor</span>
-            <span>Pagamento</span>
-            <span>Status</span>
-            <span></span>
+        <div className="bg-gray-900/40 backdrop-blur-xl overflow-hidden">
+          {/* Desktop table */}
+          <div className="hidden sm:block overflow-x-auto">
+            <div className="min-w-[640px]">
+              <div className="flex px-5 py-3 border-b border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                <span className="flex-[2]">Cliente / Item</span>
+                <span className="flex-1">Tipo</span>
+                <span className="flex-1">Valor</span>
+                <span className="flex-[1.2]">Pagamento</span>
+                <span className="flex-1">Status</span>
+                <span className="w-16"></span>
+              </div>
+              <div className="divide-y divide-gray-800/60">
+                {filtered.map((sale) => {
+                  const sc = STATUS_CONFIG[sale.status];
+                  const StatusIcon = sc.icon;
+                  return (
+                    <div key={sale.id} className="flex px-5 py-4 items-center hover:bg-gray-800/30 transition-colors">
+                      <div className="flex-[2] min-w-0 pr-2">
+                        <p className="text-sm font-medium text-white truncate">{sale.userName}</p>
+                        <p className="text-xs text-gray-500 truncate">{sale.userEmail}</p>
+                        {sale.itemTitle && <p className="text-xs text-gray-600 truncate mt-0.5">{sale.itemTitle}</p>}
+                        <p className="text-xs text-gray-700 mt-0.5">{formatDate(sale.createdAt)}</p>
+                      </div>
+                      <span className="flex-1 text-xs text-gray-400 truncate px-1">{TYPE_LABELS[sale.type]}</span>
+                      <span className="flex-1 text-sm font-bold text-white truncate px-1">{formatKz(sale.amount)}</span>
+                      <span className="flex-[1.2] text-xs text-gray-400 truncate px-1">{sale.paymentMethod}</span>
+                      <div className="flex-1 px-1">
+                        {isAdmin ? (
+                          <select value={sale.status}
+                            onChange={(e) => updateStatus(sale.id!, e.target.value as Sale["status"])}
+                            className={`w-full text-xs font-bold px-2 py-1.5 border appearance-none cursor-pointer focus:outline-none ${sc.bg} ${sc.color}`}>
+                            <option value="pending">Pendente</option>
+                            <option value="confirmed">Confirmado</option>
+                            <option value="cancelled">Cancelado</option>
+                          </select>
+                        ) : (
+                          <span className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-1.5 border ${sc.bg} ${sc.color}`}>
+                            <StatusIcon className="h-3 w-3" />{sc.label}
+                          </span>
+                        )}
+                      </div>
+                      <div className="w-16 flex items-center gap-1 shrink-0">
+                        {sale.receiptUrl && (
+                          <a href={sale.receiptUrl} target="_blank" rel="noopener noreferrer"
+                            className="p-1.5 text-gray-500 hover:text-blue-400 transition-colors" title="Ver comprovativo">
+                            <FileText className="h-3.5 w-3.5" />
+                          </a>
+                        )}
+                        {isAdmin && (
+                          <button onClick={() => handleDelete(sale.id!)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="px-5 py-3 border-t border-gray-800 text-xs text-gray-500">
+                {filtered.length} de {sales.length} vendas
+              </div>
+            </div>
           </div>
-          <div className="divide-y divide-gray-800/60">
+          {/* Mobile cards */}
+          <div className="sm:hidden divide-y divide-gray-800/60">
             {filtered.map((sale) => {
               const sc = STATUS_CONFIG[sale.status];
               const StatusIcon = sc.icon;
               return (
-                <div key={sale.id} className="grid grid-cols-[1fr_120px_120px_140px_120px_80px] gap-4 px-5 py-4 items-center hover:bg-gray-800/30 transition-colors">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-white truncate">{sale.userName}</p>
-                    <p className="text-xs text-gray-500 truncate">{sale.userEmail}</p>
-                    {sale.itemTitle && <p className="text-xs text-gray-600 truncate mt-0.5">{sale.itemTitle}</p>}
-                    <p className="text-xs text-gray-700 mt-0.5">{formatDate(sale.createdAt)}</p>
-                  </div>
-                  <span className="text-xs text-gray-400">{TYPE_LABELS[sale.type]}</span>
-                  <span className="text-sm font-bold text-white">{formatKz(sale.amount)}</span>
-                  <span className="text-xs text-gray-400 truncate">{sale.paymentMethod}</span>
-                  {/* Status — admin pode alterar, teacher só vê */}
-                  <div className="relative">
+                <div key={sale.id} className="px-4 py-4 space-y-2 hover:bg-gray-800/30 transition-colors">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-white truncate">{sale.userName}</p>
+                      <p className="text-xs text-gray-500 truncate">{sale.userEmail}</p>
+                    </div>
                     {isAdmin ? (
                       <select value={sale.status}
                         onChange={(e) => updateStatus(sale.id!, e.target.value as Sale["status"])}
-                        className={`w-full text-xs font-bold px-2 py-1.5 border appearance-none cursor-pointer focus:outline-none ${sc.bg} ${sc.color}`}>
+                        className={`shrink-0 text-xs font-bold px-2 py-1 border appearance-none cursor-pointer focus:outline-none ${sc.bg} ${sc.color}`}>
                         <option value="pending">Pendente</option>
                         <option value="confirmed">Confirmado</option>
                         <option value="cancelled">Cancelado</option>
                       </select>
                     ) : (
-                      <span className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-1.5 border ${sc.bg} ${sc.color}`}>
+                      <span className={`shrink-0 inline-flex items-center gap-1 text-xs font-bold px-2 py-1 border ${sc.bg} ${sc.color}`}>
                         <StatusIcon className="h-3 w-3" />{sc.label}
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1">
+                  {sale.itemTitle && <p className="text-xs text-gray-400 truncate">{sale.itemTitle}</p>}
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <span className="font-bold text-white text-sm">{formatKz(sale.amount)}</span>
+                    <span>·</span>
+                    <span>{TYPE_LABELS[sale.type]}</span>
+                    <span>·</span>
+                    <span>{sale.paymentMethod}</span>
+                    <span>·</span>
+                    <span>{formatDate(sale.createdAt)}</span>
+                  </div>
+                  <div className="flex items-center gap-2 pt-1">
                     {sale.receiptUrl && (
                       <a href={sale.receiptUrl} target="_blank" rel="noopener noreferrer"
-                        className="p-1.5 text-gray-500 hover:text-blue-400 transition-colors" title="Ver comprovativo">
-                        <FileText className="h-3.5 w-3.5" />
+                        className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300">
+                        <FileText className="h-3 w-3" /> Comprovativo
                       </a>
                     )}
                     {isAdmin && (
-                      <button onClick={() => handleDelete(sale.id!)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors">
-                        <Trash2 className="h-3.5 w-3.5" />
+                      <button onClick={() => handleDelete(sale.id!)} className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300">
+                        <Trash2 className="h-3 w-3" /> Apagar
                       </button>
                     )}
                   </div>
                 </div>
               );
             })}
-          </div>
-          <div className="px-5 py-3 border-t border-gray-800 text-xs text-gray-500">
-            {filtered.length} de {sales.length} vendas
-          </div>
+            <div className="px-4 py-3 text-xs text-gray-500">
+              {filtered.length} de {sales.length} vendas
+            </div>
           </div>
         </div>
       )}

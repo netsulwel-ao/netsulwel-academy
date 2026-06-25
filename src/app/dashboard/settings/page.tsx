@@ -14,7 +14,7 @@ export default function DashboardSettingsPage() {
           <Settings className="h-6 w-6 text-gray-300" />
         </div>
         <div className="min-w-0">
-          <h1 className="text-4xl font-bold text-white">Definições</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Definições</h1>
           <p className="mt-1 text-gray-400">Dados do perfil e preferências da conta.</p>
         </div>
       </div>

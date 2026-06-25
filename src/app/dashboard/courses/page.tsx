@@ -179,7 +179,7 @@ export default function CourseCatalogPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-4xl font-bold text-white">Catálogo de Cursos</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Catálogo de Cursos</h1>
           <p className="mt-1 text-gray-400">
             {loading ? "A carregar..." : `${courses.length} cursos disponíveis`}
           </p>
