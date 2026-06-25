@@ -6,7 +6,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import {
   Save, Loader2, CheckCircle2, AlertCircle, Plus,
   CreditCard, Share2, Mail, Phone, MapPin, Globe,
-  MessageCircle, Music2, Crown, Zap, X, Link,
+  MessageCircle, Music2, Crown, Zap, X, Link, Percent,
 } from "lucide-react";
 import type { PlatformSettings } from "@/types/settings";
 
@@ -24,13 +24,15 @@ const DEFAULT_SETTINGS: PlatformSettings = {
   socials: { instagram: "", youtube: "", facebook: "", twitter: "", linkedin: "", discord: "", whatsapp: "", tiktok: "" },
   contact: { email: "", phone: "", address: "", supportEmail: "" },
   meta: { description: "", keywords: "" },
+  fees: { defaultCourseFee: 0, defaultVideoFee: 0 },
 };
 
-type TabId = "plans" | "payments" | "socials" | "contact" | "meta";
+type TabId = "plans" | "payments" | "fees" | "socials" | "contact" | "meta";
 
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: "plans", label: "Planos & Preços", icon: Crown },
   { id: "payments", label: "Pagamentos", icon: CreditCard },
+  { id: "fees", label: "Taxas", icon: Percent },
   { id: "socials", label: "Redes Sociais", icon: Share2 },
   { id: "contact", label: "Contacto", icon: Mail },
   { id: "meta", label: "SEO / Meta", icon: Globe },
@@ -283,6 +285,52 @@ export default function SettingsPage() {
                   className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── FEES ── */}
+      {tab === "fees" && (
+        <div className="space-y-6">
+          <div className="bg-gray-900/40 border border-gray-800 p-6 space-y-5">
+            <div className="flex items-center gap-3 pb-5 border-b border-gray-800">
+              <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <Percent className="h-5 w-5 text-purple-400" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Taxas da Plataforma</h3>
+                <p className="text-sm text-gray-400">Percentagem deduzida do valor bruto de cada venda de curso.</p>
+              </div>
+            </div>
+
+            <div className="max-w-xs">
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                Taxa Padrão por Curso (%)
+              </label>
+              <div className="relative">
+                <Percent className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                <input type="number" min="0" max="100" step="0.5"
+                  value={settings.fees.defaultCourseFee || ""}
+                  onChange={(e) => set("fees.defaultCourseFee", parseFloat(e.target.value) || 0)}
+                  placeholder="0"
+                  className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-2.5 pl-10 pr-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
+              </div>
+              <p className="text-xs text-gray-500 mt-1.5">
+                Ex: 10% significa que Kz 1.000,00 de venda resulta em Kz 900,00 líquidos para o vendedor.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-amber-500/5 border border-amber-500/20 p-4 flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-bold text-amber-400">Importante</p>
+              <p className="text-xs text-gray-400 mt-1">
+                A taxa padrão é aplicada quando o curso não tem uma taxa individual definida na página
+                {" "}<strong className="text-gray-300">Admin → Taxas</strong>. Podes definir taxas específicas por curso nessa página.
+                As alterações afectam apenas vendas futuras.
+              </p>
+            </div>
           </div>
         </div>
       )}

@@ -41,6 +41,7 @@ const TARGET_LABELS: Record<string, { label: string; color: string }> = {
   free: { label: "Gratuito", color: "text-green-400 bg-green-500/10" },
   smart: { label: "Smart", color: "text-blue-400 bg-blue-500/10" },
   golden: { label: "Golden", color: "text-amber-400 bg-amber-500/10" },
+  standalone: { label: "Pago", color: "text-green-400 bg-green-500/10" },
 };
 
 export default function AdminLivesPage() {
@@ -111,8 +112,8 @@ export default function AdminLivesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
-            <Radio className="h-8 w-8 text-red-400" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2 lg:gap-3">
+            <Radio className="h-6 w-6 lg:h-8 lg:w-8 text-red-400" />
             Aulas ao Vivo
           </h1>
           <p className="mt-2 text-gray-400">

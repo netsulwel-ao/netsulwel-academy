@@ -93,8 +93,8 @@ export default function TrailsPage() {
                     <Layers className="h-12 w-12 text-blue-500/40" />
                   </div>
                 )}
-                <span className={`absolute top-3 right-3 px-2.5 py-1 text-xs font-bold uppercase tracking-wider border ${TYPE_COLORS[trail.type]}`}>
-                  {TYPE_LABELS[trail.type]}
+                <span className={`absolute top-3 right-3 px-2.5 py-1 text-xs font-bold uppercase tracking-wider border ${TYPE_COLORS[trail.type ?? "standalone"]}`}>
+                  {TYPE_LABELS[trail.type ?? "standalone"]}
                 </span>
               </div>
 

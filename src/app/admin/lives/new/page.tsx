@@ -17,13 +17,14 @@ import {
   Save,
   Sparkles,
   AlertCircle,
+  DollarSign,
 } from "lucide-react";
 import Link from "next/link";
 import type { LiveTarget } from "@/types/live";
 
 export default function NewLivePage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, institutionId } = useAuth();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -31,6 +32,7 @@ export default function NewLivePage() {
   const [description, setDescription] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
   const [target, setTarget] = useState<LiveTarget>("free");
+  const [price, setPrice] = useState("");
   const [thumbnail, setThumbnail] = useState("");
   const [uploadingThumb, setUploadingThumb] = useState(false);
 
@@ -106,8 +108,10 @@ export default function NewLivePage() {
         thumbnail,
         scheduledAt,
         target,
+        price: target === "standalone" && price ? Number(price) : null,
         status: "scheduled",
         createdBy: user.uid,
+        institutionId: institutionId || null,
         hostName: user.displayName || user.email || "Professor",
         roomName,
         participantCount: 0,
@@ -143,6 +147,12 @@ export default function NewLivePage() {
       label: "Golden",
       desc: "Plano Golden",
       color: "border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 data-[active=true]:border-amber-500 data-[active=true]:bg-amber-500/15",
+    },
+    {
+      value: "standalone",
+      label: "Pago",
+      desc: "Venda avulsa",
+      color: "border-green-500/30 bg-green-500/5 hover:bg-green-500/10 data-[active=true]:border-green-500 data-[active=true]:bg-green-500/15",
     },
   ];
 
@@ -246,6 +256,19 @@ export default function NewLivePage() {
             ))}
           </div>
         </div>
+
+        {/* Price (standalone only) */}
+        {target === "standalone" && (
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
+              <DollarSign className="h-4 w-4" />
+              Preço (Kz) *
+            </label>
+            <input type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)}
+              placeholder="Ex: 5000"
+              className="w-full bg-gray-900/60 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors" required />
+          </div>
+        )}
 
         {/* Thumbnail */}
         <div className="space-y-2">

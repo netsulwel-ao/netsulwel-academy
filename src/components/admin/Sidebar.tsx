@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, Users, Settings, LogOut, Search, 
-  PanelLeftClose, PanelLeft, Sun, Moon, Video, DollarSign, Folders, Layers, Megaphone, Radio, Calendar, MessageSquare, GraduationCap, BookOpen
+  PanelLeftClose, PanelLeft, Sun, Moon, Video, DollarSign, Folders, Layers, Megaphone, Radio, Calendar, MessageSquare, GraduationCap, BookOpen, MailQuestion
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -27,7 +27,8 @@ const navSections = [
  { icon: Video, label: "Criar Curso", href: "/admin/courses/new" },
    { icon: Layers, label: "Trilhas", href: "/admin/trails" },
    { icon: Calendar, label: "Cronograma", href: "/admin/schedules" },
-   { icon: Radio, label: "Aulas ao Vivo", href: "/admin/lives" },
+    { icon: Radio, label: "Aulas ao Vivo", href: "/admin/lives" },
+    { icon: MailQuestion, label: "Pedidos de Lives", href: "/admin/free-live-requests" },
    { icon: GraduationCap, label: "Professores", href: "/admin/teachers" },
    { icon: Users, label: "Alunos", href: "/admin/students" },
    { icon: DollarSign, label: "Vendas", href: "/admin/sales" },
@@ -62,7 +63,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
    const pathname = usePathname();
    const searchRef = useRef<HTMLInputElement>(null);
    const [searchQuery, setSearchQuery] = useState("");
-   const { isAdmin, isTeacher, logout } = useAuth();
+   const { user, isAdmin, isTeacher, logout } = useAuth();
 
    useEffect(() => {
      const handleKeyDown = (e: KeyboardEvent) => {
@@ -101,13 +102,19 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
      )
    })).filter(section => section.items.length > 0);
 
-   const handleLogout = async () => {
-   await logout();
-   };
+    const handleNavClick = () => {
+      if (mobileOpen) setMobileOpen(false);
+    };
 
-  return (
-  <>
-  {/* Mobile overlay */}
+    const handleLogout = async () => {
+    await logout();
+    };
+
+  if (!user) return null;
+
+   return (
+   <>
+   {/* Mobile overlay */}
   {mobileOpen && (
   <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)} />
   )}
@@ -183,9 +190,10 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
  const isActive = pathname === item.href;
  return (
  <li key={item.href}>
- <Link
- href={item.href}
- title={isCollapsed ? item.label : ""}
+              <Link
+                  href={item.href}
+                  onClick={handleNavClick}
+                  title={isCollapsed ? item.label : ""}
  className={`group flex items-center px-3 py-2.5 transition-all relative ${
  isActive 
    ? theme === "light"

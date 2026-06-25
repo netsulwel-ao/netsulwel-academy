@@ -107,7 +107,7 @@ export default function RegisterPage() {
         pais,
       });
       await sendEmailVerification(userCredential.user);
-      router.push("/verify-email");
+      router.push(`/verify-email${redirectTo !== "/dashboard" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`);
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code || "";
       const messages: Record<string, string> = {

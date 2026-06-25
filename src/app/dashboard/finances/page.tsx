@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, arrayUnion } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTrack } from "@/hooks/useTrack";
 import {
   CreditCard, Crown, Zap, Lock, ArrowUpRight, Building2,
   Smartphone, Loader2, CheckCircle2, AlertCircle, Copy,
@@ -14,16 +15,22 @@ import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { toast } from "sonner";
 import type { PlatformSettings } from "@/types/settings";
 import type { Course } from "@/types/course";
+import type { LiveSession } from "@/types/live";
 
 type PlanId = "smart" | "golden";
 type Step = "plan" | "method" | "checkout";
 
-async function uploadReceipt(file: File): Promise<string> {
+async function uploadReceipt(file: File, token: string): Promise<string> {
   const res = await fetch("/api/upload/presign", {
-    method: "POST", headers: { "Content-Type": "application/json" },
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
     body: JSON.stringify({ filename: file.name, contentType: file.type, folder: "receipts" }),
   });
-  if (!res.ok) throw new Error("Falha ao obter URL de upload.");
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({ error: "Erro desconhecido" }));
+    console.error("Erro ao obter URL de upload:", errorData);
+    throw new Error(errorData.error || "Falha ao obter URL de upload.");
+  }
   const { presignedUrl, publicUrl } = await res.json();
   const up = await fetch(presignedUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
   if (!up.ok) throw new Error("Falha ao enviar comprovativo.");
@@ -34,10 +41,13 @@ export default function DashboardFinancesPage() {
   const { user, plan: currentPlan, isAdmin } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { track } = useTrack();
   const courseId = searchParams.get("courseId");
+  const liveId = searchParams.get("liveId");
 
   const [settings, setSettings] = useState<PlatformSettings | null>(null);
   const [course, setCourse] = useState<Course | null>(null);
+  const [live, setLive] = useState<LiveSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState<Step>("plan");
   const [selectedPlan, setSelectedPlan] = useState<PlanId | null>(null);
@@ -49,14 +59,20 @@ export default function DashboardFinancesPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [settingsSnap, courseSnap] = await Promise.all([
+        const [settingsSnap, courseSnap, liveSnap] = await Promise.all([
           getDoc(doc(db, "settings", "platform")),
           courseId ? getDoc(doc(db, "courses", courseId)) : Promise.resolve(null),
+          liveId ? getDoc(doc(db, "lives", liveId)) : Promise.resolve(null),
         ]);
         if (settingsSnap.exists()) setSettings(settingsSnap.data() as PlatformSettings);
         if (courseSnap?.exists()) {
           const c = { id: courseSnap.id, ...courseSnap.data() } as Course;
           setCourse(c);
+          setStep("method");
+        }
+        if (liveSnap?.exists()) {
+          const l = { id: liveSnap.id, ...liveSnap.data() } as LiveSession;
+          setLive(l);
           setStep("method");
         }
       } catch {
@@ -66,7 +82,7 @@ export default function DashboardFinancesPage() {
       }
     };
     load();
-  }, [courseId]);
+  }, [courseId, liveId]);
 
   const plans = settings?.plans;
   const methods = settings?.paymentMethods;
@@ -96,36 +112,46 @@ export default function DashboardFinancesPage() {
     const userRef = doc(db, "users", user.uid);
     if (type === "standalone" && itemId) {
       await updateDoc(userRef, { enrolledCourses: arrayUnion(itemId) });
+      track("course_enroll", itemId, "course").catch(() => {});
+    } else if (type === "live" && itemId) {
+      await updateDoc(userRef, { enrolledLives: arrayUnion(itemId) });
+      track("course_enroll", itemId, "live").catch(() => {});
     } else if (type === "smart" || type === "golden") {
       await updateDoc(userRef, { plan: type });
+      track("course_enroll", undefined, undefined, { plan: type }).catch(() => {});
     }
   };
 
   const handlePurchase = async (paypalTransactionId?: string) => {
     if (!selectedMethod || !user) return;
-    if (!course && (!selectedPlan || !plans)) return;
+    if (!course && !live && !selectedPlan) return;
+    if (!course && !live && (!selectedPlan || !plans)) return;
     setSubmitting(true);
     try {
       let receiptUrl = "";
       if (needsReceipt && receipt) {
-        receiptUrl = await uploadReceipt(receipt.file);
+        const token = await user.getIdToken();
+        receiptUrl = await uploadReceipt(receipt.file, token);
       }
 
       const isConfirmed = !!paypalTransactionId;
-      const saleType = course ? "standalone" : selectedPlan!;
+      const saleType = live ? "live" : course ? "standalone" : selectedPlan!;
+      const amount = live ? (live.price ?? 0) : course ? (course.price ?? 0) : (plans![selectedPlan!]?.price ?? 0);
+      const itemId = live?.id ?? course?.id ?? selectedPlan;
+      const itemTitle = live?.title ?? course?.title ?? undefined;
 
       const saleData = {
         userId: user.uid,
         userName: user.displayName || "Aluno",
         userEmail: user.email || "",
-        amount: course ? (course.price ?? 0) : (plans![selectedPlan!]?.price ?? 0),
+        amount,
         paymentMethod: activeMethods.find((m) => m.id === selectedMethod)?.label || selectedMethod,
         receiptUrl: receiptUrl || "",
         status: isConfirmed ? "confirmed" as const : "pending" as const,
         type: saleType,
-        itemId: course?.id ?? selectedPlan,
-        itemTitle: course?.title ?? undefined,
-        paypalTransactionId: paypalTransactionId,
+        itemId,
+        itemTitle,
+        paypalTransactionId: paypalTransactionId || null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
@@ -133,18 +159,21 @@ export default function DashboardFinancesPage() {
       await addDoc(collection(db, "sales"), saleData);
 
       if (isConfirmed) {
-        await grantAccess(saleType, course?.id);
-        toast.success("Pagamento confirmado! Bem-vindo ao curso.");
+        await grantAccess(saleType, itemId as string | undefined);
+        const noun = live ? "aula" : "curso";
+        toast.success(`Pagamento confirmado! Bem-vindo ao ${noun}.`);
       } else {
         toast.success("Pedido registado! O pagamento será confirmado em breve.");
       }
 
       if (course) { router.push("/dashboard/courses/" + course.id); return; }
+      if (live) { router.push("/dashboard/lives/" + live.id); return; }
       setSelectedPlan(null);
       setSelectedMethod(null);
       setReceipt(null);
       setStep("plan");
-    } catch {
+    } catch (e) {
+      console.error("Erro no pagamento:", e);
       toast.error("Erro ao registar pedido. Tenta novamente.");
     } finally {
       setSubmitting(false);
@@ -185,7 +214,7 @@ export default function DashboardFinancesPage() {
           <CreditCard className="h-6 w-6 text-blue-400" />
         </div>
         <div className="min-w-0">
-          <h1 className="text-4xl font-bold text-white">Checkout</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Checkout</h1>
           <p className="mt-1 text-gray-400">Escolhe o plano e o método de pagamento.</p>
           <div className="mt-3">{planPill}</div>
         </div>
@@ -208,22 +237,34 @@ export default function DashboardFinancesPage() {
         ))}
       </div>
 
-      {/* Course info (standalone purchase) */}
+      {/* Item info (standalone purchase) */}
       {course && (
         <section>
           <div className="border border-gray-800 bg-gray-900/40 p-6">
             <p className="text-sm text-gray-500 uppercase tracking-wider mb-1">Curso Avulso</p>
             <h2 className="text-3xl font-bold text-white mb-2">{course.title}</h2>
             <p className="text-gray-400 text-base mb-4">{course.description}</p>
-            <p className="text-4xl font-bold text-white">
-              {(course.price ?? 0).toLocaleString("pt-AO")} <span className="text-xl text-gray-500 font-normal">Kz</span>
+            <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
+              {(course.price ?? 0).toLocaleString("pt-AO")} <span className="text-lg sm:text-xl text-gray-500 font-normal">Kz</span>
+            </p>
+          </div>
+        </section>
+      )}
+      {live && (
+        <section>
+          <div className="border border-gray-800 bg-gray-900/40 p-6">
+            <p className="text-sm text-gray-500 uppercase tracking-wider mb-1">Aula ao Vivo</p>
+            <h2 className="text-3xl font-bold text-white mb-2">{live.title}</h2>
+            <p className="text-gray-400 text-base mb-4">{live.description}</p>
+            <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
+              {(live.price ?? 0).toLocaleString("pt-AO")} <span className="text-lg sm:text-xl text-gray-500 font-normal">Kz</span>
             </p>
           </div>
         </section>
       )}
 
-      {/* Step 1: Plans (only when not buying a course) */}
-      {step === "plan" && !course && plans && (
+      {/* Step 1: Plans (only when not buying a course or live) */}
+      {step === "plan" && !course && !live && plans && (
         <section>
           <h2 className="text-xl font-bold text-white mb-4">Seleciona o teu Plano</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -252,8 +293,8 @@ export default function DashboardFinancesPage() {
                     {isCurrent && <span className="text-sm font-bold text-green-400 border border-green-500/30 px-2 py-1">Atual</span>}
                   </div>
                   <p className="text-gray-400 text-base mb-4">{plan.description}</p>
-                  <p className="text-4xl font-bold text-white mb-4">
-                    {plan.price.toLocaleString("pt-AO")} <span className="text-xl text-gray-500 font-normal">Kz</span>
+                  <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
+                    {plan.price.toLocaleString("pt-AO")} <span className="text-lg sm:text-xl text-gray-500 font-normal">Kz</span>
                   </p>
                   {plan.features.length > 0 && (
                     <ul className="space-y-2">
@@ -273,9 +314,9 @@ export default function DashboardFinancesPage() {
       )}
 
       {/* Step 2: Payment Method */}
-      {step === "method" && (selectedPlan || course) && (
+      {step === "method" && (selectedPlan || course || live) && (
         <section>
-          <button onClick={() => setStep("plan")} className="text-base text-gray-400 hover:text-white transition-colors mb-4">&larr; Voltar aos planos</button>
+          <button onClick={() => { if (course || live) { router.push("/dashboard"); } else { setStep("plan"); } }} className="text-base text-gray-400 hover:text-white transition-colors mb-4">&larr; {course || live ? "Voltar" : "Voltar aos planos"}</button>
           <h2 className="text-xl font-bold text-white mb-4">Método de Pagamento</h2>
           {activeMethods.length === 0 ? (
             <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 px-4 py-3 text-base text-amber-200">
@@ -307,7 +348,7 @@ export default function DashboardFinancesPage() {
       )}
 
       {/* Step 3: Checkout / Confirmation */}
-      {step === "checkout" && selectedMethod && methods && (selectedPlan || course) && (
+      {step === "checkout" && selectedMethod && methods && (selectedPlan || course || live) && (
         <section>
           <button onClick={() => setStep("method")} className="text-base text-gray-400 hover:text-white transition-colors mb-4">&larr; Voltar aos métodos</button>
 
@@ -316,7 +357,18 @@ export default function DashboardFinancesPage() {
             <div>
               <h3 className="text-base font-bold text-white uppercase tracking-wider mb-3">Resumo</h3>
               <div className="bg-gray-950/50 border border-gray-800 p-4 space-y-2 text-base">
-                {course ? (
+                {live ? (
+                  <>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Aula ao Vivo</span>
+                      <span className="text-white font-medium text-right">{live.title}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Tipo</span>
+                      <span className="text-white font-medium">Aula Avulsa</span>
+                    </div>
+                  </>
+                ) : course ? (
                   <>
                     <div className="flex flex-wrap justify-between">
                       <span className="text-gray-400">Curso</span>
@@ -335,7 +387,7 @@ export default function DashboardFinancesPage() {
                 )}
                 <div className="flex flex-wrap justify-between">
                   <span className="text-gray-400">Valor</span>
-                  <span className="text-white font-bold">{(course ? (course.price ?? 0) : (plans?.[selectedPlan!]?.price ?? 0)).toLocaleString("pt-AO")} Kz</span>
+                  <span className="text-white font-bold">{(live ? (live.price ?? 0) : course ? (course.price ?? 0) : (plans?.[selectedPlan!]?.price ?? 0)).toLocaleString("pt-AO")} Kz</span>
                 </div>
                 <div className="flex flex-wrap justify-between">
                   <span className="text-gray-400">Método</span>
@@ -413,12 +465,12 @@ export default function DashboardFinancesPage() {
                       <PayPalButtons
                         style={{ color: "blue", shape: "rect", label: "pay", height: 48 }}
                         createOrder={(_data, actions) => {
-                          const amount = course ? (course.price ?? 0) : (plans?.[selectedPlan!]?.price ?? 0);
+                          const amount = live ? (live.price ?? 0) : course ? (course.price ?? 0) : (plans?.[selectedPlan!]?.price ?? 0);
                           return actions.order.create({
                             intent: "CAPTURE",
                             purchase_units: [{
                               amount: { value: amount.toString(), currency_code: "USD" },
-                              description: course ? course.title : (plans?.[selectedPlan!]?.label || "Plano"),
+                              description: live ? live.title : course ? course.title : (plans?.[selectedPlan!]?.label || "Plano"),
                             }],
                           });
                         }}

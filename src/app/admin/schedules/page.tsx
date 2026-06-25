@@ -3,12 +3,12 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { auth, db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
-import { collection, getDocs, doc, updateDoc, query, orderBy, serverTimestamp, where } from "firebase/firestore";
+import { collection, getDocs, getDoc, doc, updateDoc, query, orderBy, serverTimestamp, where } from "firebase/firestore";
 import { Calendar, Loader2, ChevronDown, ChevronRight, Plus, Trash2, ImagePlus, Save, AlertCircle, CheckCircle2, X, Layers, Radio, Crown, Zap, Coins } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import type { Trail, TrailLiveSession } from "@/types/course";
 
-const TARGET_OPTIONS: { value: TrailLiveSession["target"]; label: string; icon: typeof Crown; color: string }[] = [
+const TARGET_OPTIONS: { value: NonNullable<TrailLiveSession["target"]>; label: string; icon: typeof Crown; color: string }[] = [
   { value: "free", label: "Grátis", icon: Radio, color: "text-green-400 bg-green-500/10 border-green-500/20" },
   { value: "smart", label: "Smart", icon: Zap, color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
   { value: "golden", label: "Golden", icon: Crown, color: "text-yellow-400 bg-yellow-500/10 border-yellow-500/20" },
@@ -128,16 +128,19 @@ export default function SchedulesPage() {
     setError("");
     try {
       const liveSessions = editing[trailId] || [];
-      const trail = trails.find((t) => t.id === trailId);
+      // Fetch fresh trail data to get current liveIds (avoid stale state)
+      const freshSnap = await getDoc(doc(db, "trails", trailId));
+      const freshData = freshSnap.data() as Trail | undefined;
+      const freshLiveIds = freshData?.liveIds?.length || 0;
       await updateDoc(doc(db, "trails", trailId), {
         liveSessions,
-        livesCount: (trail?.liveIds?.length || 0) + liveSessions.length,
+        livesCount: freshLiveIds + liveSessions.length,
         updatedAt: serverTimestamp(),
       });
       setTrails((prev) =>
-        prev.map((t) => (t.id === trailId ? { ...t, liveSessions, livesCount: (t.liveIds?.length || 0) + liveSessions.length } : t))
+        prev.map((t) => (t.id === trailId ? { ...t, liveSessions, livesCount: freshLiveIds + liveSessions.length } : t))
       );
-      setSuccess(`Cronograma "${trail?.title}" guardado.`);
+      setSuccess(`Cronograma "${freshData?.title}" guardado.`);
       setTimeout(() => setSuccess(""), 3000);
     } catch {
       setError("Erro ao guardar cronograma.");
@@ -158,8 +161,8 @@ export default function SchedulesPage() {
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
-            <Calendar className="h-8 w-8 text-orange-400" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2 lg:gap-3">
+            <Calendar className="h-6 w-6 lg:h-8 lg:w-8 text-orange-400" />
             Cronograma — Aulas ao Vivo
           </h1>
           <p className="mt-1 text-gray-400">Cria o cronograma de aulas ao vivo para cada trilha, como se fossem módulos de um curso</p>

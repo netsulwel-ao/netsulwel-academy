@@ -1,15 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Loader2, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { sendEmailVerification } from "firebase/auth";
 import { useAuth } from "@/contexts/AuthContext";
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/dashboard";
   const { user, loading } = useAuth();
   const [resending, setResending] = useState(false);
   const [checking, setChecking] = useState(false);
@@ -42,7 +44,7 @@ export default function VerifyEmailPage() {
     try {
       await auth.currentUser.reload();
       if (auth.currentUser.emailVerified) {
-        router.push("/dashboard");
+        router.push(redirectTo);
       } else {
         setError("Email ainda não verificado. Verifique a sua caixa de entrada.");
       }
@@ -99,5 +101,13 @@ export default function VerifyEmailPage() {
         </p>
       </div>
     </main>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-950"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>}>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }

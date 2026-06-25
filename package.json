@@ -2,10 +2,13 @@
   "name": "netsul-academy",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build && node scripts/copy-standalone.mjs",
-    "start": "next start",
+    "start": "node .next/standalone/server.js",
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -36,6 +39,7 @@
     "eslint-config-next": "16.2.6",
     "firebase": "^12.13.0",
     "firebase-admin": "^13.10.0",
+    "jimp": "^1.6.1",
     "livekit-client": "^2.19.0",
     "livekit-server-sdk": "^2.15.3",
     "lucide-react": "^1.16.0",
@@ -43,6 +47,7 @@
     "nodemailer": "^8.0.10",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-easy-crop": "^6.0.2",
     "recharts": "^3.8.1",
     "sonner": "^2.0.7",
     "tailwindcss": "^4",

@@ -3,9 +3,11 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 import {
   Radio, Calendar, Users, Share2, CheckCircle2,
-  Lock, LogIn, Crown, Zap, Play, Clock,
+  Lock, LogIn, Crown, Zap, Play, Clock, ShoppingCart,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -13,6 +15,7 @@ const TARGET_LABELS: Record<string, string> = {
   all: "Gratuito — todos os alunos",
   smart: "Plano Smart ou Golden",
   golden: "Exclusivo Plano Golden",
+  standalone: "Aula Avulsa",
 };
 
 function useCountdown(scheduledAt: string) {
@@ -38,17 +41,27 @@ function useCountdown(scheduledAt: string) {
 interface LivePreview {
   id: string; title: string; description: string; thumbnail: string;
   status: string; scheduledAt: string; target: string;
-  hostName: string; participantsCount: number;
+  hostName: string; participantsCount: number; price?: number;
 }
 
 export default function PreviewLiveClient({ live }: { live: LivePreview }) {
   const { user, plan, loading } = useAuth();
   const router = useRouter();
   const [copied, setCopied] = useState(false);
+  const [enrolledLives, setEnrolledLives] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    getDoc(doc(db, "users", user.uid)).then(snap => {
+      if (snap.exists()) setEnrolledLives(snap.data().enrolledLives || []);
+    }).catch(() => {});
+  }, [user]);
+
   const time = useCountdown(live.scheduledAt);
 
   const hasAccess = !loading && user && (
     live.target === "all" ||
+    (live.target === "standalone" && enrolledLives.includes(live.id)) ||
     (live.target === "smart" && (plan === "smart" || plan === "golden")) ||
     (live.target === "golden" && plan === "golden")
   );
@@ -56,6 +69,7 @@ export default function PreviewLiveClient({ live }: { live: LivePreview }) {
   const handleWatch = () => {
     if (!user) { router.push(`/login?redirect=/dashboard/lives/${live.id}`); return; }
     if (hasAccess) { router.push(`/dashboard/lives/${live.id}`); return; }
+    if (live.target === "standalone") { router.push(`/dashboard/finances?liveId=${live.id}`); return; }
     router.push("/dashboard/finances");
   };
 
@@ -244,6 +258,7 @@ function LiveCTABox({ live, hasAccess, user, loading, onWatch }: {
                 : hasAccess ? "bg-green-600 hover:bg-green-500 text-white"
                 : live.target === "golden" ? "bg-yellow-500 hover:bg-yellow-400 text-gray-900"
                 : live.target === "smart" ? "bg-green-600 hover:bg-green-500 text-white"
+                : live.target === "standalone" ? "bg-green-600 hover:bg-green-700 text-white"
                 : "bg-blue-600 hover:bg-blue-700 text-white"
               }`}>
               {loading ? <span className="animate-pulse">A verificar...</span>
@@ -252,6 +267,7 @@ function LiveCTABox({ live, hasAccess, user, loading, onWatch }: {
               : hasAccess ? <><Play className="h-4 w-4" /> Entrar quando começar</>
               : live.target === "golden" ? <><Crown className="h-4 w-4" /> Ativar Plano Golden</>
               : live.target === "smart" ? <><Zap className="h-4 w-4" /> Ativar Plano Smart</>
+              : live.target === "standalone" ? <><ShoppingCart className="h-4 w-4" /> Comprar — {(live.price ?? 0).toLocaleString("pt-AO")} Kz</>
               : <><LogIn className="h-4 w-4" /> Entrar para Assistir</>}
             </button>
 

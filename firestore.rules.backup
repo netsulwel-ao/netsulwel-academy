@@ -1,0 +1,313 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function getRole() {
+      return isAuth() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        : null;
+    }
+
+    function isAdmin() {
+      return getRole() == "admin";
+    }
+
+    function isTeacher() {
+      return getRole() == "teacher";
+    }
+
+    function isAdminOrTeacher() {
+      return getRole() == "admin" || getRole() == "teacher";
+    }
+
+    function isOwner(uid) {
+      return isAuth() && request.auth.uid == uid;
+    }
+
+    function getInstitutionId() {
+      return isAuth() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.institutionId
+        : null;
+    }
+
+    function isInstitutionAdmin() {
+      return getRole() == "institution";
+    }
+
+    // ── users ─────────────────────────────────────────────
+    match /users/{uid} {
+      allow read: if isAuth();
+      allow create: if isOwner(uid);
+      allow update: if isAdmin() ||
+        (isOwner(uid) && !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(["role"]));
+      allow delete: if isAdmin();
+
+      match /notifications/{notifId} {
+        allow read: if isOwner(uid);
+        // Sistema (admin/teacher) pode criar qualquer notificação
+        // Aluno só pode criar notificações na sua própria subcoleção e de tipos permitidos
+        allow create: if isAdmin() ||
+          (isOwner(uid) &&
+           request.resource.data.uid == uid &&
+            request.resource.data.type in [
+              "community_like", "community_comment",
+              "payment_approved", "course_complete", "certificate_ready",
+              "institution_approved"
+            ]);
+        allow update: if isOwner(uid);
+        allow delete: if isAdmin() || isOwner(uid);
+      }
+    }
+
+    // ── courses ───────────────────────────────────────────
+    match /courses/{courseId} {
+      allow read: if resource.data.status == "published" || isAdminOrTeacher();
+      // Teacher pode criar/editar apenas os seus próprios cursos
+      allow create: if isAdminOrTeacher();
+      allow update: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
+      allow delete: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
+    }
+
+    // ── trails ────────────────────────────────────────────
+    match /trails/{trailId} {
+      allow read: if resource.data.status == "published" || isAdminOrTeacher();
+      allow create: if isAdminOrTeacher();
+      allow update: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
+      allow delete: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
+    }
+
+    // ── announcements ─────────────────────────────────────
+    match /announcements/{announcementId} {
+      allow read: if isAdminOrTeacher() ||
+        (isAuth() && resource.data.active == true);
+      allow create: if isAdminOrTeacher();
+      allow update: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
+      allow delete: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
+    }
+
+    // ── countdownBanners ──────────────────────────────────
+    match /countdownBanners/{bannerId} {
+      allow read: if isAdminOrTeacher() ||
+        (isAuth() && resource.data.active == true);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── lives ─────────────────────────────────────────────
+    match /lives/{liveId} {
+      allow read: if isAuth() || isAdminOrTeacher();
+      allow create: if isAdminOrTeacher();
+      allow update: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
+      allow delete: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
+
+      match /chat/{msgId} {
+        allow read: if isAuth();
+        allow create: if isAuth() && (
+          request.resource.data.uid == request.auth.uid ||
+          (isAdminOrTeacher() && request.resource.data.type == "system")
+        );
+        allow update, delete: if isAdminOrTeacher();
+      }
+
+      match /speakers/{speakerId} {
+        allow read: if isAuth();
+        allow write: if isAdminOrTeacher();
+      }
+    }
+
+      match /handraises/{requestId} {
+        allow read: if isAuth();
+        allow create: if isAuth();
+        allow update, delete: if isAdminOrTeacher();
+      }
+
+    // ── enrollments ───────────────────────────────────────
+    match /enrollments/{enrollmentId} {
+      allow read: if isAdminOrTeacher() ||
+        (isAuth() && resource.data.userId == request.auth.uid);
+      allow create: if isAuth() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // ── progress ──────────────────────────────────────────
+    match /progress/{userId} {
+      // Subcoleção de progresso por curso
+      match /courses/{courseId} {
+        allow read, write: if isAdminOrTeacher() || isOwner(userId);
+      }
+      // Documento raiz (compatibilidade)
+      allow read: if isAdminOrTeacher() || isOwner(userId);
+      allow write: if isOwner(userId);
+    }
+
+    // ── certificates ──────────────────────────────────────
+    match /certificates/{userId} {
+      // Subcoleção de certificados por curso
+      match /courses/{courseId} {
+        allow read: if isAdminOrTeacher() || isOwner(userId);
+        allow write: if isOwner(userId); // aluno cria o próprio certificado ao completar
+      }
+      // Documento raiz
+      allow read: if isAdminOrTeacher() || isOwner(userId);
+      allow write: if isAdmin();
+    }
+
+    // ── sales ─────────────────────────────────────────────
+    match /sales/{saleId} {
+      allow read: if isAdminOrTeacher() ||
+        (isAuth() && resource.data.userId == request.auth.uid) ||
+        (isAuth() && resource.data.sellerId == request.auth.uid) ||
+        (isInstitutionAdmin() && resource.data.sellerId == getInstitutionId());
+      allow create: if isAuth() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // ── settings ──────────────────────────────────────────
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── community ─────────────────────────────────────────
+    match /community/{postId} {
+      allow read: if true;
+      allow create: if isAuth() &&
+        request.resource.data.authorId == request.auth.uid;
+      allow update: if isAdminOrTeacher() ||
+        request.auth.uid == resource.data.authorId;
+      allow delete: if isAdminOrTeacher() ||
+        request.auth.uid == resource.data.authorId;
+
+      match /likes/{userId} {
+        allow read: if true;
+        allow write: if isAuth() && request.auth.uid == userId;
+      }
+
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isAuth() &&
+          request.resource.data.authorId == request.auth.uid;
+        allow update: if isAdminOrTeacher() ||
+          request.auth.uid == resource.data.authorId;
+        allow delete: if isAdminOrTeacher() ||
+          request.auth.uid == resource.data.authorId;
+      }
+    }
+
+    // ── ratings ───────────────────────────────────────────
+    match /ratings/{docId} {
+      allow read: if isAuth();
+      allow create, update: if isAuth();
+      allow delete: if isAdmin();
+    }
+
+    // ── broadcasts ────────────────────────────────────────
+    match /broadcasts/{broadcastId} {
+      allow read: if isAuth();
+      allow create, update, delete: if isAdminOrTeacher();
+    }
+
+    // ── institutions ─────────────────────────────────────
+    match /institutions/{institutionId} {
+      allow read: if isAuth();
+      allow create: if isAdmin(); // Only admin creates via backend API
+      allow update: if isAdmin() ||
+        (isAuth() && resource.data.adminId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // ── institutionInvitations ────────────────────────────
+    match /institutionInvitations/{invitationId} {
+      allow read: if isAdmin() ||
+        (isAuth() && (
+          resource.data.email == request.auth.token.email ||
+          resource.data.invitedBy == request.auth.uid
+        ));
+      allow create: if isAdmin() ||
+        (isAuth() && request.resource.data.invitedBy == request.auth.uid);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── institutionInviteLinks ────────────────────────────
+    match /institutionInviteLinks/{linkId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() || isInstitutionAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── institutionClasses ────────────────────────────────
+    match /institutionClasses/{classId} {
+      allow read: if isAuth();
+      allow create: if isAdmin() || isInstitutionAdmin();
+      allow update, delete: if isAdmin() || isInstitutionAdmin();
+    }
+
+    // ── institutionAnnouncements ──────────────────────────
+    match /institutionAnnouncements/{announcementId} {
+      allow read: if isAuth();
+      allow create: if isAdmin() || isInstitutionAdmin();
+      allow update, delete: if isAdmin() || isInstitutionAdmin();
+    }
+
+    // ── freeLiveRequests ─────────────────────────────────────
+    match /freeLiveRequests/{requestId} {
+      allow read: if isAdmin() || isTeacher();
+      allow create: if isTeacher() &&
+        request.resource.data.teacherId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── events (tracking analytics) ───────────────────────
+    match /events/{eventId} {
+      allow read: if isAdmin();
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // ── exams ─────────────────────────────────────────────
+    match /exams/{examId} {
+      allow read: if isAuth();
+      allow create: if isAdminOrTeacher();
+      allow update: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
+      allow delete: if isAdmin() ||
+        (isTeacher() && resource.data.createdBy == request.auth.uid);
+    }
+
+    // ── exam-results ──────────────────────────────────────
+    match /exam-results/{userId} {
+      match /exams/{examId} {
+        allow read: if isAdminOrTeacher() || isOwner(userId);
+        allow create: if isOwner(userId) &&
+          request.resource.data.userId == request.auth.uid;
+        allow update: if isAdmin();
+        allow delete: if isAdmin();
+      }
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Bloqueia tudo o resto
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -11,7 +11,7 @@ export function proxy(request: NextRequest) {
   const hasValidUid = isValidUid(uid);
 
   const isProtected = pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
-  const isPublicPage = pathname === "/login" || pathname === "/register" || pathname === "/verify-email" || pathname === "/";
+  const isPublicPage = pathname === "/login" || pathname === "/register" || pathname.startsWith("/register/") || pathname === "/verify-email" || pathname === "/";
   const isStatic = pathname.startsWith("/_next") || pathname.startsWith("/favicon");
 
   if (isStatic) return NextResponse.next();

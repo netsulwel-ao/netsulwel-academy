@@ -1,8 +1,26 @@
-export type CourseType = "golden" | "smart" | "standalone";
+export type CourseType = "standalone" | "smart" | "golden";
 export type CourseLevel = "beginner" | "intermediate" | "advanced";
 export type CourseCategory = "tech" | "finance" | "investments" | "other";
 export type CourseStatus = "draft" | "published";
 export type CourseFormat = "recorded" | "live";
+export type MaterialType = "pdf" | "doc" | "link" | "image" | "video" | "other";
+export type ExerciseType = "multiple_choice" | "true_false" | "short_answer";
+
+export interface CourseMaterial {
+  title: string;
+  type: MaterialType;
+  url: string;
+  filename?: string;
+  size?: number;
+}
+
+export interface ExerciseItem {
+  question: string;
+  type: ExerciseType;
+  options?: string[];
+  correctAnswer: string;
+  explanation?: string;
+}
 
 export interface VideoItem {
   title: string;
@@ -14,6 +32,8 @@ export interface VideoItem {
   /** Apenas para cursos ao vivo (format === "live") */
   scheduledAt?: string;   // ISO datetime
   roomName?: string;      // LiveKit room slug
+  materials?: CourseMaterial[];
+  exercises?: ExerciseItem[];
 }
 
 export interface CourseModule {
@@ -42,6 +62,9 @@ export interface Course {
   lessonsCount: number;
   totalDuration?: string;    // calculado
   createdBy?: string;          // UID do admin que criou
+  institutionId?: string;     // ID da instituição a que pertence
+  sellerId?: string;          // UID do professor/instituição que vende (para taxas)
+  feePercentage?: number;     // Taxa da plataforma para este curso (ex: 10 para 10%)
   views?: number;
   createdAt?: unknown;
   updatedAt?: unknown;
@@ -52,8 +75,10 @@ export interface TrailLiveSession {
   description: string;
   thumbnail: string;
   scheduledAt: string;       // ISO datetime
-  target: "free" | "smart" | "golden" | "standalone";
-  price: number;             // usado apenas se target === "standalone"
+  price: number;
+  target?: "free" | "smart" | "golden" | "standalone";
+  sellerId?: string;         // UID do professor/instituição que vende
+  feePercentage?: number;    // Taxa da plataforma
 }
 
 export interface Trail {
@@ -61,7 +86,7 @@ export interface Trail {
   title: string;
   description: string;
   thumbnail: string;
-  type: CourseType;          // acesso mínimo necessário
+  type?: "smart" | "golden" | "standalone";
   category: CourseCategory;
   level: CourseLevel;
   status: CourseStatus;

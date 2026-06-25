@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Users, Video, DollarSign, TrendingUp, BookOpen, Radio, Settings, MessageSquare, Megaphone, Layers, ArrowRight, Loader2, UserPlus, GraduationCap } from "lucide-react";
+import { Users, Video, DollarSign, TrendingUp, BookOpen, Radio, Settings, MessageSquare, Megaphone, Layers, ArrowRight, Loader2, UserPlus, GraduationCap, Building2 } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs, orderBy, limit, Timestamp } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +16,7 @@ const adminQuickActions = [
   { icon: Radio, label: "Aula ao Vivo", href: "/admin/lives/new", color: "bg-pink-500/10 text-pink-400 hover:bg-pink-500/20" },
   { icon: Users, label: "Alunos", href: "/admin/students", color: "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20" },
   { icon: GraduationCap, label: "Professores", href: "/admin/teachers", color: "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20" },
+  { icon: Building2, label: "Instituições", href: "/admin/institutions", color: "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20" },
   { icon: MessageSquare, label: "Comunidade", href: "/admin/community", color: "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20" },
   { icon: Megaphone, label: "Anúncio", href: "/admin/announcements", color: "bg-rose-500/10 text-rose-400 hover:bg-rose-500/20" },
   { icon: Layers, label: "Trilhas", href: "/admin/trails", color: "bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20" },

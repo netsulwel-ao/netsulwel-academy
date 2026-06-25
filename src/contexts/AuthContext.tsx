@@ -7,7 +7,7 @@ import { auth, db } from "@/lib/firebase";
 import { useRouter, usePathname } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
-export type UserRole = "aluno" | "teacher" | "admin";
+export type UserRole = "aluno" | "teacher" | "admin" | "institution";
 export type UserPlan = "free" | "smart" | "golden";
 
 interface AuthContextType {
@@ -15,18 +15,20 @@ interface AuthContextType {
   loading: boolean;
   profileLoaded: boolean;
   role: UserRole;
+  plan: UserPlan;
   isAdmin: boolean;
   isTeacher: boolean;
+  isInstitution: boolean;
   isAdminOrTeacher: boolean;
-  plan: UserPlan;
+  institutionId?: string;
+  institutionRole?: "admin" | "teacher" | "student";
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null, loading: true, profileLoaded: false,
-  role: "aluno", isAdmin: false, isTeacher: false, isAdminOrTeacher: false,
-  plan: "free",
+  role: "aluno", plan: "free", isAdmin: false, isTeacher: false, isInstitution: false, isAdminOrTeacher: false,
   logout: async () => {},
   refreshUser: async () => {},
 });
@@ -36,14 +38,18 @@ interface ProfileState {
   role: UserRole;
   plan: UserPlan;
   profileLoaded: boolean;
+  institutionId?: string;
+  institutionRole?: "admin" | "teacher" | "student";
 }
 
 const DEFAULT_PROFILE: ProfileState = { role: "aluno", plan: "free", profileLoaded: false };
 
-function parseProfile(data: Record<string, unknown>): { role: UserRole; plan: UserPlan } {
-  const role: UserRole = data.role === "admin" ? "admin" : data.role === "teacher" ? "teacher" : "aluno";
-  const plan: UserPlan = data.plan === "smart" || data.plan === "golden" ? data.plan as UserPlan : "free";
-  return { role, plan };
+function parseProfile(data: Record<string, unknown>): { role: UserRole; plan: UserPlan; institutionId?: string; institutionRole?: "admin" | "teacher" | "student" } {
+  const role: UserRole = data.role === "admin" ? "admin" : data.role === "teacher" ? "teacher" : data.role === "institution" ? "institution" : "aluno";
+  const plan: UserPlan = data.plan === "smart" ? "smart" : data.plan === "golden" ? "golden" : "free";
+  const institutionId = data.institutionId as string | undefined;
+  const institutionRole = data.institutionRole as "admin" | "teacher" | "student" | undefined;
+  return { role, plan, institutionId, institutionRole };
 }
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -56,19 +62,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const redirectingRef = useRef(false);
 
-  const { role, plan, profileLoaded } = profile;
+  const { role, plan, profileLoaded, institutionId, institutionRole } = profile;
   const isAdmin = role === "admin";
   const isTeacher = role === "teacher";
+  const isInstitution = role === "institution";
   const isAdminOrTeacher = isAdmin || isTeacher;
 
   const logout = async () => {
     document.cookie = "auth-uid=;path=/;max-age=0";
     setUser(null);
     setProfile(DEFAULT_PROFILE);
-    setLoading(false);
+    setLoading(true);
     redirectingRef.current = false;
     await firebaseSignOut(auth);
-    router.replace("/login");
   };
 
   const refreshUser = async () => {
@@ -76,8 +82,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const snap = await getDoc(doc(db, "users", user.uid));
       if (!snap.exists()) return;
-      const { role, plan } = parseProfile(snap.data() as Record<string, unknown>);
-      setProfile((prev) => ({ ...prev, role, plan }));
+      const { role, plan, institutionId, institutionRole } = parseProfile(snap.data() as Record<string, unknown>);
+      setProfile((prev) => ({ ...prev, role, plan, institutionId, institutionRole }));
     } catch { /* silencia */ }
   };
 
@@ -103,15 +109,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     let cancelled = false;
 
-    // Primeira leitura com getDoc — atualiza role+plan+profileLoaded num único setState
+    // Primeira leitura com getDoc — atualiza role+profileLoaded num único setState
     const loadProfile = async () => {
       try {
         const snap = await getDoc(doc(db, "users", user.uid));
         if (cancelled) return;
         if (snap.exists()) {
-          const { role, plan } = parseProfile(snap.data() as Record<string, unknown>);
+          const { role, plan, institutionId, institutionRole } = parseProfile(snap.data() as Record<string, unknown>);
           // Um único setState → sem renders com estado parcial
-          setProfile({ role, plan, profileLoaded: true });
+          setProfile({ role, plan, institutionId, institutionRole, profileLoaded: true });
         } else {
           setProfile({ role: "aluno", plan: "free", profileLoaded: true });
         }
@@ -126,13 +132,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     loadProfile();
 
-    // Listener em tempo real para mudanças de role/plan (ex: admin promove aluno)
+    // Listener em tempo real para mudanças de role (ex: admin promove aluno)
     const unsub = onSnapshot(
       doc(db, "users", user.uid),
       (snap) => {
         if (!snap.exists()) return;
-        const { role, plan } = parseProfile(snap.data() as Record<string, unknown>);
-        setProfile((prev) => ({ ...prev, role, plan }));
+        const { role, plan, institutionId, institutionRole } = parseProfile(snap.data() as Record<string, unknown>);
+        setProfile((prev) => ({ ...prev, role, plan, institutionId, institutionRole }));
       },
       () => { /* ignora erros do listener */ }
     );
@@ -161,9 +167,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    if (user && isAdminRoute && !isAdminOrTeacher) {
+    if (user && isAdminRoute && !isAdmin) {
       redirectingRef.current = true;
-      router.replace("/dashboard");
+      router.replace(role === "institution" ? "/dashboard/institution" : "/dashboard");
       setTimeout(() => { redirectingRef.current = false; }, 1000);
       return;
     }
@@ -175,7 +181,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const stillLoading = loading || (!!user && !profileLoaded && isProtectedRoute);
 
   const ctx: AuthContextType = {
-    user, loading, profileLoaded, role, isAdmin, isTeacher, isAdminOrTeacher, plan, logout, refreshUser,
+    user, loading, profileLoaded, role, plan, isAdmin, isTeacher, isInstitution, isAdminOrTeacher, institutionId, institutionRole, logout, refreshUser,
   };
 
   // Mostra spinner apenas em rotas protegidas enquanto carrega

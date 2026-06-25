@@ -75,10 +75,12 @@ export default function RootLayout({
 }>) {
  return (
  <html lang="pt-AO" className={`${inter.variable} ${pressStart.variable} scroll-smooth`}>
- <body className="min-h-screen bg-background text-foreground antialiased">
-  <AuthProvider>
-  {children}
-  <Toaster
+  <body className="min-h-screen bg-background text-foreground antialiased">
+   <AuthProvider>
+   <div className="animate-in fade-in duration-300">
+   {children}
+   </div>
+   <Toaster
     position="bottom-right"
     richColors
     closeButton

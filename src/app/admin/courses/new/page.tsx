@@ -4,15 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import CourseForm from "@/components/admin/CourseForm";
 import { useAuth } from "@/contexts/AuthContext";
 import { syncCourseTrail } from "@/lib/trail-sync";
+import { getOrCreateGroupChat } from "@/lib/chat";
 import type { Course } from "@/types/course";
 
 export default function NewCoursePage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, institutionId } = useAuth();
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -22,12 +23,26 @@ export default function NewCoursePage() {
       const docRef = await addDoc(collection(db, "courses"), {
         ...data,
         createdBy: user?.uid ?? null,
+        institutionId: institutionId || null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
       // Sincronizar Trail.courseIds se o curso foi atribuído a uma trilha
       if (data.trailId) {
         await syncCourseTrail(docRef.id, data.trailId, undefined, data.trailOrder);
+      }
+      // Criar chat de grupo do curso
+      if (user?.uid) {
+        const teacherName = user.displayName || "Professor";
+        const teacherPhoto = user.photoURL || "";
+        const participants = [user.uid];
+        const participantNames = { [user.uid]: teacherName };
+        const participantPhotos = teacherPhoto ? { [user.uid]: teacherPhoto } : {};
+        try {
+          await getOrCreateGroupChat(docRef.id, data.title || "Curso", participants, participantNames, participantPhotos);
+        } catch (err) {
+          console.error("Erro ao criar chat de grupo:", err);
+        }
       }
       setSuccess(true);
       setTimeout(() => router.push("/admin/courses"), 1500);

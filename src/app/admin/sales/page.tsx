@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { db } from "@/lib/firebase";
 import {
   collection, getDocs, addDoc, updateDoc, deleteDoc,
-  doc, serverTimestamp, orderBy, query, where, arrayUnion, arrayRemove,
+  doc, getDoc, setDoc, serverTimestamp, orderBy, query, where, arrayUnion, arrayRemove,
 } from "firebase/firestore";
 import {
   DollarSign, TrendingUp, ShoppingCart,
@@ -15,6 +15,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import type { Sale } from "@/types/settings";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { getOrCreateIndividualChat, groupChatId } from "@/lib/chat";
 
 const STATUS_CONFIG = {
   pending:   { label: "Pendente",   color: "text-amber-400",  bg: "bg-amber-500/10 border-amber-500/30",  icon: Clock },
@@ -23,7 +24,7 @@ const STATUS_CONFIG = {
 };
 
 const TYPE_LABELS: Record<string, string> = {
-  standalone: "Curso Avulso", smart: "Plano Smart", golden: "Plano Golden",
+  standalone: "Curso Avulso", smart: "Plano Smart", golden: "Plano Golden", live: "Aula Avulsa",
 };
 
 export default function SalesPage() {
@@ -79,32 +80,150 @@ export default function SalesPage() {
       const sale = sales.find((s) => s.id === id);
       if (!sale) return;
       const userRef = doc(db, "users", sale.userId);
+      const saleRef = doc(db, "sales", id);
 
       if (newStatus === "confirmed" && sale.status !== "confirmed") {
         if (sale.type === "standalone" && sale.itemId) {
           await updateDoc(userRef, { enrolledCourses: arrayUnion(sale.itemId) });
+
+          // Auto-criar chat de grupo e individual com o professor
+          try {
+            const courseSnap = await getDoc(doc(db, "courses", sale.itemId));
+            if (courseSnap.exists()) {
+              const courseData = courseSnap.data();
+              const teacherUid = courseData.createdBy || courseData.sellerId;
+              if (teacherUid && teacherUid !== sale.userId) {
+                const teacherSnap = await getDoc(doc(db, "users", teacherUid));
+                const teacherData = teacherSnap.data();
+                const teacherName = teacherData?.displayName || teacherData?.name || "Professor";
+                const teacherPhoto = teacherData?.photoURL || "";
+                const courseTitle = courseData.title || sale.itemTitle || "Curso";
+
+                // Adicionar aluno ao chat de grupo
+                const chatRef = doc(db, "courseChats", groupChatId(sale.itemId));
+                const chatSnap = await getDoc(chatRef);
+                if (chatSnap.exists()) {
+                  await updateDoc(chatRef, {
+                    participants: arrayUnion(sale.userId),
+                    [`participantNames.${sale.userId}`]: sale.userName,
+                  });
+                } else {
+                  await setDoc(chatRef, {
+                    type: "group",
+                    courseId: sale.itemId,
+                    courseTitle,
+                    createdBy: teacherUid,
+                    createdAt: serverTimestamp(),
+                    participants: [teacherUid, sale.userId],
+                    participantNames: { [teacherUid]: teacherName, [sale.userId]: sale.userName },
+                    participantPhotos: teacherPhoto ? { [teacherUid]: teacherPhoto } : {},
+                  });
+                }
+
+                // Criar chat individual com o professor
+                await getOrCreateIndividualChat(
+                  sale.itemId, courseTitle,
+                  teacherUid, teacherName, teacherPhoto || undefined,
+                  sale.userId, sale.userName, undefined,
+                );
+              }
+            }
+          } catch (err) {
+            console.error("Erro ao criar chat do curso:", err);
+          }
+        } else if (sale.type === "live" && sale.itemId) {
+          await updateDoc(userRef, { enrolledLives: arrayUnion(sale.itemId) });
         } else if (sale.type === "smart" || sale.type === "golden") {
           await updateDoc(userRef, { plan: sale.type });
         }
+
+        // ── Calcular taxa para cursos/lives avulsos ──
+        if ((sale.type === "standalone" || sale.type === "live") && sale.itemId) {
+          let feePct = 0;
+          let sellerId = "";
+          let sellerName = "";
+          let sellerType: "teacher" | "institution" = "teacher";
+
+          // Buscar curso/live para obter sellerId e feePercentage
+          const sourceSnap = sale.type === "live"
+            ? await getDoc(doc(db, "lives", sale.itemId))
+            : await getDoc(doc(db, "courses", sale.itemId));
+          if (sourceSnap.exists()) {
+            const sourceData = sourceSnap.data();
+            sellerId = sourceData.sellerId || sourceData.createdBy || "";
+            feePct = sourceData.feePercentage ?? feePct;
+          }
+
+          // Se não tem feePercentage definido, usar o padrão das settings
+          if (!feePct) {
+            const settingsSnap = await getDoc(doc(db, "settings", "platform"));
+            if (settingsSnap.exists()) {
+              const settingsData = settingsSnap.data();
+              feePct = settingsData.fees?.defaultCourseFee ?? 0;
+            }
+          }
+
+          // Buscar nome do vendedor
+          if (sellerId) {
+            const sellerSnap = await getDoc(doc(db, "users", sellerId));
+            if (sellerSnap.exists()) {
+              const sellerData = sellerSnap.data();
+              sellerName = sellerData.displayName || sellerData.name || "";
+              sellerType = sellerData.role === "institution" ? "institution" : "teacher";
+            }
+          }
+
+          const fee = sale.amount * (feePct / 100);
+          const netAmount = sale.amount - fee;
+
+          await updateDoc(saleRef, {
+            fee: Math.round(fee * 100) / 100,
+            netAmount: Math.round(netAmount * 100) / 100,
+            sellerId,
+            sellerName,
+            sellerType,
+            updatedAt: serverTimestamp(),
+          });
+        }
+
         await addDoc(collection(db, "users", sale.userId, "notifications"), {
           uid: sale.userId,
           type: "payment_approved",
           title: "Pagamento Confirmado",
           message: `O teu pagamento para "${sale.itemTitle || sale.type}" foi aprovado.`,
-          link: sale.type === "standalone" && sale.itemId ? `/dashboard/courses/${sale.itemId}` : "/dashboard",
+          link: sale.type === "standalone" && sale.itemId ? `/dashboard/courses/${sale.itemId}`
+            : sale.type === "live" && sale.itemId ? `/dashboard/lives/${sale.itemId}`
+            : "/dashboard",
           read: false,
           createdAt: serverTimestamp(),
         });
       } else if (newStatus !== "confirmed" && sale.status === "confirmed") {
         if (sale.type === "standalone" && sale.itemId) {
           await updateDoc(userRef, { enrolledCourses: arrayRemove(sale.itemId) });
+        } else if (sale.type === "live" && sale.itemId) {
+          await updateDoc(userRef, { enrolledLives: arrayRemove(sale.itemId) });
         } else if (sale.type === "smart" || sale.type === "golden") {
-          await updateDoc(userRef, { plan: "free" });
+          // Find the highest remaining plan from other active sales
+          const otherSales = await getDocs(
+            query(
+              collection(db, "sales"),
+              where("userId", "==", sale.userId),
+              where("status", "==", "confirmed")
+            )
+          );
+          let highestPlan: "free" | "smart" | "golden" = "free";
+          otherSales.docs.forEach((d) => {
+            if (d.id === id) return;
+            const t = d.data().type;
+            if (t === "golden") highestPlan = "golden";
+            else if (t === "smart" && highestPlan !== "golden") highestPlan = "smart";
+          });
+          await updateDoc(userRef, { plan: highestPlan });
         }
       }
 
-      await updateDoc(doc(db, "sales", id), { status: newStatus, updatedAt: serverTimestamp() });
-      setSales((p) => p.map((s) => s.id === id ? { ...s, status: newStatus } : s));
+      await updateDoc(saleRef, { status: newStatus, updatedAt: serverTimestamp() });
+      fetchSales();
       toast.success(newStatus === "confirmed" ? "Pagamento confirmado — acesso atribuído." : "Status atualizado.");
     } catch { toast.error("Erro ao atualizar status."); }
   };
@@ -169,7 +288,7 @@ export default function SalesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">
+          <h1 className="text-2xl lg:text-3xl font-bold text-white">
             {isTeacher ? "As Minhas Vendas" : "Vendas"}
           </h1>
           <p className="mt-1 text-gray-400">
@@ -219,6 +338,7 @@ export default function SalesPage() {
           className="bg-gray-900 border border-gray-800 text-gray-300 text-sm py-2.5 px-4 focus:outline-none appearance-none cursor-pointer">
           <option value="all">Todos os tipos</option>
           <option value="standalone">Curso Avulso</option>
+          <option value="live">Aula Avulsa</option>
           <option value="smart">Plano Smart</option>
           <option value="golden">Plano Golden</option>
         </select>
@@ -238,31 +358,36 @@ export default function SalesPage() {
         <div className="bg-gray-900/40 backdrop-blur-xl overflow-hidden">
           {/* Desktop table */}
           <div className="hidden sm:block overflow-x-auto">
-            <div className="min-w-[640px]">
-              <div className="flex px-5 py-3 border-b border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                <span className="flex-[2]">Cliente / Item</span>
-                <span className="flex-1">Tipo</span>
-                <span className="flex-1">Valor</span>
-                <span className="flex-[1.2]">Pagamento</span>
-                <span className="flex-1">Status</span>
-                <span className="w-16"></span>
+            <div className="min-w-[900px]">
+              <div className="grid grid-cols-[1fr_100px_100px_120px_120px_100px_70px] gap-2 px-5 py-3 border-b border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                <span>Cliente / Item</span>
+                <span>Líquido</span>
+                <span>Taxa</span>
+                <span>Tipo</span>
+                <span>Bruto</span>
+                <span>Status</span>
+                <span></span>
               </div>
               <div className="divide-y divide-gray-800/60">
                 {filtered.map((sale) => {
                   const sc = STATUS_CONFIG[sale.status];
                   const StatusIcon = sc.icon;
                   return (
-                    <div key={sale.id} className="flex px-5 py-4 items-center hover:bg-gray-800/30 transition-colors">
-                      <div className="flex-[2] min-w-0 pr-2">
+                    <div key={sale.id} className="grid grid-cols-[1fr_100px_100px_120px_120px_100px_70px] gap-2 px-5 py-4 items-center hover:bg-gray-800/30 transition-colors">
+                      <div className="min-w-0">
                         <p className="text-sm font-medium text-white truncate">{sale.userName}</p>
                         <p className="text-xs text-gray-500 truncate">{sale.userEmail}</p>
                         {sale.itemTitle && <p className="text-xs text-gray-600 truncate mt-0.5">{sale.itemTitle}</p>}
                         <p className="text-xs text-gray-700 mt-0.5">{formatDate(sale.createdAt)}</p>
                       </div>
-                      <span className="flex-1 text-xs text-gray-400 truncate px-1">{TYPE_LABELS[sale.type]}</span>
-                      <span className="flex-1 text-sm font-bold text-white truncate px-1">{formatKz(sale.amount)}</span>
-                      <span className="flex-[1.2] text-xs text-gray-400 truncate px-1">{sale.paymentMethod}</span>
-                      <div className="flex-1 px-1">
+                      <div>
+                        <p className="text-sm font-bold text-green-400">{formatKz(sale.netAmount ?? sale.amount)}</p>
+                        {sale.sellerName && <p className="text-[10px] text-gray-600 truncate">{sale.sellerName}</p>}
+                      </div>
+                      <span className="text-xs text-gray-400">{sale.fee ? formatKz(sale.fee) : "—"}</span>
+                      <span className="text-xs text-gray-400">{TYPE_LABELS[sale.type]}</span>
+                      <span className="text-sm font-bold text-white">{formatKz(sale.amount)}</span>
+                      <div className="relative">
                         {isAdmin ? (
                           <select value={sale.status}
                             onChange={(e) => updateStatus(sale.id!, e.target.value as Sale["status"])}
@@ -277,7 +402,7 @@ export default function SalesPage() {
                           </span>
                         )}
                       </div>
-                      <div className="w-16 flex items-center gap-1 shrink-0">
+                      <div className="flex items-center gap-1">
                         {sale.receiptUrl && (
                           <a href={sale.receiptUrl} target="_blank" rel="noopener noreferrer"
                             className="p-1.5 text-gray-500 hover:text-blue-400 transition-colors" title="Ver comprovativo">
@@ -311,6 +436,31 @@ export default function SalesPage() {
                       <p className="text-sm font-medium text-white truncate">{sale.userName}</p>
                       <p className="text-xs text-gray-500 truncate">{sale.userEmail}</p>
                     </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {sale.receiptUrl && (
+                        <a href={sale.receiptUrl} target="_blank" rel="noopener noreferrer"
+                          className="p-1.5 text-gray-500 hover:text-blue-400 transition-colors" title="Ver comprovativo">
+                          <FileText className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                      {isAdmin && (
+                        <button onClick={() => handleDelete(sale.id!)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  {sale.itemTitle && <p className="text-xs text-gray-400 truncate">{sale.itemTitle}</p>}
+                  <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
+                    <span className="font-bold text-white text-sm">{formatKz(sale.amount)}</span>
+                    <span>·</span>
+                    <span>{TYPE_LABELS[sale.type]}</span>
+                    <span>·</span>
+                    <span>{sale.paymentMethod}</span>
+                    <span>·</span>
+                    <span>{formatDate(sale.createdAt)}</span>
+                  </div>
+                  <div className="flex items-center gap-2 pt-1">
                     {isAdmin ? (
                       <select value={sale.status}
                         onChange={(e) => updateStatus(sale.id!, e.target.value as Sale["status"])}
@@ -323,29 +473,6 @@ export default function SalesPage() {
                       <span className={`shrink-0 inline-flex items-center gap-1 text-xs font-bold px-2 py-1 border ${sc.bg} ${sc.color}`}>
                         <StatusIcon className="h-3 w-3" />{sc.label}
                       </span>
-                    )}
-                  </div>
-                  {sale.itemTitle && <p className="text-xs text-gray-400 truncate">{sale.itemTitle}</p>}
-                  <div className="flex items-center gap-3 text-xs text-gray-500">
-                    <span className="font-bold text-white text-sm">{formatKz(sale.amount)}</span>
-                    <span>·</span>
-                    <span>{TYPE_LABELS[sale.type]}</span>
-                    <span>·</span>
-                    <span>{sale.paymentMethod}</span>
-                    <span>·</span>
-                    <span>{formatDate(sale.createdAt)}</span>
-                  </div>
-                  <div className="flex items-center gap-2 pt-1">
-                    {sale.receiptUrl && (
-                      <a href={sale.receiptUrl} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300">
-                        <FileText className="h-3 w-3" /> Comprovativo
-                      </a>
-                    )}
-                    {isAdmin && (
-                      <button onClick={() => handleDelete(sale.id!)} className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300">
-                        <Trash2 className="h-3 w-3" /> Apagar
-                      </button>
                     )}
                   </div>
                 </div>

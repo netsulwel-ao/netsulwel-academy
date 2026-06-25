@@ -6,16 +6,21 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc, increment, updateDoc, onSnapshot, setDoc, serverTimestamp, Timestamp, collection } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAccess } from "@/hooks/useAccess";
+import { useTrack } from "@/hooks/useTrack";
 import {
   Lock, Play, BookOpen, Award, ChevronLeft, Clock,
   Loader2, CheckCircle2, ChevronDown, ChevronRight, Crown, Zap,
-  Heart, HeartOff, Radio, Circle, Search,
+  Heart, HeartOff, Radio, Circle, Search, MessageCircle, Send, HelpCircle, ClipboardCheck,
 } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import Link from "next/link";
 import { VideoPlayer } from "@/components/VideoPlayer";
-import type { Course } from "@/types/course";
-import type { CourseType } from "@/types/course";
+import MaterialsList from "@/components/shared/MaterialsList";
+import ExerciseBlock from "@/components/shared/ExerciseBlock";
+import { getOrCreateGroupChat, getOrCreateIndividualChat, groupChatId } from "@/lib/chat";
+import { listenQuizResults, getQuizModules } from "@/lib/quiz";
+import type { ModuleQuizResult } from "@/types/quiz";
+import type { Course, CourseType } from "@/types/course";
 
 const LEVEL_LABEL: Record<string, string> = {
   beginner: "Iniciante", intermediate: "Intermédio", advanced: "Avançado",
@@ -114,6 +119,7 @@ export default function CourseDetailPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { canAccessCourse, requiredPlanLabel } = useAccess();
+  const { track } = useTrack();
 
   const [course, setCourse] = useState<Course | null>(null);
   const [enrolledCourses, setEnrolledCourses] = useState<string[]>([]);
@@ -127,6 +133,8 @@ export default function CourseDetailPage() {
   const [progressLoaded, setProgressLoaded] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const currentTimeRef = useRef(0);
+  const [quizResults, setQuizResults] = useState<ModuleQuizResult[]>([]);
+  const [quizModules, setQuizModules] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -143,6 +151,7 @@ export default function CourseDetailPage() {
 
         if (snap.exists()) {
           updateDoc(doc(db, "courses", id), { views: increment(1) }).catch(() => {});
+          track("course_view", id, "course").catch(() => {});
         }
 
         // Abre automaticamente na primeira aula (ou restaura progresso)
@@ -170,13 +179,18 @@ export default function CourseDetailPage() {
           setProgressLoaded(true);
           if (data.modules?.[0]?.videos?.[0]) setActiveLesson({ mi: 0, vi: 0 });
         }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+      // Buscar quizzes do curso para saber que módulos têm quiz
+      try {
+        const modules = await getQuizModules(id);
+        setQuizModules(modules);
+      } catch {}
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchData();
   }, [id, user, router]);
 
   useEffect(() => {
@@ -189,6 +203,12 @@ export default function CourseDetailPage() {
     });
     return () => { unsub(); countUnsub(); };
   }, [course?.createdBy, user]);
+
+  useEffect(() => {
+    if (!user || !course?.id) return;
+    const unsub = listenQuizResults(user.uid, course.id, setQuizResults);
+    return () => unsub();
+  }, [user?.uid, course?.id]);
 
   // Save progress periodically and on lesson change
   const saveProgress = useCallback(async (mi: number, vi: number, time?: number) => {
@@ -249,8 +269,16 @@ export default function CourseDetailPage() {
       lastAccessedAt: serverTimestamp(),
     }, { merge: true });
 
+    // Track lesson complete
+    if (!isCompleted) {
+      track("lesson_complete", course.id, "course", { moduleIndex: mi, lessonIndex: vi });
+    }
+
     // Gerar certificado se completou 100% e o curso tem certificado ativo
     const justCompleted = !isCompleted && newCount >= totalLessons && totalLessons > 0;
+    if (justCompleted) {
+      track("course_complete", course.id, "course").catch(() => {});
+    }
     if (justCompleted && course.hasCertificate) {
       const certId = `CERT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
       const estHours = course.totalDuration ? parseInt(course.totalDuration) : course.lessonsCount ?? 0;
@@ -543,6 +571,20 @@ export default function CourseDetailPage() {
             </div>
           )}
 
+          {/* Materials */}
+          {hasAccess && currentVideo?.materials && currentVideo.materials.length > 0 && (
+            <div className="bg-gray-900/40 px-5 py-4 border border-gray-800">
+              <MaterialsList materials={currentVideo.materials} />
+            </div>
+          )}
+
+          {/* Exercises */}
+          {hasAccess && currentVideo?.exercises && currentVideo.exercises.length > 0 && (
+            <div className="bg-gray-900/40 px-5 py-4 border border-gray-800">
+              <ExerciseBlock exercises={currentVideo.exercises} />
+            </div>
+          )}
+
           {/* Course info */}
           <div className="space-y-4">
             <div>
@@ -674,11 +716,82 @@ export default function CourseDetailPage() {
                           </button>
                         );
                       })}
+
+                      {/* Quiz link */}
+                      {(() => {
+                        const qr = quizResults.filter((r) => r.moduleIndex === mi);
+                        const best = qr.reduce((b, r) => (r.score > (b?.score ?? 0) ? r : b), qr[0]);
+                        if (!quizModules.includes(mi)) return null;
+                        return (
+                          <Link href={`/dashboard/courses/${course.id}/quiz/${mi}`}
+                            className={`flex items-center gap-3 px-5 py-3 transition-colors border-l-2 ${
+                              best?.passed
+                                ? "border-green-600 bg-green-950/10 hover:bg-green-950/20"
+                                : best && !best.passed
+                                  ? "border-red-600 bg-red-950/10 hover:bg-red-950/20"
+                                  : "border-transparent hover:bg-gray-800/30"
+                            }`}>
+                            <div className={`flex h-7 w-7 shrink-0 items-center justify-center ${
+                              best?.passed ? "bg-green-600" : best && !best.passed ? "bg-red-600" : "bg-gray-800"
+                            }`}>
+                              {best?.passed
+                                ? <CheckCircle2 className="h-4 w-4 text-white" />
+                                : best && !best.passed
+                                  ? <HelpCircle className="h-4 w-4 text-white" />
+                                  : <ClipboardCheck className="h-4 w-4 text-gray-500" />
+                              }
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-base truncate ${
+                                best?.passed ? "text-green-400" : best && !best.passed ? "text-red-400" : "text-gray-300"
+                              }`}>
+                                Quiz do Módulo
+                              </p>
+                              <p className="text-sm text-gray-600 mt-0.5">
+                                {best ? `Nota: ${best.score}% ${best.passed ? "✓" : "✗"}` : "Por fazer"}
+                              </p>
+                            </div>
+                          </Link>
+                        );
+                      })()}
                     </div>
                   )}
                 </div>
               ))}
             </div>
+
+            {/* Chat do curso */}
+            {hasAccess && (
+              <div className="border-t border-gray-800 p-5">
+                <h4 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">
+                  <MessageCircle className="h-3.5 w-3.5" /> Chat do Curso
+                </h4>
+                <div className="space-y-2">
+                  <Link href={`/dashboard/chats/${groupChatId(course.id!)}`}
+                    className="flex items-center gap-2.5 w-full px-3 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm font-medium transition-colors">
+                    <MessageCircle className="h-4 w-4 text-purple-400" />
+                    Grupo do curso
+                  </Link>
+                  {course.createdBy && course.createdBy !== user?.uid && (
+                    <button onClick={async () => {
+                      if (!user || !course.createdBy) return;
+                      try {
+                        const chatId = await getOrCreateIndividualChat(
+                          course.id!, course.title,
+                          course.createdBy, "Professor", undefined,
+                          user.uid, user.displayName || "Aluno", user.photoURL || undefined,
+                        );
+                        router.push(`/dashboard/chats/${chatId}`);
+                      } catch {}
+                    }}
+                      className="flex items-center gap-2.5 w-full px-3 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm font-medium transition-colors text-left">
+                      <Send className="h-4 w-4 text-green-400" />
+                      Falar com o professor
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* CTA if locked */}
             {!hasAccess && (

@@ -55,7 +55,7 @@ export default function AdminCommunityPage() {
     <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white">Comunidade</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold text-white">Comunidade</h1>
         <p className="mt-1 text-gray-400">Gerir publicações da comunidade</p>
       </div>
 

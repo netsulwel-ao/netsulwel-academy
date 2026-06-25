@@ -1,5 +1,7 @@
+import type { CourseMaterial } from "./course";
+
 export type LiveStatus = "scheduled" | "live" | "ended";
-export type LiveTarget = "free" | "smart" | "golden";
+export type LiveTarget = "free" | "smart" | "golden" | "standalone";
 
 export interface LiveSession {
   id?: string;
@@ -8,8 +10,10 @@ export interface LiveSession {
   thumbnail: string;
   scheduledAt: string;        // ISO datetime
   target: LiveTarget;
+  price?: number;             // only for standalone
   status: LiveStatus;
   createdBy: string;          // admin UID (consistente com courses/trails)
+  institutionId?: string;     // ID da instituição a que pertence
   hostName?: string;
   roomName: string;           // LiveKit room slug
   startedAt?: string;
@@ -17,6 +21,7 @@ export interface LiveSession {
   participantCount?: number;
   views?: number;
   recordingUrl?: string;      // R2 URL after recording saved
+  materials?: CourseMaterial[];
   createdAt?: unknown;
   updatedAt?: unknown;
 }

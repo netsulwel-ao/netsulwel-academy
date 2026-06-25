@@ -7,7 +7,9 @@ import Header from "@/components/admin/Header";
 import { Loader2 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { loading, profileLoaded, isAdminOrTeacher } = useAuth();
+  const { user, loading, profileLoaded, isAdmin } = useAuth();
+
+  if (!user) return null;
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
@@ -40,7 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   // Sem permissão — AuthContext já está a redirecionar
-  if (!isAdminOrTeacher) {
+  if (!isAdmin) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-950">
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
@@ -49,7 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
@@ -58,9 +60,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         theme={theme}
         onToggleTheme={toggleTheme}
       />
-      <div className={`flex-1 flex flex-col h-screen overflow-y-auto transition-all duration-300 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'}`}>
+      <div className={`flex flex-1 flex-col transition-all duration-300 h-full overflow-hidden ${isCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'}`}>
         <Header onMenuClick={() => setMobileOpen(true)} theme={theme} />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-background">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-background">
           {children}
         </main>
       </div>
