@@ -228,8 +228,8 @@ export default function AdminDashboardPage() {
     <div className="max-w-[100rem] mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-white">Painel de Controlo</h1>
-          <p className="mt-2 text-gray-400">Visão geral da plataforma.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Painel de Controlo</h1>
+          <p className="mt-2 text-gray-400 text-sm sm:text-base">Visão geral da plataforma.</p>
         </div>
         {isAdmin && (
           <Link href="/admin/users" className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-2.5 text-sm font-bold transition-colors">

@@ -267,7 +267,7 @@ export default function AdminManualPage() {
             {openSections.has(section.id) && (
               <div className="border-t border-gray-800">
                 {section.content.map((item, idx) => (
-                  <div key={idx} className="p-4 pl-[4.5rem] pr-4 border-b border-gray-800/50 last:border-b-0">
+                  <div key={idx} className="p-4 pl-4 sm:pl-[4.5rem] pr-4 border-b border-gray-800/50 last:border-b-0">
                     <h3 className="text-sm font-medium text-blue-300 mb-1.5 flex items-center gap-2">
                       <ArrowRight className="w-3 h-3 text-blue-500" />
                       {item.label}

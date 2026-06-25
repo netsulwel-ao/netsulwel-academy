@@ -285,7 +285,7 @@ export default function DashboardFinancesPage() {
                         : "border-gray-800 bg-gray-900/40 hover:border-gray-700"
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex flex-wrap items-center justify-between mb-4">
                     <div className={`flex items-center gap-3 ${id === "golden" ? "text-yellow-400" : "text-green-400"}`}>
                       {id === "golden" ? <Crown className="h-6 w-6" /> : <Zap className="h-6 w-6" />}
                       <span className="text-3xl font-bold text-white">{plan.label}</span>
@@ -370,26 +370,26 @@ export default function DashboardFinancesPage() {
                   </>
                 ) : course ? (
                   <>
-                    <div className="flex justify-between">
+                    <div className="flex flex-wrap justify-between">
                       <span className="text-gray-400">Curso</span>
                       <span className="text-white font-medium text-right">{course.title}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex flex-wrap justify-between">
                       <span className="text-gray-400">Tipo</span>
                       <span className="text-white font-medium">Curso Avulso</span>
                     </div>
                   </>
                 ) : (
-                  <div className="flex justify-between">
+                  <div className="flex flex-wrap justify-between">
                     <span className="text-gray-400">Plano</span>
                     <span className="text-white font-medium">{plans?.[selectedPlan!]?.label}</span>
                   </div>
                 )}
-                <div className="flex justify-between">
+                <div className="flex flex-wrap justify-between">
                   <span className="text-gray-400">Valor</span>
                   <span className="text-white font-bold">{(live ? (live.price ?? 0) : course ? (course.price ?? 0) : (plans?.[selectedPlan!]?.price ?? 0)).toLocaleString("pt-AO")} Kz</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex flex-wrap justify-between">
                   <span className="text-gray-400">Método</span>
                   <span className="text-white font-medium">{activeMethods.find((m) => m.id === selectedMethod)?.label}</span>
                 </div>
@@ -402,19 +402,19 @@ export default function DashboardFinancesPage() {
                 <h3 className="text-base font-bold text-white uppercase tracking-wider mb-3">Dados Bancários</h3>
                 <div className="space-y-3 text-base bg-gray-950/50 border border-gray-800 p-4">
                   {methods.bankTransfer.bankName && (
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between">
                       <span className="text-gray-400">Banco</span>
                       <span className="text-white font-medium">{methods.bankTransfer.bankName}</span>
                     </div>
                   )}
                   {methods.bankTransfer.accountHolder && (
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between">
                       <span className="text-gray-400">Titular</span>
                       <span className="text-white font-medium">{methods.bankTransfer.accountHolder}</span>
                     </div>
                   )}
                   {methods.bankTransfer.iban && (
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between">
                       <span className="text-gray-400">IBAN</span>
                       <div className="flex items-center gap-2">
                         <span className="text-white font-medium font-mono text-sm">{methods.bankTransfer.iban}</span>
@@ -423,7 +423,7 @@ export default function DashboardFinancesPage() {
                     </div>
                   )}
                   {methods.bankTransfer.reference && (
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between">
                       <span className="text-gray-400">Referência</span>
                       <span className="text-white font-medium">{methods.bankTransfer.reference}</span>
                     </div>
@@ -437,11 +437,11 @@ export default function DashboardFinancesPage() {
               <div>
                 <h3 className="text-base font-bold text-white uppercase tracking-wider mb-3">Multicaixa</h3>
                 <div className="space-y-3 text-base bg-gray-950/50 border border-gray-800 p-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between">
                     <span className="text-gray-400">Entidade</span>
                     <span className="text-white font-medium">{methods.multicaixa.entity}</span>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between">
                     <span className="text-gray-400">Referência</span>
                     <div className="flex items-center gap-2">
                       <span className="text-white font-medium">{methods.multicaixa.reference}</span>
@@ -492,7 +492,7 @@ export default function DashboardFinancesPage() {
                       PayPal não configurado — o administrador precisa definir o Client ID nas configurações.
                     </div>
                     {methods.paypal.email && (
-                      <div className="flex items-center justify-between bg-gray-950/50 border border-gray-800 px-4 py-3">
+                      <div className="flex flex-wrap items-center justify-between bg-gray-950/50 border border-gray-800 px-4 py-3">
                         <span className="text-base text-white font-medium">{methods.paypal.email}</span>
                         <button onClick={() => handleCopy(methods.paypal.email)} className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white">
                           <Copy className="h-4 w-4" /> Copiar
@@ -530,7 +530,7 @@ export default function DashboardFinancesPage() {
                   </label>
                 ) : (
                   <div className="border border-gray-800 bg-gray-950/50 p-4">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex flex-wrap items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <FileText className="h-5 w-5 text-blue-400" />
                         <span className="text-base text-white">{receipt.file.name}</span>

@@ -157,7 +157,7 @@ export default function NewLivePage() {
   ];
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in duration-500">
+    <div className="max-w-3xl mx-auto space-y-8 px-4 animate-in fade-in duration-500">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link
@@ -315,7 +315,7 @@ export default function NewLivePage() {
         </div>
 
         {/* Submit */}
-        <div className="flex items-center gap-4 pt-4 border-t border-gray-800">
+        <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 border-t border-gray-800">
           <Link
             href="/admin/lives"
             className="px-6 py-3 text-sm font-medium text-gray-400 hover:text-white transition-colors"

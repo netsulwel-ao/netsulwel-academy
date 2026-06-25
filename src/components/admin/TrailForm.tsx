@@ -258,7 +258,7 @@ export function TrailForm({ mode, initialData, allCourses, allLives, saving, err
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nível</label>
               <select value={level} onChange={(e) => setLevel(e.target.value as CourseLevel)}
@@ -458,8 +458,8 @@ export function TrailForm({ mode, initialData, allCourses, allLives, saving, err
                     </div>
 
                     <div className="p-4 space-y-4">
-                      <div className="flex gap-4">
-                        <div className="w-28 shrink-0">
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="w-full sm:w-28 shrink-0">
                           <div onClick={() => sessionThumbInputs.current.get(idx)?.click()}
                             className="relative aspect-video bg-gray-800 border border-dashed border-gray-700 hover:border-orange-500/50 cursor-pointer overflow-hidden group transition-colors">
                             {sess.thumbnail ? (
@@ -522,7 +522,7 @@ export function TrailForm({ mode, initialData, allCourses, allLives, saving, err
                             <input type="number" min={0} step={100} value={sess.price || ""}
                               onChange={(e) => updateLiveSession(idx, "price", Number(e.target.value) || 0)}
                               placeholder="Preço (Kz)"
-                              className="w-40 bg-gray-800 border border-gray-700 focus:border-purple-500/50 py-1.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
+                              className="w-full sm:w-40 bg-gray-800 border border-gray-700 focus:border-purple-500/50 py-1.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
                             <span className="text-xs text-gray-500">Kz</span>
                           </div>
                         )}

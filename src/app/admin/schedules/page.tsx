@@ -161,7 +161,7 @@ export default function SchedulesPage() {
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-white flex items-center gap-2 lg:gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2 lg:gap-3">
             <Calendar className="h-6 w-6 lg:h-8 lg:w-8 text-orange-400" />
             Cronograma — Aulas ao Vivo
           </h1>
@@ -270,10 +270,10 @@ export default function SchedulesPage() {
                         {/* Corpo da aula */}
                         <div className="p-4 space-y-4">
                           {/* Linha 1: Thumbnail + Título + Data */}
-                          <div className="flex gap-4">
-                            <div className="w-28 shrink-0">
+                          <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="w-full sm:w-28 shrink-0">
                               <div onClick={() => { thumbRefs.current.get(trail.id!)?.get(idx)?.click(); }}
-                                className="relative aspect-video bg-gray-800 border border-dashed border-gray-700 hover:border-orange-500/50 cursor-pointer overflow-hidden group transition-colors">
+                                className="relative aspect-video sm:aspect-video bg-gray-800 border border-dashed border-gray-700 hover:border-orange-500/50 cursor-pointer overflow-hidden group transition-colors">
                                 {sess.thumbnail ? (
                                   <img src={sess.thumbnail} alt="" className="w-full h-full object-cover" />
                                 ) : (

@@ -289,7 +289,7 @@ export default function AnnouncementsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-white">Marketing & Comunicação</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Marketing & Comunicação</h1>
           <p className="mt-1 text-gray-400">Popups, anúncios e banners de contagem regressiva</p>
         </div>
         <button onClick={tab==="announcements"?openCreateAnn:openCreateCD}
@@ -375,24 +375,24 @@ export default function AnnouncementsPage() {
                       <p className="text-white font-semibold mt-1 truncate">{a.title}</p>
                       <p className="text-gray-400 text-sm truncate">{a.body}</p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-1 sm:gap-2 shrink-0 flex-wrap justify-end">
                       {isAdmin && isPending && (
                         <>
-                          <button onClick={() => approveAnn(a.id!)} className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/30 hover:bg-green-500/20 transition-colors">
-                            <CheckCircle2 className="h-3.5 w-3.5"/> Aprovar
+                          <button onClick={() => approveAnn(a.id!)} className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/30 hover:bg-green-500/20 transition-colors">
+                            <CheckCircle2 className="h-3.5 w-3.5"/> <span className="hidden sm:inline">Aprovar</span>
                           </button>
-                          <button onClick={() => rejectAnn(a.id!)} className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-colors">
-                            <X className="h-3.5 w-3.5"/> Rejeitar
+                          <button onClick={() => rejectAnn(a.id!)} className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-colors">
+                            <X className="h-3.5 w-3.5"/> <span className="hidden sm:inline">Rejeitar</span>
                           </button>
                         </>
                       )}
-                      <button onClick={()=>toggleAnnActive(a)} className={`p-2 transition-colors ${a.active?"text-green-400 hover:text-green-300":"text-gray-600 hover:text-gray-400"}`}>
+                      <button onClick={()=>toggleAnnActive(a)} className={`p-2 transition-colors ${a.active?"text-green-400 hover:text-green-300":"text-gray-600 hover:text-gray-400"}`} title={a.active?"Desativar":"Ativar"}>
                         {a.active?<Eye className="h-4 w-4"/>:<EyeOff className="h-4 w-4"/>}
                       </button>
                       {(isAdmin || a.createdBy === user?.uid) && (
                         <>
-                          <button onClick={()=>openEditAnn(a)} className="p-2 text-gray-500 hover:text-white transition-colors"><Pencil className="h-4 w-4"/></button>
-                          <button onClick={()=>deleteAnn(a.id!)} className="p-2 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-4 w-4"/></button>
+                          <button onClick={()=>openEditAnn(a)} className="p-2 text-gray-500 hover:text-white transition-colors" title="Editar"><Pencil className="h-4 w-4"/></button>
+                          <button onClick={()=>deleteAnn(a.id!)} className="p-2 text-gray-500 hover:text-red-400 transition-colors" title="Apagar"><Trash2 className="h-4 w-4"/></button>
                         </>
                       )}
                     </div>

@@ -106,7 +106,7 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-white">Configurações</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Configurações</h1>
           <p className="mt-1 text-gray-400">Planos, pagamentos, redes sociais e contacto</p>
         </div>
         <button onClick={handleSave} disabled={saving}

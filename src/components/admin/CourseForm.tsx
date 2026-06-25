@@ -274,7 +274,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
       )}
 
       {/* Two-column layout */}
-      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+      <div className="flex flex-col lg:flex-row flex-1 overflow-y-auto">
 
         {/* LEFT PANEL */}
         <div className="w-full lg:w-[380px] shrink-0 border-b lg:border-b-0 lg:border-r border-gray-800 overflow-y-auto p-6 space-y-6">
@@ -372,7 +372,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
           {/* Formato */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Formato do Curso</label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button type="button" onClick={() => setFormat("recorded")}
                 className={`flex items-center justify-center gap-2 px-4 py-3 border text-sm font-bold transition-all ${
                   format === "recorded"
@@ -406,7 +406,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
           )}
 
           {/* Nível + Categoria */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nível</label>
               <select value={level} onChange={(e) => setLevel(e.target.value as CourseLevel)}
@@ -559,14 +559,14 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                       <div key={vi} className="bg-gray-950/60 border border-gray-800/60 p-3 space-y-2">
                         {format === "live" ? (
                            <>
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <span className="text-xs text-gray-600 w-5 shrink-0 text-right">{vi + 1}.</span>
                             <input type="text" value={video.title} onChange={(e) => updateVideo(mi, vi, "title", e.target.value)}
 placeholder="Título da aula"
-                              className="flex-1 bg-gray-900 border border-gray-800 focus:border-purple-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all" />
+                              className="flex-1 min-w-[120px] bg-gray-900 border border-gray-800 focus:border-purple-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all" />
                             <input type="datetime-local" value={toDatetimeLocal(video.scheduledAt ?? "")}
                               onChange={(e) => updateVideo(mi, vi, "scheduledAt", new Date(e.target.value).toISOString())}
-                              className="w-44 shrink-0 bg-gray-900 border border-gray-800 focus:border-purple-500/40 py-1.5 px-3 text-sm text-white focus:outline-none transition-all" />
+                              className="w-full sm:w-44 shrink-0 bg-gray-900 border border-gray-800 focus:border-purple-500/40 py-1.5 px-3 text-sm text-white focus:outline-none transition-all" />
                             <input type="number" min="1" value={video.duration}
                               onChange={(e) => updateVideo(mi, vi, "duration", e.target.value)}
                               placeholder="Minutos"
@@ -592,11 +592,11 @@ placeholder="Título da aula"
                             </>
                           ) : (
                           <>
-                          <div className="flex items-center gap-2">
-                           <span className="text-xs text-gray-600 w-5 shrink-0 text-right">{vi + 1}.</span>
-                           <input type="text" value={video.title} onChange={(e) => updateVideo(mi, vi, "title", e.target.value)}
-                             placeholder="Título da aula"
-                             className="flex-1 bg-gray-900 border border-gray-800 focus:border-blue-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all" />
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-xs text-gray-600 w-5 shrink-0 text-right">{vi + 1}.</span>
+                            <input type="text" value={video.title} onChange={(e) => updateVideo(mi, vi, "title", e.target.value)}
+                              placeholder="Título da aula"
+                              className="flex-1 min-w-[120px] bg-gray-900 border border-gray-800 focus:border-blue-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all" />
                            <input type="text" value={video.duration} onChange={(e) => updateVideo(mi, vi, "duration", e.target.value)}
                              placeholder="00:00"
                              className="w-20 shrink-0 bg-gray-900 border border-gray-800 focus:border-blue-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none text-center transition-all" />

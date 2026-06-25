@@ -193,7 +193,7 @@ export default function AdminStudentsPage() {
     <div className="max-w-[100rem] mx-auto space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">
             {isTeacher ? "Os Meus Alunos" : "Alunos"}
           </h1>
           <p className="mt-2 text-gray-400">

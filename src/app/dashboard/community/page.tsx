@@ -52,8 +52,8 @@ export default function DashboardCommunityPage() {
           <Users className="h-6 w-6 text-purple-light" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-4">
-            <div>
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="min-w-0">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Comunidade</h1>
               <p className="mt-1 text-gray-400">
                 Dúvidas, projetos, discussões e dicas dos alunos.

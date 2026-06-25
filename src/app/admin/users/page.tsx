@@ -117,7 +117,7 @@ export default function UsersPage() {
 
       {/* ── Header ── */}
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-white">Alunos</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white">Utilizadores</h1>
         <p className="mt-1 text-gray-400">Gestão de utilizadores da plataforma</p>
       </div>
 
@@ -203,113 +203,140 @@ export default function UsersPage() {
           compact
         />
       ) : (
-        <div className="bg-gray-900/40 backdrop-blur-xl overflow-x-auto">
-          <div className="min-w-[600px]">
-          {/* Table header */}
-          <div className="grid grid-cols-[1fr_1fr_120px_120px_48px] gap-4 px-5 py-3 border-b border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
-            <span>Utilizador</span>
-            <span>Email</span>
-            <span>Registado</span>
-            <span>Role</span>
-            <span></span>
+        <div className="bg-gray-900/40 backdrop-blur-xl overflow-hidden">
+          {/* Desktop table */}
+          <div className="hidden sm:block overflow-x-auto">
+            <div className="min-w-[550px]">
+              <div className="flex items-center px-5 py-3 border-b border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                <span className="flex-[2]">Utilizador</span>
+                <span className="flex-[1.5]">Email</span>
+                <span className="flex-1">Registado</span>
+                <span className="flex-1">Role</span>
+                <span className="w-10"></span>
+              </div>
+              <div className="divide-y divide-gray-800/60">
+                {filtered.map((u) => (
+                  <div key={u.id} className="flex items-center px-5 py-4 hover:bg-gray-800/30 transition-colors group">
+                    <div className="flex-[2] flex items-center gap-3 min-w-0 pr-2">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 text-white text-xs font-bold overflow-hidden">
+                        {u.photoURL
+                          ? <img src={u.photoURL} alt={u.name} className="h-full w-full object-cover" />
+                          : getInitials(u.name, u.email)
+                        }
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-white truncate">{u.name || "—"}</p>
+                        <p className="text-xs text-gray-500 truncate">{u.id.substring(0, 12)}...</p>
+                      </div>
+                    </div>
+                    <div className="flex-[1.5] flex items-center gap-2 min-w-0 px-1">
+                      <Mail className="h-3.5 w-3.5 text-gray-600 shrink-0" />
+                      <span className="text-sm text-gray-300 truncate">{u.email || "—"}</span>
+                    </div>
+                    <span className="flex-1 flex items-center gap-1.5 text-sm text-gray-400 px-1">
+                      <Calendar className="h-3.5 w-3.5 text-gray-600 shrink-0" />
+                      {formatDate(u.createdAt)}
+                    </span>
+                    <div className="flex-1 px-1">
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${
+                        u.role === "admin"
+                          ? "bg-purple-500/15 text-purple-400 border border-purple-500/25"
+                          : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                      }`}>
+                        {u.role === "admin" ? <Shield className="h-3 w-3" /> : <BookOpen className="h-3 w-3" />}
+                        {u.role}
+                      </span>
+                    </div>
+                    {/* Actions */}
+                    <div className="w-10 flex justify-center shrink-0">
+                      {actionLoading === u.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <div className="relative">
+                          <button onClick={() => setMenuOpen(menuOpen === u.id ? null : u.id)}
+                            className="p-1.5 text-gray-600 hover:text-white hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100">
+                            <MoreVertical className="h-4 w-4" />
+                          </button>
+                          {menuOpen === u.id && (
+                            <>
+                              <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(null)} />
+                              <div className="absolute right-0 top-8 z-20 w-52 bg-gray-900 border border-gray-700 shadow-2xl py-1">
+                                <button onClick={() => { setSelectedUser(u); setMenuOpen(null); }}
+                                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                                  <Users className="h-4 w-4" /> Ver detalhes
+                                </button>
+                                {u.role === "aluno" ? (
+                                  <button onClick={() => handleRoleChange(u, "admin")}
+                                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-purple-400 hover:bg-purple-500/10 transition-colors">
+                                    <Shield className="h-4 w-4" /> Promover a Admin
+                                  </button>
+                                ) : (
+                                  <button onClick={() => handleRoleChange(u, "aluno")}
+                                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-amber-400 hover:bg-amber-500/10 transition-colors">
+                                    <ShieldOff className="h-4 w-4" /> Remover Admin
+                                  </button>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="px-5 py-3 border-t border-gray-800 text-xs text-gray-500">
+                {filtered.length} de {users.length} utilizadores
+              </div>
+            </div>
           </div>
-
-          {/* Rows */}
-          <div className="divide-y divide-gray-800/60">
-            {filtered.map((user) => (
-              <div key={user.id}
-                className="grid grid-cols-[1fr_1fr_120px_120px_48px] gap-4 px-5 py-4 items-center hover:bg-gray-800/30 transition-colors group">
-
-                {/* Avatar + nome */}
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 text-white text-xs font-bold overflow-hidden">
-                    {user.photoURL
-                      ? <img src={user.photoURL} alt={user.name} className="h-full w-full object-cover" />
-                      : getInitials(user.name, user.email)
-                    }
+          {/* Mobile cards */}
+          <div className="sm:hidden divide-y divide-gray-800/60">
+            {filtered.map((u) => (
+              <div key={u.id} className="px-4 py-4 space-y-2 hover:bg-gray-800/30 transition-colors">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 text-white text-xs font-bold overflow-hidden">
+                      {u.photoURL ? <img src={u.photoURL} alt={u.name} className="h-full w-full object-cover" /> : getInitials(u.name, u.email)}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-white truncate">{u.name || "—"}</p>
+                      <p className="text-xs text-gray-500 truncate">{u.email || "—"}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-white truncate">{user.name || "—"}</p>
-                    <p className="text-xs text-gray-500 truncate">{user.id.substring(0, 12)}...</p>
-                  </div>
-                </div>
-
-                {/* Email */}
-                <div className="flex items-center gap-2 min-w-0">
-                  <Mail className="h-3.5 w-3.5 text-gray-600 shrink-0" />
-                  <span className="text-sm text-gray-300 truncate">{user.email || "—"}</span>
-                </div>
-
-                {/* Data */}
-                <div className="flex items-center gap-1.5 text-sm text-gray-400">
-                  <Calendar className="h-3.5 w-3.5 text-gray-600 shrink-0" />
-                  {formatDate(user.createdAt)}
-                </div>
-
-                {/* Role badge */}
-                <div>
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${
-                    user.role === "admin"
-                      ? "bg-purple-500/15 text-purple-400 border border-purple-500/25"
-                      : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                  <span className={`shrink-0 inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold uppercase ${
+                    u.role === "admin" ? "bg-purple-500/15 text-purple-400" : "bg-blue-500/10 text-blue-400"
                   }`}>
-                    {user.role === "admin" ? <Shield className="h-3 w-3" /> : <BookOpen className="h-3 w-3" />}
-                    {user.role}
+                    {u.role === "admin" ? <Shield className="h-3 w-3" /> : <BookOpen className="h-3 w-3" />}
+                    {u.role}
                   </span>
                 </div>
-
-                {/* Actions menu */}
-                <div className="relative flex justify-center">
-                  {actionLoading === user.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <Calendar className="h-3 w-3" />
+                  {formatDate(u.createdAt)}
+                </div>
+                <div className="flex items-center gap-2 pt-1">
+                  <button onClick={() => setSelectedUser(u)}
+                    className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300">
+                    <Users className="h-3 w-3" /> Detalhes
+                  </button>
+                  {u.role === "aluno" ? (
+                    <button onClick={() => handleRoleChange(u, "admin")}
+                      className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300">
+                      <Shield className="h-3 w-3" /> Admin
+                    </button>
                   ) : (
-                    <>
-                      <button
-                        onClick={() => setMenuOpen(menuOpen === user.id ? null : user.id)}
-                        className="p-1.5 text-gray-600 hover:text-white hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100"
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                      </button>
-
-                      {menuOpen === user.id && (
-                        <>
-                          <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(null)} />
-                          <div className="absolute right-0 top-8 z-20 w-52 bg-gray-900 border border-gray-700 shadow-2xl py-1">
-                            <button
-                              onClick={() => { setSelectedUser(user); setMenuOpen(null); }}
-                              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
-                            >
-                              <Users className="h-4 w-4" /> Ver detalhes
-                            </button>
-                            {user.role === "aluno" ? (
-                              <button
-                                onClick={() => handleRoleChange(user, "admin")}
-                                className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-purple-400 hover:bg-purple-500/10 transition-colors"
-                              >
-                                <Shield className="h-4 w-4" /> Promover a Admin
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => handleRoleChange(user, "aluno")}
-                                className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-amber-400 hover:bg-amber-500/10 transition-colors"
-                              >
-                                <ShieldOff className="h-4 w-4" /> Remover Admin
-                              </button>
-                            )}
-                          </div>
-                        </>
-                      )}
-                    </>
+                    <button onClick={() => handleRoleChange(u, "aluno")}
+                      className="flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300">
+                      <ShieldOff className="h-3 w-3" /> Remover
+                    </button>
                   )}
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* Footer count */}
-          <div className="px-5 py-3 border-t border-gray-800 text-xs text-gray-500">
-            {filtered.length} de {users.length} utilizadores
-          </div>
+            <div className="px-4 py-3 text-xs text-gray-500">
+              {filtered.length} de {users.length} utilizadores
+            </div>
           </div>
         </div>
       )}

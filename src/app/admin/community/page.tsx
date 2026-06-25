@@ -114,27 +114,70 @@ export default function AdminCommunityPage() {
           compact
         />
       ) : (
-        <div className="bg-gray-900/40 backdrop-blur-xl overflow-x-auto">
-          <div className="min-w-[700px]">
-            {/* Header */}
-            <div className="grid grid-cols-[1fr_120px_100px_100px_80px] gap-4 px-5 py-3 border-b border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
-              <span>Publicação</span>
-              <span>Tipo</span>
-              <span>Gostos</span>
-              <span>Comentários</span>
-              <span></span>
-            </div>
-
-            {/* Rows */}
-            <div className="divide-y divide-gray-800/60">
-              {filtered.map((post) => (
-                <div key={post.id} className="grid grid-cols-[1fr_120px_100px_100px_80px] gap-4 px-5 py-4 items-center hover:bg-gray-800/30 transition-colors group">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-white truncate">{post.title}</p>
-                    <p className="text-xs text-gray-500 truncate mt-0.5">{post.authorName} &middot; {post.authorId.substring(0, 8)}...</p>
+        <div className="bg-gray-900/40 backdrop-blur-xl overflow-hidden">
+          {/* Desktop table */}
+          <div className="hidden sm:block overflow-x-auto">
+            <div className="min-w-[600px]">
+              <div className="flex items-center px-5 py-3 border-b border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                <span className="flex-[2]">Publicação</span>
+                <span className="flex-1">Tipo</span>
+                <span className="flex-1">Gostos</span>
+                <span className="flex-1">Comentários</span>
+                <span className="w-16"></span>
+              </div>
+              <div className="divide-y divide-gray-800/60">
+                {filtered.map((post) => (
+                  <div key={post.id} className="flex items-center px-5 py-4 hover:bg-gray-800/30 transition-colors group">
+                    <div className="flex-[2] min-w-0 pr-2">
+                      <p className="text-sm font-medium text-white truncate">{post.title}</p>
+                      <p className="text-xs text-gray-500 truncate mt-0.5">{post.authorName} &middot; {post.authorId.substring(0, 8)}...</p>
+                    </div>
+                    <span className="flex-1 px-1">
+                      <span className={`inline-flex items-center px-2 py-0.5 text-xs font-bold ${
+                        post.type === "duvida" ? "text-amber-400 bg-amber-500/10" :
+                        post.type === "projeto" ? "text-green-400 bg-green-500/10" :
+                        post.type === "discussao" ? "text-blue-400 bg-blue-500/10" :
+                        "text-purple-400 bg-purple-500/10"
+                      }`}>
+                        {post.type}
+                      </span>
+                    </span>
+                    <span className="flex-1 flex items-center gap-1.5 text-sm text-gray-400 px-1">
+                      <Heart className="h-3.5 w-3.5 text-gray-600" />
+                      {post.likesCount || 0}
+                    </span>
+                    <span className="flex-1 flex items-center gap-1.5 text-sm text-gray-400 px-1">
+                      <MessageCircle className="h-3.5 w-3.5 text-gray-600" />
+                      {post.commentsCount || 0}
+                    </span>
+                    <div className="w-16 flex items-center gap-1 shrink-0">
+                      <Link href={`/dashboard/community/${post.id}`} target="_blank"
+                        className="p-1.5 text-gray-600 hover:text-blue-400 hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100">
+                        <ExternalLink className="h-4 w-4" />
+                      </Link>
+                      <button onClick={() => setConfirmDeleteId(post.id)} disabled={deleting === post.id}
+                        className="p-1.5 text-gray-600 hover:text-red-400 hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-30">
+                        {deleting === post.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
-
-                  <span className={`inline-flex items-center px-2 py-0.5 text-xs font-bold w-fit ${
+                ))}
+              </div>
+              <div className="px-5 py-3 border-t border-gray-800 text-xs text-gray-500">
+                {filtered.length} de {posts.length} publicações
+              </div>
+            </div>
+          </div>
+          {/* Mobile cards */}
+          <div className="sm:hidden divide-y divide-gray-800/60">
+            {filtered.map((post) => (
+              <div key={post.id} className="px-4 py-4 space-y-2 hover:bg-gray-800/30 transition-colors">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-white truncate">{post.title}</p>
+                    <p className="text-xs text-gray-500 truncate">{post.authorName}</p>
+                  </div>
+                  <span className={`shrink-0 inline-flex items-center px-2 py-0.5 text-xs font-bold ${
                     post.type === "duvida" ? "text-amber-400 bg-amber-500/10" :
                     post.type === "projeto" ? "text-green-400 bg-green-500/10" :
                     post.type === "discussao" ? "text-blue-400 bg-blue-500/10" :
@@ -142,38 +185,24 @@ export default function AdminCommunityPage() {
                   }`}>
                     {post.type}
                   </span>
-
-                  <div className="flex items-center gap-1.5 text-sm text-gray-400">
-                    <Heart className="h-3.5 w-3.5 text-gray-600" />
-                    {post.likesCount || 0}
-                  </div>
-
-                  <div className="flex items-center gap-1.5 text-sm text-gray-400">
-                    <MessageCircle className="h-3.5 w-3.5 text-gray-600" />
-                    {post.commentsCount || 0}
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    <Link
-                      href={`/dashboard/community/${post.id}`}
-                      target="_blank"
-                      className="p-1.5 text-gray-600 hover:text-blue-400 hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </Link>
-                    <button
-                      onClick={() => setConfirmDeleteId(post.id)}
-                      disabled={deleting === post.id}
-                      className="p-1.5 text-gray-600 hover:text-red-400 hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-30"
-                    >
-                      {deleting === post.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                    </button>
-                  </div>
                 </div>
-              ))}
-            </div>
-
-            <div className="px-5 py-3 border-t border-gray-800 text-xs text-gray-500">
+                <div className="flex items-center gap-3 text-xs text-gray-500">
+                  <span className="flex items-center gap-1"><Heart className="h-3 w-3 text-gray-600" />{post.likesCount || 0}</span>
+                  <span className="flex items-center gap-1"><MessageCircle className="h-3 w-3 text-gray-600" />{post.commentsCount || 0}</span>
+                </div>
+                <div className="flex items-center gap-2 pt-1">
+                  <Link href={`/dashboard/community/${post.id}`} target="_blank"
+                    className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300">
+                    <ExternalLink className="h-3 w-3" /> Ver
+                  </Link>
+                  <button onClick={() => setConfirmDeleteId(post.id)} disabled={deleting === post.id}
+                    className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 disabled:opacity-30">
+                    {deleting === post.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />} Apagar
+                  </button>
+                </div>
+              </div>
+            ))}
+            <div className="px-4 py-3 text-xs text-gray-500">
               {filtered.length} de {posts.length} publicações
             </div>
           </div>

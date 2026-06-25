@@ -59,7 +59,7 @@ export default function TrailsPage() {
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-white">Trilhas</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Trilhas</h1>
           <p className="mt-1 text-gray-400">{loading ? "A carregar..." : `${trails.length} trilha${trails.length !== 1 ? "s" : ""}`}</p>
         </div>
         <Link href="/admin/trails/new"

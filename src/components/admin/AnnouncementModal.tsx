@@ -24,16 +24,16 @@ export function AnnouncementModal({ announcement, onClose, preview=false }:
 
       {/* Layout rico: imagem lateral + benefícios */}
       {hasImage && hasBenefits ? (
-        <div className="flex min-h-[480px]">
+        <div className="flex flex-col lg:flex-row min-h-[480px]">
           {/* Left */}
-          <div className="flex-1 p-10 flex flex-col gap-6">
+          <div className="flex-1 p-5 sm:p-10 flex flex-col gap-6">
             <div className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold uppercase tracking-wider border self-start ${cfg.bg} ${cfg.color}`}>
               <TypeIcon className="h-4 w-4"/>
               {announcement.badgeLabel || cfg.label}
               {announcement.type==="live"&&<span className="flex h-2 w-2 relative ml-1"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"/><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"/></span>}
             </div>
             <div>
-              <h3 className="text-3xl font-bold text-white leading-tight">{announcement.title||"Título"}</h3>
+              <h3 className="text-2xl sm:text-3xl font-bold text-white leading-tight">{announcement.title||"Título"}</h3>
               <p className="mt-2 text-gray-400 text-base leading-relaxed">{announcement.body}</p>
             </div>
             <ul className="space-y-4 flex-1">
@@ -56,7 +56,7 @@ export function AnnouncementModal({ announcement, onClose, preview=false }:
             )}
           </div>
           {/* Right — imagem */}
-          <div className="relative w-72 shrink-0 overflow-hidden">
+          <div className="relative w-full lg:w-72 shrink-0 overflow-hidden">
             <img src={announcement.imageUrl} alt={announcement.title} className="absolute inset-0 w-full h-full object-cover"/>
             <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent"/>
           </div>
@@ -71,13 +71,13 @@ export function AnnouncementModal({ announcement, onClose, preview=false }:
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"/>
             </div>
           )}
-          <div className="p-10 space-y-5">
+          <div className="p-5 sm:p-10 space-y-5">
             <div className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold uppercase tracking-wider border ${cfg.bg} ${cfg.color}`}>
               <TypeIcon className="h-4 w-4"/>
               {announcement.badgeLabel||cfg.label}
               {announcement.type==="live"&&<span className="flex h-2 w-2 relative ml-1"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"/><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"/></span>}
             </div>
-            <h3 className="text-3xl font-bold text-white leading-tight">{announcement.title||"Título"}</h3>
+            <h3 className="text-2xl sm:text-3xl font-bold text-white leading-tight">{announcement.title||"Título"}</h3>
             <p className="text-gray-400 text-base leading-relaxed">{announcement.body||"Mensagem aqui."}</p>
             {hasBenefits&&(
               <ul className="space-y-4 pt-2">
