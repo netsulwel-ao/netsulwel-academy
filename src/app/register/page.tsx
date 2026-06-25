@@ -318,7 +318,7 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 mt-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
                     <div className="space-y-1.5">
                       <label className="text-sm font-medium text-gray-300" htmlFor="idade">Idade</label>
                       <div className="relative">
@@ -346,7 +346,7 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 mt-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
                     <div className="space-y-1.5">
                       <label className="text-sm font-medium text-gray-300" htmlFor="nacionalidade">Nacionalidade</label>
                       <div className="relative">

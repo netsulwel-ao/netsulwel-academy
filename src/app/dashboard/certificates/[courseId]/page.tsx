@@ -98,7 +98,7 @@ export default function CertificatePage() {
   return (
     <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
       {/* Top actions */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-6">
         <Link href="/dashboard/courses" className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
           <ArrowLeft className="h-4 w-4" />
           Voltar aos cursos
@@ -156,7 +156,7 @@ export default function CertificatePage() {
               {cert.courseTitle}
             </h3>
 
-            <div className="flex items-center justify-center gap-6 text-sm text-gray-500 print:text-gray-600">
+            <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-sm text-gray-500 print:text-gray-600">
               <span className="flex items-center gap-1.5">
                 <Clock className="h-4 w-4" />
                 {cert.hours}h
@@ -184,7 +184,7 @@ export default function CertificatePage() {
           </div>
 
           {/* Signatures */}
-          <div className="flex items-center justify-center gap-16 mb-10 print:mb-8">
+          <div className="flex items-center justify-center flex-wrap gap-8 sm:gap-16 mb-10 print:mb-8">
             <div className="text-center">
               <div className="w-40 h-px bg-gray-600 print:bg-gray-400 mb-2" />
               <p className="text-sm text-gray-500 print:text-gray-600">Diretor Académico</p>

@@ -47,7 +47,7 @@ export default function CourseLiveStudioPage() {
   if (!course) return null;
 
   return (
-    <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
+    <div className="max-w-4xl mx-auto px-4 animate-in fade-in duration-500">
       <Link href="/admin/courses" className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-6">
         <ArrowLeft className="h-4 w-4" /> Voltar aos cursos
       </Link>
@@ -73,7 +73,7 @@ export default function CourseLiveStudioPage() {
                 if (!video.scheduledAt) return null;
                 const st = getLessonStatus(video.scheduledAt, video.duration);
                 return (
-                  <div key={vi} className="flex items-center gap-4 px-5 py-4">
+                  <div key={vi} className="flex flex-wrap items-center gap-3 px-5 py-4">
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center ${
                       st.status === "live" ? "bg-green-600 animate-pulse" :
                       st.status === "ended" ? "bg-gray-800" : "bg-gray-800"

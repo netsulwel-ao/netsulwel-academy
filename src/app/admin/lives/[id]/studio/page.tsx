@@ -267,9 +267,9 @@ function VideoControls({ live, onEnd }: { live: LiveSession; onEnd: () => void }
           <div className="h-full bg-red-500 w-full" />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 overflow-x-auto pb-1">
           {/* Live badge */}
-          <div className="flex items-center gap-1.5 bg-red-600 px-2.5 py-1 text-xs font-bold text-white">
+          <div className="flex items-center gap-1.5 bg-red-600 px-2.5 py-1 text-xs font-bold text-white shrink-0">
             <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
             LIVE
           </div>
@@ -278,10 +278,10 @@ function VideoControls({ live, onEnd }: { live: LiveSession; onEnd: () => void }
           {live.startedAt && <ElapsedTimer since={live.startedAt} />}
 
           {/* Volume icon */}
-          <Volume2 className="h-5 w-5 text-white ml-1" />
+          <Volume2 className="h-5 w-5 text-white shrink-0" />
 
           {/* Viewers */}
-          <div className="flex items-center gap-1.5 text-white text-sm ml-2">
+          <div className="flex items-center gap-1.5 text-white text-sm shrink-0">
             <Eye className="h-4 w-4" />
             <span className="font-medium">{participants.length}</span>
           </div>
@@ -291,25 +291,25 @@ function VideoControls({ live, onEnd }: { live: LiveSession; onEnd: () => void }
 
           {/* Media toggles */}
           <TrackToggle source={Track.Source.Microphone}
-            className="flex items-center justify-center h-9 w-9 bg-gray-800/80 hover:bg-gray-700 text-white transition-colors data-[lk-muted=true]:bg-red-600/80 backdrop-blur-sm" />
+            className="flex items-center justify-center h-9 w-9 bg-gray-800/80 hover:bg-gray-700 text-white transition-colors data-[lk-muted=true]:bg-red-600/80 backdrop-blur-sm shrink-0" />
           <TrackToggle source={Track.Source.Camera}
-            className="flex items-center justify-center h-9 w-9 bg-gray-800/80 hover:bg-gray-700 text-white transition-colors data-[lk-muted=true]:bg-red-600/80 backdrop-blur-sm" />
+            className="flex items-center justify-center h-9 w-9 bg-gray-800/80 hover:bg-gray-700 text-white transition-colors data-[lk-muted=true]:bg-red-600/80 backdrop-blur-sm shrink-0" />
           <TrackToggle source={Track.Source.ScreenShare}
-            className="flex items-center justify-center h-9 w-9 bg-gray-800/80 hover:bg-gray-700 text-white transition-colors data-[lk-enabled=true]:bg-blue-600/80 backdrop-blur-sm" />
+            className="flex items-center justify-center h-9 w-9 bg-gray-800/80 hover:bg-gray-700 text-white transition-colors data-[lk-enabled=true]:bg-blue-600/80 backdrop-blur-sm shrink-0" />
 
           {/* Settings */}
-          <button className="flex items-center justify-center h-9 w-9 bg-gray-800/80 hover:bg-gray-700 text-white transition-colors backdrop-blur-sm">
+          <button className="flex items-center justify-center h-9 w-9 bg-gray-800/80 hover:bg-gray-700 text-white transition-colors backdrop-blur-sm shrink-0">
             <Settings className="h-4 w-4" />
           </button>
 
           {/* Fullscreen */}
-          <button className="flex items-center justify-center h-9 w-9 bg-gray-800/80 hover:bg-gray-700 text-white transition-colors backdrop-blur-sm">
+          <button className="flex items-center justify-center h-9 w-9 bg-gray-800/80 hover:bg-gray-700 text-white transition-colors backdrop-blur-sm shrink-0">
             <Maximize2 className="h-4 w-4" />
           </button>
 
           {/* End */}
           <button onClick={() => setShowEndConfirm(true)}
-            className="flex items-center gap-2 h-9 px-4 bg-red-600 hover:bg-red-700 text-white font-bold text-sm transition-colors ml-2">
+            className="flex items-center gap-2 h-9 px-4 bg-red-600 hover:bg-red-700 text-white font-bold text-sm transition-colors shrink-0">
             <PhoneOff className="h-4 w-4" />
             Terminar
           </button>
@@ -358,7 +358,7 @@ function StudioInterior({ live, onEnd }: { live: LiveSession; onEnd: () => void 
       <div className="flex items-center gap-4 px-4 py-2.5 bg-[#18181b] border-b border-gray-800 shrink-0">
         <div className="flex items-center gap-2">
           <Radio className="h-5 w-5 text-red-500 animate-pulse" />
-          <span className="text-sm font-bold text-white truncate max-w-xs">{live.title}</span>
+          <span className="text-sm font-bold text-white truncate max-w-[50vw] sm:max-w-xs">{live.title}</span>
         </div>
         <div className="flex items-center gap-1.5 bg-red-600/20 border border-red-500/30 px-2.5 py-1 text-xs font-bold text-red-400">
           <div className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
