@@ -7,7 +7,7 @@ import Header from "@/components/admin/Header";
 import { Loader2 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading, profileLoaded, isAdmin } = useAuth();
+  const { user, loading, profileLoaded, isAdminOrTeacher } = useAuth();
 
   if (!user) return null;
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -42,7 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   // Sem permissão — AuthContext já está a redirecionar
-  if (!isAdmin) {
+  if (!isAdminOrTeacher) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-950">
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
