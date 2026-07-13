@@ -112,13 +112,12 @@ export default function DashboardLivesPage() {
         const snap = await getDocs(
           query(
             collection(db, "lives"),
-            where("status", "in", ["scheduled", "live", "ended"]),
             orderBy("scheduledAt", "desc")
           )
         );
-        const all = snap.docs.map(
-          (d) => ({ id: d.id, ...d.data() } as LiveSession)
-        );
+        const all = snap.docs
+          .map((d) => ({ id: d.id, ...d.data() } as LiveSession))
+          .filter((l) => ["scheduled", "live", "ended"].includes(l.status));
         setLives(all);
 
         // Fetch creator names for profile links

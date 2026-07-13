@@ -82,8 +82,8 @@ export function useProfile(userId: string | undefined) {
       try {
         const [userSnap, coursesSnap, livesSnap] = await Promise.all([
           getDoc(doc(db, "users", userId)),
-          getDocs(query(collection(db, "courses"), where("createdBy", "==", userId), where("status", "==", "published"), orderBy("createdAt", "desc"))),
-          getDocs(query(collection(db, "lives"), where("createdBy", "==", userId), where("status", "in", ["scheduled", "live", "ended"]), orderBy("scheduledAt", "desc"))),
+          getDocs(query(collection(db, "courses"), where("createdBy", "==", userId), where("status", "==", "published"), orderBy("createdAt", "desc"))).catch(() => ({ docs: [] })),
+          getDocs(query(collection(db, "lives"), where("createdBy", "==", userId))).catch(() => ({ docs: [] })),
         ]);
 
         if (userSnap.exists()) {

@@ -92,12 +92,14 @@ export default function DashboardPage() {
         const livesSnap = await getDocs(
           query(
             collection(db, "lives"),
-            where("status", "in", ["scheduled", "live"]),
             orderBy("scheduledAt", "asc"),
-            limit(1)
+            limit(20)
           )
         );
-        setNextLive(livesSnap.docs[0] ? ({ id: livesSnap.docs[0].id, ...livesSnap.docs[0].data() } as LiveSession) : null);
+        const upcomingLive = livesSnap.docs
+          .map((d) => ({ id: d.id, ...d.data() } as LiveSession))
+          .find((l) => l.status === "scheduled" || l.status === "live");
+        setNextLive(upcomingLive || null);
 
         // Fetch trending courses
         try {
