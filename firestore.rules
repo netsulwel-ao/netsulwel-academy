@@ -106,7 +106,7 @@ service cloud.firestore {
 
     // ── lives ─────────────────────────────────────────────
     match /lives/{liveId} {
-      allow read: if resource.data.status in ["scheduled", "live", "ended", "published"] || isAdminOrTeacher();
+      allow read: if isAuth();
       allow create: if isAdminOrTeacher();
       allow update: if isAdmin() ||
         (isTeacher() && resource.data.createdBy == request.auth.uid);
