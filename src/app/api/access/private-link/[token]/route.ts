@@ -109,7 +109,7 @@ export async function GET(
     const userRef = db.collection("users").doc(uid);
     const userSnap = await userRef.get();
 
-    if (!userSnap.exists()) {
+    if (!userSnap.exists) {
       return NextResponse.json(
         { error: "Usuário não encontrado" },
         { status: 404 }
