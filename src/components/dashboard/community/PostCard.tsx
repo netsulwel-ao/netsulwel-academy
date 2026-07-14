@@ -30,8 +30,8 @@ export default function PostCard({ post }: { post: CommunityPost }) {
     import("firebase/firestore").then(({ getDoc }) => {
       getDoc(doc(db, "community", post.id, "likes", user.uid)).then((s) => {
         if (s.exists()) setLiked(true);
-      });
-    });
+      }).catch(() => {});
+    }).catch(() => {});
   }, [user, post.id]);
 
   const toggleLike = async () => {

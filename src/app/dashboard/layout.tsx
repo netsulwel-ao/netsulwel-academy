@@ -14,21 +14,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const pathname = usePathname();
 
-  if (!user) return null;
-
-  useEffect(() => {
-    if (isAdmin) router.replace("/admin");
-  }, [isAdmin, router]);
-
-  useEffect(() => {
-    if (isInstitution && !pathname?.startsWith("/dashboard/institution")) {
-      router.replace("/dashboard/institution");
-    }
-  }, [isInstitution, pathname, router]);
-
  const [isCollapsed, setIsCollapsed] = useState(false);
  const [mobileOpen, setMobileOpen] = useState(false);
  const [theme, setTheme] = useState<"dark" | "light">("dark");
+
+ useEffect(() => {
+   if (isAdmin) router.replace("/admin");
+ }, [isAdmin, router]);
+
+ useEffect(() => {
+   if (isInstitution && !pathname?.startsWith("/dashboard/institution")) {
+     router.replace("/dashboard/institution");
+   }
+ }, [isInstitution, pathname, router]);
 
  useEffect(() => {
    const saved = localStorage.getItem("dashboard-theme") as "dark" | "light" | null;
@@ -39,6 +37,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
    document.documentElement.setAttribute("data-theme", theme);
    return () => { document.documentElement.removeAttribute("data-theme"); };
  }, [theme]);
+
+ if (!user) return null;
 
  const toggleTheme = () => {
    setTheme((prev) => {

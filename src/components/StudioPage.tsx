@@ -219,7 +219,7 @@ function PreJoin({ onJoin }: { onJoin: (opts: { audio: boolean; video: boolean }
     <button
       onClick={onClick}
       className={[
-        "flex flex-col items-center justify-center gap-1 h-12 w-12 transition-colors",
+        "flex flex-col items-center justify-center gap-1 h-10 sm:h-12 w-10 sm:w-12 transition-colors",
         active ? "bg-white/10 hover:bg-white/15 text-white" : "bg-red-600/80 hover:bg-red-600 text-white",
       ].join(" ")}
     >
@@ -228,38 +228,39 @@ function PreJoin({ onJoin }: { onJoin: (opts: { audio: boolean; video: boolean }
   );
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#0a0a0c] p-6">
+    <div className="flex items-center justify-center min-h-screen bg-[#0a0a0c] p-3 sm:p-6">
       <div className="w-full max-w-xl border border-white/8 bg-[#111114]">
         {/* Header */}
-        <div className="px-5 py-3 border-b border-white/8 flex items-center gap-2">
-          <Radio className="h-3.5 w-3.5 text-red-500" />
-          <span className="text-sm font-semibold text-white">Verificação antes de entrar</span>
+        <div className="px-4 sm:px-5 py-2.5 sm:py-3 border-b border-white/8 flex items-center gap-2">
+          <Radio className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-red-500 shrink-0" />
+          <span className="text-xs sm:text-sm font-semibold text-white">Verificação antes de entrar</span>
         </div>
 
         {/* Preview */}
-        <div className="relative bg-black aspect-video">
+        <div className="relative bg-black aspect-video w-full">
           {cameraOn && streamRef.current
             ? <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" />
             : (
-              <div className="flex flex-col items-center justify-center h-full gap-3">
-                <VideoOff className="h-10 w-10 text-white/20" />
-                <p className="text-xs text-white/30">Câmara desligada</p>
+              <div className="flex flex-col items-center justify-center h-full gap-2 sm:gap-3">
+                <VideoOff className="h-8 sm:h-10 w-8 sm:w-10 text-white/20" />
+                <p className="text-xs sm:text-xs text-white/30">Câmara desligada</p>
               </div>
             )}
 
           {/* Controls overlay */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-4 pb-4 pt-10">
-            <div className="flex items-center justify-center gap-3">
-              {iconBtn(micOn, toggleMic, <Mic className="h-5 w-5" />, <MicOff className="h-5 w-5" />)}
-              {iconBtn(cameraOn, toggleCamera, <Video className="h-5 w-5" />, <VideoOff className="h-5 w-5" />)}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-3 sm:px-4 pb-3 sm:pb-4 pt-8 sm:pt-10">
+            <div className="flex items-center justify-center gap-2 sm:gap-3">
+              {iconBtn(micOn, toggleMic, <Mic className="h-4 sm:h-5 w-4 sm:w-5" />, <MicOff className="h-4 sm:h-5 w-4 sm:w-5" />)}
+              {iconBtn(cameraOn, toggleCamera, <Video className="h-4 sm:h-5 w-4 sm:w-5" />, <VideoOff className="h-4 sm:h-5 w-4 sm:w-5" />)}
               <button
                 onClick={() => setShowSettings(v => !v)}
                 className={[
-                  "flex items-center justify-center h-12 w-12 transition-colors",
+                  "flex items-center justify-center h-10 sm:h-12 w-10 sm:w-12 transition-colors",
                   showSettings ? "bg-white/20 text-white" : "bg-white/8 hover:bg-white/12 text-white/60",
                 ].join(" ")}
+                title="Configurações"
               >
-                <Settings className="h-5 w-5" />
+                <Settings className="h-4 sm:h-5 w-4 sm:w-5" />
               </button>
             </div>
           </div>
@@ -267,17 +268,17 @@ function PreJoin({ onJoin }: { onJoin: (opts: { audio: boolean; video: boolean }
 
         {/* Settings drawer */}
         {showSettings && (
-          <div className="border-t border-white/8 bg-[#0e0e11] p-4 space-y-3">
+          <div className="border-t border-white/8 bg-[#0e0e11] p-3 sm:p-4 space-y-2 sm:space-y-3 max-h-48 overflow-y-auto">
             {[
               { label: "Câmara", list: cams, val: currentCam, set: (v: string) => { setCurrentCam(v); startMedia(v, currentMic || undefined); } },
               { label: "Microfone", list: mics, val: currentMic, set: (v: string) => { setCurrentMic(v); startMedia(currentCam || undefined, v); } },
             ].map(({ label, list, val, set }) => (
               <div key={label}>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-white/30 block mb-1">{label}</label>
+                <label className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-white/30 block mb-1">{label}</label>
                 <select
                   value={val}
                   onChange={e => set(e.target.value)}
-                  className="w-full bg-[#0a0a0c] border border-white/10 text-white/80 px-3 py-2 text-sm focus:outline-none focus:border-white/25 transition-colors"
+                  className="w-full bg-[#0a0a0c] border border-white/10 text-white/80 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:outline-none focus:border-white/25 transition-colors"
                 >
                   {list.map(d => (
                     <option key={d.deviceId} value={d.deviceId}>{d.label || `${label} ${d.deviceId.slice(0, 8)}`}</option>
@@ -289,14 +290,14 @@ function PreJoin({ onJoin }: { onJoin: (opts: { audio: boolean; video: boolean }
         )}
 
         {/* CTA */}
-        <div className="border-t border-white/8 p-4">
+        <div className="border-t border-white/8 p-3 sm:p-4">
           <button
             onClick={() => onJoin({ audio: micOn, video: cameraOn })}
-            className="w-full flex items-center justify-center gap-2 bg-white text-black font-bold py-3 text-sm hover:bg-white/90 transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-white text-black font-bold py-2.5 sm:py-3 text-xs sm:text-sm hover:bg-white/90 transition-colors"
           >
-            <LogIn className="h-4 w-4" /> Entrar na Sala
+            <LogIn className="h-3.5 sm:h-4 w-3.5 sm:w-4" /> Entrar na Sala
           </button>
-          <p className="text-center text-[11px] text-white/25 mt-2">
+          <p className="text-center text-[10px] sm:text-[11px] text-white/25 mt-2">
             {!micOn && !cameraOn ? "Vais entrar sem microfone nem câmara"
               : !micOn ? "Vais entrar sem microfone"
               : !cameraOn ? "Vais entrar sem câmara"
@@ -619,45 +620,61 @@ function ControlsBar({ live, onEnd }: { live: LiveSession; onEnd: () => void }) 
     return () => document.removeEventListener("fullscreenchange", handler);
   }, []);
 
-  const btnBase = "flex flex-col items-center justify-center gap-1 h-14 w-fit min-w-[64px] px-1 transition-colors select-none text-white/70 hover:text-white hover:bg-white/8";
+  const btnBase = "flex flex-col items-center justify-center gap-0.5 sm:gap-1 h-12 sm:h-14 w-12 sm:w-fit sm:min-w-[64px] sm:px-1 px-0 transition-colors select-none text-white/70 hover:text-white hover:bg-white/8";
+  const btnText = "hidden sm:inline text-[10px] sm:text-[10px] font-medium tracking-wide leading-none";
 
   return (
     <>
-      <div className="h-16 bg-[#0e0e11] border-t border-white/8 flex items-center px-4 shrink-0">
+      <div className="h-14 sm:h-16 bg-[#0e0e11] border-t border-white/8 flex items-center px-2 sm:px-4 gap-1 sm:gap-2 shrink-0 overflow-x-auto sm:overflow-x-visible">
         <div className="flex-1" />
 
-        <div className="flex items-center">
-          <button onClick={() => localParticipant?.setMicrophoneEnabled(!isMicOn)}
-            className={`${btnBase} ${isMicOn ? "" : "text-red-400 bg-red-500/10 hover:bg-red-500/20"}`}>
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          <button 
+            onClick={() => localParticipant?.setMicrophoneEnabled(!isMicOn)}
+            className={`${btnBase} ${isMicOn ? "" : "text-red-400 bg-red-500/10 hover:bg-red-500/20"}`}
+            title={isMicOn ? "Desligar microfone" : "Ligar microfone"}
+          >
             {isMicOn ? <Mic size={18} /> : <MicOff size={18} />}
-            <span className="text-[10px] font-medium tracking-wide leading-none">Microfone</span>
+            <span className={btnText}>Mic</span>
           </button>
 
-          <button onClick={() => localParticipant?.setCameraEnabled(!isCamOn)}
-            className={`${btnBase} ${isCamOn ? "" : "text-red-400 bg-red-500/10 hover:bg-red-500/20"}`}>
+          <button 
+            onClick={() => localParticipant?.setCameraEnabled(!isCamOn)}
+            className={`${btnBase} ${isCamOn ? "" : "text-red-400 bg-red-500/10 hover:bg-red-500/20"}`}
+            title={isCamOn ? "Desligar câmara" : "Ligar câmara"}
+          >
             {isCamOn ? <Video size={18} /> : <VideoOff size={18} />}
-            <span className="text-[10px] font-medium tracking-wide leading-none">Câmara</span>
+            <span className={btnText}>Cam</span>
           </button>
 
-          <div className="w-px h-8 bg-white/8 mx-2" />
+          <div className="w-px h-8 bg-white/8 mx-1 sm:mx-2 hidden sm:block" />
 
-          <button onClick={() => localParticipant?.setScreenShareEnabled(!isScreenOn)}
-            className={`${btnBase} ${isScreenOn ? "text-blue-300 bg-blue-500/15 hover:bg-blue-500/25" : ""}`}>
+          <button 
+            onClick={() => localParticipant?.setScreenShareEnabled(!isScreenOn)}
+            className={`${btnBase} ${isScreenOn ? "text-blue-300 bg-blue-500/15 hover:bg-blue-500/25" : ""}`}
+            title={isScreenOn ? "Parar partilha" : "Partilhar ecrã"}
+          >
             <MonitorUp size={18} />
-            <span className="text-[10px] font-medium tracking-wide leading-none">Partilhar</span>
+            <span className={btnText}>Partilha</span>
           </button>
 
-          <button onClick={toggleFullscreen}
-            className="flex flex-col items-center justify-center gap-1 h-14 w-fit min-w-[64px] px-1 transition-colors select-none text-white/70 hover:text-white hover:bg-white/8">
+          <button 
+            onClick={toggleFullscreen}
+            className={`${btnBase} hidden sm:flex`}
+            title={isFullscreen ? "Sair de ecrã total" : "Ecrã total"}
+          >
             {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-            <span className="text-[10px] font-medium tracking-wide leading-none">{isFullscreen ? "Sair" : "Ecrã total"}</span>
+            <span className={btnText}>{isFullscreen ? "Sair" : "Tela"}</span>
           </button>
         </div>
 
         <div className="flex-1 flex justify-end">
-          <button onClick={() => setShowEndConfirm(true)}
-            className="flex items-center gap-2 h-10 px-5 bg-red-700 hover:bg-red-600 text-white font-bold text-sm transition-colors">
-            <PhoneOff className="h-4 w-4" /> Encerrar aula
+          <button 
+            onClick={() => setShowEndConfirm(true)}
+            className="flex items-center gap-1 sm:gap-2 h-10 px-3 sm:px-5 bg-red-700 hover:bg-red-600 text-white font-bold text-xs sm:text-sm transition-colors whitespace-nowrap"
+          >
+            <PhoneOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> 
+            <span className="hidden sm:inline">Encerrar</span>
           </button>
         </div>
       </div>
@@ -666,19 +683,27 @@ function ControlsBar({ live, onEnd }: { live: LiveSession; onEnd: () => void }) 
         <>
           <div className="fixed inset-0 z-50 bg-black/75" onClick={() => setShowEndConfirm(false)} />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="bg-[#111114] border border-white/10 p-8 max-w-sm w-full space-y-5">
+            <div className="bg-[#111114] border border-white/10 p-6 sm:p-8 max-w-sm w-full space-y-5">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
                 <div>
                   <h3 className="text-base font-bold text-white">Encerrar aula?</h3>
-                  <p className="text-sm text-white/40 mt-1">Todos os participantes serão desconectados imediatamente.</p>
+                  <p className="text-xs sm:text-sm text-white/40 mt-1">Todos os participantes serão desconectados imediatamente.</p>
                 </div>
               </div>
-              <div className="flex gap-3">
-                <button onClick={() => setShowEndConfirm(false)}
-                  className="flex-1 py-2.5 text-sm font-medium text-white/50 hover:text-white bg-white/5 hover:bg-white/10 transition-colors">Cancelar</button>
-                <button onClick={() => { setShowEndConfirm(false); onEnd(); }}
-                  className="flex-1 py-2.5 text-sm font-bold text-white bg-red-700 hover:bg-red-600 transition-colors">Sim, encerrar</button>
+              <div className="flex gap-2 sm:gap-3">
+                <button 
+                  onClick={() => setShowEndConfirm(false)}
+                  className="flex-1 py-2.5 text-xs sm:text-sm font-medium text-white/50 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={() => { setShowEndConfirm(false); onEnd(); }}
+                  className="flex-1 py-2.5 text-xs sm:text-sm font-bold text-white bg-red-700 hover:bg-red-600 transition-colors"
+                >
+                  Sim, encerrar
+                </button>
               </div>
             </div>
           </div>
@@ -694,6 +719,7 @@ function ControlsBar({ live, onEnd }: { live: LiveSession; onEnd: () => void }) 
 function StudioInterior({ live, onEnd }: { live: LiveSession; onEnd: () => void }) {
   const [sideTab, setSideTab] = useState<"palavra" | "alunos" | "chat">("palavra");
   const [pinnedMsg, setPinnedMsg] = useState<ChatMessage | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const participants = useParticipants();
   useEntrySound();
 
@@ -707,48 +733,69 @@ function StudioInterior({ live, onEnd }: { live: LiveSession; onEnd: () => void 
     <div className="flex flex-col h-full bg-[#0a0a0c]">
 
       {/* ── Top bar (44px) ── */}
-      <div className="h-11 min-h-[44px] bg-[#0e0e11] border-b border-white/8 flex items-center px-4">
+      <div className="h-11 min-h-[44px] bg-[#0e0e11] border-b border-white/8 flex items-center px-3 sm:px-4 gap-2 sm:gap-4">
 
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <Radio className="h-3.5 w-3.5 text-white/30 shrink-0" />
-          <span className="text-sm font-semibold text-white/80 truncate">{live.title}</span>
+          <span className="text-xs sm:text-sm font-semibold text-white/80 truncate">{live.title}</span>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 bg-red-600/15 border border-red-500/20 px-2 py-0.5">
+          <div className="flex items-center gap-1.5 bg-red-600/15 border border-red-500/20 px-2 py-0.5 hidden sm:flex">
             <span className="w-1.5 h-1.5 bg-red-500 animate-pulse shrink-0" />
             <span className="text-[11px] font-bold text-red-400 tracking-widest">AO VIVO</span>
           </div>
           {live.startedAt && <ElapsedTimer since={live.startedAt} />}
         </div>
 
-        <div className="flex-1 flex justify-end">
-          <div className="flex items-center gap-1.5 text-white/40">
-            <Eye className="h-3.5 w-3.5" />
-            <span className="text-xs tabular-nums font-medium">{participants.length}</span>
-          </div>
+        <div className="flex items-center gap-1.5 text-white/40 shrink-0">
+          <Eye className="h-3.5 w-3.5" />
+          <span className="text-xs tabular-nums font-medium">{participants.length}</span>
         </div>
+
+        {/* Mobile menu toggle */}
+        <button 
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="md:hidden flex items-center justify-center h-8 w-8 text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+        >
+          {sidebarOpen ? <MessageSquare className="h-4 w-4" /> : <MessageSquare className="h-4 w-4 opacity-50" />}
+        </button>
       </div>
 
       {/* ── Body ── */}
-      <div className="flex flex-row flex-1 min-h-0">
+      <div className="flex flex-col md:flex-row flex-1 min-h-0">
 
-        <div className="flex-1 flex min-w-0 bg-black">
-          <div className="flex-1 relative">
+        <div className="flex-1 flex min-w-0 bg-black md:order-1 order-2">
+          <div className="flex-1 relative w-full">
             <Stage hostName={live.hostName || "Professor"} />
           </div>
         </div>
 
-        <div className="w-[300px] shrink-0 border-l border-white/8 flex flex-col bg-[#0e0e11]">
-          <div className="flex border-b border-white/8 shrink-0">
+        {/* Sidebar */}
+        <div className={`
+          flex flex-col bg-[#0e0e11] border-t md:border-t-0 md:border-l border-white/8
+          w-full md:w-[280px] lg:w-[320px] shrink-0
+          order-1 md:order-2
+          transition-all duration-300 ease-out
+          ${sidebarOpen ? 'h-auto md:h-auto' : 'h-0 overflow-hidden md:h-auto'}
+        `}>
+          <div className="flex border-b border-white/8 shrink-0 gap-0">
             {tabs.map(t => (
-              <button key={t.id} onClick={() => setSideTab(t.id)}
-                className={`flex-1 h-10 flex items-center justify-center gap-1.5 text-xs font-semibold transition-colors ${sideTab === t.id ? "text-white border-b-2 border-white bg-white/[3%]" : "text-white/30 hover:text-white/60 bg-transparent"}`}>
-                {t.icon}{t.label}
+              <button 
+                key={t.id} 
+                onClick={() => setSideTab(t.id)}
+                className={`flex-1 h-10 flex items-center justify-center gap-1 sm:gap-1.5 text-xs sm:text-xs font-semibold transition-colors ${
+                  sideTab === t.id 
+                    ? "text-white border-b-2 border-white bg-white/[3%]" 
+                    : "text-white/30 hover:text-white/60 bg-transparent"
+                }`}
+              >
+                <span className="text-xs sm:text-sm">{t.icon}</span>
+                <span className="hidden sm:inline">{t.label}</span>
               </button>
             ))}
           </div>
-          <div className="flex-1 min-h-0">
+          <div className="flex-1 min-h-0 overflow-hidden">
             {sideTab === "palavra" && <PalavraPanel liveId={live.id!} />}
             {sideTab === "alunos" && <AlunosPanel liveId={live.id!} />}
             {sideTab === "chat" && <ChatPanel liveId={live.id!} pinnedMsg={pinnedMsg} onPin={setPinnedMsg} hostName={live.hostName || "Professor"} />}

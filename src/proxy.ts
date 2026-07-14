@@ -11,10 +11,24 @@ export function proxy(request: NextRequest) {
   const hasValidUid = isValidUid(uid);
 
   const isProtected = pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
-  const isPublicPage = pathname === "/login" || pathname === "/register" || pathname.startsWith("/register/") || pathname === "/verify-email" || pathname === "/";
+  const isPublicPage = 
+    pathname === "/login" || 
+    pathname === "/register" || 
+    pathname.startsWith("/register/") || 
+    pathname === "/verify-email" || 
+    pathname.startsWith("/access/") ||  // Link privado de acesso
+    pathname === "/";
   const isStatic = pathname.startsWith("/_next") || pathname.startsWith("/favicon");
 
   if (isStatic) return NextResponse.next();
+  
+  // Link de acesso pode redirecionar para login se necessário
+  if (pathname.startsWith("/access/") && !hasValidUid) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", pathname + request.nextUrl.search);
+    return NextResponse.redirect(loginUrl);
+  }
+  
   if (isPublicPage && hasValidUid) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }

@@ -49,7 +49,7 @@ export default function CommunityPostDetailPage() {
     if (!user || !id) return;
     getDoc(doc(db, "community", id, "likes", user.uid)).then((s) => {
       if (s.exists()) setLiked(true);
-    });
+    }).catch(() => {});
   }, [user, id]);
 
   const toggleLike = async () => {

@@ -1,3 +1,5 @@
+"use client";
+
 let lastPlayed = 0;
 
 export function playEntrySound() {
