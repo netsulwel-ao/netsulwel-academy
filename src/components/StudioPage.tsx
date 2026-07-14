@@ -29,22 +29,43 @@ import { playEntrySound } from "@/lib/entry-sound";
 function ShareLiveButton({ liveId, liveTitle }: { liveId: string; liveTitle: string }) {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+  const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const { user } = useAuth();
 
   const handleGenerateLink = async () => {
+    if (!user || loading) return;
+    
+    setLoading(true);
     try {
-      // Importar o hook dinamicamente
-      const { usePrivateAccessLink } = await import("@/hooks/usePrivateAccessLink");
-      const { createLink, getShareUrl } = usePrivateAccessLink();
+      const authToken = await user.getIdToken();
       
-      // Criar link: 24h de validade, ilimitado de usos
-      const link = await createLink(undefined, liveId, 24 * 60 * 60 * 1000, undefined);
-      if (link) {
-        const url = getShareUrl(link.token);
-        setShareUrl(url);
+      // Chamar API para criar link
+      const res = await fetch("/api/access/private-link/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          liveId,
+          expiresIn: 24 * 60 * 60 * 1000, // 24h
+          maxUses: undefined, // Ilimitado
+        }),
+      });
+
+      const data = await res.json();
+      
+      if (data.shareUrl) {
+        setShareUrl(data.shareUrl);
+        console.log("Link gerado:", data.shareUrl);
+      } else {
+        console.error("Erro:", data.error);
       }
     } catch (error) {
       console.error("Erro ao gerar link:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,7 +79,6 @@ function ShareLiveButton({ liveId, liveTitle }: { liveId: string; liveTitle: str
 
   const handleShare = async () => {
     if (!shareUrl) {
-      await handleGenerateLink();
       return;
     }
 
@@ -66,29 +86,43 @@ function ShareLiveButton({ liveId, liveTitle }: { liveId: string; liveTitle: str
       try {
         await navigator.share({
           title: `Aula ao Vivo: ${liveTitle}`,
-          text: `Clica neste link para aceder à aula: ${shareUrl}`,
+          text: `Clica neste link para aceder à aula`,
           url: shareUrl,
         });
       } catch (err) {
         console.error("Erro ao partilhar:", err);
       }
+    } else {
+      handleCopy();
     }
   };
 
   return (
     <>
       <button
-        onClick={() => {
-          if (!shareUrl) {
-            handleGenerateLink();
+        onClick={async () => {
+          if (!shareUrl && !loading) {
+            await handleGenerateLink();
+            setShowShareMenu(true);
+          } else {
+            setShowShareMenu(!showShareMenu);
           }
-          setShowShareMenu(!showShareMenu);
         }}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 bg-purple/20 hover:bg-purple/30 border border-purple/50 text-purple-200 hover:text-purple-100 rounded text-xs font-medium transition-colors"
+        disabled={loading}
+        className="flex items-center gap-1.5 px-2.5 py-1.5 bg-purple/20 hover:bg-purple/30 border border-purple/50 text-purple-200 hover:text-purple-100 rounded text-xs font-medium transition-colors disabled:opacity-50"
         title="Partilhar aula"
       >
-        <Share2 className="h-3.5 w-3.5" />
-        <span className="hidden sm:inline">Partilhar</span>
+        {loading ? (
+          <>
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            <span className="hidden sm:inline">Gerando...</span>
+          </>
+        ) : (
+          <>
+            <Share2 className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Partilhar</span>
+          </>
+        )}
       </button>
 
       {/* Share Menu Dropdown */}
@@ -100,11 +134,11 @@ function ShareLiveButton({ liveId, liveTitle }: { liveId: string; liveTitle: str
               type="text"
               value={shareUrl}
               readOnly
-              className="flex-1 bg-transparent text-gray-200 text-xs font-mono border-0 outline-0"
+              className="flex-1 bg-transparent text-gray-200 text-xs font-mono border-0 outline-0 truncate"
             />
             <button
               onClick={handleCopy}
-              className={`p-1 transition-colors ${
+              className={`p-1 transition-colors shrink-0 ${
                 copied
                   ? "bg-green-500/20 text-green-400"
                   : "bg-gray-700 hover:bg-gray-600 text-gray-300"
