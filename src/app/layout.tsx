@@ -7,12 +7,16 @@ import { Toaster } from "sonner";
 const inter = Inter({
  variable: "--font-inter",
  subsets: ["latin"],
+ display: "swap",
+ preload: true,
 });
 
 const pressStart = Press_Start_2P({
  variable: "--font-press-start",
  weight: "400",
  subsets: ["latin"],
+ display: "swap",
+ preload: false,
 });
 
 // ── Defaults ──────────────────────────────────────────────
@@ -38,6 +42,9 @@ async function fetchSEOSettings(): Promise<{ description: string; keywords: stri
     return { description: DEFAULT_DESCRIPTION, keywords: DEFAULT_KEYWORDS };
   }
 }
+
+// ── Viewport ──────────────────────────────────────────────
+export const viewport = "width=device-width, initial-scale=1.0, viewport-fit=cover";
 
 // ── generateMetadata ──────────────────────────────────────
 export async function generateMetadata(): Promise<Metadata> {

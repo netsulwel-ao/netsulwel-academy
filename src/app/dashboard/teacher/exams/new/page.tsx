@@ -37,7 +37,7 @@ export default function NewExamPage() {
     if (!user) return;
     getDocs(query(collection(db, "courses"), where("createdBy", "==", user.uid))).then((snap) => {
       setCourses(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Course)));
-    });
+    }).catch(() => {});
   }, [user]);
 
   const addQuestion = () => setQuestions((prev) => [...prev, emptyQuestion()]);

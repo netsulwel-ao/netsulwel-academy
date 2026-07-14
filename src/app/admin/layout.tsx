@@ -9,7 +9,6 @@ import { Loader2 } from "lucide-react";
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, profileLoaded, isAdminOrTeacher } = useAuth();
 
-  if (!user) return null;
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
@@ -31,6 +30,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return next;
     });
   };
+
+  if (!user) return null;
 
   // Aguarda loading E profile — o redirect é feito pelo AuthContext
   if (loading || !profileLoaded) {
