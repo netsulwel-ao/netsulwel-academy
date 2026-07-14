@@ -61,15 +61,15 @@ export default function AccessPage() {
           return;
         }
 
+        console.log("[ACCESS] Link validated, redirecting to:", data.redirectTo);
+        
         setStatus("success");
         setMessage("Acesso concedido! Redirecionando...");
         setRedirectUrl(data.redirectTo || "/dashboard");
         toast.success("Bem-vindo!");
 
-        // Redirecionar após 2 segundos
-        setTimeout(() => {
-          router.push(data.redirectTo);
-        }, 2000);
+        // Redirecionar imediatamente
+        router.push(data.redirectTo || "/dashboard");
       } catch (error) {
         console.error("Erro ao validar link:", error);
         setStatus("error");

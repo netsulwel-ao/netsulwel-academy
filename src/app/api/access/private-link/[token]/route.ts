@@ -73,6 +73,13 @@ export async function GET(
       ? `/(studio)/lives/${link.liveId}/studio`
       : `/dashboard/courses/${link.courseId}`;
 
+    console.log("[API] Link data:", {
+      linkId: link.id,
+      liveId: link.liveId,
+      courseId: link.courseId,
+      computedRedirectTo: redirectTo,
+    });
+
     // Se solicitação é GET sem uid, retornar dados do link com redirectTo
     if (!uid) {
       return NextResponse.json({
@@ -146,6 +153,7 @@ export async function GET(
       userId: uid,
       liveId: link.liveId,
       courseId: link.courseId,
+      redirectTo,
     });
 
     return NextResponse.json({
