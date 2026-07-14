@@ -41,7 +41,7 @@ service cloud.firestore {
 
     // ── users ─────────────────────────────────────────────
     match /users/{uid} {
-      allow read: if isAuth();
+      allow read: if isAuth(); // Only authenticated users can read profiles
       allow create: if isOwner(uid);
       allow update: if isAdmin() ||
         (isOwner(uid) && !request.resource.data.diff(resource.data).affectedKeys()
@@ -138,8 +138,7 @@ service cloud.firestore {
     match /enrollments/{enrollmentId} {
       allow read: if isAdminOrTeacher() ||
         (isAuth() && resource.data.userId == request.auth.uid);
-      allow create: if isAuth() &&
-        request.resource.data.userId == request.auth.uid;
+      allow create: if isAdmin(); // Only admin/backend can create enrollments
       allow update, delete: if isAdmin();
     }
 
@@ -269,8 +268,7 @@ service cloud.firestore {
     match /exam-results/{userId} {
       match /exams/{examId} {
         allow read: if isAdminOrTeacher() || isOwner(userId);
-        allow create: if isOwner(userId) &&
-          request.resource.data.userId == request.auth.uid;
+        allow create: if isAdmin(); // Only admin/backend can create results
         allow update: if isAdmin();
         allow delete: if isAdmin();
       }
@@ -295,8 +293,7 @@ service cloud.firestore {
     match /moduleQuizResults/{userId} {
       match /quizzes/{resultId} {
         allow read: if isAdminOrTeacher() || isOwner(userId);
-        allow create: if isOwner(userId) &&
-          request.resource.data.userId == request.auth.uid;
+        allow create: if isAdmin(); // Only admin/backend can create results
         allow update: if isAdmin();
         allow delete: if isAdmin();
       }

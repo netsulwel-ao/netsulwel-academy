@@ -4,6 +4,15 @@ import { verifyAuth } from "@/lib/api-auth";
 
 export async function GET(req: NextRequest) {
   try {
+    // Verify authentication - only authenticated users can view institutions
+    const { uid, error } = await verifyAuth(req);
+    if (error || !uid) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const admin = getFirebaseAdmin();
     const db = admin.firestore();
     
