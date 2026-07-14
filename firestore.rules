@@ -323,6 +323,24 @@ service cloud.firestore {
       }
     }
 
+    // ── private_access_links (Sistema de Links Privados) ──
+    match /private_access_links/{linkId} {
+      allow read: if isAdminOrTeacher();
+      allow create: if isAdminOrTeacher() ||
+        (isAuth() && request.resource.data.createdBy == request.auth.uid);
+      allow update: if isAdminOrTeacher() ||
+        (isAuth() && resource.data.createdBy == request.auth.uid);
+      allow delete: if isAdmin() ||
+        (isAuth() && resource.data.createdBy == request.auth.uid);
+    }
+
+    // ── access_logs (Log de Acessos via Links Privados) ────
+    match /access_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAuth();
+      allow update, delete: if isAdmin();
+    }
+
     // Bloqueia tudo o resto
     match /{document=**} {
       allow read, write: if false;
