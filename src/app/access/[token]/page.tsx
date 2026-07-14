@@ -56,8 +56,10 @@ export default function AccessPage() {
 
         if (!response.ok) {
           setStatus("error");
-          setMessage(data.error || "Não foi possível processar o link");
-          toast.error(data.error);
+          const errMsg = data.error || "Não foi possível processar o link";
+          setMessage(errMsg);
+          console.error("[ACCESS] API error:", data);
+          toast.error(errMsg);
           return;
         }
 

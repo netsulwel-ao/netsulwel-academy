@@ -166,9 +166,11 @@ export async function GET(
       redirectTo,
     });
   } catch (error) {
-    console.error("[API ERROR] Failed to process private link:", error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    const errorCode = (error as any)?.code || "unknown";
+    console.error("[API ERROR] Failed to process private link:", errorMsg, errorCode);
     return NextResponse.json(
-      { error: "Erro ao processar link" },
+      { error: `Erro ao processar link: ${errorMsg}`, code: errorCode },
       { status: 500 }
     );
   }
