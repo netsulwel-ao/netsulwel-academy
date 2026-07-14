@@ -18,10 +18,128 @@ import {
   Mic, MicOff, Video, VideoOff, MonitorUp, PhoneOff,
   Send, Users, MessageSquare, Loader2,
   AlertTriangle, Maximize2, Minimize2,
-  Eye, LogIn, Radio, Hand, Volume2, Settings,
+  Eye, LogIn, Radio, Hand, Volume2, Settings, Share2, Copy, Check,
 } from "lucide-react";
 import type { LiveSession, ChatMessage } from "@/types/live";
 import { playEntrySound } from "@/lib/entry-sound";
+
+// ─────────────────────────────────────────────────────────────
+// ShareLiveButton — Botão para partilhar link da aula ao vivo
+// ─────────────────────────────────────────────────────────────
+function ShareLiveButton({ liveId, liveTitle }: { liveId: string; liveTitle: string }) {
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const handleGenerateLink = async () => {
+    try {
+      // Importar o hook dinamicamente
+      const { usePrivateAccessLink } = await import("@/hooks/usePrivateAccessLink");
+      const { createLink, getShareUrl } = usePrivateAccessLink();
+      
+      // Criar link: 24h de validade, ilimitado de usos
+      const link = await createLink(undefined, liveId, 24 * 60 * 60 * 1000, undefined);
+      if (link) {
+        const url = getShareUrl(link.token);
+        setShareUrl(url);
+      }
+    } catch (error) {
+      console.error("Erro ao gerar link:", error);
+    }
+  };
+
+  const handleCopy = () => {
+    if (shareUrl) {
+      navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!shareUrl) {
+      await handleGenerateLink();
+      return;
+    }
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Aula ao Vivo: ${liveTitle}`,
+          text: `Clica neste link para aceder à aula: ${shareUrl}`,
+          url: shareUrl,
+        });
+      } catch (err) {
+        console.error("Erro ao partilhar:", err);
+      }
+    }
+  };
+
+  return (
+    <>
+      <button
+        onClick={() => {
+          if (!shareUrl) {
+            handleGenerateLink();
+          }
+          setShowShareMenu(!showShareMenu);
+        }}
+        className="flex items-center gap-1.5 px-2.5 py-1.5 bg-purple/20 hover:bg-purple/30 border border-purple/50 text-purple-200 hover:text-purple-100 rounded text-xs font-medium transition-colors"
+        title="Partilhar aula"
+      >
+        <Share2 className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">Partilhar</span>
+      </button>
+
+      {/* Share Menu Dropdown */}
+      {showShareMenu && shareUrl && (
+        <div className="fixed top-12 right-4 sm:right-auto bg-[#111114] border border-gray-700 rounded-lg shadow-xl p-3 space-y-2 z-50 w-64 sm:w-auto">
+          {/* URL Display */}
+          <div className="bg-gray-900 rounded p-2 flex gap-2 items-center">
+            <input
+              type="text"
+              value={shareUrl}
+              readOnly
+              className="flex-1 bg-transparent text-gray-200 text-xs font-mono border-0 outline-0"
+            />
+            <button
+              onClick={handleCopy}
+              className={`p-1 transition-colors ${
+                copied
+                  ? "bg-green-500/20 text-green-400"
+                  : "bg-gray-700 hover:bg-gray-600 text-gray-300"
+              }`}
+            >
+              {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+            </button>
+          </div>
+
+          {/* Share Options */}
+          <div className="flex gap-2 text-xs">
+            <button
+              onClick={handleCopy}
+              className="flex-1 px-2 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded transition-colors flex items-center justify-center gap-1"
+            >
+              <Copy className="h-3 w-3" />
+              Copiar
+            </button>
+            <button
+              onClick={handleShare}
+              className="flex-1 px-2 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors flex items-center justify-center gap-1"
+            >
+              <Share2 className="h-3 w-3" />
+              Enviar
+            </button>
+          </div>
+
+          <p className="text-[10px] text-gray-400 text-center">
+            Link válido por 24h | Ilimitado de usos
+          </p>
+        </div>
+      )}
+    </>
+  );
+}
 
 // ─────────────────────────────────────────────────────────────
 // Helpers
@@ -747,6 +865,9 @@ function StudioInterior({ live, onEnd }: { live: LiveSession; onEnd: () => void 
           </div>
           {live.startedAt && <ElapsedTimer since={live.startedAt} />}
         </div>
+
+        {/* Share Link Button */}
+        <ShareLiveButton liveId={live.id!} liveTitle={live.title} />
 
         <div className="flex items-center gap-1.5 text-white/40 shrink-0">
           <Eye className="h-3.5 w-3.5" />
