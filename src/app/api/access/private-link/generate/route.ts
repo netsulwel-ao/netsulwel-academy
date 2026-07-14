@@ -13,7 +13,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Extract uid from Authorization header if needed (Firebase handles this)
     const body = await request.json();
     const { liveId, courseId, expiresIn, maxUses } = body;
 
@@ -24,43 +23,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate unique token
-    const token = Math.random()
-      .toString(36)
-      .substring(2, 15)
-      .concat(Math.random().toString(36).substring(2, 15))
-      .concat(Math.random().toString(36).substring(2, 15));
+    // Generate unique token (30 chars)
+    const token = 
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15);
 
     // Create link in Firestore
-    const newLink: Omit<PrivateAccessLink, "id"> = {
+    const linkData = {
       token,
-      courseId,
-      liveId,
-      createdBy: "system", // Will be updated with real UID if needed
-      createdAt: Date.now(),
-      expiresAt: expiresIn ? Date.now() + expiresIn : undefined,
-      maxUses: maxUses && maxUses > 0 ? maxUses : undefined,
+      courseId: courseId || null,
+      liveId: liveId || null,
+      createdBy: "system",
+      createdAt: new Date().toISOString(),
+      expiresAt: expiresIn ? new Date(Date.now() + expiresIn).toISOString() : null,
+      maxUses: maxUses && maxUses > 0 ? maxUses : null,
       usedCount: 0,
       usedBy: [],
       status: "active",
     };
 
-    const docRef = await addDoc(collection(db, "private_access_links"), newLink);
+    const docRef = await addDoc(collection(db, "private_access_links"), linkData);
 
     // Build share URL
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://academia.netsulwel.tech";
-    const shareUrl = `${baseUrl}/access/${token}`;
+    const shareUrl = `https://academia.netsulwel.tech/access/${token}`;
 
-    return NextResponse.json({
-      success: true,
-      token,
-      shareUrl,
-      linkId: docRef.id,
-    });
-  } catch (error) {
-    console.error("Erro ao gerar link:", error);
     return NextResponse.json(
-      { error: "Erro ao gerar link" },
+      {
+        success: true,
+        token,
+        shareUrl,
+        linkId: docRef.id,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Erro ao gerar link privado:", error);
+    return NextResponse.json(
+      { error: "Erro ao gerar link: " + (error instanceof Error ? error.message : "Unknown error") },
       { status: 500 }
     );
   }
