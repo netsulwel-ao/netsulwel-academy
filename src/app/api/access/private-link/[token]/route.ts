@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { doc, getDoc, updateDoc, arrayUnion, serverTimestamp, collection, addDoc, query, where, getDocs } from "firebase/firestore";
+import { getFirebaseAdmin } from "@/lib/firebase-admin";
 import type { PrivateAccessLink, AccessLog } from "@/types/access";
 
 export async function GET(
@@ -20,10 +19,14 @@ export async function GET(
       );
     }
 
+    // Use Admin SDK instead of client SDK
+    const admin = getFirebaseAdmin();
+    const db = admin.firestore();
+
     // Buscar link privado
-    const linksRef = collection(db, "private_access_links");
-    const q = query(linksRef, where("token", "==", token));
-    const snapshot = await getDocs(q);
+    const linksRef = db.collection("private_access_links");
+    const q = linksRef.where("token", "==", token);
+    const snapshot = await q.get();
 
     if (snapshot.empty) {
       return NextResponse.json(
@@ -43,14 +46,19 @@ export async function GET(
       );
     }
 
-    if (link.expiresAt && link.expiresAt < Date.now()) {
-      await updateDoc(doc(db, "private_access_links", link.id!), {
-        status: "expired",
-      });
-      return NextResponse.json(
-        { error: "Link expirou" },
-        { status: 403 }
-      );
+    // Comparação correta de timestamps (ambos ISO strings)
+    if (link.expiresAt) {
+      const expiresAtMs = new Date(link.expiresAt as string).getTime();
+      const nowMs = Date.now();
+      if (expiresAtMs < nowMs) {
+        await db.collection("private_access_links").doc(link.id!).update({
+          status: "expired",
+        });
+        return NextResponse.json(
+          { error: "Link expirou" },
+          { status: 403 }
+        );
+      }
     }
 
     if (link.maxUses && link.usedCount >= link.maxUses) {
@@ -60,41 +68,37 @@ export async function GET(
       );
     }
 
-    // Se solicitação é GET apenas, retornar dados do link
-    if (request.method === "GET" && !uid) {
+    // Determinar redirectTo URL (mesmo sem estar autenticado)
+    const redirectTo = link.liveId
+      ? `/(studio)/lives/${link.liveId}/studio`
+      : `/dashboard/courses/${link.courseId}`;
+
+    // Se solicitação é GET sem uid, retornar dados do link com redirectTo
+    if (!uid) {
       return NextResponse.json({
         courseId: link.courseId,
         liveId: link.liveId,
         valid: true,
+        redirectTo,
+        loginUrl: `/login?redirect=/access/${token}`,
       });
     }
 
-    // Se user está autenticado, conceder acesso
-    if (!uid) {
-      // Redirecionar para login com intent de usar o link
-      return NextResponse.json(
-        {
-          error: "Authentication required",
-          loginUrl: `/login?redirect=/access/${token}`,
-        },
-        { status: 401 }
-      );
-    }
-
-    // Atualizar link: incrementar usedCount, adicionar usuário
+    // Se user está autenticado, conceder acesso e atualizar o link
     const updatedUsedBy = [...(link.usedBy || [])];
     if (!updatedUsedBy.includes(uid)) {
       updatedUsedBy.push(uid);
     }
 
-    await updateDoc(doc(db, "private_access_links", link.id!), {
+    await db.collection("private_access_links").doc(link.id!).update({
       usedCount: (link.usedCount || 0) + 1,
       usedBy: updatedUsedBy,
+      lastAccessedAt: new Date().toISOString(),
     });
 
     // Conceder acesso ao usuário
-    const userRef = doc(db, "users", uid);
-    const userSnap = await getDoc(userRef);
+    const userRef = db.collection("users").doc(uid);
+    const userSnap = await userRef.get();
 
     if (!userSnap.exists()) {
       return NextResponse.json(
@@ -108,46 +112,51 @@ export async function GET(
 
     // Adicionar aos cursos ou lives do usuário
     if (link.courseId) {
-      const enrolledCourses = userData.enrolledCourses || [];
+      const enrolledCourses = userData?.enrolledCourses || [];
       if (!enrolledCourses.includes(link.courseId)) {
         updateData.enrolledCourses = [...enrolledCourses, link.courseId];
       }
     }
 
     if (link.liveId) {
-      const enrolledLives = userData.enrolledLives || [];
+      const enrolledLives = userData?.enrolledLives || [];
       if (!enrolledLives.includes(link.liveId)) {
         updateData.enrolledLives = [...enrolledLives, link.liveId];
       }
     }
 
     if (Object.keys(updateData).length > 0) {
-      await updateDoc(userRef, updateData);
+      await userRef.update(updateData);
     }
 
     // Registrar acesso
     const accessLog: Omit<AccessLog, "id"> = {
       userId: uid,
       linkToken: token,
-      courseId: link.courseId,
-      liveId: link.liveId,
+      courseId: link.courseId || null,
+      liveId: link.liveId || null,
       grantedAt: Date.now(),
       accessType: link.courseId ? "course" : "live",
     };
 
-    await addDoc(collection(db, "access_logs"), accessLog);
+    await db.collection("access_logs").add(accessLog);
+
+    console.log("[API] Access granted via private link:", {
+      token: token.substring(0, 10) + "...",
+      userId: uid,
+      liveId: link.liveId,
+      courseId: link.courseId,
+    });
 
     return NextResponse.json({
       success: true,
       message: "Acesso concedido com sucesso",
       courseId: link.courseId,
       liveId: link.liveId,
-      redirectTo: link.courseId
-        ? `/dashboard/courses/${link.courseId}`
-        : `/dashboard/lives/${link.liveId}`,
+      redirectTo,
     });
   } catch (error) {
-    console.error("Erro ao processar link privado:", error);
+    console.error("[API ERROR] Failed to process private link:", error);
     return NextResponse.json(
       { error: "Erro ao processar link" },
       { status: 500 }

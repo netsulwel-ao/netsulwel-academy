@@ -63,7 +63,7 @@ export default function AccessPage() {
 
         setStatus("success");
         setMessage("Acesso concedido! Redirecionando...");
-        setRedirectUrl(data.redirectTo);
+        setRedirectUrl(data.redirectTo || "/dashboard");
         toast.success("Bem-vindo!");
 
         // Redirecionar após 2 segundos
