@@ -70,9 +70,11 @@ export async function GET(
       );
     }
 
-    // Determinar redirectTo URL (mesmo sem estar autenticado)
+    // Determinar redirectTo URL
+    // O aluno vai para /dashboard/lives/[id] para ver a live
+    // O studio /lives/[id]/studio é apenas para o professor
     const redirectTo = link.liveId
-      ? `/(studio)/lives/${link.liveId}/studio`
+      ? `/dashboard/lives/${link.liveId}`
       : `/dashboard/courses/${link.courseId}`;
 
     console.log("[API] Link data:", {
