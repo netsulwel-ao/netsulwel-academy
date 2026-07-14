@@ -88,5 +88,8 @@ export function getFirebaseAdmin() {
     });
   }
 
+  // Ignorar campos undefined no Firestore
+  admin.firestore().settings({ ignoreUndefinedProperties: true });
+
   return admin;
 }

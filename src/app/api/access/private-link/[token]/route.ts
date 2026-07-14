@@ -133,17 +133,16 @@ export async function GET(
         updateData.enrolledLives = [...enrolledLives, link.liveId];
       }
     }
-
     if (Object.keys(updateData).length > 0) {
       await userRef.update(updateData);
     }
 
     // Registrar acesso
-    const accessLog: Omit<AccessLog, "id"> = {
+    const accessLog = {
       userId: uid,
       linkToken: token,
-      courseId: link.courseId || undefined,
-      liveId: link.liveId || undefined,
+      courseId: link.courseId ?? null,
+      liveId: link.liveId ?? null,
       grantedAt: Date.now(),
       accessType: link.courseId ? "course" : "live",
     };
@@ -161,8 +160,8 @@ export async function GET(
     return NextResponse.json({
       success: true,
       message: "Acesso concedido com sucesso",
-      courseId: link.courseId,
-      liveId: link.liveId,
+      courseId: link.courseId ?? null,
+      liveId: link.liveId ?? null,
       redirectTo,
     });
   } catch (error) {
