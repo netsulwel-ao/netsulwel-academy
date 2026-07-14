@@ -142,8 +142,8 @@ export async function GET(
     const accessLog: Omit<AccessLog, "id"> = {
       userId: uid,
       linkToken: token,
-      courseId: link.courseId || null,
-      liveId: link.liveId || null,
+      courseId: link.courseId || undefined,
+      liveId: link.liveId || undefined,
       grantedAt: Date.now(),
       accessType: link.courseId ? "course" : "live",
     };
