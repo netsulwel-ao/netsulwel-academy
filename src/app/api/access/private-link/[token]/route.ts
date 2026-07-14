@@ -48,7 +48,9 @@ export async function GET(
 
     // Comparação correta de timestamps (ambos ISO strings)
     if (link.expiresAt) {
-      const expiresAtMs = new Date(link.expiresAt as string).getTime();
+      const expiresAtMs = typeof link.expiresAt === 'number' 
+        ? link.expiresAt 
+        : new Date(link.expiresAt as string).getTime();
       const nowMs = Date.now();
       if (expiresAtMs < nowMs) {
         await db.collection("private_access_links").doc(link.id!).update({
