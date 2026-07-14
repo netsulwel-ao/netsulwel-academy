@@ -11,27 +11,28 @@ export function proxy(request: NextRequest) {
   const hasValidUid = isValidUid(uid);
 
   const isProtected = pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
-  const isPublicPage = 
+  const isAuthPage = 
     pathname === "/login" || 
     pathname === "/register" || 
     pathname.startsWith("/register/") || 
-    pathname === "/verify-email" || 
-    pathname.startsWith("/access/") ||  // Link privado de acesso
-    pathname === "/";
+    pathname === "/verify-email";
+  const isAccessLink = pathname.startsWith("/access/"); // NUNCA redirecionar links de acesso
   const isStatic = pathname.startsWith("/_next") || pathname.startsWith("/favicon");
 
   if (isStatic) return NextResponse.next();
-  
-  // Link de acesso pode redirecionar para login se necessário
-  if (pathname.startsWith("/access/") && !hasValidUid) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirect", pathname + request.nextUrl.search);
-    return NextResponse.redirect(loginUrl);
+
+  // Links de acesso privado: SEMPRE deixar passar para a página processar
+  // A página /access/[token] trata do login e redirect internamente
+  if (isAccessLink) {
+    return NextResponse.next();
   }
   
-  if (isPublicPage && hasValidUid) {
+  // Páginas de auth (login/register): redirecionar para dashboard se já logado
+  if (isAuthPage && hasValidUid) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
+
+  // Páginas protegidas: redirecionar para login se não autenticado
   if (isProtected && !hasValidUid) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname + request.nextUrl.search);
