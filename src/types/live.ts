@@ -34,5 +34,7 @@ export interface ChatMessage {
   photoURL?: string;
   text: string;
   type: "message" | "hand_raise" | "system";
+  hidden?: boolean;        // soft-delete flag
+  hiddenAt?: unknown;      // timestamp of hiding
   createdAt: unknown;
 }

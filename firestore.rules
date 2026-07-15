@@ -119,7 +119,8 @@ service cloud.firestore {
           request.resource.data.uid == request.auth.uid ||
           (isAdminOrTeacher() && request.resource.data.type == "system")
         );
-        allow update, delete: if isAdminOrTeacher();
+        allow update: if isAdminOrTeacher() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["hidden", "hiddenAt"]);
+        allow delete: if isAdminOrTeacher() || resource.data.uid == request.auth.uid;
       }
 
       match /speakers/{speakerId} {

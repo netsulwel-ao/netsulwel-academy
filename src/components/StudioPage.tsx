@@ -18,7 +18,7 @@ import {
   Mic, MicOff, Video, VideoOff, MonitorUp, PhoneOff,
   Send, Users, MessageSquare, Loader2,
   AlertTriangle, Maximize2, Minimize2,
-  Eye, LogIn, Radio, Hand, Volume2, Settings, Share2, Copy, Check,
+  Eye, LogIn, Radio, Hand, Volume2, Settings, Share2, Copy, Check, X,
 } from "lucide-react";
 import type { LiveSession, ChatMessage } from "@/types/live";
 import { playEntrySound } from "@/lib/entry-sound";
@@ -560,6 +560,7 @@ function PalavraPanel({ liveId }: { liveId: string }) {
 function AlunosPanel({ liveId }: { liveId: string }) {
   const participants = useParticipants();
   const [speakers, setSpeakers] = useState<Set<string>>(new Set());
+  const { localParticipant } = useLocalParticipant();
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "lives", liveId, "speakers"), snap => {
@@ -581,19 +582,35 @@ function AlunosPanel({ liveId }: { liveId: string }) {
           : students.map(p => {
             const isSpeaker = speakers.has(p.identity);
             const name = p.name || p.identity;
+            const isMuted = !p.audioTracks.some(t => t.isSubscribed && t.source.toString().includes("MICROPHONE"));
+            
             return (
               <div
                 key={p.identity}
                 className={[
-                  "flex items-center gap-3 px-4 py-3 border-b border-white/5 transition-colors",
+                  "flex items-center gap-3 px-4 py-3 border-b border-white/5 transition-colors group",
                   isSpeaker ? "border-l-2 border-l-green-500 bg-green-500/[3%]" : "hover:bg-white/[2%]",
                 ].join(" ")}
               >
                 {/* Status dot */}
                 <span className={`w-1.5 h-1.5 shrink-0 ${isSpeaker ? "bg-green-400" : "bg-white/15"}`} />
-                <Avatar name={name} />
+                <Avatar name={name} size={28} />
                 <span className="text-sm text-white/70 truncate flex-1">{name}</span>
                 {isSpeaker && <Waveform />}
+                
+                {/* Moderation buttons - show on hover */}
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => {
+                      // TODO: Implement kick participant
+                      alert(`Em desenvolvimento: Kick ${name}`);
+                    }}
+                    className="p-1 text-red-400/50 hover:text-red-400 transition-colors"
+                    title={`Remover ${name}`}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               </div>
             );
           })}
@@ -650,34 +667,64 @@ function ChatPanel({ liveId, pinnedMsg, onPin, hostName }: {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
         {messages.length === 0 && <EmptyState icon={<MessageSquare />} text="Nenhuma mensagem ainda" />}
-        {messages.map(msg => (
-          <div key={msg.id} className="group">
-            {msg.type === "hand_raise" ? (
-              <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/8 border-l-2 border-amber-400/50 text-amber-300/80 text-xs my-2">
-                <Hand className="h-3.5 w-3.5 shrink-0" />
-                <span className="font-bold">{msg.displayName}</span>
-                <span className="text-white/30">pediu a palavra</span>
-              </div>
-            ) : msg.type === "system" ? (
-              <div className="text-center text-[11px] text-white/20 py-2 italic">{msg.text}</div>
-            ) : (
-              <div className="flex gap-2 items-start hover:bg-white/[3%] px-2 py-1.5 -mx-2 transition-colors">
-                <Avatar name={msg.displayName || "?"} size={22} />
-                <div className="flex-1 min-w-0">
-                  <span className="text-[11px] font-bold text-white/50 mr-1.5">{msg.displayName}</span>
-                  <span className="text-sm text-white/80 break-words">{msg.text}</span>
+        {messages.map(msg => {
+          // Mostrar apenas mensagens não-ocultas
+          if (msg.hidden) return null;
+          
+          return (
+            <div key={msg.id} className="group">
+              {msg.type === "hand_raise" ? (
+                <div className="flex items-center justify-between gap-2 px-3 py-2 bg-amber-500/8 border-l-2 border-amber-400/50 text-amber-300/80 text-xs my-2">
+                  <div className="flex items-center gap-2">
+                    <Hand className="h-3.5 w-3.5 shrink-0" />
+                    <span className="font-bold">{msg.displayName}</span>
+                    <span className="text-white/30">pediu a palavra</span>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      await deleteDoc(doc(db, "lives", liveId, "chat", msg.id!));
+                    }}
+                    className="opacity-0 group-hover:opacity-100 p-1 text-red-400/50 hover:text-red-400 transition-all"
+                    title="Remover"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => onPin(pinnedMsg?.id === msg.id ? null : msg)}
-                  className="opacity-0 group-hover:opacity-100 p-1 text-white/20 hover:text-amber-400 transition-all shrink-0"
-                  title="Fixar mensagem"
-                >
-                  <span className="text-sm">📌</span>
-                </button>
-              </div>
-            )}
-          </div>
-        ))}
+              ) : msg.type === "system" ? (
+                <div className="text-center text-[11px] text-white/20 py-2 italic">{msg.text}</div>
+              ) : (
+                <div className="flex gap-2 items-start hover:bg-white/[3%] px-2 py-1.5 -mx-2 transition-colors group">
+                  <Avatar name={msg.displayName || "?"} size={22} />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[11px] font-bold text-white/50 mr-1.5">{msg.displayName}</span>
+                    <span className="text-sm text-white/80 break-words">{msg.text}</span>
+                  </div>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <button
+                      onClick={() => onPin(pinnedMsg?.id === msg.id ? null : msg)}
+                      className="p-1 text-white/20 hover:text-amber-400 transition-colors shrink-0"
+                      title="Fixar mensagem"
+                    >
+                      <span className="text-sm">📌</span>
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await updateDoc(doc(db, "lives", liveId, "chat", msg.id!), {
+                          hidden: true,
+                          hiddenAt: serverTimestamp(),
+                        });
+                      }}
+                      className="p-1 text-red-400/50 hover:text-red-400 transition-colors shrink-0"
+                      title="Ocultar mensagem"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
         <div ref={bottomRef} />
       </div>
 
@@ -808,6 +855,20 @@ function ControlsBar({ live, onEnd }: { live: LiveSession; onEnd: () => void }) 
           >
             <MonitorUp size={18} />
             <span className={btnText}>Partilha</span>
+          </button>
+
+          <div className="w-px h-8 bg-white/8 mx-1 sm:mx-2 hidden sm:block" />
+
+          <button 
+            onClick={() => {
+              // TODO: Implement mute all students
+              alert("Em desenvolvimento: Mute-All para alunos");
+            }}
+            className={`${btnBase}`}
+            title="Silenciar todos os alunos"
+          >
+            <Volume2 size={18} />
+            <span className={btnText}>Mute</span>
           </button>
 
           <button 
