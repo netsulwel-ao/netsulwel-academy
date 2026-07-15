@@ -339,6 +339,15 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // ── recordings (Gravações de Aulas) ─────────────────────
+    match /recordings/{recordingId} {
+      allow read: if isAdminOrTeacher();
+      allow create: if isAdminOrTeacher() ||
+        (isAuth() && request.resource.data.uploadedBy == request.auth.uid);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
     // Bloqueia tudo o resto
     match /{document=**} {
       allow read, write: if false;

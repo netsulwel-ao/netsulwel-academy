@@ -1038,3 +1038,248 @@ select {
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+
+/* ════════════════════════════════════════════════════════════════
+   STUDIO RESPONSIVENESS IMPROVEMENTS
+   ════════════════════════════════════════════════════════════════ */
+
+/* Hide scrollbar but allow scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Smooth tab switching */
+.tab-content-enter {
+  animation: fadeIn 200ms ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Studio video aspect ratio fix */
+.studio-video-container {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  height: auto;
+}
+
+@media (max-width: 768px) {
+  .studio-video-container {
+    aspect-ratio: 9 / 16;
+  }
+}
+
+/* Sidebar collapse animation */
+.sidebar-collapse {
+  transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mobile bottom sheet */
+.bottom-sheet {
+  animation: slideUp 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Controls bar responsiveness */
+.controls-bar-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+@media (max-width: 640px) {
+  .controls-bar-compact {
+    gap: 0.25rem;
+  }
+}
+
+/* Tab scrolling container */
+.tabs-scroll-container {
+  scroll-behavior: smooth;
+  scroll-padding-left: 1rem;
+}
+
+/* Chat message container responsiveness */
+.chat-message {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 640px) {
+  .chat-message {
+    font-size: 0.75rem;
+  }
+}
+
+/* Participant avatar sizing */
+.participant-avatar {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .participant-avatar {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Button size responsiveness */
+.btn-adaptive {
+  padding: 0.5rem 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .btn-adaptive {
+    padding: 0.625rem 1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .btn-adaptive {
+    padding: 0.75rem 1.25rem;
+  }
+}
+
+/* Sidebar tabs horizontal scroll on mobile */
+@media (max-width: 768px) {
+  .sidebar-tabs {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+}
+
+/* Prevent layout shift on scrollbar appearance */
+html {
+  overflow-y: scroll;
+}
+
+/* Studio stage container */
+.studio-stage {
+  background: #000;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ensure video fills container */
+.studio-stage video,
+.studio-stage canvas,
+.studio-stage [data-lk-video-element] {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Side panel responsiveness */
+@media (max-width: 768px) {
+  .studio-sidebar {
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+/* Input fields in studio */
+.studio-input {
+  font-size: 16px; /* Prevent zoom on iOS */
+  border-radius: 0.375rem;
+}
+
+@media (max-width: 640px) {
+  .studio-input {
+    font-size: 16px;
+  }
+}
+
+/* Prevent layout shift on modal appearance */
+.modal-open {
+  overflow: hidden;
+}
+
+/* Flexbox utilities for studio layout */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Safe area support for notched devices */
+@supports (padding: max(0px)) {
+  .safe-top {
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+  }
+  
+  .safe-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+  
+  .safe-left {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+  }
+  
+  .safe-right {
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+}
+
+/* Animation for control button states */
+.control-btn-active {
+  animation: buttonPulse 300ms ease-out;
+}
+
+@keyframes buttonPulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.05);
+  }
+}
+
+/* Prevent text selection on interactive elements */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Touch feedback */
+@media (hover: none) {
+  button, a[role="button"] {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Hide scrollbar for specific containers */
+.hide-scrollbar-webkit::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar-webkit {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
