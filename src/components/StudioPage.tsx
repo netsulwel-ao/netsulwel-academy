@@ -585,7 +585,7 @@ function AlunosPanel({ liveId }: { liveId: string }) {
           : students.map(p => {
             const isSpeaker = speakers.has(p.identity);
             const name = p.name || p.identity;
-            const isMuted = !p.audioTracks.some(t => t.isSubscribed && t.source.toString().includes("MICROPHONE"));
+            const isMuted = !("audioTracks" in p && Array.isArray(p.audioTracks) && p.audioTracks.some(t => t?.isSubscribed && t?.source?.toString?.().includes("MICROPHONE")));
             
             return (
               <div

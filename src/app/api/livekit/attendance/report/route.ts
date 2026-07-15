@@ -112,7 +112,7 @@ async function fetchAttendanceData(
     ? new Date(liveData.endedAt).getTime()
     : Date.now();
 
-  snapshot.forEach((doc) => {
+  snapshot.forEach((doc: any) => {
     const data = doc.data();
     const userId = data.userId;
     const userName = data.displayName || "Utilizador Anónimo";

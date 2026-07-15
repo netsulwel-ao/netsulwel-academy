@@ -146,7 +146,7 @@ async function notifyRecordingReady(admin: any, liveId: string) {
     const snapshot = await accessLogsRef.get();
     const studentIds = new Set<string>();
 
-    snapshot.forEach((doc) => {
+    snapshot.forEach((doc: any) => {
       if (doc.data().userId) {
         studentIds.add(doc.data().userId);
       }

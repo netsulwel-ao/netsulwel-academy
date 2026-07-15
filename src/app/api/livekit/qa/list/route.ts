@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
       .limit(limit)
       .get();
 
-    const questions = snapshot.docs.map((doc) => ({
+    const questions = snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
     }));
