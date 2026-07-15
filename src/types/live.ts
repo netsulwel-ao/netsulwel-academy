@@ -22,8 +22,44 @@ export interface LiveSession {
   views?: number;
   recordingUrl?: string;      // R2 URL after recording saved
   materials?: CourseMaterial[];
+  // Recording fields
+  recordingStatus?: "idle" | "recording" | "processing" | "ready" | "failed";
+  egressId?: string;          // LiveKit egress ID
+  recordingStartedAt?: string;
+  recordingStoppedAt?: string;
+  // Q&A fields
+  qaMode?: boolean;
+  qaQuestions?: QAQuestion[];
+  // Attendance fields
+  attendanceEvents?: AttendanceEvent[];
   createdAt?: unknown;
   updatedAt?: unknown;
+}
+
+export interface QAQuestion {
+  id: string;
+  question: string;
+  askedBy: string;           // uid
+  askedByName: string;
+  askedAt: string;           // ISO datetime
+  answers: QAAnswer[];
+  status: "pending" | "answered" | "dismissed";
+  upvotes: number;
+}
+
+export interface QAAnswer {
+  id: string;
+  answer: string;
+  answeredBy: string;        // uid (professor)
+  answeredByName: string;
+  answeredAt: string;        // ISO datetime
+}
+
+export interface AttendanceEvent {
+  uid: string;
+  displayName: string;
+  joinedAt: string;          // ISO datetime
+  leftAt?: string;           // ISO datetime (null if still in session)
 }
 
 export interface ChatMessage {

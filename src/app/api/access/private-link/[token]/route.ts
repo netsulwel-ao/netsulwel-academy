@@ -140,14 +140,19 @@ export async function GET(
     }
 
     // Registrar acesso
-    const accessLog = {
+    const accessLog: Record<string, any> = {
       userId: uid,
       linkToken: token,
-      courseId: link.courseId ?? null,
-      liveId: link.liveId ?? null,
       grantedAt: Date.now(),
       accessType: link.courseId ? "course" : "live",
     };
+    
+    if (link.courseId) {
+      accessLog.courseId = link.courseId;
+    }
+    if (link.liveId) {
+      accessLog.liveId = link.liveId;
+    }
 
     await db.collection("access_logs").add(accessLog);
 

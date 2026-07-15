@@ -22,6 +22,9 @@ import {
 } from "lucide-react";
 import type { LiveSession, ChatMessage } from "@/types/live";
 import { playEntrySound } from "@/lib/entry-sound";
+import { RecordingControls } from "@/components/RecordingControls";
+import { QAPanel } from "@/components/QAPanel";
+import { AttendanceReport } from "@/components/AttendanceReport";
 
 // ─────────────────────────────────────────────────────────────
 // ShareLiveButton — Botão para partilhar link da aula ao vivo
@@ -930,7 +933,7 @@ function ControlsBar({ live, onEnd }: { live: LiveSession; onEnd: () => void }) 
 // StudioInterior
 // ─────────────────────────────────────────────────────────────
 function StudioInterior({ live, onEnd }: { live: LiveSession; onEnd: () => void }) {
-  const [sideTab, setSideTab] = useState<"palavra" | "alunos" | "chat">("palavra");
+  const [sideTab, setSideTab] = useState<"palavra" | "alunos" | "chat" | "recording" | "qa" | "attendance">("palavra");
   const [pinnedMsg, setPinnedMsg] = useState<ChatMessage | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const participants = useParticipants();
@@ -940,6 +943,9 @@ function StudioInterior({ live, onEnd }: { live: LiveSession; onEnd: () => void 
     { id: "palavra" as const, label: "Palavra", icon: <Hand className="h-3.5 w-3.5" /> },
     { id: "alunos" as const, label: "Alunos", icon: <Users className="h-3.5 w-3.5" /> },
     { id: "chat" as const, label: "Chat", icon: <MessageSquare className="h-3.5 w-3.5" /> },
+    { id: "recording" as const, label: "Gravação", icon: <Radio className="h-3.5 w-3.5" /> },
+    { id: "qa" as const, label: "Q&A", icon: <MessageSquare className="h-3.5 w-3.5" /> },
+    { id: "attendance" as const, label: "Presença", icon: <Users className="h-3.5 w-3.5" /> },
   ] as const;
 
   return (
@@ -1015,6 +1021,9 @@ function StudioInterior({ live, onEnd }: { live: LiveSession; onEnd: () => void 
             {sideTab === "palavra" && <PalavraPanel liveId={live.id!} />}
             {sideTab === "alunos" && <AlunosPanel liveId={live.id!} />}
             {sideTab === "chat" && <ChatPanel liveId={live.id!} pinnedMsg={pinnedMsg} onPin={setPinnedMsg} hostName={live.hostName || "Professor"} />}
+            {sideTab === "recording" && <RecordingControls live={live} isHost={true} onStatusChange={() => {}} />}
+            {sideTab === "qa" && <QAPanel liveId={live.id!} isHost={true} hostName={live.hostName || "Professor"} />}
+            {sideTab === "attendance" && <AttendanceReport liveId={live.id!} liveTitle={live.title} isTeacher={true} />}
           </div>
         </div>
       </div>
