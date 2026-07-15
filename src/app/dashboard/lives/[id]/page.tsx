@@ -77,7 +77,7 @@ function ViewerChat({ liveId }: { liveId: string }) {
         ))}
         <div ref={bottomRef} />
       </div>
-      <form onSubmit={send} className="p-3 border-t border-gray-800 flex gap-2">
+      <form onSubmit={send} className="p-3 border-t border-gray-800 flex gap-2 shrink-0 pb-[max(12px,env(safe-area-inset-bottom))]">
         <input type="text" value={text} onChange={(e) => setText(e.target.value)} placeholder="Enviar mensagem..."
           className="flex-1 bg-gray-900 border border-gray-700 px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition-colors" />
         <button type="submit" disabled={!text.trim()}

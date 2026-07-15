@@ -926,3 +926,115 @@ div:has(> img[alt*="Download"]) {
     animation: none;
   }
 }
+
+
+/* ════════════════════════════════════════════════════════════
+   MOBILE FIXES — Landscape Lock + iOS Keyboard Handling
+   ════════════════════════════════════════════════════════════ */
+
+/* Lock to portrait on mobile during live broadcast */
+@media (max-width: 768px) and (orientation: landscape) {
+  html, body {
+    overflow: hidden;
+  }
+  
+  .live-broadcast-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100dvh; /* Dynamic viewport height — excludes address bar */
+  }
+}
+
+/* iOS keyboard handling — push content up when keyboard appears */
+@supports (padding: max(0px)) {
+  /* Add bottom padding for safe area (notch, home indicator) */
+  .safe-area-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+  
+  .safe-area-top {
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+  }
+}
+
+/* Fix chat input on iOS — don't let keyboard overlap */
+@media (max-height: 600px) {
+  .chat-input-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: inherit;
+    z-index: 50;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+  
+  .chat-messages-container {
+    padding-bottom: 80px; /* Reserve space for fixed input */
+  }
+}
+
+/* Prevent zoom on iOS input focus */
+input,
+textarea,
+select {
+  font-size: 16px !important; /* Prevents auto-zoom on iOS */
+}
+
+/* Smooth scrolling to bottom of chat */
+.scroll-smooth-auto {
+  scroll-behavior: smooth;
+}
+
+/* Disable horizontal scroll on mobile */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+  
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Touch-friendly minimum tap targets */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  a,
+  [role="button"] {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  /* Add padding for hit area */
+  .btn-touch-target {
+    padding: 12px !important;
+    margin: 4px !important;
+  }
+}
+
+/* Landscape orientation detection */
+@media (orientation: landscape) {
+  /* Hide unnecessary elements in landscape to maximize video */
+  .hide-in-landscape {
+    display: none !important;
+  }
+  
+  /* Reduce padding in landscape */
+  .reduce-landscape-padding {
+    padding: 4px !important;
+  }
+}
+
+/* High DPI screens (retina) — crisper text */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
