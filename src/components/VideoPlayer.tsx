@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import {
   Play, Pause, Volume2, VolumeX, Maximize, Minimize,
-  Settings, PictureInPicture2, ChevronDown,
+  Settings, PictureInPicture2,
 } from "lucide-react";
 
 interface DirectSource {
@@ -37,11 +37,12 @@ interface VideoPlayerProps {
 }
 
 export function VideoPlayer({ source, className = "", onProgress }: VideoPlayerProps) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [fullscreen, setFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const [aspectRatio, setAspectRatio] = useState<string | undefined>(undefined);
+  const [videoSize, setVideoSize] = useState<{ width: number; height: number } | null>(null);
 
   const handleMouseMove = useCallback(() => {
     setShowControls(true);
@@ -71,38 +72,67 @@ export function VideoPlayer({ source, className = "", onProgress }: VideoPlayerP
   }, []);
 
   const handleAspectRatio = useCallback((width: number, height: number) => {
-    if (width > 0 && height > 0) {
-      setAspectRatio(`${width} / ${height}`);
-    }
+    setVideoSize({ width, height });
   }, []);
 
-  return (
-    <div
-      ref={containerRef}
-      className={`relative w-full bg-black overflow-hidden group ${fullscreen ? "fixed inset-0 z-50" : ""} ${className}`}
-      style={aspectRatio ? { aspectRatio } : { aspectRatio: "16 / 9" }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={() => setShowControls(false)}
-    >
-      {source.type === "direct" && (
-        <DirectPlayer source={source} showControls={showControls} onFullscreen={toggleFullscreen} fullscreen={fullscreen} onProgress={onProgress} onAspectRatio={handleAspectRatio} />
-      )}
-      {(source.type === "youtube" || source.type === "vimeo") && (
-        <EmbedPlayer source={source} showControls={showControls} onFullscreen={toggleFullscreen} fullscreen={fullscreen} />
-      )}
-      {source.type === "livekit" && (
-        <LiveKitPlayer source={source} showControls={showControls} onFullscreen={toggleFullscreen} fullscreen={fullscreen} />
-      )}
+  // Compute container size like YouTube: respect video ratio + cap max height
+  const getContainerStyle = (): React.CSSProperties => {
+    if (!videoSize || fullscreen) return {};
 
-      {/* Fullscreen button (floating, always visible on hover) */}
-      <button
-        onClick={toggleFullscreen}
-        className={`absolute top-3 right-3 z-20 p-2 bg-black/60 text-white hover:bg-black/80 transition-opacity ${
-          showControls ? "opacity-100" : "opacity-0"
-        }`}
+    const parentWidth = wrapperRef.current?.clientWidth ?? 0;
+    if (parentWidth <= 0) return {};
+
+    const { width: vw, height: vh } = videoSize;
+    const videoRatio = vw / vh;
+    const maxHeight = typeof window !== "undefined" ? window.innerHeight * 0.75 : 600;
+
+    // Start with parent width
+    let containerWidth = parentWidth;
+    let containerHeight = parentWidth / videoRatio;
+
+    // If height exceeds max, cap it and recalculate width
+    if (containerHeight > maxHeight) {
+      containerHeight = maxHeight;
+      containerWidth = maxHeight * videoRatio;
+    }
+
+    return {
+      width: containerWidth,
+      maxWidth: "100%",
+      height: containerHeight,
+      margin: "0 auto",
+    };
+  };
+
+  return (
+    <div ref={wrapperRef} className={`w-full bg-black ${fullscreen ? "fixed inset-0 z-50" : ""} ${className}`}>
+      <div
+        ref={containerRef}
+        className={`relative bg-black overflow-hidden group ${fullscreen ? "w-full h-full" : ""}`}
+        style={getContainerStyle()}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setShowControls(false)}
       >
-        {fullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-      </button>
+        {source.type === "direct" && (
+          <DirectPlayer source={source} showControls={showControls} onFullscreen={toggleFullscreen} fullscreen={fullscreen} onProgress={onProgress} onAspectRatio={handleAspectRatio} />
+        )}
+        {(source.type === "youtube" || source.type === "vimeo") && (
+          <EmbedPlayer source={source} showControls={showControls} onFullscreen={toggleFullscreen} fullscreen={fullscreen} />
+        )}
+        {source.type === "livekit" && (
+          <LiveKitPlayer source={source} showControls={showControls} onFullscreen={toggleFullscreen} fullscreen={fullscreen} />
+        )}
+
+        {/* Fullscreen button (floating, always visible on hover) */}
+        <button
+          onClick={toggleFullscreen}
+          className={`absolute top-3 right-3 z-20 p-2 bg-black/60 text-white hover:bg-black/80 transition-opacity ${
+            showControls ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          {fullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+        </button>
+      </div>
     </div>
   );
 }
@@ -277,7 +307,6 @@ function DirectPlayer({
 
   return (
     <div className="absolute inset-0 flex flex-col">
-      {/* Video element — pointer-events:none impede IDM/detecção */}
       <div className="relative flex-1" onClick={togglePlay}>
         <video
           ref={videoRef}
@@ -290,7 +319,6 @@ function DirectPlayer({
         />
       </div>
 
-      {/* Center play button (shown when paused) */}
       {!playing && (
         <button
           onClick={togglePlay}
@@ -302,24 +330,18 @@ function DirectPlayer({
         </button>
       )}
 
-      {/* Controls bar */}
       <div
         className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-12 pb-3 px-4 transition-opacity duration-300 ${
           showControls ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
-        {/* Progress bar */}
         <div className="relative w-full h-1 bg-gray-600/50 mb-3 group/progress cursor-pointer">
-          {/* Buffered */}
           <div className="absolute top-0 left-0 h-full bg-gray-500/40" style={{ width: `${bufPct}%` }} />
-          {/* Progress */}
           <div className="absolute top-0 left-0 h-full bg-blue-500" style={{ width: `${pct}%` }} />
-          {/* Thumb */}
           <div
             className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-blue-500 rounded-full opacity-0 group-hover/progress:opacity-100 transition-opacity"
             style={{ left: `calc(${pct}% - 7px)` }}
           />
-          {/* Invisible range for seeking */}
           <input
             type="range"
             min={0}
@@ -331,19 +353,15 @@ function DirectPlayer({
           />
         </div>
 
-        {/* Controls row */}
         <div className="flex items-center gap-3">
-          {/* Play/Pause */}
           <button onClick={togglePlay} className="text-white hover:text-blue-400 transition-colors">
             {playing ? <Pause className="h-5 w-5 fill-white" /> : <Play className="h-5 w-5 fill-white ml-0.5" />}
           </button>
 
-          {/* Time */}
           <span className="text-xs text-gray-300 font-mono tabular-nums whitespace-nowrap">
             {fmt(currentTime)} / {fmt(duration)}
           </span>
 
-          {/* Volume */}
           <div className="flex items-center gap-1.5 group/vol">
             <button onClick={toggleMute} className="text-white hover:text-blue-400 transition-colors">
               {muted || volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
@@ -364,7 +382,6 @@ function DirectPlayer({
 
           <div className="flex-1" />
 
-          {/* Speed */}
           <div className="relative">
             <button
               onClick={() => setShowSpeedMenu(!showSpeedMenu)}
@@ -393,7 +410,6 @@ function DirectPlayer({
             )}
           </div>
 
-          {/* PiP */}
           <button
             onClick={togglePiP}
             className={`transition-colors ${pinned ? "text-blue-400" : "text-gray-300 hover:text-white"}`}
@@ -402,7 +418,6 @@ function DirectPlayer({
             <PictureInPicture2 className="h-4 w-4" />
           </button>
 
-          {/* Fullscreen */}
           <button onClick={onFullscreen} className="text-gray-300 hover:text-white transition-colors">
             {fullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
           </button>
