@@ -41,6 +41,7 @@ export function VideoPlayer({ source, className = "", onProgress }: VideoPlayerP
   const [fullscreen, setFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const [aspectRatio, setAspectRatio] = useState<string | undefined>(undefined);
 
   const handleMouseMove = useCallback(() => {
     setShowControls(true);
@@ -69,15 +70,22 @@ export function VideoPlayer({ source, className = "", onProgress }: VideoPlayerP
     return () => document.removeEventListener("fullscreenchange", onFsChange);
   }, []);
 
+  const handleAspectRatio = useCallback((width: number, height: number) => {
+    if (width > 0 && height > 0) {
+      setAspectRatio(`${width} / ${height}`);
+    }
+  }, []);
+
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-full bg-black overflow-hidden group ${fullscreen ? "fixed inset-0 z-50" : ""} ${className}`}
+      className={`relative w-full bg-black overflow-hidden group ${fullscreen ? "fixed inset-0 z-50" : ""} ${className}`}
+      style={aspectRatio ? { aspectRatio } : { aspectRatio: "16 / 9" }}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setShowControls(false)}
     >
       {source.type === "direct" && (
-        <DirectPlayer source={source} showControls={showControls} onFullscreen={toggleFullscreen} fullscreen={fullscreen} onProgress={onProgress} />
+        <DirectPlayer source={source} showControls={showControls} onFullscreen={toggleFullscreen} fullscreen={fullscreen} onProgress={onProgress} onAspectRatio={handleAspectRatio} />
       )}
       {(source.type === "youtube" || source.type === "vimeo") && (
         <EmbedPlayer source={source} showControls={showControls} onFullscreen={toggleFullscreen} fullscreen={fullscreen} />
@@ -106,12 +114,14 @@ function DirectPlayer({
   onFullscreen,
   fullscreen,
   onProgress,
+  onAspectRatio,
 }: {
   source: DirectSource;
   showControls: boolean;
   onFullscreen: () => void;
   fullscreen: boolean;
   onProgress?: (currentTime: number, duration: number) => void;
+  onAspectRatio?: (width: number, height: number) => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -138,6 +148,12 @@ function DirectPlayer({
     const onBuffer = () => {
       if (v.buffered.length > 0) setBuffered(v.buffered.end(v.buffered.length - 1));
     };
+    const onLoadedMetadata = () => {
+      onTime();
+      if (v.videoWidth > 0 && v.videoHeight > 0) {
+        onAspectRatio?.(v.videoWidth, v.videoHeight);
+      }
+    };
 
     v.addEventListener("timeupdate", onTime);
     v.addEventListener("play", onPlay);
@@ -145,7 +161,7 @@ function DirectPlayer({
     v.addEventListener("volumechange", onVol);
     v.addEventListener("ratechange", onRate);
     v.addEventListener("progress", onBuffer);
-    v.addEventListener("loadedmetadata", onTime);
+    v.addEventListener("loadedmetadata", onLoadedMetadata);
 
     return () => {
       v.removeEventListener("timeupdate", onTime);
@@ -154,7 +170,7 @@ function DirectPlayer({
       v.removeEventListener("volumechange", onVol);
       v.removeEventListener("ratechange", onRate);
       v.removeEventListener("progress", onBuffer);
-      v.removeEventListener("loadedmetadata", onTime);
+      v.removeEventListener("loadedmetadata", onLoadedMetadata);
     };
   }, []);
 

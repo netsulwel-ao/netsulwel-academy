@@ -489,7 +489,7 @@ export default function CourseDetailPage() {
         <div className="flex-1 min-w-0 space-y-6">
 
           {/* Player area */}
-          <div className="relative w-full aspect-video bg-gray-900">
+          <div className="relative w-full bg-gray-900">
             {hasAccess && currentVideo?.url ? (
               <VideoPlayer source={buildVideoSource(currentVideo.url, course.thumbnail)}
                 onProgress={(time, dur) => {
