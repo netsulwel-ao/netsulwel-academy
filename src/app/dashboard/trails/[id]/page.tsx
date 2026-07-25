@@ -189,7 +189,7 @@ export default function TrailDetailPage() {
           <div className="space-y-3">
             {courses.map((course, idx) => {
               const normType = normalizeCourseType(course.type);
-              const hasAccess = canAccessCourse(normType, course.id!, enrolledCourses, course.price);
+              const hasAccess = canAccessCourse(normType, course.id!, enrolledCourses, course.price, course.accessCode);
               return (
                 <div key={course.id}
                   className={`flex items-center gap-4 bg-gray-900/40 border p-4 transition-all ${

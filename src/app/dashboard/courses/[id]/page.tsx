@@ -10,7 +10,7 @@ import { useTrack } from "@/hooks/useTrack";
 import {
   Lock, Play, BookOpen, Award, ChevronLeft, Clock,
   Loader2, CheckCircle2, ChevronDown, ChevronRight, Crown, Zap,
-  Heart, HeartOff, Radio, Circle, Search, MessageCircle, Send, HelpCircle, ClipboardCheck,
+  Heart, HeartOff, Radio, Circle, Search, MessageCircle, Send, HelpCircle, ClipboardCheck, KeyRound,
 } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import Link from "next/link";
@@ -118,7 +118,7 @@ export default function CourseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
-  const { canAccessCourse, requiredPlanLabel } = useAccess();
+  const { canAccessCourse, requiredPlanLabel, needsAccessCode } = useAccess();
   const { track } = useTrack();
 
   const [course, setCourse] = useState<Course | null>(null);
@@ -135,6 +135,10 @@ export default function CourseDetailPage() {
   const currentTimeRef = useRef(0);
   const [quizResults, setQuizResults] = useState<ModuleQuizResult[]>([]);
   const [quizModules, setQuizModules] = useState<number[]>([]);
+  const [accessCodeInput, setAccessCodeInput] = useState("");
+  const [accessCodeError, setAccessCodeError] = useState("");
+  const [accessCodeLoading, setAccessCodeLoading] = useState(false);
+  const [accessCodeSuccess, setAccessCodeSuccess] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -356,7 +360,8 @@ export default function CourseDetailPage() {
   );
 
   const normalizedType = normalizeCourseType(course.type);
-  const hasAccess = canAccessCourse(normalizedType, course.id!, enrolledCourses, course.price);
+  const hasAccess = canAccessCourse(normalizedType, course.id!, enrolledCourses, course.price, course.accessCode);
+  const showAccessCode = needsAccessCode(normalizedType, course.id!, enrolledCourses, course.price, course.accessCode);
   const currentVideo = activeLesson ? course.modules?.[activeLesson.mi]?.videos?.[activeLesson.vi] : null;
   const required = requiredPlanLabel(normalizedType);
   const youtubeEmbed = currentVideo?.url ? getYoutubeEmbedUrl(currentVideo.url) : null;
@@ -364,6 +369,37 @@ export default function CourseDetailPage() {
 
   const toggleModule = (mi: number) => {
     setExpandedModules((prev) => prev.includes(mi) ? prev.filter((x) => x !== mi) : [...prev, mi]);
+  };
+
+  const verifyAccessCode = async () => {
+    if (!accessCodeInput.trim() || !course?.id) return;
+    setAccessCodeLoading(true);
+    setAccessCodeError("");
+    try {
+      const token = await import("firebase/auth").then(async () => {
+        const { auth } = await import("@/lib/firebase");
+        return auth.currentUser ? auth.currentUser.getIdToken() : "";
+      });
+      const res = await fetch("/api/access/verify-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ courseId: course.id, code: accessCodeInput.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAccessCodeError(data.error || "Código inválido.");
+        return;
+      }
+      setEnrolledCourses((prev) => [...prev, course.id!]);
+      setAccessCodeSuccess(true);
+    } catch {
+      setAccessCodeError("Erro ao verificar código. Tente novamente.");
+    } finally {
+      setAccessCodeLoading(false);
+    }
   };
 
   return (
@@ -504,6 +540,53 @@ export default function CourseDetailPage() {
               <div className="flex flex-col items-center justify-center h-full gap-3 text-gray-500">
                 <Play className="h-12 w-12" />
                 <p className="text-base">Seleciona uma aula para começar</p>
+              </div>
+            ) : showAccessCode ? (
+              <div className="relative h-full">
+                {course.thumbnail && (
+                  <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover opacity-20 blur-sm" />
+                )}
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-gray-950/80 p-8 text-center">
+                  <div className="flex h-16 w-16 items-center justify-center bg-gray-900 border border-gray-700">
+                    <KeyRound className="h-10 w-10 text-amber-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-white">Código de Acesso</h3>
+                    <p className="mt-2 text-gray-400 text-base max-w-sm">
+                      Este curso é gratuito mas requer um código de acesso para visualizar.
+                    </p>
+                  </div>
+                  {accessCodeSuccess ? (
+                    <div className="flex items-center gap-2 text-green-400">
+                      <CheckCircle2 className="h-5 w-5" />
+                      <span className="text-base font-medium">Código aceite! A carregar curso...</span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-3 w-full max-w-sm">
+                      <input
+                        type="text"
+                        value={accessCodeInput}
+                        onChange={(e) => { setAccessCodeInput(e.target.value.toUpperCase()); setAccessCodeError(""); }}
+                        onKeyDown={(e) => e.key === "Enter" && verifyAccessCode()}
+                        placeholder="Introduza o código de acesso"
+                        className="w-full px-4 py-3 bg-gray-900 border border-gray-700 text-white text-center text-lg font-mono tracking-widest placeholder-gray-600 focus:outline-none focus:border-amber-500 transition-colors"
+                        disabled={accessCodeLoading}
+                        autoFocus
+                      />
+                      {accessCodeError && (
+                        <p className="text-sm text-red-400">{accessCodeError}</p>
+                      )}
+                      <button
+                        onClick={verifyAccessCode}
+                        disabled={accessCodeLoading || !accessCodeInput.trim()}
+                        className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-gray-900 px-6 py-3 font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {accessCodeLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
+                        {accessCodeLoading ? "A verificar..." : "Desbloquear"}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="relative h-full">

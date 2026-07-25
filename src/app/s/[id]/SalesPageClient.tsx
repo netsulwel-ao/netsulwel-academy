@@ -30,6 +30,7 @@ interface CourseData {
   tags: string[];
   modules: { title: string; videos: { title: string; duration: string }[] }[];
   createdBy?: string;
+  accessCode?: string;
   createdAt?: unknown;
 }
 
@@ -87,7 +88,7 @@ export default function SalesPageClient({ courseId }: { courseId: string }) {
   };
 
   const hasAccess = !authLoading && user && course
-    ? canAccessCourse(course.type as any, course.id, [])
+    ? canAccessCourse(course.type as any, course.id, [], course.price, course.accessCode)
     : false;
 
   const handleCTA = () => {

@@ -202,8 +202,8 @@ export default function CourseCatalogPage() {
     return result;
   }, [courses, filters, search, sort]);
 
-  const accessible = filtered.filter((c) => canAccessCourse(normalizeCourseType(c.type), c.id!, enrolledCourses, c.price));
-  const locked = filtered.filter((c) => !canAccessCourse(normalizeCourseType(c.type), c.id!, enrolledCourses, c.price));
+  const accessible = filtered.filter((c) => canAccessCourse(normalizeCourseType(c.type), c.id!, enrolledCourses, c.price, c.accessCode));
+  const locked = filtered.filter((c) => !canAccessCourse(normalizeCourseType(c.type), c.id!, enrolledCourses, c.price, c.accessCode));
   const resultCount = filtered.length;
 
   const activeTag = (label: string, onRemove: () => void) => (

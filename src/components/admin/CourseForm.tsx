@@ -12,6 +12,7 @@ import Link from "next/link";
 import type { Course, CourseModule, VideoItem, CourseType, CourseLevel, CourseCategory, CourseFormat, Trail, CourseMaterial } from "@/types/course";
 import MaterialEditor from "@/components/shared/MaterialEditor";
 import ExerciseEditor from "@/components/shared/ExerciseEditor";
+import { uploadLargeFile } from "@/lib/tus-upload";
 
 // -- Upload helpers ----------------------------------------
 async function uploadToR2WithProgress(file: File, folder: string, onProgress: (p: number) => void): Promise<string> {
@@ -113,6 +114,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
   const [trails, setTrails] = useState<Trail[]>([]);
   const [generatingDesc, setGeneratingDesc] = useState(false);
   const [error, setError] = useState("");
+  const [accessCode, setAccessCode] = useState(initialData?.accessCode ?? "");
 
   const thumbInputRef = useRef<HTMLInputElement>(null);
   const videoInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
@@ -143,7 +145,18 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
     updateVideo(mi, vi, "uploadProgress", 0);
     updateVideo(mi, vi, "uploadError", "");
     try {
-      const url = await uploadToR2WithProgress(file, "videos", (pct) => updateVideo(mi, vi, "uploadProgress", pct));
+      // Use TUS multipart for files > 50MB
+      const LARGE_FILE_THRESHOLD = 50 * 1024 * 1024;
+      let url: string;
+      if (file.size > LARGE_FILE_THRESHOLD) {
+        url = await uploadLargeFile({
+          file,
+          folder: "videos",
+          onProgress: (pct) => updateVideo(mi, vi, "uploadProgress", pct),
+        });
+      } else {
+        url = await uploadToR2WithProgress(file, "videos", (pct) => updateVideo(mi, vi, "uploadProgress", pct));
+      }
       updateVideo(mi, vi, "url", url);
       updateVideo(mi, vi, "uploading", false);
       updateVideo(mi, vi, "uploadProgress", 100);
@@ -227,6 +240,11 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
       tags, modules: cleanModules,
       modulesCount: cleanModules.length, lessonsCount, status,
     };
+    if (courseType === "standalone" && (!price || parseFloat(price) <= 0) && accessCode.trim()) {
+      courseData.accessCode = accessCode.trim();
+    } else if (courseType !== "standalone" || (price && parseFloat(price) > 0)) {
+      courseData.accessCode = "";
+    }
     if (trailId) courseData.trailId = trailId;
     if (trailOrder) courseData.trailOrder = parseInt(trailOrder);
     await onSave(courseData, status);
@@ -401,6 +419,33 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                 <input type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)}
                   placeholder="0 = Gratuito"
                   className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 pl-10 pr-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all" />
+              </div>
+            </div>
+          )}
+
+          {/* Código de Acesso — só standalone gratuito */}
+          {courseType === "standalone" && (!price || parseInt(price) <= 0) && (
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Código de Acesso</label>
+              <p className="text-xs text-gray-500 mb-2">Se definido, os alunos precisam deste código para aceder ao curso.</p>
+              <div className="flex items-center gap-2">
+                <input type="text" value={accessCode} onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+                  placeholder="Ex: MAT-7X9K"
+                  className="flex-1 bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white font-mono tracking-wider placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all" />
+                <button type="button" onClick={() => {
+                  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+                  const code = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("") + "-" + Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+                  setAccessCode(code);
+                }}
+                  className="px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm font-bold transition-colors whitespace-nowrap">
+                  Gerar
+                </button>
+                {accessCode && (
+                  <button type="button" onClick={() => { navigator.clipboard.writeText(accessCode); }}
+                    className="px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm font-bold transition-colors whitespace-nowrap">
+                    Copiar
+                  </button>
+                )}
               </div>
             </div>
           )}

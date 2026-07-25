@@ -26,7 +26,7 @@ interface CoursePreview {
   id: string; title: string; description: string; thumbnail: string;
   type: string; level: string; category: string; price: number;
   hasCertificate: boolean; modulesCount: number; lessonsCount: number;
-  tags: string[]; modules: Module[];
+  tags: string[]; modules: Module[]; accessCode?: string;
 }
 
 export default function PreviewCourseClient({ course }: { course: CoursePreview }) {
@@ -37,7 +37,7 @@ export default function PreviewCourseClient({ course }: { course: CoursePreview 
   const [expandedModules, setExpandedModules] = useState<number[]>([0]);
 
   const hasAccess = !loading && user
-    ? canAccessCourse(course.type as "golden" | "smart" | "standalone", course.id, [])
+    ? canAccessCourse(course.type as "golden" | "smart" | "standalone", course.id, [], course.price, course.accessCode)
     : false;
 
   const handleWatch = () => {

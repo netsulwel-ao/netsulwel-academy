@@ -7,6 +7,9 @@ import type { CourseType } from "@/types/course";
  *  smart   → smart + standalone comprado
  *  golden  → tudo (golden + smart + standalone comprado)
  *  admin   → tudo sempre
+ *
+ *  Se standalone tem accessCode, NÃO dá acesso automático mesmo com price <= 0.
+ *  O utilizador precisa de introduzir o código ou estar em enrolledCourses.
  */
 export function useAccess() {
   const { plan, isAdmin } = useAuth();
@@ -23,15 +26,34 @@ export function useAccess() {
     type: CourseType,
     courseId: string,
     enrolledCourses: string[] = [],
-    standalonePrice?: number
+    standalonePrice?: number,
+    accessCode?: string
   ): boolean => {
     if (isAdmin) return true;
     if (type === "standalone") {
+      // Se tem accessCode, não dá acesso automático — precisa de estar enrolled
+      if (accessCode) {
+        return enrolledCourses.includes(courseId);
+      }
       // Curso avulso gratuito fica disponível mesmo sem compra.
       if ((standalonePrice ?? 0) <= 0) return true;
       return enrolledCourses.includes(courseId);
     }
     return canAccessCourseType(type);
+  };
+
+  const needsAccessCode = (
+    type: CourseType,
+    courseId: string,
+    enrolledCourses: string[] = [],
+    standalonePrice?: number,
+    accessCode?: string
+  ): boolean => {
+    if (isAdmin) return false;
+    if (type === "standalone" && accessCode && (standalonePrice ?? 0) <= 0) {
+      return !enrolledCourses.includes(courseId);
+    }
+    return false;
   };
 
   const planLabel: Record<UserPlan, string> = {
@@ -46,5 +68,5 @@ export function useAccess() {
     return "Compra Individual";
   };
 
-  return { canAccessCourse, canAccessCourseType, plan, planLabel, requiredPlanLabel };
+  return { canAccessCourse, canAccessCourseType, needsAccessCode, plan, planLabel, requiredPlanLabel };
 }

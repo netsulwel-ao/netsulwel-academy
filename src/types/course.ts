@@ -66,6 +66,7 @@ export interface Course {
   sellerId?: string;          // UID do professor/instituição que vende (para taxas)
   feePercentage?: number;     // Taxa da plataforma para este curso (ex: 10 para 10%)
   views?: number;
+  accessCode?: string;       // código de acesso para cursos grátis (auto-gerado)
   createdAt?: unknown;
   updatedAt?: unknown;
 }
