@@ -73,7 +73,7 @@ export default function PostCard({ post }: { post: CommunityPost }) {
           <div className="flex items-start justify-between gap-3">
             <Link href={`/dashboard/community/profile/${post.authorId}`} className="flex items-center gap-3 min-w-0 group">
             {post.authorPhoto ? (
-              <img src={post.authorPhoto} alt="" className="h-10 w-10 rounded-full object-cover shrink-0" />
+               <img src={post.authorPhoto} alt={post.authorName} className="h-10 w-10 rounded-full object-cover shrink-0" />
             ) : (
               <div className="h-10 w-10 rounded-full bg-purple/20 flex items-center justify-center shrink-0">
                 <span className="text-sm font-bold text-purple-light">{post.authorName?.[0]?.toUpperCase() || "?"}</span>
@@ -104,7 +104,7 @@ export default function PostCard({ post }: { post: CommunityPost }) {
           <div className={`grid gap-2 ${post.images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
             {post.images.slice(0, 4).map((img, i) => (
               <div key={i} className="relative overflow-hidden bg-gray-800 aspect-video">
-                <img src={img} alt="" className="w-full h-full object-cover" />
+                 <img src={img} alt={`Imagem ${i + 1}`} className="w-full h-full object-cover" />
               </div>
             ))}
           </div>

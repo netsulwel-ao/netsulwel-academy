@@ -128,6 +128,7 @@ export function RecordingControls({ live, isHost, onStatusChange }: RecordingCon
             ? "text-red-400 bg-red-500/20 hover:bg-red-500/30"
             : "text-white/70 hover:text-white hover:bg-white/8"
         } disabled:opacity-50 disabled:cursor-not-allowed`}
+        aria-label={isRecording ? "Parar gravação" : "Iniciar gravação"}
         title={isRecording ? "Parar gravação" : "Iniciar gravação"}
       >
         <div className="relative">

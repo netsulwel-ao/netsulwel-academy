@@ -63,7 +63,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       />
       <div className={`flex flex-1 flex-col transition-all duration-300 h-full overflow-hidden ${isCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'}`}>
         <Header onMenuClick={() => setMobileOpen(true)} theme={theme} />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-background">
+        <main id="main-content" className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-background">
           {children}
         </main>
       </div>

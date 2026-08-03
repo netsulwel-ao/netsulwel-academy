@@ -137,6 +137,9 @@ export function AttendanceReport({ liveId, liveTitle, isTeacher }: AttendanceRep
       {/* Header / Collapsed View */}
       <button
         onClick={handleLoadReport}
+        aria-expanded={expanded}
+        aria-controls="attendance-panel"
+        id="attendance-toggle"
         disabled={loading}
         className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors disabled:opacity-50"
       >
@@ -178,7 +181,7 @@ export function AttendanceReport({ liveId, liveTitle, isTeacher }: AttendanceRep
 
       {/* Expanded View */}
       {expanded && (
-        <div className="border-t border-white/8 p-4 space-y-4">
+        <div id="attendance-panel" role="region" aria-labelledby="attendance-toggle" className="border-t border-white/8 p-4 space-y-4">
           {error && (
             <div className="bg-red-900/20 border border-red-500/30 text-red-400 text-xs p-3 rounded">
               {error}
@@ -189,11 +192,12 @@ export function AttendanceReport({ liveId, liveTitle, isTeacher }: AttendanceRep
           {attendees.length > 0 && (
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-white/80">
+                <caption className="sr-only">Relatório de presença</caption>
                 <thead className="text-white/50 border-b border-white/8">
                   <tr>
-                    <th className="text-left py-2 px-2">Nome</th>
-                    <th className="text-left py-2 px-2">Entrou em</th>
-                    <th className="text-left py-2 px-2">Duração</th>
+                    <th scope="col" className="text-left py-2 px-2">Nome</th>
+                    <th scope="col" className="text-left py-2 px-2">Entrou em</th>
+                    <th scope="col" className="text-left py-2 px-2">Duração</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">

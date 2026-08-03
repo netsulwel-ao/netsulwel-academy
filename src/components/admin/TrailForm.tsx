@@ -175,7 +175,7 @@ export function TrailForm({ mode, initialData, allCourses, allLives, saving, err
       {/* Top bar */}
       <div className="sticky top-0 z-20 flex items-center justify-between gap-4 bg-gray-950/90 backdrop-blur-xl border-b border-gray-800 px-6 py-4">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="p-2 bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-white transition-colors">
+          <button onClick={onBack} aria-label="Voltar" className="p-2 bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-white transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
@@ -198,9 +198,9 @@ export function TrailForm({ mode, initialData, allCourses, allLives, saving, err
       </div>
 
       {error && (
-        <div className="mx-6 mt-4 flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+        <div role="alert" className="mx-6 mt-4 flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
           <AlertCircle className="h-4 w-4 shrink-0" />{error}
-          <button onClick={() => onError("")} className="ml-auto"><X className="h-4 w-4" /></button>
+          <button onClick={() => onError("")} aria-label="Fechar erro" className="ml-auto"><X className="h-4 w-4" /></button>
         </div>
       )}
 
@@ -210,6 +210,8 @@ export function TrailForm({ mode, initialData, allCourses, allLives, saving, err
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Capa da Trilha</label>
             <div onClick={() => thumbInputRef.current?.click()}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); thumbInputRef.current?.click(); } }}
+              role="button" tabIndex={0} aria-label="Carregar capa da trilha"
               className="relative w-full aspect-video bg-gray-900 border border-dashed border-gray-700 hover:border-blue-500/50 cursor-pointer overflow-hidden group transition-colors">
               {thumbnailPreview ? (
                 <img src={thumbnailPreview} alt="preview" className="w-full h-full object-cover" />
@@ -225,22 +227,23 @@ export function TrailForm({ mode, initialData, allCourses, allLives, saving, err
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nome da Trilha *</label>
-            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex: Trilha de Desenvolvimento Web"
+            <label htmlFor="trail-title" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nome da Trilha *</label>
+            <input id="trail-title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex: Trilha de Desenvolvimento Web"
               className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Descrição</label>
-            <textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descreva o percurso de aprendizagem..."
+            <label htmlFor="trail-desc" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Descrição</label>
+            <textarea id="trail-desc" rows={4} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descreva o percurso de aprendizagem..."
               className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all resize-none" />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Tipo de Acesso</label>
-            <div className="space-y-2">
+            <div role="radiogroup" aria-label="Tipo de acesso" className="space-y-2">
               {TYPE_OPTIONS.map((t) => (
                 <button key={t.value} type="button" onClick={() => setTrailType(t.value)}
+                  role="radio" aria-checked={trailType === t.value}
                   className={`w-full flex items-center gap-3 px-4 py-3 border text-left transition-all ${
                     trailType === t.value
                       ? t.color === "blue" ? "border-blue-500/50 bg-blue-500/10"
@@ -260,8 +263,8 @@ export function TrailForm({ mode, initialData, allCourses, allLives, saving, err
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nível</label>
-              <select value={level} onChange={(e) => setLevel(e.target.value as CourseLevel)}
+              <label htmlFor="trail-level" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nível</label>
+              <select id="trail-level" value={level} onChange={(e) => setLevel(e.target.value as CourseLevel)}
                 className="w-full bg-gray-900 border border-gray-800 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer">
                 <option value="beginner">Iniciante</option>
                 <option value="intermediate">Intermédio</option>
@@ -269,8 +272,8 @@ export function TrailForm({ mode, initialData, allCourses, allLives, saving, err
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Categoria</label>
-              <select value={category} onChange={(e) => setCategory(e.target.value as CourseCategory)}
+              <label htmlFor="trail-category" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Categoria</label>
+              <select id="trail-category" value={category} onChange={(e) => setCategory(e.target.value as CourseCategory)}
                 className="w-full bg-gray-900 border border-gray-800 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer">
                 <option value="tech">Tecnologia</option>
                 <option value="finance">Finanças</option>
@@ -311,11 +314,13 @@ export function TrailForm({ mode, initialData, allCourses, allLives, saving, err
                         <span className="flex-1 text-sm text-white truncate">{course.title}</span>
                         <div className="flex gap-1">
                           <button onClick={() => moveCourse(idx, -1)} disabled={idx === 0}
+                            aria-label={`Mover curso ${course.title} para cima`}
                             className="p-1 text-gray-500 hover:text-white disabled:opacity-30 transition-colors">▲</button>
                           <button onClick={() => moveCourse(idx, 1)} disabled={idx === selectedCourseIds.length - 1}
+                            aria-label={`Mover curso ${course.title} para baixo`}
                             className="p-1 text-gray-500 hover:text-white disabled:opacity-30 transition-colors">▼</button>
                         </div>
-                        <button onClick={() => toggleCourse(cid)} className="p-1.5 text-gray-600 hover:text-red-400 transition-colors">
+                        <button onClick={() => toggleCourse(cid)} aria-label={`Remover curso ${course.title}`} className="p-1.5 text-gray-600 hover:text-red-400 transition-colors">
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
@@ -383,11 +388,13 @@ export function TrailForm({ mode, initialData, allCourses, allLives, saving, err
                         </span>
                         <div className="flex gap-1">
                           <button onClick={() => moveLive(idx, -1)} disabled={idx === 0}
+                            aria-label={`Mover aula ${live.title} para cima`}
                             className="p-1 text-gray-500 hover:text-white disabled:opacity-30 transition-colors">▲</button>
                           <button onClick={() => moveLive(idx, 1)} disabled={idx === selectedLiveIds.length - 1}
+                            aria-label={`Mover aula ${live.title} para baixo`}
                             className="p-1 text-gray-500 hover:text-white disabled:opacity-30 transition-colors">▼</button>
                         </div>
-                        <button onClick={() => toggleLive(lid)} className="p-1.5 text-gray-600 hover:text-red-400 transition-colors">
+                        <button onClick={() => toggleLive(lid)} aria-label={`Remover aula ${live.title}`} className="p-1.5 text-gray-600 hover:text-red-400 transition-colors">
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
@@ -446,12 +453,15 @@ export function TrailForm({ mode, initialData, allCourses, allLives, saving, err
                     <div className="flex items-center justify-between px-4 py-2.5 bg-gray-950/50 border-b border-gray-800">
                       <div className="flex items-center gap-2">
                         <button onClick={() => moveLiveSession(idx, -1)} disabled={idx === 0}
+                          aria-label={`Mover aula #${idx + 1} para cima`}
                           className="p-0.5 text-gray-600 hover:text-white disabled:opacity-20 transition-colors">▲</button>
                         <span className="text-xs font-bold text-orange-400">Aula #{idx + 1}</span>
                         <button onClick={() => moveLiveSession(idx, 1)} disabled={idx === liveSessions.length - 1}
+                          aria-label={`Mover aula #${idx + 1} para baixo`}
                           className="p-0.5 text-gray-600 hover:text-white disabled:opacity-20 transition-colors">▼</button>
                       </div>
                       <button onClick={() => removeLiveSession(idx)}
+                        aria-label="Remover aula ao vivo"
                         className="p-1 text-gray-600 hover:text-red-400 transition-colors">
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -461,9 +471,11 @@ export function TrailForm({ mode, initialData, allCourses, allLives, saving, err
                       <div className="flex flex-col sm:flex-row gap-4">
                         <div className="w-full sm:w-28 shrink-0">
                           <div onClick={() => sessionThumbInputs.current.get(idx)?.click()}
+                            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); sessionThumbInputs.current.get(idx)?.click(); } }}
+                            role="button" tabIndex={0} aria-label="Carregar capa da aula"
                             className="relative aspect-video bg-gray-800 border border-dashed border-gray-700 hover:border-orange-500/50 cursor-pointer overflow-hidden group transition-colors">
                             {sess.thumbnail ? (
-                              <img src={sess.thumbnail} alt="" className="w-full h-full object-cover" />
+                               <img src={sess.thumbnail} alt={sess.title || "Aula ao vivo"} className="w-full h-full object-cover" />
                             ) : (
                               <div className="flex flex-col items-center justify-center h-full gap-1 text-gray-500 group-hover:text-orange-400">
                                 <ImagePlus className="h-6 w-6" />

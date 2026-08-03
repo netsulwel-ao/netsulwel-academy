@@ -68,7 +68,7 @@ export default function TrailsPage() {
         </Link>
       </div>
 
-      {loading && <div className="flex items-center justify-center py-24"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>}
+      {loading && <div className="flex items-center justify-center py-24" role="status" aria-live="polite"><Loader2 className="h-8 w-8 animate-spin text-purple" /><span className="sr-only">A carregar trilhas...</span></div>}
 
       {!loading && trails.length === 0 && (
         <div className="flex flex-col items-center justify-center py-24 bg-gray-900/40 text-center">
@@ -128,14 +128,16 @@ export default function TrailsPage() {
       {/* Confirm delete modal */}
       {confirmDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/80 backdrop-blur-sm">
-          <div className="bg-gray-900 border border-gray-800 p-8 max-w-sm w-full mx-4 shadow-2xl">
+          <div className="bg-gray-900 border border-gray-800 p-8 max-w-sm w-full mx-4 shadow-2xl"
+            role="dialog" aria-modal="true" aria-labelledby="delete-trail-title" aria-describedby="delete-trail-desc"
+            onKeyDown={(e) => { if (e.key === "Escape") setConfirmDelete(null); }}>
             <div className="flex items-center gap-3 mb-4">
               <div className="flex h-10 w-10 items-center justify-center bg-red-500/10">
                 <AlertTriangle className="h-5 w-5 text-red-400" />
               </div>
-              <h3 className="text-lg font-bold text-white">Apagar Trilha</h3>
+              <h3 id="delete-trail-title" className="text-lg font-bold text-white">Apagar Trilha</h3>
             </div>
-            <p className="text-gray-400 text-sm mb-6">Tens a certeza? Os cursos associados não serão apagados, apenas a trilha.</p>
+            <p id="delete-trail-desc" className="text-gray-400 text-sm mb-6">Tens a certeza? Os cursos associados não serão apagados, apenas a trilha.</p>
             <div className="flex gap-3">
               <button onClick={() => handleDelete(confirmDelete)} disabled={!!deletingId}
                 className="flex flex-1 items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2.5 font-bold transition-colors disabled:opacity-60">

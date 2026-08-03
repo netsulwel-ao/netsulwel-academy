@@ -30,15 +30,11 @@ export async function POST(req: NextRequest) {
     }
 
     const userRef = db.collection("users").doc(uid);
-    const userSnap = await userRef.get();
-    const enrolledCourses: string[] = userSnap.data()?.enrolledCourses ?? [];
 
-    if (!enrolledCourses.includes(courseId)) {
-      await userRef.set(
-        { enrolledCourses: [...enrolledCourses, courseId] },
-        { merge: true }
-      );
-    }
+    // Use arrayUnion instead of read-then-write to prevent race conditions
+    await userRef.update({
+      enrolledCourses: admin.firestore.FieldValue.arrayUnion(courseId),
+    });
 
     return NextResponse.json({
       success: true,

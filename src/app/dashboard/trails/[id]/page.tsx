@@ -198,7 +198,7 @@ export default function TrailDetailPage() {
                   <span className="text-xs font-bold text-gray-500 w-8 shrink-0 text-center">{idx + 1}</span>
                   <div className="w-16 h-12 bg-gray-800 overflow-hidden shrink-0">
                     {course.thumbnail ? (
-                      <img src={course.thumbnail} alt="" className="w-full h-full object-cover" />
+                       <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gray-800">
                         <BookOpen className="h-5 w-5 text-gray-600" />
@@ -250,7 +250,7 @@ export default function TrailDetailPage() {
                   <span className="text-xs font-bold text-gray-500 w-8 shrink-0 text-center">{idx + 1}</span>
                   <div className="w-16 h-12 bg-gray-800 overflow-hidden shrink-0">
                     {live.thumbnail ? (
-                      <img src={live.thumbnail} alt="" className="w-full h-full object-cover" />
+                       <img src={live.thumbnail} alt={live.title} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gray-800">
                         <Radio className="h-5 w-5 text-gray-600" />
@@ -327,7 +327,7 @@ export default function TrailDetailPage() {
                   <span className="text-xs font-bold text-gray-500 w-8 shrink-0 text-center">{idx + 1}</span>
                   <div className="w-16 h-12 bg-gray-800 overflow-hidden shrink-0">
                     {sess.thumbnail ? (
-                      <img src={sess.thumbnail} alt="" className="w-full h-full object-cover" />
+                       <img src={sess.thumbnail} alt={sess.title} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gray-800">
                         <Calendar className="h-5 w-5 text-gray-600" />

@@ -161,6 +161,9 @@ export default function PreviewCourseClient({ course }: { course: CoursePreview 
           {course.modules.map((module, mi) => (
             <div key={mi} className="border border-gray-800 overflow-hidden">
               <button onClick={() => toggleModule(mi)}
+                aria-expanded={expandedModules.includes(mi)}
+                aria-controls={`prev-module-${mi}`}
+                id={`prev-module-btn-${mi}`}
                 className="w-full flex items-center gap-4 px-5 py-4 bg-gray-900/60 hover:bg-gray-900 transition-colors text-left">
                 <span className="text-xs font-bold text-blue-400 uppercase tracking-wider shrink-0 w-20">Módulo {mi + 1}</span>
                 <span className="flex-1 text-sm font-medium text-white">{module.title || `Módulo ${mi + 1}`}</span>
@@ -171,7 +174,7 @@ export default function PreviewCourseClient({ course }: { course: CoursePreview 
                 }
               </button>
               {expandedModules.includes(mi) && (
-                <div className="bg-gray-950/40 divide-y divide-gray-800/50">
+                <div id={`prev-module-${mi}`} role="region" aria-labelledby={`prev-module-btn-${mi}`} className="bg-gray-950/40 divide-y divide-gray-800/50">
                   {module.videos.map((video, vi) => (
                     <div key={vi} className="flex items-center gap-4 px-5 py-3">
                       <div className="flex h-7 w-7 shrink-0 items-center justify-center bg-gray-800">

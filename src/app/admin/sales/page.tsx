@@ -15,6 +15,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import type { Sale } from "@/types/settings";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { getOrCreateIndividualChat, groupChatId } from "@/lib/chat";
 
 const STATUS_CONFIG = {
@@ -197,6 +198,19 @@ export default function SalesPage() {
           read: false,
           createdAt: serverTimestamp(),
         });
+
+        // Send confirmation email (fire-and-forget — don't block the UI)
+        fetchWithAuth("/api/notifications/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            saleId: sale.itemId || sale.type,
+            userId: sale.userId,
+            itemTitle: sale.itemTitle || sale.type,
+            itemType: sale.type,
+            amount: sale.amount,
+          }),
+        }).catch(() => {});
       } else if (newStatus !== "confirmed" && sale.status === "confirmed") {
         if (sale.type === "standalone" && sale.itemId) {
           await updateDoc(userRef, { enrolledCourses: arrayRemove(sale.itemId) });

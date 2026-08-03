@@ -194,6 +194,7 @@ export default function Header({ onMenuClick, theme = "dark" }: HeaderProps) {
       <div className="flex flex-1 items-center gap-4">
         <button
           onClick={onMenuClick}
+          aria-label="Abrir menu de navegação"
           className={`lg:hidden transition-colors mr-2 ${
             theme === "light" ? "text-slate-400 hover:text-slate-800" : "text-gray-400 hover:text-white"
           }`}

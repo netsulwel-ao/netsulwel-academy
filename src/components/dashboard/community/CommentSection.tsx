@@ -94,7 +94,7 @@ export default function CommentSection({ postId, postAuthorId, postTitle }: { po
         {comments.map((comment) => (
           <div key={comment.id} className="flex gap-3 bg-gray-900/30 border border-gray-800/50 p-3">
             {comment.authorPhoto ? (
-              <img src={comment.authorPhoto} alt="" className="h-8 w-8 rounded-full object-cover shrink-0 mt-0.5" />
+               <img src={comment.authorPhoto} alt={comment.authorName} className="h-8 w-8 rounded-full object-cover shrink-0 mt-0.5" />
             ) : (
               <div className="h-8 w-8 rounded-full bg-purple/20 flex items-center justify-center shrink-0 mt-0.5">
                 <span className="text-xs font-bold text-purple-light">{comment.authorName?.[0]?.toUpperCase() || "?"}</span>

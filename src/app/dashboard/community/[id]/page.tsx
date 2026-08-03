@@ -119,12 +119,13 @@ export default function CommunityPostDetailPage() {
   return (
     <div className="max-w-3xl mx-auto animate-in fade-in duration-500">
       {toast && (
-        <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 text-sm font-medium shadow-xl border ${
+        <div role={toast.type === "error" ? "alert" : "status"} aria-live={toast.type === "error" ? "assertive" : "polite"} aria-atomic="true"
+          className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 text-sm font-medium shadow-xl border ${
           toast.type === "success" ? "bg-green-500/10 border-green-500/30 text-green-400" : "bg-red-500/10 border-red-500/30 text-red-400"
         }`}>
           {toast.type === "success" ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
           {toast.msg}
-          <button onClick={() => setToast(null)}><X className="h-4 w-4" /></button>
+          <button onClick={() => setToast(null)} aria-label="Fechar notificação"><X className="h-4 w-4" /></button>
         </div>
       )}
 
@@ -156,7 +157,7 @@ export default function CommunityPostDetailPage() {
           <div className="flex items-start justify-between gap-3">
             <Link href={`/dashboard/community/profile/${post.authorId}`} className="flex items-center gap-3 group">
               {post.authorPhoto ? (
-                <img src={post.authorPhoto} alt="" className="h-12 w-12 rounded-full object-cover" />
+                 <img src={post.authorPhoto} alt={post.authorName} className="h-12 w-12 rounded-full object-cover" />
               ) : (
                 <div className="h-12 w-12 rounded-full bg-purple/20 flex items-center justify-center">
                   <span className="text-lg font-bold text-purple-light">{post.authorName?.[0]?.toUpperCase() || "?"}</span>
@@ -185,7 +186,7 @@ export default function CommunityPostDetailPage() {
             <div className={`grid gap-3 ${post.images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
               {post.images.map((img, i) => (
                 <a key={i} href={img} target="_blank" rel="noopener noreferrer" className="overflow-hidden bg-gray-800 block group">
-                  <img src={img} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                   <img src={img} alt={`Imagem ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 </a>
               ))}
             </div>

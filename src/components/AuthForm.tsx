@@ -61,6 +61,7 @@ export default function AuthForm({
             <button
               type="button"
               disabled={loading}
+              aria-label={showPassword ? "Esconder palavra-passe" : "Mostrar palavra-passe"}
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 focus:outline-none disabled:opacity-50"
             >

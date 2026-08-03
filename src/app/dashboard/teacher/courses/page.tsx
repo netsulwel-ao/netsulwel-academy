@@ -112,7 +112,7 @@ export default function TeacherCoursesPage() {
               <div className="flex items-center gap-4 p-5">
                 <div className="h-16 w-24 rounded bg-gray-800 overflow-hidden shrink-0">
                   {course.thumbnail ? (
-                    <img src={course.thumbnail} alt="" className="h-full w-full object-cover" />
+                     <img src={course.thumbnail} alt={course.title} className="h-full w-full object-cover" />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center"><BookOpen className="h-6 w-6 text-gray-700" /></div>
                   )}

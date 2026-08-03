@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFirebaseAdmin } from "@/lib/firebase-admin";
+import { verifyAuth } from "@/lib/api-auth";
 import type { PrivateAccessLink, AccessLog } from "@/types/access";
 
 export async function GET(
@@ -8,8 +9,6 @@ export async function GET(
 ) {
   try {
     const { token } = await params;
-    const uid = request.headers.get("X-User-ID") || "";
-    const authHeader = request.headers.get("Authorization");
 
     // Validar token
     if (!token || token.length < 10) {
@@ -19,9 +18,16 @@ export async function GET(
       );
     }
 
-    // Use Admin SDK instead of client SDK
     const admin = getFirebaseAdmin();
     const db = admin.firestore();
+
+    // Verify user identity via Firebase token (not spoofable header)
+    const authHeader = request.headers.get("Authorization");
+    let uid = "";
+    if (authHeader?.startsWith("Bearer ")) {
+      const authResult = await verifyAuth(request);
+      if (authResult.uid) uid = authResult.uid;
+    }
 
     // Buscar link privado
     const linksRef = db.collection("private_access_links");
@@ -107,7 +113,7 @@ export async function GET(
       lastAccessedAt: new Date().toISOString(),
     });
 
-    // Conceder acesso ao usuário
+    // Conceder acesso ao usuário (arrayUnion — atomic, no race condition)
     const userRef = db.collection("users").doc(uid);
     const userSnap = await userRef.get();
 
@@ -118,25 +124,16 @@ export async function GET(
       );
     }
 
-    const userData = userSnap.data();
-    const updateData: Record<string, any> = {};
-
-    // Adicionar aos cursos ou lives do usuário
     if (link.courseId) {
-      const enrolledCourses = userData?.enrolledCourses || [];
-      if (!enrolledCourses.includes(link.courseId)) {
-        updateData.enrolledCourses = [...enrolledCourses, link.courseId];
-      }
+      await userRef.update({
+        enrolledCourses: admin.firestore.FieldValue.arrayUnion(link.courseId),
+      });
     }
 
     if (link.liveId) {
-      const enrolledLives = userData?.enrolledLives || [];
-      if (!enrolledLives.includes(link.liveId)) {
-        updateData.enrolledLives = [...enrolledLives, link.liveId];
-      }
-    }
-    if (Object.keys(updateData).length > 0) {
-      await userRef.update(updateData);
+      await userRef.update({
+        enrolledLives: admin.firestore.FieldValue.arrayUnion(link.liveId),
+      });
     }
 
     // Registrar acesso

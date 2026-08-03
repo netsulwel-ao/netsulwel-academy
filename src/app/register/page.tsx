@@ -246,67 +246,144 @@ export default function RegisterPage() {
               )}
 
               <form className="space-y-5 relative z-10" onSubmit={handleRegister}>
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-gray-300" htmlFor="name">Nome completo</label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                      <User className="h-5 w-5 text-gray-500" />
-                    </div>
-                    <input id="name" type="text" required disabled={loading} placeholder="João Silva"
-                      value={name} onChange={(e) => setName(e.target.value)}
-                      className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-                  </div>
-                </div>
+                {/* Back Button */}
+                <Link href="/login" className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-6">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Voltar
+                </Link>
 
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-gray-300" htmlFor="email">Seu Email</label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                      <Mail className="h-5 w-5 text-gray-500" />
-                    </div>
-                    <input id="email" type="email" required disabled={loading} placeholder="email@exemplo.com"
-                      value={email} onChange={(e) => setEmail(e.target.value)}
-                      className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-gray-300" htmlFor="password">Palavra-passe</label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                      <Lock className="h-5 w-5 text-gray-500" />
-                    </div>
-                    <input id="password" type={showPassword ? "text" : "password"} required disabled={loading}
-                      placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)}
-                      className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-10 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-                    <button type="button" disabled={loading} onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 focus:outline-none disabled:opacity-50">
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
-                  <p className="mt-1 text-xs text-gray-500">Mínimo de 6 caracteres</p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-gray-300" htmlFor="confirmPassword">Confirmar palavra-passe</label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                      <Lock className="h-5 w-5 text-gray-500" />
-                    </div>
-                    <input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} required disabled={loading}
-                      placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-10 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-                    <button type="button" disabled={loading} onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 focus:outline-none disabled:opacity-50">
-                      {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-800 pt-5 mt-5">
-                  <p className="text-sm font-medium text-gray-400 mb-4">Dados pessoais</p>
-
+                {/* Grid Layout for Account Info - 2 columns on desktop, 1 on mobile */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Name */}
                   <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-gray-300" htmlFor="name">Nome completo</label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <User className="h-5 w-5 text-gray-500" />
+                      </div>
+                      <input id="name" type="text" required disabled={loading} placeholder="João Silva"
+                        value={name} onChange={(e) => setName(e.target.value)}
+                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
+                    </div>
+                  </div>
+
+                  {/* Email */}
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-gray-300" htmlFor="email">Email</label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <Mail className="h-5 w-5 text-gray-500" />
+                      </div>
+                      <input id="email" type="email" required disabled={loading} placeholder="email@exemplo.com"
+                        value={email} onChange={(e) => setEmail(e.target.value)}
+                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
+                    </div>
+                  </div>
+
+                  {/* Password */}
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-gray-300" htmlFor="password">Palavra-passe</label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <Lock className="h-5 w-5 text-gray-500" />
+                      </div>
+                      <input id="password" type={showPassword ? "text" : "password"} required disabled={loading}
+                        placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)}
+                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-10 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
+                      <button type="button" disabled={loading} onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 focus:outline-none disabled:opacity-50">
+                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-gray-300" htmlFor="confirmPassword">Confirmar</label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <Lock className="h-5 w-5 text-gray-500" />
+                      </div>
+                      <input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} required disabled={loading}
+                        placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-10 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
+                      <button type="button" disabled={loading} onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 focus:outline-none disabled:opacity-50">
+                        {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Personal Data Section - Grid 2 cols */}
+                  {/* Idade */}
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-gray-300" htmlFor="idade">Idade</label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <Calendar className="h-5 w-5 text-gray-500" />
+                      </div>
+                      <input id="idade" type="number" required disabled={loading} placeholder="18" min="1" max="150"
+                        value={idade} onChange={(e) => setIdade(e.target.value)}
+                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
+                    </div>
+                  </div>
+
+                  {/* Género */}
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-gray-300" htmlFor="genero">Género</label>
+                    <select id="genero" required disabled={loading}
+                      value={genero} onChange={(e) => setGenero(e.target.value)}
+                      className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-3 pr-3 text-white transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50 appearance-none">
+                      <option value="" disabled>Selecionar</option>
+                      <option value="Masculino">Masculino</option>
+                      <option value="Feminino">Feminino</option>
+                      <option value="Outro">Outro</option>
+                    </select>
+                  </div>
+
+                  {/* Telefone */}
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-gray-300" htmlFor="telefone">Telefone</label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <Phone className="h-5 w-5 text-gray-500" />
+                      </div>
+                      <input id="telefone" type="tel" required disabled={loading} placeholder="+244 900 000 000"
+                        value={telefone} onChange={(e) => setTelefone(e.target.value)}
+                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
+                    </div>
+                  </div>
+
+                  {/* Nacionalidade */}
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-gray-300" htmlFor="nacionalidade">Nacionalidade</label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <MapPin className="h-5 w-5 text-gray-500" />
+                      </div>
+                      <input id="nacionalidade" type="text" required disabled={loading} placeholder="Angolana"
+                        value={nacionalidade} onChange={(e) => setNacionalidade(e.target.value)}
+                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
+                    </div>
+                  </div>
+
+                  {/* País */}
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-gray-300" htmlFor="pais">País</label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <Globe className="h-5 w-5 text-gray-500" />
+                      </div>
+                      <input id="pais" type="text" required disabled={loading} placeholder="Angola"
+                        value={pais} onChange={(e) => setPais(e.target.value)}
+                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
+                    </div>
+                  </div>
+
+                  {/* Morada - Full width */}
+                  <div className="col-span-full space-y-1.5">
                     <label className="text-sm font-medium text-gray-300" htmlFor="morada">Morada</label>
                     <div className="relative">
                       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -314,72 +391,6 @@ export default function RegisterPage() {
                       </div>
                       <input id="morada" type="text" required disabled={loading} placeholder="Rua Principal, 123"
                         value={morada} onChange={(e) => setMorada(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-gray-300" htmlFor="idade">Idade</label>
-                      <div className="relative">
-                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                          <Calendar className="h-5 w-5 text-gray-500" />
-                        </div>
-                        <input id="idade" type="number" required disabled={loading} placeholder="18" min="1" max="150"
-                          value={idade} onChange={(e) => setIdade(e.target.value)}
-                          className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-gray-300" htmlFor="genero">Género</label>
-                      <div className="relative">
-                        <select id="genero" required disabled={loading}
-                          value={genero} onChange={(e) => setGenero(e.target.value)}
-                          className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-3 pr-3 text-white transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50 appearance-none">
-                          <option value="" disabled>Selecionar</option>
-                          <option value="Masculino">Masculino</option>
-                          <option value="Feminino">Feminino</option>
-                          <option value="Outro">Outro</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-gray-300" htmlFor="nacionalidade">Nacionalidade</label>
-                      <div className="relative">
-                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                          <MapPin className="h-5 w-5 text-gray-500" />
-                        </div>
-                        <input id="nacionalidade" type="text" required disabled={loading} placeholder="Angolana"
-                          value={nacionalidade} onChange={(e) => setNacionalidade(e.target.value)}
-                          className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium text-gray-300" htmlFor="pais">País</label>
-                      <div className="relative">
-                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                          <Globe className="h-5 w-5 text-gray-500" />
-                        </div>
-                        <input id="pais" type="text" required disabled={loading} placeholder="Angola"
-                          value={pais} onChange={(e) => setPais(e.target.value)}
-                          className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5 mt-4">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="telefone">Número de telefone</label>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <Phone className="h-5 w-5 text-gray-500" />
-                      </div>
-                      <input id="telefone" type="tel" required disabled={loading} placeholder="+244 900 000 000"
-                        value={telefone} onChange={(e) => setTelefone(e.target.value)}
                         className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
                     </div>
                   </div>

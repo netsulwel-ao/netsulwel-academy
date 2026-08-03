@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Press_Start_2P } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider } from "@/contexts/AuthProvider";
+import { TransitionProvider } from "@/contexts/TransitionContext";
+import { TransitionOverlay } from "@/components/TransitionOverlay";
 import { Toaster } from "sonner";
 
 const inter = Inter({
@@ -83,19 +85,22 @@ export default function RootLayout({
  return (
  <html lang="pt-AO" className={`${inter.variable} ${pressStart.variable} scroll-smooth`}>
   <body className="min-h-screen bg-background text-foreground antialiased">
-   <AuthProvider>
-   <div className="animate-in fade-in duration-300">
-   {children}
-   </div>
-   <Toaster
-    position="bottom-right"
-    richColors
-    closeButton
-    toastOptions={{
-      style: { fontFamily: "var(--font-inter), system-ui, sans-serif" },
-    }}
-  />
-  </AuthProvider>
+   <TransitionProvider>
+    <AuthProvider>
+      <TransitionOverlay />
+      <div className="animate-in fade-in duration-300">
+        {children}
+      </div>
+      <Toaster
+        position="bottom-right"
+        richColors
+        closeButton
+        toastOptions={{
+          style: { fontFamily: "var(--font-inter), system-ui, sans-serif" },
+        }}
+      />
+    </AuthProvider>
+   </TransitionProvider>
  </body>
  </html>
  );

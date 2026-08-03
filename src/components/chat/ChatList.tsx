@@ -98,7 +98,7 @@ export default function ChatList({ theme = "dark", courseId, onSelect, linkPrefi
     }
     const photo = otherParticipantId ? chat.participantPhotos[otherParticipantId] : undefined;
     if (photo) {
-      return <img src={photo} alt="" className="h-10 w-10 shrink-0 object-cover" />;
+       return <img src={photo} alt="Foto de perfil" className="h-10 w-10 shrink-0 object-cover" />;
     }
     return (
       <div className={`flex h-10 w-10 shrink-0 items-center justify-center ${theme === "light" ? "bg-green-500/10 text-green-600" : "bg-green-500/20 text-green-400"}`}>

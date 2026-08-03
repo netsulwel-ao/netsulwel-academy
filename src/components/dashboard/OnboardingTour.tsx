@@ -76,10 +76,12 @@ export function OnboardingTour() {
   const progress = ((step + 1) / STEPS.length) * 100;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-950/85 backdrop-blur-sm animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-950/85 backdrop-blur-sm animate-in fade-in duration-300"
+      role="dialog" aria-modal="true" aria-labelledby="onboarding-title" aria-describedby="onboarding-desc"
+      onKeyDown={(e) => { if (e.key === "Escape") finish(); }}>
       <div className="relative w-full max-w-lg mx-4 bg-gray-900 border border-gray-800 shadow-2xl animate-in zoom-in-95 duration-300">
         {/* Close */}
-        <button onClick={finish} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors z-10">
+        <button onClick={finish} aria-label="Fechar tour" className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors z-10">
           <X className="h-5 w-5" />
         </button>
 
@@ -101,10 +103,10 @@ export function OnboardingTour() {
           </p>
 
           {/* Title */}
-          <h2 className="text-2xl font-bold text-white mb-3">{s.title}</h2>
+          <h2 id="onboarding-title" className="text-2xl font-bold text-white mb-3">{s.title}</h2>
 
           {/* Description */}
-          <p className="text-gray-400 text-base leading-relaxed mb-8">{s.desc}</p>
+          <p id="onboarding-desc" className="text-gray-400 text-base leading-relaxed mb-8">{s.desc}</p>
 
           {/* Navigation */}
           <div className="flex items-center justify-between">

@@ -111,6 +111,7 @@ export default function ProfessoresPage() {
               className="w-full bg-gray-900 border border-gray-800 focus:border-purple/50 py-3.5 pl-12 pr-10 text-white placeholder-gray-600 text-base focus:outline-none transition-all" />
             {search && (
               <button onClick={() => { setSearch(""); setShowDropdown(false); }}
+                aria-label="Limpar pesquisa"
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors">
                 <X className="h-4 w-4" />
               </button>
@@ -122,7 +123,7 @@ export default function ProfessoresPage() {
                     onClick={() => { setShowDropdown(false); setSearch(""); }}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800/50 transition-colors">
                     {t.photoURL ? (
-                      <img src={t.photoURL} alt="" className="h-10 w-10 rounded-full object-cover" />
+                      <img src={t.photoURL} alt={t.name} className="h-10 w-10 rounded-full object-cover" />
                     ) : (
                       <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center">
                         <span className="text-sm font-bold text-purple-300">{t.name[0] || "?"}</span>
@@ -152,7 +153,7 @@ export default function ProfessoresPage() {
                 <Link key={t.id} href={`/profile/${t.id}`}
                   className="group bg-gray-900/40 border border-gray-800/60 hover:border-purple/30 p-6 transition-all duration-300 text-center">
                   {t.photoURL ? (
-                    <img src={t.photoURL} alt="" className="h-20 w-20 rounded-full object-cover mx-auto mb-4 ring-2 ring-purple-500/20 group-hover:ring-purple-500/40 transition-all" />
+                    <img src={t.photoURL} alt={t.name} className="h-20 w-20 rounded-full object-cover mx-auto mb-4 ring-2 ring-purple-500/20 group-hover:ring-purple-500/40 transition-all" />
                   ) : (
                     <div className="h-20 w-20 rounded-full mx-auto mb-4 bg-gradient-to-br from-purple-500/30 to-purple-700/30 flex items-center justify-center ring-2 ring-purple-500/20 group-hover:ring-purple-500/40 transition-all">
                       <span className="text-2xl font-bold text-purple-300">{t.name[0]?.toUpperCase() || "?"}</span>

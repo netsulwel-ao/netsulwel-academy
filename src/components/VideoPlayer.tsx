@@ -75,25 +75,31 @@ export function VideoPlayer({ source, className = "", onProgress }: VideoPlayerP
     setVideoSize({ width, height });
   }, []);
 
-  // Compute container size like YouTube: respect video ratio + cap max height
+  // Compute container size like YouTube
   const getContainerStyle = (): React.CSSProperties => {
-    if (!videoSize || fullscreen) return {};
+    if (fullscreen) return {};
 
     const parentWidth = wrapperRef.current?.clientWidth ?? 0;
     if (parentWidth <= 0) return {};
 
-    const { width: vw, height: vh } = videoSize;
+    // Default to 16:9 before metadata loads
+    const vw = videoSize?.width ?? 16;
+    const vh = videoSize?.height ?? 9;
     const videoRatio = vw / vh;
-    const maxHeight = typeof window !== "undefined" ? window.innerHeight * 0.75 : 600;
 
-    // Start with parent width
-    let containerWidth = parentWidth;
-    let containerHeight = parentWidth / videoRatio;
+    const maxH = typeof window !== "undefined" ? Math.min(window.innerHeight * 0.55, 480) : 480;
 
-    // If height exceeds max, cap it and recalculate width
-    if (containerHeight > maxHeight) {
-      containerHeight = maxHeight;
-      containerWidth = maxHeight * videoRatio;
+    let containerWidth: number;
+    let containerHeight: number;
+
+    // Always start from parent width
+    containerWidth = parentWidth;
+    containerHeight = parentWidth / videoRatio;
+
+    // Cap height — if too tall, shrink width to fit
+    if (containerHeight > maxH) {
+      containerHeight = maxH;
+      containerWidth = maxH * videoRatio;
     }
 
     return {
@@ -126,6 +132,7 @@ export function VideoPlayer({ source, className = "", onProgress }: VideoPlayerP
         {/* Fullscreen button (floating, always visible on hover) */}
         <button
           onClick={toggleFullscreen}
+          aria-label={fullscreen ? "Sair de ecrã inteiro" : "Ecrã inteiro"}
           className={`absolute top-3 right-3 z-20 p-2 bg-black/60 text-white hover:bg-black/80 transition-opacity ${
             showControls ? "opacity-100" : "opacity-0"
           }`}
@@ -322,6 +329,7 @@ function DirectPlayer({
       {!playing && (
         <button
           onClick={togglePlay}
+          aria-label="Reproduzir"
           className="absolute inset-0 z-10 flex items-center justify-center bg-black/20 transition-opacity hover:bg-black/30 cursor-pointer"
         >
           <div className="flex h-16 w-16 items-center justify-center bg-blue-600/90 shadow-lg shadow-blue-500/30 transition-transform hover:scale-105">
@@ -354,7 +362,7 @@ function DirectPlayer({
         </div>
 
         <div className="flex items-center gap-3">
-          <button onClick={togglePlay} className="text-white hover:text-blue-400 transition-colors">
+          <button onClick={togglePlay} aria-label={playing ? "Pausar" : "Reproduzir"} className="text-white hover:text-blue-400 transition-colors">
             {playing ? <Pause className="h-5 w-5 fill-white" /> : <Play className="h-5 w-5 fill-white ml-0.5" />}
           </button>
 
@@ -363,7 +371,7 @@ function DirectPlayer({
           </span>
 
           <div className="flex items-center gap-1.5 group/vol">
-            <button onClick={toggleMute} className="text-white hover:text-blue-400 transition-colors">
+            <button onClick={toggleMute} aria-label={muted || volume === 0 ? "Ativar som" : "Silenciar"} className="text-white hover:text-blue-400 transition-colors">
               {muted || volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
             </button>
             <div className="relative w-0 group-hover/vol:w-20 transition-all duration-200 overflow-hidden">
@@ -385,6 +393,7 @@ function DirectPlayer({
           <div className="relative">
             <button
               onClick={() => setShowSpeedMenu(!showSpeedMenu)}
+              aria-label="Velocidade de reprodução"
               className="flex items-center gap-1 text-xs text-gray-300 hover:text-white transition-colors"
             >
               <Settings className="h-3.5 w-3.5" />
@@ -412,13 +421,14 @@ function DirectPlayer({
 
           <button
             onClick={togglePiP}
+            aria-label={pinned ? "Sair de imagem em imagem" : "Imagem em imagem"}
             className={`transition-colors ${pinned ? "text-blue-400" : "text-gray-300 hover:text-white"}`}
             title="Picture-in-Picture"
           >
             <PictureInPicture2 className="h-4 w-4" />
           </button>
 
-          <button onClick={onFullscreen} className="text-gray-300 hover:text-white transition-colors">
+          <button onClick={onFullscreen} aria-label={fullscreen ? "Sair de ecrã inteiro" : "Ecrã inteiro"} className="text-gray-300 hover:text-white transition-colors">
             {fullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
           </button>
         </div>

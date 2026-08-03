@@ -60,11 +60,22 @@ export default function SalesPageClient({ courseId }: { courseId: string }) {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [expandedModules, setExpandedModules] = useState<number[]>([0]);
+  const [enrolledCourses, setEnrolledCourses] = useState<string[]>([]);
 
   useEffect(() => {
     if (!courseId) return;
     loadCourse();
   }, [courseId]);
+
+  // Fetch user's enrolled courses for accurate ownership check
+  useEffect(() => {
+    if (!user) return;
+    getDoc(doc(db, "users", user.uid)).then((snap) => {
+      if (snap.exists()) {
+        setEnrolledCourses(snap.data()?.enrolledCourses ?? []);
+      }
+    }).catch(() => {});
+  }, [user]);
 
   const loadCourse = async () => {
     try {
@@ -88,7 +99,7 @@ export default function SalesPageClient({ courseId }: { courseId: string }) {
   };
 
   const hasAccess = !authLoading && user && course
-    ? canAccessCourse(course.type as any, course.id, [], course.price, course.accessCode)
+    ? canAccessCourse(course.type as any, course.id, enrolledCourses, course.price, course.accessCode)
     : false;
 
   const handleCTA = () => {
@@ -377,6 +388,9 @@ function RichPage({ course, teacher, hasAccess, authLoading, copied, user, onCTA
             {course.modules.map((mod, mi) => (
               <div key={mi} className="border border-gray-800 overflow-hidden">
                 <button onClick={() => onToggleModule(mi)}
+                  aria-expanded={expandedModules.includes(mi)}
+                  aria-controls={`sp-module-${mi}`}
+                  id={`sp-module-btn-${mi}`}
                   className="w-full flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-4 bg-gray-900/60 hover:bg-gray-900/80 transition-colors text-left">
                   <span className="text-[10px] sm:text-xs font-bold text-blue-400 uppercase tracking-wider shrink-0 w-16 sm:w-20">Mód. {mi + 1}</span>
                   <span className="flex-1 text-xs sm:text-sm font-medium text-white truncate">{mod.title || `Módulo ${mi + 1}`}</span>
@@ -387,7 +401,7 @@ function RichPage({ course, teacher, hasAccess, authLoading, copied, user, onCTA
                   }
                 </button>
                 {expandedModules.includes(mi) && (
-                  <div className="bg-gray-950/40 divide-y divide-gray-800/50">
+                  <div id={`sp-module-${mi}`} role="region" aria-labelledby={`sp-module-btn-${mi}`} className="bg-gray-950/40 divide-y divide-gray-800/50">
                     {mod.videos.map((vid, vi) => (
                       <div key={vi} className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2.5 sm:py-3">
                         <div className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center bg-gray-800 shrink-0">

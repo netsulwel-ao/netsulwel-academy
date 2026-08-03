@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Mail, Lock, Loader2, AlertCircle, CheckCircle2, Sun, Moon, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Loader2, AlertCircle, CheckCircle2, Sun, Moon, Eye, EyeOff, BookOpen, Building2, ArrowRight } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence, GoogleAuthProvider, GithubAuthProvider, signInWithPopup } from "firebase/auth";
@@ -337,19 +337,25 @@ export default function LoginPage() {
               )}
             </div>
 
-            <div className={`mt-8 text-center space-y-2 ${theme === "dark" ? "login-register-text" : "text-gray-500"}`}>
-              <p className="text-sm">
+            <div className={`mt-8 space-y-3 ${theme === "dark" ? "login-register-text" : "text-gray-500"}`}>
+              <p className="text-sm text-center">
                 Ainda não tem conta?{" "}
                 <Link href="/register" className="text-purple hover:text-purple-light font-medium">Criar conta</Link>
               </p>
-              <p className="text-sm">
-                É professor?{" "}
-                <Link href="/register/teacher" className="text-green-400 hover:text-green-300 font-medium">Registar como professor</Link>
-              </p>
-              <p className="text-sm">
-                Representa uma instituição?{" "}
-                <Link href="/register/institution" className="text-cyan-400 hover:text-cyan-300 font-medium">Registar instituição</Link>
-              </p>
+              
+              {/* Button Grid for Teacher and Institution */}
+              <div className="flex gap-3 mt-6">
+                <Link href="/register/teacher" 
+                  className="flex-1 flex flex-col items-center justify-center gap-2 p-4 rounded-lg border-2 border-green-500/30 bg-green-500/5 hover:bg-green-500/15 hover:border-green-500/50 transition-all group">
+                  <BookOpen className="h-6 w-6 text-green-400 group-hover:text-green-300 transition-colors" />
+                  <span className="text-xs font-semibold text-green-400 group-hover:text-green-300 transition-colors">Professor</span>
+                </Link>
+                <Link href="/register/institution"
+                  className="flex-1 flex flex-col items-center justify-center gap-2 p-4 rounded-lg border-2 border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/15 hover:border-blue-500/50 transition-all group">
+                  <Building2 className="h-6 w-6 text-blue-400 group-hover:text-blue-300 transition-colors" />
+                  <span className="text-xs font-semibold text-blue-400 group-hover:text-blue-300 transition-colors">Instituição</span>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

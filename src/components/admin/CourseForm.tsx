@@ -257,7 +257,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
       {/* Sticky top bar */}
       <div className="sticky top-0 z-20 flex items-center justify-between gap-4 bg-gray-950/90 backdrop-blur-xl border-b border-gray-800 px-6 py-4">
         <div className="flex items-center gap-3">
-          <Link href={backHref} className="p-2 bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-white transition-colors">
+          <Link href={backHref} aria-label="Voltar" className="p-2 bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-white transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div>
@@ -285,9 +285,9 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
 
       {/* Error banner */}
       {error && (
-        <div className="mx-6 mt-4 flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+        <div role="alert" className="mx-6 mt-4 flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
           <AlertCircle className="h-4 w-4 shrink-0" />{error}
-          <button onClick={() => setError("")} className="ml-auto"><X className="h-4 w-4" /></button>
+          <button onClick={() => setError("")} aria-label="Fechar erro" className="ml-auto"><X className="h-4 w-4" /></button>
         </div>
       )}
 
@@ -301,6 +301,8 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Capa do Curso</label>
             <div onClick={() => thumbInputRef.current?.click()}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); thumbInputRef.current?.click(); } }}
+              role="button" tabIndex={0} aria-label="Carregar capa do curso"
               className="relative w-full aspect-video bg-gray-900 border border-dashed border-gray-700 hover:border-blue-500/50 cursor-pointer overflow-hidden group transition-colors">
               {thumbnailPreview ? (
                 <>
@@ -322,15 +324,15 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                 </div>
               )}
             </div>
-            <input ref={thumbInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleThumbnailChange} />
+            <input ref={thumbInputRef} id="course-thumb" type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleThumbnailChange} />
             {thumbnailUploading && <p className="mt-2 text-xs text-blue-400 flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> A enviar...</p>}
             {thumbnail && !thumbnailUploading && <p className="mt-2 text-xs text-green-400 flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Upload concluído</p>}
           </div>
 
           {/* Nome */}
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nome do Curso <span className="text-red-400">*</span></label>
-            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
+            <label htmlFor="course-title" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nome do Curso <span className="text-red-400">*</span></label>
+            <input id="course-title" type="text" value={title} onChange={(e) => setTitle(e.target.value)}
               placeholder="Ex: Formação Completa em JavaScript"
               className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all" />
           </div>
@@ -338,14 +340,14 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
           {/* Descrição + IA */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Descrição</label>
+              <label htmlFor="course-desc" className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Descrição</label>
               <button type="button" onClick={handleGenerateDescription} disabled={generatingDesc || !title.trim()}
                 className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
                 {generatingDesc ? <><Loader2 className="w-3 h-3 animate-spin" /> A gerar...</> : <><Sparkles className="w-3 h-3" /> Gerar com IA</>}
               </button>
             </div>
             <div className="relative">
-              <textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
+              <textarea id="course-desc" rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
                 placeholder="Descreva o que os alunos vão aprender..."
                 className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all resize-none" />
               {generatingDesc && (
@@ -359,9 +361,10 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
           {/* Tipo de curso */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Tipo de Acesso</label>
-            <div className="space-y-2">
+            <div role="radiogroup" aria-label="Tipo de acesso" className="space-y-2">
               {COURSE_TYPES.map((t) => (
                 <button key={t.value} type="button" onClick={() => setCourseType(t.value)}
+                  role="radio" aria-checked={courseType === t.value}
                   className={`w-full flex items-center gap-3 px-4 py-3 border text-left transition-all ${
                     courseType === t.value
                       ? t.color === "blue" ? "border-blue-500/50 bg-blue-500/10"
@@ -390,8 +393,9 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
           {/* Formato */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Formato do Curso</label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div role="radiogroup" aria-label="Formato do curso" className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button type="button" onClick={() => setFormat("recorded")}
+                role="radio" aria-checked={format === "recorded"}
                 className={`flex items-center justify-center gap-2 px-4 py-3 border text-sm font-bold transition-all ${
                   format === "recorded"
                     ? "border-blue-500/50 bg-blue-500/10 text-blue-400"
@@ -400,6 +404,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                 <Video className="h-4 w-4" /> Gravado
               </button>
               <button type="button" onClick={() => setFormat("live")}
+                role="radio" aria-checked={format === "live"}
                 className={`flex items-center justify-center gap-2 px-4 py-3 border text-sm font-bold transition-all ${
                   format === "live"
                     ? "border-purple-500/50 bg-purple-500/10 text-purple-400"
@@ -413,10 +418,10 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
           {/* Preço — só standalone */}
           {courseType === "standalone" && (
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Preço (Kz)</label>
+              <label htmlFor="course-price" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Preço (Kz)</label>
               <div className="relative">
                 <span className="absolute left-3 top-2.5 text-sm text-gray-500 font-medium">Kz</span>
-                <input type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)}
+                <input id="course-price" type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)}
                   placeholder="0 = Gratuito"
                   className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 pl-10 pr-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all" />
               </div>
@@ -426,13 +431,13 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
           {/* Código de Acesso — só standalone gratuito */}
           {courseType === "standalone" && (!price || parseInt(price) <= 0) && (
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Código de Acesso</label>
+              <label htmlFor="course-access-code" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Código de Acesso</label>
               <p className="text-xs text-gray-500 mb-2">Se definido, os alunos precisam deste código para aceder ao curso.</p>
               <div className="flex items-center gap-2">
-                <input type="text" value={accessCode} onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+                <input id="course-access-code" type="text" value={accessCode} onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
                   placeholder="Ex: MAT-7X9K"
                   className="flex-1 bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white font-mono tracking-wider placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all" />
-                <button type="button" onClick={() => {
+                <button type="button" aria-label="Gerar código de acesso" onClick={() => {
                   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
                   const code = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("") + "-" + Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
                   setAccessCode(code);
@@ -441,7 +446,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                   Gerar
                 </button>
                 {accessCode && (
-                  <button type="button" onClick={() => { navigator.clipboard.writeText(accessCode); }}
+                  <button type="button" aria-label="Copiar código de acesso" onClick={() => { navigator.clipboard.writeText(accessCode); }}
                     className="px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm font-bold transition-colors whitespace-nowrap">
                     Copiar
                   </button>
@@ -453,15 +458,15 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
           {/* Nível + Categoria */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nível</label>
-              <select value={level} onChange={(e) => setLevel(e.target.value as CourseLevel)}
+              <label htmlFor="course-level" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nível</label>
+              <select id="course-level" value={level} onChange={(e) => setLevel(e.target.value as CourseLevel)}
                 className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer">
                 {LEVELS.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Categoria</label>
-              <select value={category} onChange={(e) => setCategory(e.target.value as CourseCategory)}
+              <label htmlFor="course-category" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Categoria</label>
+              <select id="course-category" value={category} onChange={(e) => setCategory(e.target.value as CourseCategory)}
                 className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer">
                 {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
               </select>
@@ -472,6 +477,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Certificado</label>
             <button type="button" onClick={() => setHasCertificate(!hasCertificate)}
+              role="switch" aria-checked={hasCertificate} aria-label="Ativar certificado"
               className={`w-full flex items-center gap-3 px-4 py-3 border transition-all ${
                 hasCertificate ? "border-amber-500/50 bg-amber-500/10" : "border-gray-800 bg-gray-900 hover:border-gray-700"
               }`}>
@@ -492,6 +498,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Landing Page</label>
             <button type="button" onClick={() => setFeatured(!featured)}
+              role="switch" aria-checked={featured} aria-label="Destacar na landing page"
               className={`w-full flex items-center gap-3 px-4 py-3 border transition-all ${
                 featured ? "border-blue-500/50 bg-blue-500/10" : "border-gray-800 bg-gray-900 hover:border-gray-700"
               }`}>
@@ -510,8 +517,8 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
 
           {/* Trilha */}
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Trilha (opcional)</label>
-            <select value={trailId} onChange={(e) => setTrailId(e.target.value)}
+              <label htmlFor="course-trail" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Trilha (opcional)</label>
+              <select id="course-trail" value={trailId} onChange={(e) => setTrailId(e.target.value)}
               className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer mb-2">
               <option value="">— Nenhuma trilha —</option>
               {trails.map((t) => <option key={t.id} value={t.id}>{t.title}</option>)}
@@ -525,16 +532,16 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
 
           {/* Tags */}
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tags</label>
+              <label htmlFor="course-tags" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tags</label>
             <div className="flex gap-2 mb-2">
               <div className="relative flex-1">
                 <Tag className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-gray-500" />
-                <input type="text" value={tagInput} onChange={(e) => setTagInput(e.target.value)}
+                <input id="course-tags" type="text" value={tagInput} onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
                   placeholder="javascript, react..."
                   className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2 pl-8 pr-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
               </div>
-              <button type="button" onClick={addTag} className="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm transition-colors">
+              <button type="button" onClick={addTag} aria-label="Adicionar tag" className="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm transition-colors">
                 <Plus className="h-4 w-4" />
               </button>
             </div>
@@ -543,7 +550,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                 {tags.map((t) => (
                   <span key={t} className="flex items-center gap-1 px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-medium">
                     {t}
-                    <button onClick={() => removeTag(t)} className="hover:text-white transition-colors"><X className="h-3 w-3" /></button>
+                    <button onClick={() => removeTag(t)} aria-label={`Remover tag ${t}`} className="hover:text-white transition-colors"><X className="h-3 w-3" /></button>
                   </span>
                 ))}
               </div>
@@ -571,7 +578,8 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
               <h2 className="text-lg font-bold text-white">Módulos e Aulas</h2>
               <p className="text-xs text-gray-500 mt-0.5">Organize o conteúdo em módulos e faça upload dos vídeos</p>
             </div>
-            <button onClick={addModule}
+               <button onClick={() => addModule}
+              aria-label="Adicionar novo módulo"
               className="flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-2 transition-colors">
               <Plus className="w-4 h-4" /> Novo Módulo
             </button>
@@ -589,7 +597,7 @@ export default function CourseForm({ initialData, onSave, saving, backHref = "/a
                     placeholder="Nome do módulo (ex: Introdução)"
                     className="flex-1 bg-transparent text-white placeholder-gray-600 text-sm focus:outline-none" />
                   {modules.length > 1 && (
-                    <button onClick={() => removeModule(mi)} className="p-1.5 text-gray-600 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0">
+                    <button onClick={() => removeModule(mi)} aria-label={`Remover módulo ${mi + 1}`} className="p-1.5 text-gray-600 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   )}
@@ -617,7 +625,7 @@ placeholder="Título da aula"
                               placeholder="Minutos"
                               className="w-20 shrink-0 bg-gray-900 border border-gray-800 focus:border-purple-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none text-center transition-all" />
                             {module.videos.length > 1 && (
-                              <button onClick={() => removeVideo(mi, vi)} className="p-1.5 text-gray-600 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0">
+                              <button onClick={() => removeVideo(mi, vi)} aria-label={`Remover aula ${vi + 1}`} className="p-1.5 text-gray-600 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0">
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             )}
@@ -646,19 +654,21 @@ placeholder="Título da aula"
                              placeholder="00:00"
                              className="w-20 shrink-0 bg-gray-900 border border-gray-800 focus:border-blue-500/40 py-1.5 px-3 text-sm text-white placeholder-gray-600 focus:outline-none text-center transition-all" />
                            {module.videos.length > 1 && (
-                             <button onClick={() => removeVideo(mi, vi)} className="p-1.5 text-gray-600 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0">
-                               <Trash2 className="w-3.5 h-3.5" />
-                             </button>
-                           )}
+                              <button onClick={() => removeVideo(mi, vi)} aria-label={`Remover aula ${vi + 1}`} className="p-1.5 text-gray-600 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
                           </div>
 
                           <div className="flex items-start gap-2 pl-7">
                            <div className="flex shrink-0 border border-gray-800 overflow-hidden">
                              <button onClick={() => { if (mode !== "upload") toggleMode(mi, vi); }}
+                               aria-pressed={mode === "upload"}
                                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${mode === "upload" ? "bg-purple text-white" : "bg-gray-900 text-gray-500 hover:text-gray-300"}`}>
                                <UploadCloud className="w-3.5 h-3.5" /> Upload
                              </button>
                              <button onClick={() => { if (mode !== "link") toggleMode(mi, vi); }}
+                               aria-pressed={mode === "link"}
                                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${mode === "link" ? "bg-purple text-white" : "bg-gray-900 text-gray-500 hover:text-gray-300"}`}>
                                <LinkIcon className="w-3.5 h-3.5" /> URL
                              </button>
@@ -678,8 +688,8 @@ placeholder="Título da aula"
                                      <span className="flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> A enviar...</span>
                                      <span>{video.uploadProgress ?? 0}%</span>
                                    </div>
-                                   <div className="w-full bg-gray-800 h-1.5">
-                                     <div className="bg-blue-500 h-1.5 transition-all duration-200" style={{ width: `${video.uploadProgress ?? 0}%` }} />
+                                    <div className="w-full bg-gray-800 h-1.5">
+                                      <div className="bg-blue-500 h-1.5 transition-all duration-200" role="progressbar" aria-valuenow={video.uploadProgress ?? 0} aria-valuemin={0} aria-valuemax={100} style={{ width: `${video.uploadProgress ?? 0}%` }} />
                                    </div>
                                  </div>
                                )}
@@ -689,8 +699,9 @@ placeholder="Título da aula"
                                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                                      <span className="truncate">{video.url.split("/").pop()}</span>
                                    </div>
-                                   <button onClick={() => { updateVideo(mi, vi, "url", ""); updateVideo(mi, vi, "uploadProgress", 0); }}
-                                     className="p-1.5 text-gray-500 hover:text-red-400 transition-colors shrink-0">
+                                  <button onClick={() => { updateVideo(mi, vi, "url", ""); updateVideo(mi, vi, "uploadProgress", 0); }}
+                                      aria-label="Remover vídeo enviado"
+                                      className="p-1.5 text-gray-500 hover:text-red-400 transition-colors shrink-0">
                                      <X className="w-3.5 h-3.5" />
                                    </button>
                                  </div>

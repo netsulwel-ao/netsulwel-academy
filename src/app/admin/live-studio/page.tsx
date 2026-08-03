@@ -180,9 +180,11 @@ function BroadcastInterior({ roomName, backUrl }: { roomName: string; backUrl: s
       {/* Confirm modal */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
-          <div className="bg-gray-900 border border-gray-700 p-6 max-w-sm w-full space-y-4">
-            <h3 className="text-lg font-bold text-white">Terminar Transmissão?</h3>
-            <p className="text-sm text-gray-400">Os alunos serão desconectados da aula ao vivo.</p>
+          <div className="bg-gray-900 border border-gray-700 p-6 max-w-sm w-full space-y-4"
+            role="dialog" aria-modal="true" aria-labelledby="end-live-title" aria-describedby="end-live-desc"
+            onKeyDown={(e) => { if (e.key === "Escape") setShowConfirm(false); }}>
+            <h3 id="end-live-title" className="text-lg font-bold text-white">Terminar Transmissão?</h3>
+            <p id="end-live-desc" className="text-sm text-gray-400">Os alunos serão desconectados da aula ao vivo.</p>
             <div className="flex gap-3 justify-end">
               <button onClick={() => setShowConfirm(false)}
                 className="px-4 py-2 bg-gray-800 text-gray-300 hover:bg-gray-700 font-bold text-sm transition-colors">

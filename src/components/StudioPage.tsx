@@ -835,6 +835,7 @@ function ControlsBar({ live, onEnd }: { live: LiveSession; onEnd: () => void }) 
           <button 
             onClick={() => localParticipant?.setMicrophoneEnabled(!isMicOn)}
             className={`${btnBase} ${isMicOn ? "" : "text-red-400 bg-red-500/10 hover:bg-red-500/20"}`}
+            aria-label={isMicOn ? "Desligar microfone" : "Ligar microfone"}
             title={isMicOn ? "Desligar microfone" : "Ligar microfone"}
           >
             {isMicOn ? <Mic size={18} /> : <MicOff size={18} />}
@@ -844,6 +845,7 @@ function ControlsBar({ live, onEnd }: { live: LiveSession; onEnd: () => void }) 
           <button 
             onClick={() => localParticipant?.setCameraEnabled(!isCamOn)}
             className={`${btnBase} ${isCamOn ? "" : "text-red-400 bg-red-500/10 hover:bg-red-500/20"}`}
+            aria-label={isCamOn ? "Desligar câmara" : "Ligar câmara"}
             title={isCamOn ? "Desligar câmara" : "Ligar câmara"}
           >
             {isCamOn ? <Video size={18} /> : <VideoOff size={18} />}
@@ -855,6 +857,7 @@ function ControlsBar({ live, onEnd }: { live: LiveSession; onEnd: () => void }) 
           <button 
             onClick={() => localParticipant?.setScreenShareEnabled(!isScreenOn)}
             className={`${btnBase} ${isScreenOn ? "text-blue-300 bg-blue-500/15 hover:bg-blue-500/25" : ""}`}
+            aria-label={isScreenOn ? "Parar partilha" : "Partilhar ecrã"}
             title={isScreenOn ? "Parar partilha" : "Partilhar ecrã"}
           >
             <MonitorUp size={18} />
@@ -869,6 +872,7 @@ function ControlsBar({ live, onEnd }: { live: LiveSession; onEnd: () => void }) 
               alert("Em desenvolvimento: Mute-All para alunos");
             }}
             className={`${btnBase}`}
+            aria-label="Silenciar todos os alunos"
             title="Silenciar todos os alunos"
           >
             <Volume2 size={18} />
@@ -878,6 +882,7 @@ function ControlsBar({ live, onEnd }: { live: LiveSession; onEnd: () => void }) 
           <button 
             onClick={toggleFullscreen}
             className={`${btnBase} hidden sm:flex`}
+            aria-label={isFullscreen ? "Sair de ecrã total" : "Ecrã total"}
             title={isFullscreen ? "Sair de ecrã total" : "Ecrã total"}
           >
             {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
@@ -888,6 +893,7 @@ function ControlsBar({ live, onEnd }: { live: LiveSession; onEnd: () => void }) 
         <div className="flex-1 flex justify-end">
           <button 
             onClick={() => setShowEndConfirm(true)}
+            aria-label="Encerrar aula"
             className="flex items-center gap-1 sm:gap-2 h-10 px-3 sm:px-5 bg-red-700 hover:bg-red-600 text-white font-bold text-xs sm:text-sm transition-colors whitespace-nowrap"
           >
             <PhoneOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> 
@@ -900,23 +906,27 @@ function ControlsBar({ live, onEnd }: { live: LiveSession; onEnd: () => void }) 
         <>
           <div className="fixed inset-0 z-50 bg-black/75" onClick={() => setShowEndConfirm(false)} />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="bg-[#111114] border border-white/10 p-6 sm:p-8 max-w-sm w-full space-y-5">
+            <div className="bg-[#111114] border border-white/10 p-6 sm:p-8 max-w-sm w-full space-y-5"
+              role="dialog" aria-modal="true" aria-labelledby="end-confirm-title" aria-describedby="end-confirm-desc"
+              onKeyDown={(e) => { if (e.key === "Escape") setShowEndConfirm(false); }}>
               <div className="flex items-start gap-3">
                 <AlertTriangle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="text-base font-bold text-white">Encerrar aula?</h3>
-                  <p className="text-xs sm:text-sm text-white/40 mt-1">Todos os participantes serão desconectados imediatamente.</p>
+                  <h3 id="end-confirm-title" className="text-base font-bold text-white">Encerrar aula?</h3>
+                  <p id="end-confirm-desc" className="text-xs sm:text-sm text-white/40 mt-1">Todos os participantes serão desconectados imediatamente.</p>
                 </div>
               </div>
               <div className="flex gap-2 sm:gap-3">
                 <button 
                   onClick={() => setShowEndConfirm(false)}
+                  aria-label="Cancelar"
                   className="flex-1 py-2.5 text-xs sm:text-sm font-medium text-white/50 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
                 >
                   Cancelar
                 </button>
                 <button 
                   onClick={() => { setShowEndConfirm(false); onEnd(); }}
+                  aria-label="Sim, encerrar"
                   className="flex-1 py-2.5 text-xs sm:text-sm font-bold text-white bg-red-700 hover:bg-red-600 transition-colors"
                 >
                   Sim, encerrar
@@ -979,6 +989,7 @@ function StudioInterior({ live, onEnd }: { live: LiveSession; onEnd: () => void 
         {/* Mobile menu toggle */}
         <button 
           onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label={sidebarOpen ? "Fechar barra lateral" : "Abrir barra lateral"}
           className="md:hidden flex items-center justify-center h-8 w-8 text-white/60 hover:text-white hover:bg-white/10 transition-colors"
         >
           {sidebarOpen ? <MessageSquare className="h-4 w-4" /> : <MessageSquare className="h-4 w-4 opacity-50" />}
@@ -1002,11 +1013,15 @@ function StudioInterior({ live, onEnd }: { live: LiveSession; onEnd: () => void 
           transition-all duration-300 ease-out
           ${sidebarOpen ? 'h-auto md:h-auto' : 'h-0 overflow-hidden md:h-auto'}
         `}>
-          <div className="flex border-b border-white/8 shrink-0 gap-0">
+          <div className="flex border-b border-white/8 shrink-0 gap-0" role="tablist" aria-label="Painel lateral">
             {tabs.map(t => (
               <button 
                 key={t.id} 
                 onClick={() => setSideTab(t.id)}
+                role="tab"
+                aria-selected={sideTab === t.id}
+                aria-controls={`panel-${t.id}`}
+                id={`tab-${t.id}`}
                 className={`flex-1 h-10 flex items-center justify-center gap-1 sm:gap-1.5 text-xs sm:text-xs font-semibold transition-colors ${
                   sideTab === t.id 
                     ? "text-white border-b-2 border-white bg-white/[3%]" 
@@ -1019,13 +1034,13 @@ function StudioInterior({ live, onEnd }: { live: LiveSession; onEnd: () => void 
             ))}
           </div>
           <div className="flex-1 min-h-0 overflow-hidden">
-            {sideTab === "palavra" && <PalavraPanel liveId={live.id!} />}
-            {sideTab === "alunos" && <AlunosPanel liveId={live.id!} />}
-            {sideTab === "chat" && <ChatPanel liveId={live.id!} pinnedMsg={pinnedMsg} onPin={setPinnedMsg} hostName={live.hostName || "Professor"} />}
-            {sideTab === "simple-recorder" && <SimpleRecorder liveId={live.id!} liveTitle={live.title} />}
-            {sideTab === "recording" && <RecordingControls live={live} isHost={true} onStatusChange={() => {}} />}
-            {sideTab === "qa" && <QAPanel liveId={live.id!} isHost={true} hostName={live.hostName || "Professor"} />}
-            {sideTab === "attendance" && <AttendanceReport liveId={live.id!} liveTitle={live.title} isTeacher={true} />}
+            {sideTab === "palavra" && <div role="tabpanel" id="panel-palavra" aria-labelledby="tab-palavra"><PalavraPanel liveId={live.id!} /></div>}
+            {sideTab === "alunos" && <div role="tabpanel" id="panel-alunos" aria-labelledby="tab-alunos"><AlunosPanel liveId={live.id!} /></div>}
+            {sideTab === "chat" && <div role="tabpanel" id="panel-chat" aria-labelledby="tab-chat"><ChatPanel liveId={live.id!} pinnedMsg={pinnedMsg} onPin={setPinnedMsg} hostName={live.hostName || "Professor"} /></div>}
+            {sideTab === "simple-recorder" && <div role="tabpanel" id="panel-simple-recorder" aria-labelledby="tab-simple-recorder"><SimpleRecorder liveId={live.id!} liveTitle={live.title} /></div>}
+            {sideTab === "recording" && <div role="tabpanel" id="panel-recording" aria-labelledby="tab-recording"><RecordingControls live={live} isHost={true} onStatusChange={() => {}} /></div>}
+            {sideTab === "qa" && <div role="tabpanel" id="panel-qa" aria-labelledby="tab-qa"><QAPanel liveId={live.id!} isHost={true} hostName={live.hostName || "Professor"} /></div>}
+            {sideTab === "attendance" && <div role="tabpanel" id="panel-attendance" aria-labelledby="tab-attendance"><AttendanceReport liveId={live.id!} liveTitle={live.title} isTeacher={true} /></div>}
           </div>
         </div>
       </div>

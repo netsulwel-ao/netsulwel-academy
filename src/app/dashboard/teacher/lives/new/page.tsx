@@ -210,7 +210,7 @@ export default function TeacherNewLivePage() {
           <label className="flex items-center gap-2 text-sm font-medium text-gray-300"><ImageIcon className="h-4 w-4 text-gray-500" /> Thumbnail</label>
           {thumbnail ? (
             <div className="relative group">
-              <img src={thumbnail} alt="" className="w-full h-48 object-cover" />
+               <img src={thumbnail} alt="Pré-visualização da thumbnail" className="w-full h-48 object-cover" />
               <button type="button" onClick={() => setThumbnail("")}
                 className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">Remover</button>
             </div>

@@ -141,7 +141,7 @@ export default function DashboardSettingsPage() {
               <div className="flex items-center gap-4">
                 <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-800 border border-gray-700">
                   {photoURL ? (
-                    <img src={photoURL} alt="" className="w-full h-full object-cover" />
+                     <img src={photoURL} alt={`Foto de perfil de ${user?.displayName || "utilizador"}`} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-600 text-xl font-bold">
                       {user?.displayName?.charAt(0)?.toUpperCase() || "?"}
@@ -185,7 +185,7 @@ export default function DashboardSettingsPage() {
               <div className="flex items-center gap-4">
                 {bannerURL ? (
                   <div className="relative w-40 h-20 rounded-lg overflow-hidden bg-gray-800 border border-gray-700">
-                    <img src={bannerURL} alt="" className="w-full h-full object-cover" />
+                     <img src={bannerURL} alt={`Banner de ${user?.displayName || "utilizador"}`} className="w-full h-full object-cover" />
                   </div>
                 ) : (
                   <div className="w-40 h-20 rounded-lg bg-gradient-to-br from-purple-900/30 via-gray-900 to-gray-950 border border-gray-700 flex items-center justify-center">

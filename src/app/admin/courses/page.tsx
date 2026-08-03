@@ -103,8 +103,9 @@ export default function CoursesPage() {
 
       {/* Loading */}
       {loading && (
-        <div className="flex items-center justify-center py-24">
+        <div className="flex items-center justify-center py-24" role="status" aria-live="polite">
           <Loader2 className="h-8 w-8 animate-spin text-purple" />
+          <span className="sr-only">A carregar cursos...</span>
         </div>
       )}
 
@@ -224,6 +225,7 @@ export default function CoursesPage() {
                   ) : (
                     <button
                       onClick={() => setConfirmDelete(course.id)}
+                      aria-label="Apagar curso"
                       className="flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-3 py-2 text-sm font-medium transition-colors"
                     >
                       <Trash2 className="h-4 w-4" />

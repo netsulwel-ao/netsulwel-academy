@@ -306,7 +306,7 @@ export default function DashboardPage() {
               <div className="relative overflow-hidden bg-gray-950/40 border border-gray-800/80">
                 {nextLive.thumbnail && (
                   <div className="absolute inset-0">
-                    <img src={nextLive.thumbnail} alt="" className="w-full h-full object-cover" />
+                     <img src={nextLive.thumbnail} alt={nextLive.title} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/80 to-gray-950/40" />
                   </div>
                 )}

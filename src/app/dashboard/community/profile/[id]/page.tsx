@@ -132,7 +132,7 @@ export default function CommunityProfilePage() {
       <div className="bg-gray-900/40 border border-gray-800 p-6 sm:p-8">
         <div className="flex items-start gap-5">
           {profile.photoURL ? (
-            <img src={profile.photoURL} alt="" className="h-20 w-20 rounded-full object-cover shrink-0" />
+             <img src={profile.photoURL} alt={profile.name} className="h-20 w-20 rounded-full object-cover shrink-0" />
           ) : (
             <div className="h-20 w-20 rounded-full bg-purple/20 flex items-center justify-center shrink-0">
               <span className="text-3xl font-bold text-purple-light">{profile.name[0]?.toUpperCase() || "?"}</span>

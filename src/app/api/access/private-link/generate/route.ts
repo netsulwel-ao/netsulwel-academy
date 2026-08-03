@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFirebaseAdmin } from "@/lib/firebase-admin";
 import { verifyAuth } from "@/lib/api-auth";
+import { randomBytes } from "crypto";
 import type { PrivateAccessLink } from "@/types/access";
 
 export async function POST(request: NextRequest) {
@@ -80,11 +81,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Generate unique token (30 chars)
-    const token = 
-      Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15);
+    // Generate cryptographically secure token (30 chars)
+    const token = randomBytes(22).toString("base64url").substring(0, 30);
 
     const linkData: any = {
       token,

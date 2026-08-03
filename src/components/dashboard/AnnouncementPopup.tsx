@@ -107,6 +107,8 @@ export default function AnnouncementPopup() {
       {/* Modal wrapper */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <div
+          role="dialog" aria-modal="true" aria-label="Anúncio"
+          onKeyDown={(e) => { if (e.key === "Escape") handleClose(); }}
           className={`pointer-events-auto w-full max-w-3xl transition-all duration-300 ${
             visible
               ? "opacity-100 translate-y-0 scale-100"
@@ -128,6 +130,7 @@ export default function AnnouncementPopup() {
             {/* Botão X redondo */}
             <button
               onClick={handleClose}
+              aria-label="Fechar anúncio"
               className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-800/90 border border-gray-700 text-gray-400 hover:text-white hover:bg-gray-700 hover:border-gray-600 transition-all"
             >
               <X className="h-4 w-4" />

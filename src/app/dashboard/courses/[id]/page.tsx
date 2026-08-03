@@ -748,6 +748,9 @@ export default function CourseDetailPage() {
                 <div key={mi} className="border-b border-gray-800/60 last:border-0">
                   {/* Module header */}
                   <button onClick={() => toggleModule(mi)}
+                    aria-expanded={expandedModules.includes(mi)}
+                    aria-controls={`cd-module-${mi}`}
+                    id={`cd-module-btn-${mi}`}
                     className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-gray-800/40 transition-colors text-left">
                     <span className="text-sm font-bold text-blue-400 uppercase tracking-wider shrink-0 w-16">Módulo {mi + 1}</span>
                     <span className="flex-1 text-base font-medium text-white truncate">{module.title || `Módulo ${mi + 1}`}</span>
@@ -760,7 +763,7 @@ export default function CourseDetailPage() {
 
                   {/* Lessons */}
                   {expandedModules.includes(mi) && (
-                    <div className="bg-gray-950/30">
+                    <div id={`cd-module-${mi}`} role="region" aria-labelledby={`cd-module-btn-${mi}`} className="bg-gray-950/30">
                       {module.videos.map((video, vi) => {
                         const isActive = activeLesson?.mi === mi && activeLesson?.vi === vi;
                         const lessonLocked = !hasAccess;

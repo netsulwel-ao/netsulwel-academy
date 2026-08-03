@@ -240,12 +240,13 @@ export default function InstitutionMembersPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
+              <caption className="sr-only">Membros da instituição</caption>
               <thead>
                 <tr className="border-b border-gray-800/70 text-left text-xs uppercase tracking-wider text-gray-500">
-                  <th className="py-3 px-4 sm:py-4 sm:px-6 font-medium">Membro</th>
-                  <th className="py-3 px-4 sm:py-4 sm:px-6 font-medium hidden sm:table-cell">Email</th>
-                  <th className="py-3 px-4 sm:py-4 sm:px-6 font-medium">Cargo</th>
-                  <th className="py-3 px-4 sm:py-4 sm:px-6 font-medium hidden md:table-cell">Membro desde</th>
+                  <th scope="col" className="py-3 px-4 sm:py-4 sm:px-6 font-medium">Membro</th>
+                  <th scope="col" className="py-3 px-4 sm:py-4 sm:px-6 font-medium hidden sm:table-cell">Email</th>
+                  <th scope="col" className="py-3 px-4 sm:py-4 sm:px-6 font-medium">Cargo</th>
+                  <th scope="col" className="py-3 px-4 sm:py-4 sm:px-6 font-medium hidden md:table-cell">Membro desde</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/50">

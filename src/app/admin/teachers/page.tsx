@@ -183,7 +183,7 @@ export default function AdminTeachersPage() {
       {/* Table */}
       <div className="bg-gray-900 border border-gray-800 overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>
+          <div className="flex items-center justify-center py-20" role="status" aria-live="polite"><Loader2 className="h-8 w-8 animate-spin text-purple" /><span className="sr-only">A carregar professores...</span></div>
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={GraduationCap}
@@ -195,15 +195,16 @@ export default function AdminTeachersPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
+              <caption className="sr-only">Lista de professores</caption>
               <thead>
                 <tr className="border-b border-gray-800 text-left text-xs uppercase tracking-wider text-gray-500">
-                  <th className="py-4 px-6 font-medium">Professor</th>
-                  <th className="py-4 px-6 font-medium">Email</th>
-                  <th className="py-4 px-6 font-medium">Estado</th>
-                  <th className="py-4 px-6 font-medium">Especialidade</th>
-                  <th className="py-4 px-6 font-medium">Registado</th>
-                  <th className="py-4 px-6 font-medium">Cursos</th>
-                  <th className="py-4 px-6 font-medium">Acções</th>
+                  <th scope="col" className="py-4 px-6 font-medium">Professor</th>
+                  <th scope="col" className="py-4 px-6 font-medium">Email</th>
+                  <th scope="col" className="py-4 px-6 font-medium">Estado</th>
+                  <th scope="col" className="py-4 px-6 font-medium">Especialidade</th>
+                  <th scope="col" className="py-4 px-6 font-medium">Registado</th>
+                  <th scope="col" className="py-4 px-6 font-medium">Cursos</th>
+                  <th scope="col" className="py-4 px-6 font-medium">Acções</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">

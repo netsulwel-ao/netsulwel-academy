@@ -170,15 +170,15 @@ export default function SchedulesPage() {
       </div>
 
       {success && (
-        <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/20 px-4 py-3 text-sm text-green-400">
+        <div role="status" className="flex items-center gap-2 bg-green-500/10 border border-green-500/20 px-4 py-3 text-sm text-green-400">
           <CheckCircle2 className="h-4 w-4 shrink-0" />{success}
         </div>
       )}
 
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+        <div role="alert" className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
           <AlertCircle className="h-4 w-4 shrink-0" />{error}
-          <button onClick={() => setError("")} className="ml-auto"><X className="h-4 w-4" /></button>
+          <button onClick={() => setError("")} aria-label="Fechar erro" className="ml-auto"><X className="h-4 w-4" /></button>
         </div>
       )}
 
@@ -201,6 +201,9 @@ export default function SchedulesPage() {
             <div key={trail.id} className="bg-gray-900/40 border border-gray-800 overflow-hidden">
               {/* Header — nome do cronograma (título da trilha) */}
               <button onClick={() => toggleExpand(trail.id!)}
+                aria-expanded={expanded.has(trail.id!)}
+                aria-controls={`sched-${trail.id}`}
+                id={`sched-btn-${trail.id}`}
                 className="w-full flex items-center gap-4 px-6 py-5 hover:bg-gray-800/40 transition-colors text-left">
                 <div className={`p-1.5 border transition-colors ${isOpen ? "border-orange-500/50 bg-orange-500/10" : "border-gray-700"}`}>
                   {isOpen ? <ChevronDown className="h-5 w-5 text-orange-400" /> : <ChevronRight className="h-5 w-5 text-gray-500" />}
@@ -208,7 +211,7 @@ export default function SchedulesPage() {
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                   <div className="w-12 h-9 bg-gray-800 overflow-hidden shrink-0">
                     {trail.thumbnail ? (
-                      <img src={trail.thumbnail} alt="" className="w-full h-full object-cover" />
+                       <img src={trail.thumbnail} alt={trail.title} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-900/30 to-gray-800">
                         <Calendar className="h-5 w-5 text-orange-600/50" />
@@ -236,7 +239,7 @@ export default function SchedulesPage() {
 
               {/* Expanded — criação de aulas como num curso */}
               {isOpen && (
-                <div className="border-t border-gray-800">
+                <div id={`sched-${trail.id}`} role="region" aria-labelledby={`sched-btn-${trail.id}`} className="border-t border-gray-800">
                   {/* Lista de aulas */}
                   <div className="px-6 py-5 space-y-4">
                     {sessions.length === 0 && (
@@ -275,7 +278,7 @@ export default function SchedulesPage() {
                               <div onClick={() => { thumbRefs.current.get(trail.id!)?.get(idx)?.click(); }}
                                 className="relative aspect-video sm:aspect-video bg-gray-800 border border-dashed border-gray-700 hover:border-orange-500/50 cursor-pointer overflow-hidden group transition-colors">
                                 {sess.thumbnail ? (
-                                  <img src={sess.thumbnail} alt="" className="w-full h-full object-cover" />
+                                   <img src={sess.thumbnail} alt={sess.title || "Thumbnail da aula"} className="w-full h-full object-cover" />
                                 ) : (
                                   <div className="flex flex-col items-center justify-center h-full gap-1 text-gray-500 group-hover:text-orange-400">
                                     <ImagePlus className="h-6 w-6" />

@@ -117,7 +117,7 @@ export default function InstitutionPublicPage() {
       {/* Banner */}
       <div className="relative h-48 sm:h-64 bg-gray-900 overflow-hidden">
         {institution.banner ? (
-          <img src={institution.banner} alt="" className="w-full h-full object-cover" />
+           <img src={institution.banner} alt={institution.name} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900" />
         )}

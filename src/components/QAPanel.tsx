@@ -226,6 +226,7 @@ export function QAPanel({ liveId, isHost, hostName }: QAPanelProps) {
                   <button
                     onClick={() => handleDismiss(question.id)}
                     className="flex items-center gap-1 text-xs bg-white/10 hover:bg-white/20 text-white/70 px-2 py-1 rounded transition-colors"
+                    aria-label="Dispensar pergunta"
                   >
                     <Trash2 size={14} />
                   </button>

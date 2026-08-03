@@ -245,12 +245,13 @@ export default function InstitutionDetailPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
+              <caption className="sr-only">Membros da instituição</caption>
               <thead>
                 <tr className="border-b border-gray-800 text-left text-xs uppercase tracking-wider text-gray-500">
-                  <th className="py-4 px-6 font-medium">Membro</th>
-                  <th className="py-4 px-6 font-medium">Email</th>
-                  <th className="py-4 px-6 font-medium">Cargo</th>
-                  <th className="py-4 px-6 font-medium">Juntou-se</th>
+                  <th scope="col" className="py-4 px-6 font-medium">Membro</th>
+                  <th scope="col" className="py-4 px-6 font-medium">Email</th>
+                  <th scope="col" className="py-4 px-6 font-medium">Cargo</th>
+                  <th scope="col" className="py-4 px-6 font-medium">Juntou-se</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">

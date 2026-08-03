@@ -120,6 +120,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
   )}
 
   <aside 
+  role="navigation"
+  aria-label="Menu admin"
   className={`fixed left-0 top-0 h-screen backdrop-blur-2xl transition-all duration-300 flex flex-col ${
   isCollapsed ? "w-20" : "w-[280px]"
   } ${mobileOpen ? "translate-x-0 z-50" : "-translate-x-full invisible pointer-events-none"} lg:translate-x-0 lg:z-40 lg:visible lg:pointer-events-auto ${
@@ -138,9 +140,10 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
  <span className={`text-lg font-bold tracking-wide ${theme === "light" ? "text-slate-800" : "text-white"}`}>ADMIN</span>
  </a>
  
- <button 
- onClick={() => setIsCollapsed(!isCollapsed)}
- className={`flex h-8 w-8 items-center justify-center transition-colors ${isCollapsed ? "mx-auto" : ""} ${
+  <button 
+  onClick={() => setIsCollapsed(!isCollapsed)}
+  aria-label={isCollapsed ? "Expandir barra lateral" : "Recolher barra lateral"}
+  className={`flex h-8 w-8 items-center justify-center transition-colors ${isCollapsed ? "mx-auto" : ""} ${
    theme === "light"
      ? "bg-slate-100 text-slate-500 hover:text-slate-800 hover:bg-slate-200"
      : "bg-gray-900 text-gray-400 hover:text-white hover:bg-gray-800"
@@ -193,6 +196,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
               <Link
                   href={item.href}
                   onClick={handleNavClick}
+                  aria-current={isActive ? "page" : undefined}
                   title={isCollapsed ? item.label : ""}
  className={`group flex items-center px-3 py-2.5 transition-all relative ${
  isActive 
@@ -238,14 +242,14 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
   <div className={`flex items-center justify-center p-1 ${isCollapsed ? "flex-col gap-2 py-3" : "gap-1"} ${
     theme === "light" ? "bg-slate-100" : "bg-gray-900"
   }`}>
-  <button onClick={onToggleTheme} className={`flex items-center justify-center transition-all ${
+   <button onClick={onToggleTheme} aria-label="Ativar tema claro" aria-pressed={theme === "light"} className={`flex items-center justify-center transition-all ${
     theme === "light"
       ? "bg-white text-purple shadow-sm ring-1 ring-slate-200"
       : "text-gray-400 hover:text-white"
   } ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
   <Sun className="w-4 h-4" />
   </button>
-  <button onClick={onToggleTheme} className={`flex items-center justify-center transition-all ${
+  <button onClick={onToggleTheme} aria-label="Ativar tema escuro" aria-pressed={theme === "dark"} className={`flex items-center justify-center transition-all ${
     theme === "dark"
       ? "bg-gray-800 text-blue-500 shadow-sm"
       : "text-slate-400 hover:text-slate-600"
@@ -254,9 +258,10 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
   </button>
   </div>
 
- <button
- onClick={handleLogout}
- className={`flex items-center transition-all group ${
+  <button
+  onClick={handleLogout}
+  aria-label="Sair do Admin"
+  className={`flex items-center transition-all group ${
  isCollapsed ? "w-12 h-12 justify-center mx-auto" : "w-full px-3 py-2.5 gap-3"
  } ${
    theme === "light"

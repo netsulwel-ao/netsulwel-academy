@@ -159,7 +159,7 @@ export default function UsersPage() {
             className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 pl-10 pr-4 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"
           />
           {search && (
-            <button onClick={() => setSearch("")} className="absolute right-3 top-2.5 text-gray-500 hover:text-white">
+            <button onClick={() => setSearch("")} aria-label="Limpar pesquisa" className="absolute right-3 top-2.5 text-gray-500 hover:text-white">
               <X className="h-4 w-4" />
             </button>
           )}
@@ -192,8 +192,9 @@ export default function UsersPage() {
 
       {/* ── Table ── */}
       {loading ? (
-        <div className="flex items-center justify-center py-24">
+        <div className="flex items-center justify-center py-24" role="status" aria-live="polite">
           <Loader2 className="h-8 w-8 animate-spin text-purple" />
+          <span className="sr-only">A carregar utilizadores...</span>
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
@@ -254,6 +255,7 @@ export default function UsersPage() {
                       ) : (
                         <div className="relative">
                           <button onClick={() => setMenuOpen(menuOpen === u.id ? null : u.id)}
+                            aria-label="Mais opções"
                             className="p-1.5 text-gray-600 hover:text-white hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100">
                             <MoreVertical className="h-4 w-4" />
                           </button>

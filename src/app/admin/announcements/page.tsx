@@ -386,13 +386,13 @@ export default function AnnouncementsPage() {
                           </button>
                         </>
                       )}
-                      <button onClick={()=>toggleAnnActive(a)} className={`p-2 transition-colors ${a.active?"text-green-400 hover:text-green-300":"text-gray-600 hover:text-gray-400"}`} title={a.active?"Desativar":"Ativar"}>
+                      <button onClick={()=>toggleAnnActive(a)} aria-label={a.active?"Desativar":"Ativar"} className={`p-2 transition-colors ${a.active?"text-green-400 hover:text-green-300":"text-gray-600 hover:text-gray-400"}`} title={a.active?"Desativar":"Ativar"}>
                         {a.active?<Eye className="h-4 w-4"/>:<EyeOff className="h-4 w-4"/>}
                       </button>
                       {(isAdmin || a.createdBy === user?.uid) && (
                         <>
-                          <button onClick={()=>openEditAnn(a)} className="p-2 text-gray-500 hover:text-white transition-colors" title="Editar"><Pencil className="h-4 w-4"/></button>
-                          <button onClick={()=>deleteAnn(a.id!)} className="p-2 text-gray-500 hover:text-red-400 transition-colors" title="Apagar"><Trash2 className="h-4 w-4"/></button>
+                          <button onClick={()=>openEditAnn(a)} aria-label="Editar" className="p-2 text-gray-500 hover:text-white transition-colors" title="Editar"><Pencil className="h-4 w-4"/></button>
+                          <button onClick={()=>deleteAnn(a.id!)} aria-label="Apagar" className="p-2 text-gray-500 hover:text-red-400 transition-colors" title="Apagar"><Trash2 className="h-4 w-4"/></button>
                         </>
                       )}
                     </div>
@@ -450,11 +450,11 @@ export default function AnnouncementsPage() {
                       <p className="text-gray-400 text-sm">Termina: {new Date(b.endsAt).toLocaleString("pt-AO")}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <button onClick={()=>toggleCdActive(b)} className={`p-2 transition-colors ${b.active?"text-green-400 hover:text-green-300":"text-gray-600 hover:text-gray-400"}`}>
+                      <button onClick={()=>toggleCdActive(b)} aria-label={b.active?"Desativar":"Ativar"} className={`p-2 transition-colors ${b.active?"text-green-400 hover:text-green-300":"text-gray-600 hover:text-gray-400"}`}>
                         {b.active?<Eye className="h-4 w-4"/>:<EyeOff className="h-4 w-4"/>}
                       </button>
-                      <button onClick={()=>openEditCD(b)} className="p-2 text-gray-500 hover:text-white transition-colors"><Pencil className="h-4 w-4"/></button>
-                      <button onClick={()=>deleteCD(b.id!)} className="p-2 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-4 w-4"/></button>
+                      <button onClick={()=>openEditCD(b)} aria-label="Editar" className="p-2 text-gray-500 hover:text-white transition-colors"><Pencil className="h-4 w-4"/></button>
+                      <button onClick={()=>deleteCD(b.id!)} aria-label="Apagar" className="p-2 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-4 w-4"/></button>
                     </div>
                   </div>
                 );
@@ -472,7 +472,7 @@ export default function AnnouncementsPage() {
             <div className="bg-gray-900 border border-gray-800 w-full max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl">
               <div className="flex items-center justify-between px-6 py-5 border-b border-gray-800 sticky top-0 bg-gray-900 z-10">
                 <h2 className="text-lg font-bold text-white">{editingAnnId?"Editar Anúncio":"Novo Anúncio"}</h2>
-                <button onClick={()=>setAnnModalOpen(false)} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"><X className="h-5 w-5"/></button>
+                <button onClick={()=>setAnnModalOpen(false)} aria-label="Fechar" className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"><X className="h-5 w-5"/></button>
               </div>
               <div className="p-6 space-y-6">
                 {annError&&<div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400"><AlertCircle className="h-4 w-4 shrink-0"/>{annError}</div>}
@@ -536,6 +536,7 @@ export default function AnnouncementsPage() {
                           <ImagePlus className="h-8 w-8 text-white"/>
                         </div>
                         <button type="button" onClick={e=>{e.stopPropagation();setImagePreview("");setAnnForm(f=>({...f,imageUrl:""}));}}
+                          aria-label="Remover imagem"
                           className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center bg-gray-900/80 border border-gray-700 text-gray-300 hover:text-white z-10">
                           <X className="h-3.5 w-3.5"/>
                         </button>
@@ -612,6 +613,7 @@ export default function AnnouncementsPage() {
                         {/* Icon picker button */}
                         <div className="relative shrink-0">
                           <button type="button" onClick={()=>setIconPickerIdx(iconPickerIdx===i?null:i)}
+                            aria-label="Escolher ícone"
                             className="flex h-9 w-9 items-center justify-center bg-gray-800 border border-gray-700 hover:border-blue-500/50 text-gray-300 hover:text-white transition-colors">
                             {getIcon(b.icon,"h-4 w-4") ?? <Plus className="h-4 w-4"/>}
                           </button>
@@ -628,6 +630,7 @@ export default function AnnouncementsPage() {
                             className="w-full bg-gray-900 border border-gray-800 py-1.5 px-3 text-gray-400 placeholder-gray-600 text-xs focus:outline-none"/>
                         </div>
                         <button type="button" onClick={()=>setAnnForm(f=>({...f,benefits:(f.benefits??[]).filter((_,j)=>j!==i)}))}
+                          aria-label="Remover benefício"
                           className="p-1.5 text-gray-600 hover:text-red-400 transition-colors shrink-0"><Trash2 className="h-3.5 w-3.5"/></button>
                       </div>
                     ))}
@@ -669,7 +672,7 @@ export default function AnnouncementsPage() {
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-5 border-b border-gray-800 shrink-0">
                 <h2 className="text-lg font-bold text-white">{editingCdId?"Editar Banner":"Novo Banner de Contagem"}</h2>
-                <button onClick={()=>setCdModalOpen(false)} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"><X className="h-5 w-5"/></button>
+                <button onClick={()=>setCdModalOpen(false)} aria-label="Fechar" className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"><X className="h-5 w-5"/></button>
               </div>
 
               {/* Scrollable body ? no visible scrollbar */}
@@ -703,6 +706,7 @@ export default function AnnouncementsPage() {
                               <ImagePlus className="h-8 w-8 text-white"/>
                             </div>
                             <button type="button" onClick={e=>{e.stopPropagation();setCdImagePreview("");setCdForm(f=>({...f,imageUrl:""}));}}
+                              aria-label="Remover imagem"
                               className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center bg-gray-900/80 border border-gray-700 text-gray-300 hover:text-white z-10">
                               <X className="h-3.5 w-3.5"/>
                             </button>

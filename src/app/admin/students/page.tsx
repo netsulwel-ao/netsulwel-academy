@@ -230,8 +230,9 @@ export default function AdminStudentsPage() {
       {/* Table */}
       <div className="bg-gray-900 border border-gray-800 overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-20">
+          <div className="flex items-center justify-center py-20" role="status" aria-live="polite">
             <Loader2 className="h-8 w-8 animate-spin text-purple" />
+            <span className="sr-only">A carregar alunos...</span>
           </div>
         ) : filtered.length === 0 ? (
           <EmptyState
@@ -249,15 +250,16 @@ export default function AdminStudentsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
+              <caption className="sr-only">Lista de alunos</caption>
               <thead>
                 <tr className="border-b border-gray-800 text-left text-xs uppercase tracking-wider text-gray-500">
-                  <th className="py-4 px-6 font-medium">Aluno</th>
-                  <th className="py-4 px-6 font-medium">Email</th>
-                  <th className="py-4 px-6 font-medium">Plano</th>
-                  <th className="py-4 px-6 font-medium">Registado</th>
-                  <th className="py-4 px-6 font-medium">{isTeacher ? "Meus Cursos" : "Cursos"}</th>
-                  {isTeacher && <th className="py-4 px-6 font-medium">Acesso</th>}
-                  {isAdmin && <th className="py-4 px-6 font-medium">Acções</th>}
+                  <th scope="col" className="py-4 px-6 font-medium">Aluno</th>
+                  <th scope="col" className="py-4 px-6 font-medium">Email</th>
+                  <th scope="col" className="py-4 px-6 font-medium">Plano</th>
+                  <th scope="col" className="py-4 px-6 font-medium">Registado</th>
+                  <th scope="col" className="py-4 px-6 font-medium">{isTeacher ? "Meus Cursos" : "Cursos"}</th>
+                  {isTeacher && <th scope="col" className="py-4 px-6 font-medium">Acesso</th>}
+                  {isAdmin && <th scope="col" className="py-4 px-6 font-medium">Acções</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">

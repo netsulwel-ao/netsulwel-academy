@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, arrayUnion } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTrack } from "@/hooks/useTrack";
+import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import {
   CreditCard, Crown, Zap, Lock, ArrowUpRight, Building2,
   Smartphone, Loader2, CheckCircle2, AlertCircle, Copy,
@@ -41,7 +41,6 @@ export default function DashboardFinancesPage() {
   const { user, plan: currentPlan, isAdmin } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { track } = useTrack();
   const courseId = searchParams.get("courseId");
   const liveId = searchParams.get("liveId");
 
@@ -107,21 +106,6 @@ export default function DashboardFinancesPage() {
     setReceipt({ file, preview: URL.createObjectURL(file) });
   };
 
-  const grantAccess = async (type: string, itemId?: string) => {
-    if (!user) return;
-    const userRef = doc(db, "users", user.uid);
-    if (type === "standalone" && itemId) {
-      await updateDoc(userRef, { enrolledCourses: arrayUnion(itemId) });
-      track("course_enroll", itemId, "course").catch(() => {});
-    } else if (type === "live" && itemId) {
-      await updateDoc(userRef, { enrolledLives: arrayUnion(itemId) });
-      track("course_enroll", itemId, "live").catch(() => {});
-    } else if (type === "smart" || type === "golden") {
-      await updateDoc(userRef, { plan: type });
-      track("course_enroll", undefined, undefined, { plan: type }).catch(() => {});
-    }
-  };
-
   const handlePurchase = async (paypalTransactionId?: string) => {
     if (!selectedMethod || !user) return;
     if (!course && !live && !selectedPlan) return;
@@ -134,32 +118,31 @@ export default function DashboardFinancesPage() {
         receiptUrl = await uploadReceipt(receipt.file, token);
       }
 
-      const isConfirmed = !!paypalTransactionId;
       const saleType = live ? "live" : course ? "standalone" : selectedPlan!;
-      const amount = live ? (live.price ?? 0) : course ? (course.price ?? 0) : (plans![selectedPlan!]?.price ?? 0);
       const itemId = live?.id ?? course?.id ?? selectedPlan;
-      const itemTitle = live?.title ?? course?.title ?? undefined;
 
-      const saleData = {
-        userId: user.uid,
-        userName: user.displayName || "Aluno",
-        userEmail: user.email || "",
-        amount,
-        paymentMethod: activeMethods.find((m) => m.id === selectedMethod)?.label || selectedMethod,
-        receiptUrl: receiptUrl || "",
-        status: isConfirmed ? "confirmed" as const : "pending" as const,
-        type: saleType,
-        itemId,
-        itemTitle,
-        paypalTransactionId: paypalTransactionId || null,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      };
+      // Idempotency key prevents duplicate purchases on double-click
+      const idempotencyKey = `${user.uid}-${saleType}-${itemId}-${Date.now()}`;
 
-      await addDoc(collection(db, "sales"), saleData);
+      const res = await fetchWithAuth("/api/purchases/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: saleType,
+          itemId,
+          paymentMethod: activeMethods.find((m) => m.id === selectedMethod)?.label || selectedMethod,
+          receiptUrl: receiptUrl || undefined,
+          paypalTransactionId: paypalTransactionId || undefined,
+          idempotencyKey,
+        }),
+      });
 
-      if (isConfirmed) {
-        await grantAccess(saleType, itemId as string | undefined);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Erro ao processar pagamento.");
+      }
+
+      if (data.status === "confirmed") {
         const noun = live ? "aula" : "curso";
         toast.success(`Pagamento confirmado! Bem-vindo ao ${noun}.`);
       } else {
@@ -174,7 +157,8 @@ export default function DashboardFinancesPage() {
       setStep("plan");
     } catch (e) {
       console.error("Erro no pagamento:", e);
-      toast.error("Erro ao registar pedido. Tenta novamente.");
+      const msg = e instanceof Error ? e.message : "Erro ao registar pedido. Tenta novamente.";
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
@@ -465,11 +449,14 @@ export default function DashboardFinancesPage() {
                       <PayPalButtons
                         style={{ color: "blue", shape: "rect", label: "pay", height: 48 }}
                         createOrder={(_data, actions) => {
-                          const amount = live ? (live.price ?? 0) : course ? (course.price ?? 0) : (plans?.[selectedPlan!]?.price ?? 0);
+                          const kzAmount = live ? (live.price ?? 0) : course ? (course.price ?? 0) : (plans?.[selectedPlan!]?.price ?? 0);
+                          // Convert Kz to USD — set PAYPAL_EXCHANGE_RATE env var (Kz per 1 USD)
+                          const rate = Number(process.env.NEXT_PUBLIC_PAYPAL_EXCHANGE_RATE) || 830;
+                          const usdAmount = Math.round((kzAmount / rate) * 100) / 100;
                           return actions.order.create({
                             intent: "CAPTURE",
                             purchase_units: [{
-                              amount: { value: amount.toString(), currency_code: "USD" },
+                              amount: { value: usdAmount.toString(), currency_code: "USD" },
                               description: live ? live.title : course ? course.title : (plans?.[selectedPlan!]?.label || "Plano"),
                             }],
                           });

@@ -20,7 +20,7 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon: Icon, title, description, action, secondaryAction, compact }: EmptyStateProps) {
   return (
-    <div className={`flex flex-col items-center justify-center text-center ${compact ? "py-12" : "py-20"} bg-gray-900/40 border border-gray-800`}>
+    <div role="status" aria-live="polite" className={`flex flex-col items-center justify-center text-center ${compact ? "py-12" : "py-20"} bg-gray-900/40 border border-gray-800`}>
       <div className="h-16 w-16 flex items-center justify-center bg-gray-800/50 mb-4">
         <Icon className="h-8 w-8 text-gray-500" />
       </div>

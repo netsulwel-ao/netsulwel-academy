@@ -1,12 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "firebase/auth";
-import { Building2, Mail, Phone, MapPin, User, Lock, Loader2, Eye, EyeOff, AlertCircle, Sun, Moon } from "lucide-react";
+import { Building2, Mail, Phone, MapPin, User, Lock, Loader2, Eye, EyeOff, AlertCircle, Sun, Moon, Users, BookOpen, Globe, ArrowRight } from "lucide-react";
 import Link from "next/link";
+
+const HERO_CARDS = [
+  { icon: Users, title: "Gerencie Alunos", desc: "Acompanhe progresso em tempo real" },
+  { icon: BookOpen, title: "Ofereça Cursos", desc: "Plataforma completa de educação" },
+  { icon: Globe, title: "Alcance Global", desc: "Expanda sua instituição digitalmente" },
+];
 
 export default function InstitutionRegisterPage() {
   const router = useRouter();
@@ -14,6 +20,7 @@ export default function InstitutionRegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [mounted, setMounted] = useState(false);
 
   // Step 1 — admin account
   const [adminName, setAdminName] = useState("");
@@ -28,21 +35,22 @@ export default function InstitutionRegisterPage() {
   const [instAddress, setInstAddress] = useState("");
 
   useEffect(() => {
-    const saved = localStorage.getItem("public-theme") as "dark" | "light" | null;
-    if (saved) setTheme(saved);
-  }, []);
-
-  useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
-  const togglePublicTheme = () => {
+  useEffect(() => {
+    const saved = localStorage.getItem("public-theme") as "dark" | "light" | null;
+    if (saved && saved !== theme) setTheme(saved);
+    setMounted(true);
+  }, []);
+
+  const togglePublicTheme = useCallback(() => {
     setTheme(prev => {
       const next = prev === "dark" ? "light" : "dark";
       localStorage.setItem("public-theme", next);
       return next;
     });
-  };
+  }, []);
 
   const handleStep1 = (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,173 +119,303 @@ export default function InstitutionRegisterPage() {
   };
 
   return (
-    <main className="flex min-h-screen bg-gray-950 flex-col lg:flex-row overflow-hidden">
-      <div className="relative hidden w-1/2 lg:flex flex-col items-center justify-center bg-gray-900 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/20 via-gray-900 to-gray-950" />
-        <Link href="/" className="absolute left-10 top-10 z-20 flex items-center gap-4 hover:opacity-80 transition-opacity">
-          <img src="/Logo-Academy-White.svg" alt="Academy Logo" className="h-12 w-auto" />
-          <span className="text-3xl font-light text-white/30">|</span>
-          <div className="flex items-center gap-2">
-            <img src="/logo.svg" alt="Netsulwel" className="h-7 w-auto brightness-0 invert" />
-            <span className="text-2xl font-bold text-white">Netsulwel</span>
-          </div>
-        </Link>
-        <div className="absolute bottom-16 left-10 right-10 z-20">
-          <h2 className="text-4xl lg:text-5xl font-bold text-white leading-tight">Registe a sua instituição</h2>
-          <p className="mt-4 text-lg text-gray-300 max-w-lg">
-            Crie uma instituição educativa, convide professores e alunos, e gerencie tudo num só lugar.
-          </p>
-        </div>
+    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-hidden" data-theme={theme}>
+      {/* Background Effects */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        {/* Aurora Gradients - Cyan theme for institutions */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 md:w-[900px] md:h-[900px] bg-gradient-to-br from-cyan-500/20 to-blue-500/10 blur-3xl md:blur-[500px] rounded-full" />
+        <div className="absolute -bottom-32 left-1/3 w-72 h-72 md:w-[700px] md:h-[700px] bg-gradient-to-tr from-blue-500/10 to-cyan-500/5 blur-3xl md:blur-[500px] rounded-full" />
+        
+        {/* Grid Pattern */}
+        <svg className="absolute inset-0 w-full h-full opacity-[0.04]" preserveAspectRatio="none">
+          <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <circle cx="20" cy="20" r="0.5" fill="#fff" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+
+        {/* Network Nodes */}
+        <div className="absolute top-20 right-20 w-2 h-2 rounded-full bg-cyan-400/20" />
+        <div className="absolute top-32 right-32 w-1 h-1 rounded-full bg-blue-400/30" />
+        <div className="absolute bottom-40 left-20 w-2 h-2 rounded-full bg-blue-400/15" />
       </div>
 
-      <div data-theme={theme} className="relative flex w-full flex-col lg:w-1/2 bg-gray-950 overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 grid-bg opacity-10" />
-        <div className="pointer-events-none absolute top-[-20%] left-[-10%] h-[600px] w-[600px] bg-cyan/10 blur-[150px] hidden sm:block" />
+      {/* Header */}
+      <header className="relative z-40 px-6 md:px-20 py-6 md:py-8 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-3 hover:opacity-75 transition-opacity">
+          <img src="/Logo-Academy-White.svg" alt="Academy" className="h-10 md:h-12 w-auto" />
+          <span className="text-xl md:text-2xl font-bold text-white">Netsulwel</span>
+        </Link>
+        <button
+          onClick={togglePublicTheme}
+          className="h-10 w-10 flex items-center justify-center rounded-lg border border-gray-700/50 bg-white/5 hover:bg-white/10 transition-colors text-gray-300 hover:text-white"
+        >
+          {!mounted || theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </button>
+      </header>
 
-        <div className="flex items-center justify-between p-6 z-20">
-          <Link href="/" className="flex lg:hidden items-center gap-3">
-            <img src="/Logo-Academy-White.svg" alt="Academy Logo" className="h-10 w-auto" />
-            <img src="/logo.svg" alt="Netsulwel" className="h-6 w-auto brightness-0 invert" />
-          </Link>
-          <div className="flex items-center gap-3">
-            <button onClick={togglePublicTheme} className="flex items-center justify-center h-9 w-9 border border-gray-800 bg-gray-900/60 hover:bg-gray-800 hover:border-gray-600 transition-all text-gray-400 hover:text-white">
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
-            <Link href="/login" className="text-sm font-medium text-white px-6 py-2.5 border border-gray-800 bg-gray-900/60 hover:bg-gray-800 hover:border-gray-600 transition-all">
-              Iniciar sessão
-            </Link>
-          </div>
-        </div>
-
-        <div className="flex-1 flex flex-col justify-center px-6 sm:px-16 lg:px-24 z-20 pb-12 lg:pb-0">
-          <div className="w-full max-w-md mx-auto">
-            <div className="flex items-center gap-2 mb-6">
-              <div className={`h-2 w-8 ${step === 1 ? "bg-cyan-400" : "bg-cyan-400"}`} />
-              <div className={`h-2 w-8 ${step === 2 ? "bg-cyan-400" : "bg-gray-700"}`} />
-            </div>
-
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-              {step === 1 ? "Criar conta" : "Dados da instituição"}
-            </h2>
-            <p className="mt-2 text-sm text-gray-400 mb-8">
-              {step === 1
-                ? "Primeiro, crie a sua conta de administrador"
-                : "Agora, preencha os dados da sua instituição"}
-            </p>
-
-            <div className="border border-gray-800/50 bg-gray-900/40 p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative">
-              <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-50 pointer-events-none" />
-
-              {error && (
-                <div className="mb-6 flex items-center gap-2 bg-red-500/10 p-4 text-sm text-red-400 border border-red-500/20 relative z-10">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  <p>{error}</p>
+      {/* Main Content */}
+      <div className="relative z-20 flex items-center justify-center min-h-[calc(100vh-120px)] px-4 md:px-6 py-8 md:py-12">
+        <div className="w-full max-w-7xl">
+          {/* Desktop: 45/55 split | Mobile: stacked */}
+          <div className="flex flex-col lg:flex-row lg:gap-16 lg:items-center">
+            
+            {/* LEFT: Register Form (45% on desktop) */}
+            <div className="w-full lg:w-5/12 flex justify-center lg:justify-end mb-12 lg:mb-0">
+              <div className="w-full max-w-md">
+                
+                {/* Form Title */}
+                <div className="mb-12">
+                  <h1 className="text-4xl md:text-5xl lg:text-5xl font-bold leading-tight text-white mb-4">
+                    Registe a sua instituição
+                  </h1>
+                  <p className="text-base md:text-lg text-gray-400 leading-relaxed opacity-75">
+                    Gerencie educação em larga escala com nossa plataforma.
+                  </p>
                 </div>
-              )}
 
-              {step === 1 ? (
-                <form className="space-y-5 relative z-10" onSubmit={handleStep1}>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="admin-name">Nome do administrador</label>
-                    <div className="relative">
-                      <User className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
-                      <input id="admin-name" type="text" required placeholder="João Silva"
-                        value={adminName} onChange={(e) => setAdminName(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400" />
-                    </div>
+                {/* Register Card with Glassmorphism */}
+                <div className="rounded-3xl bg-gradient-to-br from-white/10 to-white/5 border border-white/15 backdrop-blur-xl p-8 md:p-12 shadow-2xl">
+                  
+                  {/* Progress Indicator */}
+                  <div className="flex gap-2 mb-8">
+                    <div className={`h-2 w-8 rounded-full transition-all ${step === 1 ? "bg-cyan-400" : "bg-cyan-400"}`} />
+                    <div className={`h-2 w-8 rounded-full transition-all ${step === 2 ? "bg-cyan-400" : "bg-gray-600"}`} />
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="admin-email">Email</label>
-                    <div className="relative">
-                      <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
-                      <input id="admin-email" type="email" required placeholder="admin@exemplo.com"
-                        value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400" />
+
+                  {/* Error Message */}
+                  {error && (
+                    <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/30 flex gap-3 text-sm text-red-300 animate-in fade-in">
+                      <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                      <p>{error}</p>
                     </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="admin-password">Palavra-passe</label>
-                    <div className="relative">
-                      <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
-                      <input id="admin-password" type={showPassword ? "text" : "password"} required
-                        placeholder="••••••••" value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-10 text-white placeholder-gray-600 transition-colors focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400" />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 focus:outline-none">
-                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  )}
+
+                  {step === 1 ? (
+                    <form onSubmit={handleStep1} className="space-y-6">
+                      <h2 className="text-2xl font-bold text-white mb-6">Conta do Administrador</h2>
+
+                      {/* Admin Name Input */}
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Nome do administrador</label>
+                        <div className="relative">
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                          <input
+                            type="text"
+                            placeholder="João Silva"
+                            value={adminName}
+                            onChange={(e) => setAdminName(e.target.value)}
+                            className="w-full h-14 pl-12 pr-4 rounded-2xl border border-gray-600/50 bg-white/5 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 transition-all outline-none disabled:opacity-50"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      {/* Admin Email Input */}
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Email</label>
+                        <div className="relative">
+                          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                          <input
+                            type="email"
+                            placeholder="admin@instituicao.com"
+                            value={adminEmail}
+                            onChange={(e) => setAdminEmail(e.target.value)}
+                            className="w-full h-14 pl-12 pr-4 rounded-2xl border border-gray-600/50 bg-white/5 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 transition-all outline-none disabled:opacity-50"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      {/* Admin Password Input */}
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Palavra-passe</label>
+                        <div className="relative">
+                          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            value={adminPassword}
+                            onChange={(e) => setAdminPassword(e.target.value)}
+                            className="w-full h-14 pl-12 pr-12 rounded-2xl border border-gray-600/50 bg-white/5 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 transition-all outline-none disabled:opacity-50"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                          >
+                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Submit Button */}
+                      <button
+                        type="submit"
+                        className="w-full h-14 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 font-semibold text-white text-base flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-95 transition-all mt-8"
+                      >
+                        <span>Continuar</span>
+                        <ArrowRight className="w-4 h-4" />
                       </button>
-                    </div>
-                    <p className="mt-1 text-xs text-gray-500">Mínimo de 6 caracteres</p>
-                  </div>
-                  <button type="submit"
-                    className="mt-6 flex w-full items-center justify-center gap-2 bg-cyan-600 py-3.5 text-sm font-bold text-white transition-all hover:bg-cyan-500">
-                    Continuar
-                  </button>
-                </form>
-              ) : (
-                <form className="space-y-5 relative z-10" onSubmit={handleSubmit}>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="inst-name">Nome da Instituição</label>
-                    <div className="relative">
-                      <Building2 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
-                      <input id="inst-name" type="text" required disabled={loading}
-                        placeholder="Ex: Escola Secundária de Luanda"
-                        value={instName} onChange={(e) => setInstName(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 disabled:opacity-50" />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="inst-email">Email da Instituição</label>
-                    <div className="relative">
-                      <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
-                      <input id="inst-email" type="email" required disabled={loading}
-                        placeholder="contacto@escola.pt"
-                        value={instEmail} onChange={(e) => setInstEmail(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 disabled:opacity-50" />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="inst-phone">Telefone</label>
-                    <div className="relative">
-                      <Phone className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
-                      <input id="inst-phone" type="tel" disabled={loading} placeholder="+244 923 000 000"
-                        value={instPhone} onChange={(e) => setInstPhone(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 disabled:opacity-50" />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="inst-address">Morada</label>
-                    <div className="relative">
-                      <MapPin className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
-                      <input id="inst-address" type="text" disabled={loading} placeholder="Rua da Escola, 123, Luanda"
-                        value={instAddress} onChange={(e) => setInstAddress(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 disabled:opacity-50" />
-                    </div>
-                  </div>
+                    </form>
+                  ) : (
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      <h2 className="text-2xl font-bold text-white mb-6">Dados da Instituição</h2>
 
-                  <div className="p-3 bg-yellow-500/5 border border-yellow-500/20">
-                    <p className="text-xs text-yellow-400">
-                      Após o registo, a instituição ficará em estado <strong>pendente</strong> até ser aprovada pela administração.
-                    </p>
-                  </div>
+                      {/* Institution Name Input */}
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Nome da Instituição</label>
+                        <div className="relative">
+                          <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                          <input
+                            type="text"
+                            placeholder="Escola Secundária de Luanda"
+                            value={instName}
+                            onChange={(e) => setInstName(e.target.value)}
+                            className="w-full h-14 pl-12 pr-4 rounded-2xl border border-gray-600/50 bg-white/5 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 transition-all outline-none disabled:opacity-50"
+                            required
+                            disabled={loading}
+                          />
+                        </div>
+                      </div>
 
-                  <div className="flex gap-3">
-                    <button type="button" onClick={() => setStep(1)} disabled={loading}
-                      className="flex items-center justify-center gap-2 border border-gray-700 bg-gray-900 py-3.5 px-6 text-sm font-medium text-gray-300 transition-all hover:bg-gray-800 disabled:opacity-50">
-                      Voltar
-                    </button>
-                    <button type="submit" disabled={loading}
-                      className="flex-1 flex items-center justify-center gap-2 bg-cyan-600 py-3.5 text-sm font-bold text-white transition-all hover:bg-cyan-500 disabled:opacity-70 disabled:cursor-not-allowed">
-                      {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Registar Instituição"}
-                    </button>
-                  </div>
-                </form>
-              )}
+                      {/* Institution Email Input */}
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Email da Instituição</label>
+                        <div className="relative">
+                          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                          <input
+                            type="email"
+                            placeholder="contacto@escola.pt"
+                            value={instEmail}
+                            onChange={(e) => setInstEmail(e.target.value)}
+                            className="w-full h-14 pl-12 pr-4 rounded-2xl border border-gray-600/50 bg-white/5 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 transition-all outline-none disabled:opacity-50"
+                            required
+                            disabled={loading}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Institution Phone Input */}
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Telefone</label>
+                        <div className="relative">
+                          <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                          <input
+                            type="tel"
+                            placeholder="+244 923 000 000"
+                            value={instPhone}
+                            onChange={(e) => setInstPhone(e.target.value)}
+                            className="w-full h-14 pl-12 pr-4 rounded-2xl border border-gray-600/50 bg-white/5 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 transition-all outline-none disabled:opacity-50"
+                            disabled={loading}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Institution Address Input */}
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Morada</label>
+                        <div className="relative">
+                          <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                          <input
+                            type="text"
+                            placeholder="Rua da Escola, 123, Luanda"
+                            value={instAddress}
+                            onChange={(e) => setInstAddress(e.target.value)}
+                            className="w-full h-14 pl-12 pr-4 rounded-2xl border border-gray-600/50 bg-white/5 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 transition-all outline-none disabled:opacity-50"
+                            disabled={loading}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Info Box */}
+                      <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-sm text-yellow-300">
+                        Após o registo, sua instituição ficará em <strong>avaliação</strong> até ser aprovada.
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-3 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => { setStep(1); setError(""); }}
+                          disabled={loading}
+                          className="flex-1 h-12 rounded-2xl border border-gray-600/50 bg-white/5 hover:bg-white/10 transition-colors text-white font-semibold disabled:opacity-50"
+                        >
+                          Voltar
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={loading}
+                          className="flex-1 h-12 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 font-semibold text-white flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                        >
+                          {loading ? (
+                            <>
+                              <Loader2 className="h-5 w-5 animate-spin" />
+                              <span>Registando...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>Registar Instituição</span>
+                              <ArrowRight className="w-4 h-4" />
+                            </>
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Footer Links */}
+                      <div className="border-t border-gray-700/30 pt-6 mt-6 text-center text-sm text-gray-400">
+                        Já tem conta?{" "}
+                        <Link href="/login" className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors">
+                          Entrar agora
+                        </Link>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              </div>
             </div>
 
-            <p className="mt-8 text-center text-sm text-gray-400 relative z-20">
-              Já tem conta? <Link href="/login" className="font-semibold text-cyan-400 hover:text-cyan-300 transition-colors">Iniciar sessão</Link>
-            </p>
+            {/* RIGHT: Hero Section (55% on desktop) */}
+            <div className="w-full lg:w-7/12">
+              <div className="space-y-8">
+                <div>
+                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight text-white mb-6">
+                    Educação digital em escala.
+                  </h2>
+                  <p className="text-base md:text-lg text-gray-300 leading-relaxed max-w-2xl opacity-85">
+                    Transforme sua instituição com uma plataforma completa de educação, da gestão ao aprendizado.
+                  </p>
+                </div>
+
+                {/* Hero Cards */}
+                <div className="space-y-4 mt-12">
+                  {HERO_CARDS.map((card, i) => {
+                    const Icon = card.icon;
+                    return (
+                      <div
+                        key={i}
+                        className="group p-6 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/15 backdrop-blur-md hover:from-white/15 hover:to-white/10 hover:border-white/25 transition-all duration-300 cursor-pointer flex gap-5"
+                      >
+                        <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-cyan-500/40 to-blue-500/30 flex items-center justify-center flex-shrink-0 group-hover:from-cyan-500/60 group-hover:to-blue-500/40 transition-all">
+                          <Icon className="w-6 h-6 text-cyan-200" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-white mb-1 group-hover:text-cyan-200 transition-colors">
+                            {card.title}
+                          </p>
+                          <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
+                            {card.desc}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

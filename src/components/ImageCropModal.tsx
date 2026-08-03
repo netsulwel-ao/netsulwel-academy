@@ -81,12 +81,14 @@ export function ImageCropModal({ imageUrl, title, aspectRatio, outputWidth, outp
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      role="dialog" aria-modal="true" aria-labelledby="crop-title"
+      onKeyDown={(e) => { if (e.key === "Escape" && !saving) onCancel(); }}>
       <div className="bg-gray-950 border border-gray-800 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800 shrink-0">
-          <h2 className="text-lg font-bold text-white">{title}</h2>
-          <button onClick={onCancel} className="text-gray-500 hover:text-white transition-colors" disabled={saving}>
+          <h2 id="crop-title" className="text-lg font-bold text-white">{title}</h2>
+          <button onClick={onCancel} aria-label="Cancelar corte" className="text-gray-500 hover:text-white transition-colors" disabled={saving}>
             <X className="h-5 w-5" />
           </button>
         </div>

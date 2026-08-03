@@ -43,7 +43,7 @@ export function FAQ() {
  </div>
 
  <div className="mt-12 space-y-3">
- {faqs.map((faq, index) => (
+  {faqs.map((faq, index) => (
  <div
  key={faq.question}
  className="overflow-hidden border border-gray-700 bg-gray-800/50 transition-colors hover:border-gray-600"
@@ -55,6 +55,8 @@ export function FAQ() {
  setOpenIndex(openIndex === index ? null : index)
  }
  aria-expanded={openIndex === index}
+ aria-controls={`faq-panel-${index}`}
+ id={`faq-button-${index}`}
  >
  {faq.question}
  <ChevronDown
@@ -64,6 +66,9 @@ export function FAQ() {
  />
  </button>
  <div
+ id={`faq-panel-${index}`}
+ role="region"
+ aria-labelledby={`faq-button-${index}`}
  className={`grid transition-all duration-300 ${
  openIndex === index
  ? "grid-rows-[1fr] opacity-100"

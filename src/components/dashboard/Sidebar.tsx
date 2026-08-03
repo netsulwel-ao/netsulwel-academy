@@ -42,9 +42,10 @@ const teacherNav = [
   { icon: FileText, label: "Avaliações", href: "/dashboard/teacher/exams" },
   { icon: Video, label: "Aulas ao Vivo", href: "/dashboard/teacher/lives" },
   { icon: Users, label: "Alunos", href: "/dashboard/teacher/students" },
+  { icon: DollarSign, label: "Vendas", href: "/dashboard/teacher/sales" },
+  { icon: CreditCard, label: "Carteira", href: "/dashboard/wallet" },
   { icon: MessageCircle, label: "Chats", href: "/dashboard/chats" },
   { icon: TrendingUp, label: "Analytics", href: "/dashboard/teacher/analytics" },
-  { icon: DollarSign, label: "Carteira", href: "/dashboard/wallet" },
   { icon: Settings, label: "Definições", href: "/dashboard/settings" },
 ];
 
@@ -86,6 +87,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
   )}
 
   <aside
+  role="navigation"
+  aria-label="Menu do painel"
   className={`fixed left-0 top-0 h-screen overflow-hidden backdrop-blur-2xl transition-all duration-300 flex flex-col ${
     isCollapsed ? "w-20" : "w-[280px]"
   } ${mobileOpen ? "translate-x-0 z-50" : "-translate-x-full invisible pointer-events-none"} lg:translate-x-0 lg:z-40 lg:visible lg:pointer-events-auto ${
@@ -108,6 +111,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
 
  <button
  onClick={() => setIsCollapsed(!isCollapsed)}
+ aria-label={isCollapsed ? "Expandir barra lateral" : "Recolher barra lateral"}
  className={`flex h-8 w-8 items-center justify-center transition-colors ${isCollapsed ? "mx-auto" : ""} ${
    theme === "light"
      ? "bg-slate-100 text-slate-500 hover:text-slate-800 hover:bg-slate-200"
@@ -139,59 +143,61 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
             : pathname.startsWith(item.href);
           return (
             <li key={item.href}>
-              <Link
-                href={item.href}
-                onClick={handleNavClick}
-                title={isCollapsed ? item.label : ""}
-                className={`group flex items-center px-3 py-2.5 transition-all relative ${isActive
-                  ? theme === "light"
-                    ? "bg-purple text-white shadow-sm"
-                    : "bg-purple text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]"
-                  : theme === "light"
-                    ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                    : "text-gray-400 hover:bg-gray-900 hover:text-gray-200"
-                }`}
-              >
-                <item.icon className={`h-6 w-6 shrink-0 ${isCollapsed ? "mx-auto" : "mr-3"} ${
-                  isActive
-                    ? "text-white drop-shadow-md"
-                    : theme === "light"
-                      ? "text-slate-400 group-hover:text-slate-700"
-                      : "text-gray-500 group-hover:text-gray-300"
-                }`} />
-                {!isCollapsed && (
-                  <span className="text-base font-medium whitespace-nowrap">{item.label}</span>
-                )}
-                {isCollapsed && (
-                  <div className={`absolute left-14 hidden group-hover:block px-2 py-1 text-sm whitespace-nowrap z-50 ${
-                    theme === "light" ? "bg-slate-800 text-white" : "bg-gray-800 text-white"
-                  }`}>
-                    {item.label}
-                  </div>
-                )}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  )}
+               <Link
+                 href={item.href}
+                 onClick={handleNavClick}
+                 aria-current={isActive ? "page" : undefined}
+                 title={isCollapsed ? item.label : ""}
+                 className={`group flex items-center px-3 py-2.5 transition-all relative ${isActive
+                   ? theme === "light"
+                     ? "bg-purple text-white shadow-sm"
+                     : "bg-purple text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+                   : theme === "light"
+                     ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                     : "text-gray-400 hover:bg-gray-900 hover:text-gray-200"
+                 }`}
+               >
+                 <item.icon className={`h-6 w-6 shrink-0 ${isCollapsed ? "mx-auto" : "mr-3"} ${
+                   isActive
+                     ? "text-white drop-shadow-md"
+                     : theme === "light"
+                       ? "text-slate-400 group-hover:text-slate-700"
+                       : "text-gray-500 group-hover:text-gray-300"
+                 }`} />
+                 {!isCollapsed && (
+                   <span className="text-base font-medium whitespace-nowrap">{item.label}</span>
+                 )}
+                 {isCollapsed && (
+                   <div className={`absolute left-14 hidden group-hover:block px-2 py-1 text-sm whitespace-nowrap z-50 ${
+                     theme === "light" ? "bg-slate-800 text-white" : "bg-gray-800 text-white"
+                   }`}>
+                     {item.label}
+                   </div>
+                 )}
+               </Link>
+             </li>
+           );
+         })}
+       </ul>
+     </div>
+   )}
 
-   {/* Secção de Navegação (apenas para alunos) */}
-   {!isAdmin && !isInstitution && !isTeacher && (
-    <div>
-      {!isCollapsed && (
-        <h3 className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-gray-500">NAVEGAÇÃO</h3>
-      )}
-      <ul className="space-y-1">
-        {studentNav.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                onClick={handleNavClick}
-                title={isCollapsed ? item.label : ""}
+    {/* Secção de Navegação (apenas para alunos) */}
+    {!isAdmin && !isInstitution && !isTeacher && (
+     <div>
+       {!isCollapsed && (
+         <h3 className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-gray-500">NAVEGAÇÃO</h3>
+       )}
+       <ul className="space-y-1">
+         {studentNav.map((item) => {
+           const isActive = pathname === item.href;
+           return (
+             <li key={item.href}>
+               <Link
+                 href={item.href}
+                 onClick={handleNavClick}
+                 aria-current={isActive ? "page" : undefined}
+                 title={isCollapsed ? item.label : ""}
                 className={`group flex items-center px-3 py-2.5 transition-all relative ${isActive
                   ? theme === "light"
                     ? "bg-purple text-white shadow-sm"
@@ -246,6 +252,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
               <Link
                 href={item.href}
                 onClick={handleNavClick}
+                aria-current={isActive ? "page" : undefined}
                 title={isCollapsed ? item.label : ""}
                 className={`group flex items-center pl-6 py-2.5 pr-3 transition-all relative ${isActive
                   ? theme === "light"
@@ -316,27 +323,28 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
   <div className={`flex items-center justify-center p-1 ${isCollapsed ? "flex-col gap-2 py-3" : "gap-1"} ${
     theme === "light" ? "bg-slate-100" : "bg-gray-900"
   }`}>
-  <button onClick={onToggleTheme}
-    className={`flex items-center justify-center transition-all ${
-      theme === "light"
-        ? "bg-white text-purple shadow-sm ring-1 ring-slate-200"
-        : "text-gray-400 hover:text-white"
-    } ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
-  <Sun className="w-5 h-5" />
-  </button>
-  <button onClick={onToggleTheme}
-    className={`flex items-center justify-center transition-all ${
-      theme === "dark"
-        ? "bg-gray-800 text-purple shadow-sm"
-        : "text-slate-400 hover:text-slate-600"
-    } ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
-  <Moon className="w-5 h-5" />
-  </button>
+   <button onClick={onToggleTheme} aria-label="Ativar tema claro" aria-pressed={theme === "light"}
+     className={`flex items-center justify-center transition-all ${
+       theme === "light"
+         ? "bg-white text-purple shadow-sm ring-1 ring-slate-200"
+         : "text-gray-400 hover:text-white"
+     } ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
+   <Sun className="w-5 h-5" />
+   </button>
+   <button onClick={onToggleTheme} aria-label="Ativar tema escuro" aria-pressed={theme === "dark"}
+     className={`flex items-center justify-center transition-all ${
+       theme === "dark"
+         ? "bg-gray-800 text-purple shadow-sm"
+         : "text-slate-400 hover:text-slate-600"
+     } ${isCollapsed ? "w-8 h-8" : "w-1/2 py-1.5"}`}>
+   <Moon className="w-5 h-5" />
+   </button>
   </div>
 
  {/* Botão de Logout */}
  <button
  onClick={handleLogout}
+ aria-label="Sair"
  className={`flex items-center transition-all group ${isCollapsed ? "w-12 h-12 justify-center mx-auto" : "w-full px-3 py-2.5 gap-3"} ${
    theme === "light"
      ? "text-slate-400 hover:bg-red-50 hover:text-red-500"

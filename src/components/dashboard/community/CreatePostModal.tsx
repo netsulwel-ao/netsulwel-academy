@@ -99,12 +99,14 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+      role="dialog" aria-modal="true" aria-labelledby="create-post-title"
+      onKeyDown={(e) => { if (e.key === "Escape") onClose(); }}>
       <div className="w-full max-w-lg bg-gray-900 border border-gray-800 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-gray-800">
-          <h2 className="text-xl font-bold text-white">Nova Publicação</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
+          <h2 id="create-post-title" className="text-xl font-bold text-white">Nova Publicação</h2>
+          <button onClick={onClose} aria-label="Fechar" className="text-gray-500 hover:text-white transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -167,7 +169,7 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
               <div className="flex flex-wrap gap-2 mb-2">
                 {images.map((file, i) => (
                   <div key={i} className="relative group">
-                    <img src={URL.createObjectURL(file)} alt="" className="h-16 w-16 object-cover rounded" />
+                     <img src={URL.createObjectURL(file)} alt={`Imagem ${i + 1}`} className="h-16 w-16 object-cover rounded" />
                     <button
                       type="button"
                       onClick={() => removeImage(i)}

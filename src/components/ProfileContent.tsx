@@ -128,13 +128,12 @@ export function ProfileContent({ profile, courses, lives, courseHref, coverClass
       <div className={`relative h-32 sm:h-48 overflow-hidden ${coverClassName || ""}`}>
         {hasBanner ? (
           <div className="absolute inset-0 w-full h-full">
-            <img src={profile.bannerURL} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src={profile.bannerURL} alt={`Banner de ${profile.name}`} className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-gray-950/30 to-transparent" />
           </div>
         ) : hasPhoto ? (
           <div className="absolute inset-0 w-full h-full">
-            <img src={profile.photoURL} alt=""
-              className="absolute inset-0 w-full h-full object-cover scale-110 blur-xl brightness-50" />
+            <img src={profile.photoURL} alt="" className="absolute inset-0 w-full h-full object-cover scale-110 blur-xl brightness-50" />
             <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/60 to-transparent" />
           </div>
         ) : (
@@ -148,7 +147,7 @@ export function ProfileContent({ profile, courses, lives, courseHref, coverClass
         {profile.photoURL ? (
           <button type="button" onClick={() => setPhotoPreviewUrl(profile.photoURL!)}
             className="shrink-0 cursor-pointer focus:outline-none">
-            <img src={profile.photoURL} alt="" className="h-20 w-20 sm:h-28 sm:w-28 rounded-full border-4 border-gray-950 object-cover hover:brightness-75 transition-all" />
+             <img src={profile.photoURL} alt={profile.name} className="h-20 w-20 sm:h-28 sm:w-28 rounded-full border-4 border-gray-950 object-cover hover:brightness-75 transition-all" />
           </button>
         ) : (
           <div className="h-20 w-20 sm:h-28 sm:w-28 rounded-full border-4 border-gray-950 bg-gradient-to-br from-purple-500/30 to-purple-700/30 flex items-center justify-center shrink-0">

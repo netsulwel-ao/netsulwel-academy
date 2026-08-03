@@ -137,7 +137,7 @@ export default function InstitutionSettingsPage() {
               <label className="block text-sm font-medium text-gray-300 mb-1.5">Logótipo</label>
               {logo ? (
                 <div className="relative group w-32 h-32">
-                  <img src={logo} alt="" className="w-32 h-32 object-cover" />
+                   <img src={logo} alt="Logótipo da instituição" className="w-32 h-32 object-cover" />
                   <button type="button" onClick={() => { setLogo(""); }}
                     className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white px-2 py-0.5 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">Remover</button>
                 </div>
@@ -156,7 +156,7 @@ export default function InstitutionSettingsPage() {
               <label className="block text-sm font-medium text-gray-300 mb-1.5">Banner</label>
               {banner ? (
                 <div className="relative group">
-                  <img src={banner} alt="" className="w-full h-24 object-cover" />
+                   <img src={banner} alt="Banner da instituição" className="w-full h-24 object-cover" />
                   <button type="button" onClick={() => { setBanner(""); }}
                     className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white px-2 py-0.5 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">Remover</button>
                 </div>

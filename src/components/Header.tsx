@@ -26,7 +26,7 @@ export function Header() {
           </span>
         </Link>
 
- <nav className="hidden items-center gap-8 md:flex">
+ <nav className="hidden items-center gap-8 md:flex" aria-label="Menu principal">
  {navLinks.map((link) => (
  <a
  key={link.href}
@@ -67,7 +67,7 @@ export function Header() {
 
   {open && (
   <div className="border-t border-gray-800 bg-gray-900/40 px-6 py-4 backdrop-blur-xl md:hidden">
-  <nav className="flex flex-col gap-4">
+   <nav className="flex flex-col gap-4" aria-label="Menu de navegação móvel">
   {navLinks.map((link) => (
   <a
   key={link.href}
