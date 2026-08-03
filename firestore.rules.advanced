@@ -1,0 +1,152 @@
+// Firestore Rules - Advanced Security Features
+// This file contains additional security rules for production
+
+/**
+ * RATE LIMITING STRATEGY
+ * 
+ * Since Firestore doesn't have built-in rate limiting, we implement it via:
+ * 1. Document-level checks (timestamp-based)
+ * 2. Backend enforcement
+ * 3. Cloud Functions
+ * 
+ * Example patterns:
+ */
+
+// Pattern 1: Limit writes per minute
+function checkRateLimit(collection, userId, maxWrites) {
+  let userPath = /databases/$(database)/documents/$(collection)/$(userId);
+  return !exists(userPath) ||
+    request.time > resource.data.lastWrite.toMillis() + 60000; // 1 minute
+}
+
+// Pattern 2: Prevent duplicate submissions
+function isUnique(value, field) {
+  // Check if value already exists in collection
+  return !exists(/databases/$(database)/documents/...) ||
+    !resource.data[field].contains(value);
+}
+
+/**
+ * INPUT VALIDATION EXAMPLES
+ */
+
+// Validate email format
+function isEmail(email) {
+  return email is string &&
+    email.size() <= 255 &&
+    email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+}
+
+// Validate price (non-negative number)
+function isPrice(price) {
+  return price is number && price >= 0 && price <= 999999;
+}
+
+// Validate text length
+function isValidLength(text, min, max) {
+  return text is string &&
+    text.size() >= min &&
+    text.size() <= max;
+}
+
+// Validate URL
+function isUrl(url) {
+  return url is string &&
+    url.size() <= 2048 &&
+    (url.matches('^https?://.*') || url == '');
+}
+
+// Validate timestamp
+function isFutureTimestamp(timestamp) {
+  return timestamp is number &&
+    timestamp > request.time.toMillis();
+}
+
+/**
+ * AUDIT LOGGING
+ * 
+ * Track all sensitive operations
+ */
+
+// Helper to log sensitive changes
+function logChange(collection, operation) {
+  // This would be handled by Cloud Functions
+  // but here we document the pattern
+  return {
+    collection: collection,
+    operation: operation,
+    userId: request.auth.uid,
+    timestamp: request.time,
+    ip: request.auth.token.claims.ip,
+    changes: request.resource.data.diff(resource.data)
+  };
+}
+
+/**
+ * RECOMMENDED PRODUCTION RULES ENHANCEMENTS
+ */
+
+// 1. Add these to users collection create:
+rules_example_1 = """
+allow create: if isOwner(uid) &&
+  hasRequiredFields(['email', 'role', 'plan']) &&
+  isValidEmail(request.resource.data.email) &&
+  isValidRole(request.resource.data.role) &&
+  isValidPlan(request.resource.data.plan) &&
+  isValidLength(request.resource.data.email, 5, 255) &&
+  request.resource.data.createdAt == request.time &&
+  request.resource.data.uid == uid;
+""";
+
+// 2. Add rate limiting to prevent abuse:
+rules_example_2 = """
+// In transactions collection
+match /transactions/{txnId} {
+  allow create: if isAuth() &&
+    checkRateLimit('transactions', request.auth.uid, 10) &&
+    request.resource.data.userId == request.auth.uid &&
+    isPrice(request.resource.data.amount) &&
+    request.resource.data.timestamp == request.time;
+}
+""";
+
+// 3. Prevent privilege escalation:
+rules_example_3 = """
+// In users collection
+allow update: if !request.resource.data.diff(resource.data)
+  .affectedKeys().hasAny(['role', 'plan', 'admin', 'permissions']) &&
+  (isOwner(uid) || isAdmin());
+""";
+
+// 4. Temporal access control:
+rules_example_4 = """
+// Restrict access to draft content before publication
+match /courses/{courseId} {
+  allow read: if resource.data.status == 'published' ||
+    isAdminOrTeacher() ||
+    (isAuth() && resource.data.createdBy == request.auth.uid);
+}
+""";
+
+/**
+ * SECURITY CHECKLIST
+ * 
+ * ✅ Authentication required for sensitive operations
+ * ✅ Role-based access control implemented
+ * ✅ Ownership verification for user data
+ * ✅ Data validation for all inputs
+ * ✅ Prevent privilege escalation
+ * ✅ Prevent unauthorized data exposure
+ * ✅ Timestamp tracking for audit
+ * ✅ Default deny for unknown paths
+ * 
+ * TODO for Production:
+ * ⚠️ Implement rate limiting via Cloud Functions
+ * ⚠️ Add audit logging via Cloud Functions
+ * ⚠️ Monitor suspicious patterns
+ * ⚠️ Regular security audits
+ * ⚠️ GDPR compliance (data deletion)
+ * ⚠️ Encryption for sensitive fields
+ * ⚠️ Backup strategy
+ * ⚠️ Disaster recovery plan
+ */

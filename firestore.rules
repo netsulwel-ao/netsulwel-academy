@@ -39,13 +39,43 @@ service cloud.firestore {
       return getRole() == "institution";
     }
 
+    // ── Data Validation ──────────────────────────────────
+    function isValidEmail(email) {
+      return email is string &&
+        email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    }
+
+    function isValidUrl(url) {
+      return url is string &&
+        (url.matches('^https?://.*') || url == '');
+    }
+
+    function isValidRole(role) {
+      return role in ["admin", "teacher", "aluno", "institution"];
+    }
+
+    function isValidPlan(plan) {
+      return plan in ["free", "smart", "golden"];
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
     // ── users ─────────────────────────────────────────────
     match /users/{uid} {
-      allow read: if isAuth(); // Only authenticated users can read profiles
-      allow create: if isOwner(uid);
+      allow read: if isAuth();
+      
+      allow create: if isOwner(uid) &&
+        hasRequiredFields(['email', 'role', 'plan']) &&
+        isValidEmail(request.resource.data.email) &&
+        isValidRole(request.resource.data.role) &&
+        isValidPlan(request.resource.data.plan);
+      
       allow update: if isAdmin() ||
         (isOwner(uid) && !request.resource.data.diff(resource.data).affectedKeys()
-          .hasAny(["role"]));
+          .hasAny(["role", "plan"])); // Usuários não podem mudar role/plan
+      
       allow delete: if isAdmin();
 
       match /notifications/{notifId} {
