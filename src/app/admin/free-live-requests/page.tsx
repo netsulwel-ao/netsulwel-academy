@@ -278,10 +278,10 @@ export default function FreeLiveRequestsPage() {
                               {fmtDate(req.scheduledAt)}
                             </span>
                           )}
-                          {req.createdAt && (
+                          {toDate(req.createdAt).getTime() > 0 && (
                             <span className="flex items-center gap-1.5 font-mono text-[10px] text-gray-700">
                               <Clock className="h-3 w-3" strokeWidth={1.5} />
-                              pedido em {toDate(req.createdAt)?.toLocaleDateString("pt-PT") ?? "—"}
+                              pedido em {toDate(req.createdAt).toLocaleDateString("pt-PT")}
                             </span>
                           )}
                         </div>
