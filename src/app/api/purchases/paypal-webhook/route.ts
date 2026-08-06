@@ -111,6 +111,28 @@ export async function POST(req: NextRequest) {
       await userRef.update({
         enrolledCourses: admin.firestore.FieldValue.arrayUnion(sale.itemId),
       });
+
+      // Se já existe chat de grupo para este curso, adicionar o aluno como participante
+      const groupChatId = `course_${sale.itemId}`;
+      const chatRef = db.collection("courseChats").doc(groupChatId);
+      const chatSnap = await chatRef.get();
+      if (chatSnap.exists) {
+        const chatData = chatSnap.data()!;
+        if (!chatData.participants?.includes(sale.userId)) {
+          // Buscar dados do aluno para o nome
+          const userSnap = await db.collection("users").doc(sale.userId).get();
+          const uData = userSnap.data();
+          const studentName = uData?.displayName || uData?.name || sale.userName || "Aluno";
+          const chatUpdate: Record<string, unknown> = {
+            participants: admin.firestore.FieldValue.arrayUnion(sale.userId),
+            [`participantNames.${sale.userId}`]: studentName,
+          };
+          if (uData?.photoURL) {
+            chatUpdate[`participantPhotos.${sale.userId}`] = uData.photoURL;
+          }
+          await chatRef.update(chatUpdate);
+        }
+      }
     } else if (sale.type === "live" && sale.itemId) {
       await userRef.update({
         enrolledLives: admin.firestore.FieldValue.arrayUnion(sale.itemId),

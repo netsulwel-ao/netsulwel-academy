@@ -44,7 +44,7 @@ const teacherNav = [
   { icon: Users, label: "Alunos", href: "/dashboard/teacher/students" },
   { icon: DollarSign, label: "Vendas", href: "/dashboard/teacher/sales" },
   { icon: CreditCard, label: "Carteira", href: "/dashboard/wallet" },
-  { icon: MessageCircle, label: "Chats", href: "/dashboard/chats" },
+  { icon: MessageCircle, label: "Chats", href: "/dashboard/teacher/chats" },
   { icon: TrendingUp, label: "Analytics", href: "/dashboard/teacher/analytics" },
   { icon: Settings, label: "Definições", href: "/dashboard/settings" },
 ];
@@ -94,7 +94,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
   } ${mobileOpen ? "translate-x-0 z-50" : "-translate-x-full invisible pointer-events-none"} lg:translate-x-0 lg:z-40 lg:visible lg:pointer-events-auto ${
     theme === "light"
       ? "bg-white border-r border-slate-200 shadow-[1px_0_0_0_#e2e8f0]"
-      : "bg-gray-950/80"
+      : "bg-gray-950/80 border-r border-gray-800/60"
   }`}
   >
 

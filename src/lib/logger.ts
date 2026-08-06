@@ -38,8 +38,13 @@ export const logger = {
   },
 
   error: (message: string, error?: any, context?: LogContext) => {
-    const log = formatLog("error", message, { ...context, error });
-    console.error(log.formatted, context || "");
+    // FirebaseError (and many native errors) have non-enumerable properties,
+    // so spreading produces {}. Normalise to a plain object first.
+    const normalizedError = error instanceof Error
+      ? { message: error.message, name: error.name, code: (error as any).code, stack: error.stack }
+      : error;
+    const log = formatLog("error", message, { ...context, error: normalizedError });
+    console.error(log.formatted, normalizedError ?? context ?? "");
 
     // Em produção, você poderia enviar para Sentry aqui
     if (!isDevelopment && error) {

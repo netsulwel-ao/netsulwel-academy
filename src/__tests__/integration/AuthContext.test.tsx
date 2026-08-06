@@ -1,21 +1,20 @@
 /**
- * Integration tests — AuthContext
- * Testa o fluxo completo de autenticação com mocks do Firebase.
- * Foca na race condition teacher/admin → profileLoaded antes de redirect.
+ * Integration tests — AuthProvider
+ * Testa o estado de autenticação gerenciado pelo AuthProvider.
+ * O redirect é responsabilidade do middleware, não do provider.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import React from "react";
 
 // ── Mocks ─────────────────────────────────────────────────
-const mockRouterReplace = vi.fn();
 const mockOnIdTokenChanged = vi.fn();
 const mockGetDoc = vi.fn();
 const mockOnSnapshot = vi.fn(() => () => {});
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: mockRouterReplace, push: vi.fn() }),
-  usePathname: () => "/admin",
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+  usePathname: () => "/dashboard",
 }));
 
 vi.mock("firebase/auth", () => ({
@@ -24,7 +23,7 @@ vi.mock("firebase/auth", () => ({
 }));
 
 vi.mock("firebase/firestore", () => ({
-  doc: vi.fn((_db, col, id) => `${col}/${id}`),
+  doc: vi.fn((_db: unknown, col: string, id: string) => `${col}/${id}`),
   getDoc: mockGetDoc,
   onSnapshot: mockOnSnapshot,
 }));
@@ -32,14 +31,16 @@ vi.mock("firebase/firestore", () => ({
 vi.mock("@/lib/firebase", () => ({ auth: {}, db: {} }));
 
 // Import após mocks
-const { AuthProvider, useAuth } = await import("@/contexts/AuthContext");
+const { AuthProvider } = await import("@/contexts/AuthProvider");
+const { useAuth } = await import("@/hooks/useAuth");
 
 // Componente helper para ler o contexto
 function AuthConsumer() {
-  const { role, isAdminOrTeacher, loading, profileLoaded } = useAuth();
+  const { role, isAdmin, isAdminOrTeacher, loading, profileLoaded } = useAuth();
   return (
     <div>
       <span data-testid="role">{role}</span>
+      <span data-testid="isAdmin">{String(isAdmin)}</span>
       <span data-testid="isAdminOrTeacher">{String(isAdminOrTeacher)}</span>
       <span data-testid="loading">{String(loading)}</span>
       <span data-testid="profileLoaded">{String(profileLoaded)}</span>
@@ -55,25 +56,25 @@ function renderWithAuth() {
   );
 }
 
-describe("AuthContext", () => {
+describe("AuthProvider", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockRouterReplace.mockClear();
   });
 
-  it("começa com loading=true e role=aluno (defaults seguros)", () => {
+  it("exibe loading spinner enquanto carrega (sem auth state)", () => {
+    // Nunca chama o callback → loading permanece true
     mockOnIdTokenChanged.mockImplementation(() => () => {});
+
     renderWithAuth();
-    // O spinner é renderizado em rotas protegidas — o consumer não aparece
-    // Mas os defaults do contexto são role=aluno, loading=true
+
+    // O spinner é renderizado, o consumer não aparece
+    expect(screen.queryByTestId("role")).not.toBeInTheDocument();
   });
 
-  it("teacher em /admin NÃO é redirecionado para /dashboard", async () => {
-    // Simula: utilizador autenticado com role=teacher
+  it("carrega perfil de teacher corretamente", async () => {
     const mockUser = { uid: "teacher_uid_1" };
 
-    mockOnIdTokenChanged.mockImplementation((_auth, callback) => {
-      // Dispara o callback com o utilizador autenticado
+    mockOnIdTokenChanged.mockImplementation((_auth: unknown, callback: (u: typeof mockUser) => void) => {
       act(() => callback(mockUser));
       return () => {};
     });
@@ -83,7 +84,7 @@ describe("AuthContext", () => {
       data: () => ({ role: "teacher", plan: "free" }),
     });
 
-    mockOnSnapshot.mockImplementation((_ref, onNext) => {
+    mockOnSnapshot.mockImplementation((_ref: unknown, onNext: (snap: { exists: () => boolean; data: () => { role: string; plan: string } }) => void) => {
       onNext({
         exists: () => true,
         data: () => ({ role: "teacher", plan: "free" }),
@@ -94,14 +95,18 @@ describe("AuthContext", () => {
     renderWithAuth();
 
     await waitFor(() => {
-      expect(mockRouterReplace).not.toHaveBeenCalledWith("/dashboard");
-    }, { timeout: 2000 });
+      expect(screen.getByTestId("role")).toHaveTextContent("teacher");
+    }, { timeout: 3000 });
+
+    expect(screen.getByTestId("isAdmin")).toHaveTextContent("false");
+    expect(screen.getByTestId("isAdminOrTeacher")).toHaveTextContent("true");
+    expect(screen.getByTestId("profileLoaded")).toHaveTextContent("true");
   });
 
-  it("aluno em /admin É redirecionado para /dashboard após profileLoaded", async () => {
+  it("carrega perfil de aluno corretamente", async () => {
     const mockUser = { uid: "aluno_uid_1" };
 
-    mockOnIdTokenChanged.mockImplementation((_auth, callback) => {
+    mockOnIdTokenChanged.mockImplementation((_auth: unknown, callback: (u: typeof mockUser) => void) => {
       act(() => callback(mockUser));
       return () => {};
     });
@@ -111,7 +116,7 @@ describe("AuthContext", () => {
       data: () => ({ role: "aluno", plan: "free" }),
     });
 
-    mockOnSnapshot.mockImplementation((_ref, onNext) => {
+    mockOnSnapshot.mockImplementation((_ref: unknown, onNext: (snap: { exists: () => boolean; data: () => { role: string; plan: string } }) => void) => {
       onNext({
         exists: () => true,
         data: () => ({ role: "aluno", plan: "free" }),
@@ -122,14 +127,15 @@ describe("AuthContext", () => {
     renderWithAuth();
 
     await waitFor(() => {
-      expect(mockRouterReplace).toHaveBeenCalledWith("/dashboard");
-    }, { timeout: 2000 });
+      expect(screen.getByTestId("role")).toHaveTextContent("aluno");
+    }, { timeout: 3000 });
+
+    expect(screen.getByTestId("isAdmin")).toHaveTextContent("false");
+    expect(screen.getByTestId("isAdminOrTeacher")).toHaveTextContent("false");
   });
 
-  it("utilizador não autenticado em rota protegida → redirect /login", async () => {
+  it("utilizador não autenticado → user null, loading false", async () => {
     mockOnIdTokenChanged.mockImplementation((_auth: unknown, callback: (u: null) => void) => {
-      // Firebase chama o callback com null = não autenticado
-      // Neste caso o AuthContext seta loading=false diretamente (sem loadProfile)
       act(() => callback(null));
       return () => {};
     });
@@ -137,8 +143,11 @@ describe("AuthContext", () => {
     renderWithAuth();
 
     await waitFor(() => {
-      // Quando user=null e loading=false, deve redirecionar para /login
-      expect(mockRouterReplace).toHaveBeenCalledWith("/login");
+      // Quando user=null, o provider não mostra spinner
+      expect(screen.getByTestId("role")).toHaveTextContent("aluno");
     }, { timeout: 3000 });
+
+    expect(screen.getByTestId("loading")).toHaveTextContent("false");
+    expect(screen.getByTestId("profileLoaded")).toHaveTextContent("false");
   });
 });

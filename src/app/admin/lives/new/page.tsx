@@ -1,110 +1,86 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { db } from "@/lib/firebase";
+import Link from "next/link";
+import { db, auth } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  ArrowLeft,
-  Radio,
-  Calendar,
-  Type,
-  AlignLeft,
-  Image as ImageIcon,
-  Target,
-  Loader2,
-  Save,
-  Sparkles,
-  AlertCircle,
-  DollarSign,
+  ArrowLeft, Loader2, Save, ImagePlus, CheckCircle2, Radio,
+  Calendar, Crown, Zap, Coins,
 } from "lucide-react";
-import Link from "next/link";
+import { logger } from "@/lib/logger";
+import { toast } from "sonner";
 import type { LiveTarget } from "@/types/live";
+
+const inputCls =
+  "w-full border border-gray-800/60 bg-gray-900/40 py-2.5 px-3 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors";
+
+const TARGETS: { value: LiveTarget; label: string; desc: string; icon: React.ElementType }[] = [
+  { value: "free",       label: "Gratuito",   desc: "Todos os alunos",   icon: Radio  },
+  { value: "smart",      label: "Smart",      desc: "Plano Smart+",      icon: Zap    },
+  { value: "golden",     label: "Golden",     desc: "Plano Golden",      icon: Crown  },
+  { value: "standalone", label: "Pago",       desc: "Venda avulsa",      icon: Coins  },
+];
+
+function generateRoomName(title: string) {
+  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 30);
+  return `${slug}-${Math.random().toString(36).slice(2, 8)}`;
+}
 
 export default function NewLivePage() {
   const router = useRouter();
   const { user, institutionId } = useAuth();
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
 
-  const [title, setTitle] = useState("");
+  const [title,       setTitle]       = useState("");
   const [description, setDescription] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
-  const [target, setTarget] = useState<LiveTarget>("free");
-  const [price, setPrice] = useState("");
-  const [thumbnail, setThumbnail] = useState("");
-  const [uploadingThumb, setUploadingThumb] = useState(false);
+  const [target,      setTarget]      = useState<LiveTarget>("free");
+  const [price,       setPrice]       = useState("");
+  const [thumbnail,   setThumbnail]   = useState("");
+  const [thumbPreview,setThumbPreview]= useState("");
+  const [thumbUpload, setThumbUpload] = useState(false);
+  const [saving,      setSaving]      = useState(false);
+  const [success,     setSuccess]     = useState(false);
+  const [error,       setError]       = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const generateRoomName = (title: string) => {
-    const slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "")
-      .slice(0, 30);
-    const id = Math.random().toString(36).substring(2, 8);
-    return `${slug}-${id}`;
-  };
-
-  const handleThumbnailUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploadingThumb(true);
+  const handleThumb = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    setThumbPreview(URL.createObjectURL(file));
+    setThumbUpload(true);
     try {
-      // Obter token de autenticação para a API protegida
-      const { auth } = await import("@/lib/firebase");
       const token = auth.currentUser ? await auth.currentUser.getIdToken() : "";
-
       const res = await fetch("/api/upload/presign", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          filename: file.name,
-          contentType: file.type,
-          folder: "lives/thumbnails",
-        }),
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ filename: file.name, contentType: file.type, folder: "lives/thumbnails" }),
       });
-
       if (!res.ok) throw new Error(`Erro ${res.status}`);
       const { presignedUrl, publicUrl } = await res.json();
-
-      await fetch(presignedUrl, {
-        method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
-
+      await fetch(presignedUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
       setThumbnail(publicUrl);
     } catch (err) {
-      console.error("Erro ao fazer upload:", err);
-      setError("Erro ao fazer upload da thumbnail. Tenta novamente.");
+      logger.error("NewLivePage: thumbnail upload failed", err);
+      toast.error("Erro ao fazer upload da capa.");
+      setThumbPreview("");
     } finally {
-      setUploadingThumb(false);
+      setThumbUpload(false);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-
-    if (!title || !scheduledAt || !user) {
-      setError("Preencha o título e a data/hora.");
+    if (!title.trim() || !scheduledAt || !user) {
+      setError("Preenche o título e a data/hora.");
       return;
     }
-
-    setSaving(true);
+    setSaving(true); setError("");
     try {
-      const roomName = generateRoomName(title);
-
-      const docRef = await addDoc(collection(db, "lives"), {
-        title,
-        description,
+      await addDoc(collection(db, "lives"), {
+        title: title.trim(),
+        description: description.trim(),
         thumbnail,
         scheduledAt,
         target,
@@ -113,225 +89,178 @@ export default function NewLivePage() {
         createdBy: user.uid,
         institutionId: institutionId || null,
         hostName: user.displayName || user.email || "Professor",
-        roomName,
+        roomName: generateRoomName(title),
         participantCount: 0,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-
-      // Navegar com o ID real da live criada
-      router.push("/admin/lives");
+      toast.success("Aula ao vivo criada!");
+      setSuccess(true);
+      setTimeout(() => router.push("/admin/lives"), 1200);
     } catch (err) {
-      console.error("Erro ao criar live:", err);
+      logger.error("NewLivePage: create failed", err);
       setError("Erro ao criar a live. Tenta novamente.");
     } finally {
       setSaving(false);
     }
   };
 
-  const TARGET_OPTIONS: { value: LiveTarget; label: string; desc: string; color: string }[] = [
-    {
-      value: "free",
-      label: "Gratuito",
-      desc: "Todos os alunos",
-      color: "border-green-500/30 bg-green-500/5 hover:bg-green-500/10 data-[active=true]:border-green-500 data-[active=true]:bg-green-500/15",
-    },
-    {
-      value: "smart",
-      label: "Smart",
-      desc: "Plano Smart+",
-      color: "border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 data-[active=true]:border-blue-500 data-[active=true]:bg-blue-500/15",
-    },
-    {
-      value: "golden",
-      label: "Golden",
-      desc: "Plano Golden",
-      color: "border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 data-[active=true]:border-amber-500 data-[active=true]:bg-amber-500/15",
-    },
-    {
-      value: "standalone",
-      label: "Pago",
-      desc: "Venda avulsa",
-      color: "border-green-500/30 bg-green-500/5 hover:bg-green-500/10 data-[active=true]:border-green-500 data-[active=true]:bg-green-500/15",
-    },
-  ];
+  if (success) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="flex h-16 w-16 items-center justify-center border border-green/25 bg-green/8">
+          <CheckCircle2 className="h-7 w-7 text-green/70" strokeWidth={1.5} />
+        </div>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-600">// live criada</p>
+        <p className="text-sm text-gray-600">A redirecionar...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 px-4 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex items-center gap-4">
+    <div className="max-w-2xl mx-auto animate-in fade-in duration-300">
+
+      {/* ── Top bar ── */}
+      <div className="flex items-center gap-3 mb-8">
         <Link
           href="/admin/lives"
-          className="flex items-center justify-center h-10 w-10 bg-gray-900 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+          className="flex h-8 w-8 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-4 w-4" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-            <Sparkles className="h-6 w-6 text-blue-400" />
-            Nova Aula ao Vivo
-          </h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Agende uma nova sessão em direto para os seus alunos.
-          </p>
+          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-700">// nova live</p>
+          <p className="text-sm font-semibold text-gray-200">{title || "Nova Aula ao Vivo"}</p>
         </div>
       </div>
 
-      {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
-          <AlertCircle className="h-4 w-4 shrink-0" />{error}
-        </div>
-      )}
-
-      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Title */}
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
-            <Type className="h-4 w-4 text-gray-500" />
-            Título *
-          </label>
+
+        {/* ── Título ── */}
+        <div>
+          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600 mb-2">
+            // título <span className="text-red-400/80">*</span>
+          </p>
           <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            type="text" value={title} onChange={e => setTitle(e.target.value)}
             placeholder="Ex: Introdução ao React — Aula ao Vivo"
-            className="w-full bg-gray-900/60 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
-            required
+            required className={inputCls}
           />
         </div>
 
-        {/* Description */}
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
-            <AlignLeft className="h-4 w-4 text-gray-500" />
-            Descrição
-          </label>
+        {/* ── Descrição ── */}
+        <div>
+          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600 mb-2">// descrição</p>
           <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Descreva o que será abordado nesta aula..."
-            rows={4}
-            className="w-full bg-gray-900/60 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors resize-none"
+            rows={3} value={description} onChange={e => setDescription(e.target.value)}
+            placeholder="O que será abordado nesta aula..."
+            className={`${inputCls} resize-none`}
           />
         </div>
 
-        {/* Date & Time */}
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
-            <Calendar className="h-4 w-4 text-gray-500" />
-            Data e Hora *
-          </label>
-          <input
-            type="datetime-local"
-            value={scheduledAt}
-            onChange={(e) => setScheduledAt(e.target.value)}
-            className="w-full bg-gray-900/60 border border-gray-800 px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors [color-scheme:dark]"
-            required
-          />
+        {/* ── Data/hora ── */}
+        <div>
+          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600 mb-2">
+            // data e hora <span className="text-red-400/80">*</span>
+          </p>
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-700 pointer-events-none" strokeWidth={1.5} />
+            <input
+              type="datetime-local" value={scheduledAt} onChange={e => setScheduledAt(e.target.value)}
+              required className={`${inputCls} pl-9 [color-scheme:dark]`}
+            />
+          </div>
         </div>
 
-        {/* Target */}
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
-            <Target className="h-4 w-4 text-gray-500" />
-            Público-alvo
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {TARGET_OPTIONS.map((opt) => (
+        {/* ── Plano de acesso ── */}
+        <div>
+          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600 mb-2">// plano de acesso</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {TARGETS.map(({ value, label, desc, icon: Icon }) => (
               <button
-                key={opt.value}
-                type="button"
-                data-active={target === opt.value}
-                onClick={() => setTarget(opt.value)}
-                className={`p-4 border text-left transition-all ${opt.color}`}
+                key={value} type="button" onClick={() => setTarget(value)}
+                className={`flex flex-col gap-2 p-4 border text-left transition-all ${
+                  target === value
+                    ? "border-purple/40 bg-purple/8"
+                    : "border-gray-800/60 bg-gray-900/10 hover:border-gray-700"
+                }`}
               >
-                <span className="text-sm font-bold text-white">
-                  {opt.label}
-                </span>
-                <span className="block text-xs text-gray-400 mt-1">
-                  {opt.desc}
-                </span>
+                <Icon className={`h-4 w-4 ${target === value ? "text-purple/70" : "text-gray-600"}`} strokeWidth={1.5} />
+                <div>
+                  <p className={`text-sm font-semibold ${target === value ? "text-purple/80" : "text-gray-400"}`}>{label}</p>
+                  <p className="font-mono text-[9px] text-gray-700 mt-0.5">{desc}</p>
+                </div>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Price (standalone only) */}
+        {/* ── Preço (standalone) ── */}
         {target === "standalone" && (
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
-              <DollarSign className="h-4 w-4" />
-              Preço (Kz) *
-            </label>
-            <input type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)}
-              placeholder="Ex: 5000"
-              className="w-full bg-gray-900/60 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors" required />
+          <div>
+            <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600 mb-2">
+              // preço (Kz) <span className="text-red-400/80">*</span>
+            </p>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-gray-600">Kz</span>
+              <input
+                type="number" min="0" value={price} onChange={e => setPrice(e.target.value)}
+                placeholder="Ex: 5000" required
+                className={`${inputCls} pl-10`}
+              />
+            </div>
           </div>
         )}
 
-        {/* Thumbnail */}
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
-            <ImageIcon className="h-4 w-4 text-gray-500" />
-            Thumbnail
-          </label>
-          {thumbnail ? (
-            <div className="relative group">
-              <img
-                src={thumbnail}
-                alt="Thumbnail"
-                className="w-full h-48 object-cover"
-              />
-              <button
-                type="button"
-                onClick={() => setThumbnail("")}
-                className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                Remover
-              </button>
-            </div>
-          ) : (
-            <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-700 hover:border-gray-600 bg-gray-900/30 cursor-pointer transition-colors">
-              {uploadingThumb ? (
-                <Loader2 className="h-8 w-8 animate-spin text-purple" />
-              ) : (
-                <>
-                  <ImageIcon className="h-8 w-8 text-gray-600 mb-2" />
-                  <span className="text-sm text-gray-500">
-                    Clique para enviar uma imagem
-                  </span>
-                </>
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleThumbnailUpload}
-                className="hidden"
-                disabled={uploadingThumb}
-              />
-            </label>
-          )}
+        {/* ── Thumbnail ── */}
+        <div>
+          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600 mb-2">// capa (opcional)</p>
+          <div
+            role="button" tabIndex={0} aria-label="Carregar capa"
+            onClick={() => inputRef.current?.click()}
+            onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); inputRef.current?.click(); } }}
+            className="relative w-full aspect-video border border-gray-800/60 bg-gray-900/20 cursor-pointer overflow-hidden group hover:border-purple/30 transition-colors"
+          >
+            {thumbPreview ? (
+              <>
+                <img src={thumbPreview} alt="preview" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gray-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <ImagePlus className="h-7 w-7 text-white" strokeWidth={1.5} />
+                </div>
+                {thumbUpload && (
+                  <div className="absolute inset-0 bg-gray-950/70 flex items-center justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin text-purple" />
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full gap-2 text-gray-700 group-hover:text-gray-500 transition-colors">
+                <ImagePlus className="h-8 w-8" strokeWidth={1} />
+                <span className="font-mono text-[9px] uppercase tracking-widest">Clique para carregar</span>
+                <span className="font-mono text-[8px] text-gray-700">PNG, JPG, WEBP</span>
+              </div>
+            )}
+          </div>
+          <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleThumb} disabled={thumbUpload} />
         </div>
 
-        {/* Submit */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 border-t border-gray-800">
-          <Link
-            href="/admin/lives"
-            className="px-6 py-3 text-sm font-medium text-gray-400 hover:text-white transition-colors"
-          >
-            Cancelar
+        {/* ── Erro ── */}
+        {error && (
+          <div className="border border-red-500/20 bg-red-500/8 px-4 py-3 text-sm text-red-400/80">
+            {error}
+          </div>
+        )}
+
+        {/* ── Acções ── */}
+        <div className="flex items-center justify-between pt-2 border-t border-gray-800/60">
+          <Link href="/admin/lives" className="font-mono text-[10px] uppercase tracking-widest text-gray-700 hover:text-gray-400 transition-colors">
+            ← Cancelar
           </Link>
           <button
-            type="submit"
-            disabled={saving}
-            className="flex items-center gap-2 bg-purple hover:bg-purple-light disabled:bg-blue-800 disabled:opacity-50 text-white px-6 py-3 font-bold transition-colors ml-auto"
+            type="submit" disabled={saving || thumbUpload}
+            className="flex items-center gap-1.5 border border-red-500/30 bg-red-500/8 px-5 py-2.5 font-mono text-[10px] uppercase tracking-widest text-red-400/80 hover:bg-red-500/15 disabled:opacity-40 transition-all"
           >
-            {saving ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Save className="h-5 w-5" />
-            )}
+            {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
             {saving ? "A criar..." : "Criar Live"}
           </button>
         </div>

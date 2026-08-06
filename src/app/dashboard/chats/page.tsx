@@ -1,22 +1,26 @@
 "use client";
 
-import { useDashboardTheme } from "@/hooks/useDashboardTheme";
+import { MessageCircle } from "lucide-react";
 import ChatList from "@/components/chat/ChatList";
 
 export default function ChatsPage() {
-  const theme = useDashboardTheme();
-
   return (
-    <div className={theme === "light" ? "text-gray-900" : "text-gray-100"}>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Chats</h1>
-        <p className={`text-sm mt-1 ${theme === "light" ? "text-gray-500" : "text-gray-400"}`}>
-          Conversas de grupo e mensagens individuais dos teus cursos
+    <div className="max-w-[80rem] mx-auto space-y-6 animate-in fade-in duration-300">
+
+      {/* ── Cabeçalho ── */}
+      <div>
+        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+          // mensagens
+        </p>
+        <h1 className="text-2xl font-bold text-gray-100">Chats</h1>
+        <p className="mt-1 text-sm text-gray-600">
+          Conversas de grupo e mensagens individuais dos teus cursos.
         </p>
       </div>
 
-      <div className={`border ${theme === "light" ? "border-gray-200 bg-white" : "border-gray-800 bg-gray-950/40"}`}>
-        <ChatList theme={theme} />
+      {/* ── Lista de conversas ── */}
+      <div className="border border-gray-800/60 bg-gray-900/10">
+        <ChatList />
       </div>
     </div>
   );

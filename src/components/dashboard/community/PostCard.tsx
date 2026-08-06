@@ -1,24 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, MessageCircle, Image as ImageIcon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Heart, MessageCircle } from "lucide-react";
 import { db } from "@/lib/firebase";
-import { doc, increment, updateDoc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import {
+  doc, getDoc, increment, updateDoc,
+  setDoc, deleteDoc, serverTimestamp,
+} from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
+import { Avatar } from "@/components/ui/Avatar";
 import PostTypeBadge from "./PostTypeBadge";
 import type { CommunityPost } from "@/types/community";
-import { useState, useEffect } from "react";
 
-function timeAgo(date: Date) {
-  const diff = Date.now() - new Date(date).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "agora";
-  if (mins < 60) return `${mins}m atrás`;
+// ── Helper timestamp ────────────────────────────────────────
+function timeAgo(date: Date | unknown): string {
+  const d = date instanceof Date ? date :
+    (typeof date === "object" && date && "toDate" in date)
+      ? (date as { toDate: () => Date }).toDate()
+      : new Date(date as string);
+  const diff = Date.now() - d.getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1)  return "agora";
+  if (mins < 60) return `${mins}m`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h atrás`;
+  if (hrs < 24)  return `${hrs}h`;
   const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d atrás`;
-  return new Date(date).toLocaleDateString("pt-PT");
+  if (days < 30) return `${days}d`;
+  return d.toLocaleDateString("pt-PT");
 }
 
 export default function PostCard({ post }: { post: CommunityPost }) {
@@ -27,20 +36,17 @@ export default function PostCard({ post }: { post: CommunityPost }) {
 
   useEffect(() => {
     if (!user) return;
-    import("firebase/firestore").then(({ getDoc }) => {
-      getDoc(doc(db, "community", post.id, "likes", user.uid)).then((s) => {
-        if (s.exists()) setLiked(true);
-      }).catch(() => {});
-    }).catch(() => {});
-  }, [user, post.id]);
+    getDoc(doc(db, "community", post.id, "likes", user.uid))
+      .then(s => { if (s.exists()) setLiked(true); })
+      .catch(() => {});
+  }, [user?.uid, post.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleLike = async () => {
     if (!user) return;
-    const ref = doc(db, "community", post.id, "likes", user.uid);
+    const ref     = doc(db, "community", post.id, "likes", user.uid);
     const postRef = doc(db, "community", post.id);
-    // Optimistic update
     const wasLiked = liked;
-    setLiked(!liked);
+    setLiked(!wasLiked); // optimistic
     try {
       if (wasLiked) {
         await deleteDoc(ref);
@@ -49,95 +55,101 @@ export default function PostCard({ post }: { post: CommunityPost }) {
         await setDoc(ref, {});
         await updateDoc(postRef, { likesCount: increment(1) });
         if (post.authorId !== user.uid) {
-          await setDoc(doc(db, "users", post.authorId, "notifications", `${post.id}_like_${user.uid}`), {
-            uid: post.authorId,
-            type: "community_like",
-            title: "Novo gosto",
-            message: `${user.displayName || "Alguém"} gostou do teu post "${post.title}"`,
-            link: `/dashboard/community/${post.id}`,
-            read: false,
-            createdAt: serverTimestamp(),
-          });
+          await setDoc(
+            doc(db, "users", post.authorId, "notifications", `${post.id}_like_${user.uid}`),
+            {
+              uid: post.authorId,
+              type: "community_like",
+              title: "Novo gosto",
+              message: `${user.displayName ?? "Alguém"} gostou do teu post "${post.title}"`,
+              link: `/dashboard/community/${post.id}`,
+              read: false,
+              createdAt: serverTimestamp(),
+            }
+          );
         }
       }
     } catch {
-      // Rollback on error
-      setLiked(wasLiked);
+      setLiked(wasLiked); // rollback
     }
   };
 
   return (
-    <div className="bg-gray-900/40 border border-gray-800 hover:border-gray-700 transition-colors">
-      <div className="p-5 space-y-4">
-        {/* Header */}
-          <div className="flex items-start justify-between gap-3">
-            <Link href={`/dashboard/community/profile/${post.authorId}`} className="flex items-center gap-3 min-w-0 group">
-            {post.authorPhoto ? (
-               <img src={post.authorPhoto} alt={post.authorName} className="h-10 w-10 rounded-full object-cover shrink-0" />
-            ) : (
-              <div className="h-10 w-10 rounded-full bg-purple/20 flex items-center justify-center shrink-0">
-                <span className="text-sm font-bold text-purple-light">{post.authorName?.[0]?.toUpperCase() || "?"}</span>
-              </div>
-            )}
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-white group-hover:text-purple-light transition-colors truncate">{post.authorName}</p>
-              <p className="text-xs text-gray-500">{timeAgo(post.createdAt)}</p>
-            </div>
-            </Link>
-            <PostTypeBadge type={post.type} />
-          </div>
+    <div className="group flex flex-col border border-gray-800/60 bg-gray-900/20 hover:border-gray-700 hover:bg-gray-900/30 transition-all">
+      <div className="p-4 sm:p-5 space-y-4">
 
-        {/* Title */}
+        {/* ── Header ── */}
+        <div className="flex items-start justify-between gap-3">
+          <Link
+            href={`/dashboard/community/profile/${post.authorId}`}
+            className="flex items-center gap-2.5 min-w-0 group/author"
+          >
+            <div className="h-9 w-9 shrink-0 overflow-hidden border border-gray-800/60">
+              <Avatar uid={post.authorId} photoURL={post.authorPhoto} name={post.authorName} size={36} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-gray-300 group-hover/author:text-white truncate transition-colors">
+                {post.authorName}
+              </p>
+              <p className="font-mono text-[9px] text-gray-700">{timeAgo(post.createdAt)}</p>
+            </div>
+          </Link>
+          <PostTypeBadge type={post.type} />
+        </div>
+
+        {/* ── Título ── */}
         <Link href={`/dashboard/community/${post.id}`} className="block">
-          <h3 className="text-lg font-bold text-white hover:text-purple-light transition-colors leading-snug">
+          <h3 className="text-sm sm:text-base font-bold text-gray-200 hover:text-white transition-colors leading-snug line-clamp-2">
             {post.title}
           </h3>
         </Link>
 
-        {/* Content preview */}
-        <p className="text-sm text-gray-400 line-clamp-3 leading-relaxed whitespace-pre-wrap">
+        {/* ── Preview do conteúdo ── */}
+        <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
           {post.content}
         </p>
 
-        {/* Images */}
-        {post.images && post.images.length > 0 && (
-          <div className={`grid gap-2 ${post.images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+        {/* ── Imagens ── */}
+        {post.images?.length > 0 && (
+          <div className={`grid gap-1.5 overflow-hidden ${post.images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
             {post.images.slice(0, 4).map((img, i) => (
-              <div key={i} className="relative overflow-hidden bg-gray-800 aspect-video">
-                 <img src={img} alt={`Imagem ${i + 1}`} className="w-full h-full object-cover" />
+              <div key={i} className="relative aspect-video overflow-hidden bg-gray-900">
+                <img src={img} alt={`Imagem ${i + 1}`} className="h-full w-full object-cover" />
               </div>
             ))}
           </div>
         )}
 
-        {/* Tags */}
-        {post.tags && post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {post.tags.map((tag) => (
-              <span key={tag} className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5">
+        {/* ── Tags ── */}
+        {post.tags?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {post.tags.map(tag => (
+              <span key={tag} className="font-mono text-[9px] uppercase tracking-widest border border-gray-800/60 bg-gray-900/60 px-2 py-0.5 text-gray-700">
                 #{tag}
               </span>
             ))}
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex items-center gap-4 pt-2 border-t border-gray-800/50">
+        {/* ── Acções ── */}
+        <div className="flex items-center gap-5 pt-2 border-t border-gray-800/40">
           <button
+            type="button"
             onClick={toggleLike}
-            className={`flex items-center gap-1.5 text-sm transition-colors ${
-              liked ? "text-red-400" : "text-gray-500 hover:text-red-400"
+            disabled={!user}
+            className={`flex items-center gap-1.5 font-mono text-[10px] transition-colors disabled:opacity-40 ${
+              liked ? "text-red-400" : "text-gray-700 hover:text-red-400"
             }`}
           >
-            <Heart className={`h-4 w-4 ${liked ? "fill-red-400" : ""}`} />
-            {post.likesCount || 0}
+            <Heart className={`h-3.5 w-3.5 ${liked ? "fill-red-400" : ""}`} strokeWidth={1.5} />
+            {post.likesCount ?? 0}
           </button>
           <Link
             href={`/dashboard/community/${post.id}`}
-            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-400 transition-colors"
+            className="flex items-center gap-1.5 font-mono text-[10px] text-gray-700 hover:text-blue-400/80 transition-colors"
           >
-            <MessageCircle className="h-4 w-4" />
-            {post.commentsCount || 0}
+            <MessageCircle className="h-3.5 w-3.5" strokeWidth={1.5} />
+            {post.commentsCount ?? 0}
           </Link>
         </div>
       </div>

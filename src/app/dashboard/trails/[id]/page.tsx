@@ -1,381 +1,171 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { db } from "@/lib/firebase";
-import { doc, getDoc, getDocs, collection, query, where } from "firebase/firestore";
-import { useAuth } from "@/contexts/AuthContext";
-import { useAccess } from "@/hooks/useAccess";
-import {
-  Layers, BookOpen, Radio, Lock, Loader2, ChevronLeft, Play, Calendar, Clock,
-  Award, CheckCircle2, Crown, Zap, Sparkles, Coins,
-} from "lucide-react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
-import type { Trail, Course, CourseType } from "@/types/course";
-import type { LiveSession } from "@/types/live";
-
-function normalizeCourseType(type: unknown): CourseType {
-  if (type === "standalone" || type === "smart" || type === "golden") return type;
-  return "standalone";
-}
+import {
+  ChevronLeft, Layers, Lock, Loader2,
+  BookOpen, Radio, Zap, Crown, Sparkles,
+} from "lucide-react";
+import { useTrailDetail } from "../_hooks/useTrailDetail";
+import { TrailCourseList } from "../_components/TrailCourseList";
+import { TrailLiveList, TrailScheduleList } from "../_components/TrailLiveList";
+import { TYPE_BADGE, LEVEL_LABEL, CAT_LABEL, trailRequiredPlanLabel } from "../_types/trails";
 
 export default function TrailDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const router = useRouter();
-  const { user, plan, isAdmin } = useAuth();
-  const { canAccessCourse, requiredPlanLabel } = useAccess();
-
-  const [trail, setTrail] = useState<Trail | null>(null);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [lives, setLives] = useState<LiveSession[]>([]);
-  const [enrolledCourses, setEnrolledCourses] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const trailSnap = await getDoc(doc(db, "trails", id));
-        if (!trailSnap.exists()) { router.push("/dashboard/trails"); return; }
-        const trailData = { id: trailSnap.id, ...trailSnap.data() } as Trail;
-        setTrail(trailData);
-
-        if (user) {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) setEnrolledCourses(userDoc.data().enrolledCourses ?? []);
-        }
-
-        // Fetch all referenced courses
-        if (trailData.courseIds?.length > 0) {
-          const coursesSnap = await getDocs(
-            query(collection(db, "courses"), where("__name__", "in", trailData.courseIds))
-          );
-          const courseMap = new Map(
-            coursesSnap.docs.map((d) => [d.id, { id: d.id, ...d.data() } as Course])
-          );
-          setCourses(trailData.courseIds.map((cid) => courseMap.get(cid)).filter(Boolean) as Course[]);
-        }
-
-        // Fetch all referenced lives
-        if (trailData.liveIds?.length > 0) {
-          const livesSnap = await getDocs(
-            query(collection(db, "lives"), where("__name__", "in", trailData.liveIds))
-          );
-          const liveMap = new Map(
-            livesSnap.docs.map((d) => [d.id, { id: d.id, ...d.data() } as LiveSession])
-          );
-          setLives(trailData.liveIds.map((lid) => liveMap.get(lid)).filter(Boolean) as LiveSession[]);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [id, user, router]);
+  const { trail, courses, lives, enrolledCourses, loading, hasTrailAccess } = useTrailDetail(id);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-purple" />
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-5 w-5 animate-spin text-gray-700" />
       </div>
     );
   }
 
   if (!trail) return null;
 
-  const canAccessByPlan = (): boolean => {
-    if (isAdmin) return true;
-    if (trail.type === "smart") return plan === "smart" || plan === "golden";
-    if (trail.type === "golden") return plan === "golden";
-    return false;
-  };
-
-  const hasTrailAccess = canAccessByPlan();
-
-  const formatDate = (iso: string) => {
-    return new Date(iso).toLocaleDateString("pt-PT", {
-      day: "2-digit", month: "short", year: "numeric",
-      hour: "2-digit", minute: "2-digit",
-    });
-  };
-
-  const levelLabel = trail.level === "beginner" ? "Iniciante"
-    : trail.level === "intermediate" ? "Intermédio" : "Avançado";
-
-  const categoryLabel = trail.category === "tech" ? "Tecnologia"
-    : trail.category === "finance" ? "Finanças"
-    : trail.category === "investments" ? "Investimentos" : "Outro";
+  const badge = TYPE_BADGE[trail.type ?? "standalone"] ?? TYPE_BADGE.standalone;
+  const isEmpty =
+    courses.length === 0 &&
+    lives.length === 0 &&
+    (!trail.liveSessions || trail.liveSessions.length === 0);
 
   return (
-    <div className="max-w-[100rem] mx-auto animate-in fade-in duration-500">
-      {/* Back */}
-      <Link href="/dashboard/trails" className="inline-flex items-center gap-2 text-base text-gray-400 hover:text-white transition-colors mb-6">
-        <ChevronLeft className="h-5 w-5" /> Voltar às trilhas
+    <div className="max-w-[80rem] mx-auto space-y-10 animate-in fade-in duration-300">
+
+      {/* ── Breadcrumb ── */}
+      <Link
+        href="/dashboard/trails"
+        className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-gray-700 hover:text-gray-500 transition-colors"
+      >
+        <ChevronLeft className="h-3 w-3" /> Trilhas
       </Link>
 
-      {/* ── HEADER ── */}
-      <div className="flex flex-col lg:flex-row gap-8 mb-12">
-        <div className="w-full lg:w-96 shrink-0">
-          <div className="relative aspect-video bg-gray-800 overflow-hidden">
+      {/* ── HERO — layout assimétrico ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 lg:gap-8 items-start">
+
+        {/* Esquerda — info */}
+        <div className="space-y-4">
+          {/* Badges */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`font-mono text-[9px] uppercase tracking-widest border px-2.5 py-1 ${badge.color}`}>
+              {badge.label}
+            </span>
+            <span className="font-mono text-[9px] uppercase tracking-widest border border-gray-800/60 bg-gray-900/40 px-2.5 py-1 text-gray-600">
+              {LEVEL_LABEL[trail.level] ?? trail.level}
+            </span>
+            <span className="font-mono text-[9px] uppercase tracking-widest border border-gray-800/60 bg-gray-900/40 px-2.5 py-1 text-gray-600">
+              {CAT_LABEL[trail.category] ?? trail.category}
+            </span>
+          </div>
+
+          {/* Título */}
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+              // trilha
+            </p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-100 leading-tight">
+              {trail.title}
+            </h1>
+            {trail.description && (
+              <p className="mt-3 text-sm text-gray-500 leading-relaxed max-w-xl">
+                {trail.description}
+              </p>
+            )}
+          </div>
+
+          {/* Meta stats */}
+          <div className="flex flex-wrap items-center gap-4 font-mono text-[11px] text-gray-700 pt-1">
+            <span className="flex items-center gap-1.5">
+              <BookOpen className="h-3.5 w-3.5" strokeWidth={1.5} />
+              {trail.coursesCount ?? 0} cursos
+            </span>
+            <span className="h-3 w-px bg-gray-800" />
+            <span className="flex items-center gap-1.5">
+              <Radio className="h-3.5 w-3.5" strokeWidth={1.5} />
+              {trail.livesCount ?? 0} aulas ao vivo
+            </span>
+          </div>
+        </div>
+
+        {/* Direita — thumbnail */}
+        <div className="order-first lg:order-last">
+          <div className="relative aspect-video overflow-hidden border border-gray-800/60 bg-gray-900">
             {trail.thumbnail ? (
-              <img src={trail.thumbnail} alt={trail.title} className="h-full w-full object-cover" />
+              <img
+                src={trail.thumbnail}
+                alt={trail.title}
+                className="h-full w-full object-cover"
+              />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-purple-900/40 to-gray-900">
-                <Layers className="h-16 w-16 text-purple/40" />
+              <div className="flex h-full w-full items-center justify-center">
+                <Layers className="h-10 w-10 text-gray-800" strokeWidth={1} />
               </div>
             )}
           </div>
         </div>
-
-        <div className="flex-1 min-w-0 space-y-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className={`px-3 py-1 text-sm font-bold uppercase tracking-wider border ${
-              trail.type === "golden" ? "bg-yellow-500/15 text-yellow-400 border-yellow-500/25"
-              : trail.type === "smart" ? "bg-green-500/15 text-green-400 border-green-500/25"
-              : "bg-blue-500/15 text-blue-400 border-blue-500/25"
-            }`}>
-              {trail.type === "golden" ? "Golden" : trail.type === "smart" ? "Smart" : "Avulso"}
-            </span>
-            <span className="text-sm text-gray-500">{levelLabel}</span>
-            <span className="text-sm text-gray-500">{categoryLabel}</span>
-          </div>
-
-          <h1 className="text-3xl lg:text-4xl font-bold text-white">{trail.title}</h1>
-          {trail.description && (
-            <p className="text-gray-300 text-base leading-relaxed">{trail.description}</p>
-          )}
-
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-            <span className="flex items-center gap-1.5"><BookOpen className="h-4 w-4" />{trail.coursesCount ?? 0} cursos</span>
-            <span className="flex items-center gap-1.5"><Radio className="h-4 w-4" />{trail.livesCount ?? 0} aulas ao vivo</span>
-          </div>
-        </div>
       </div>
 
-      {/* ── TRAIL LOCKED MESSAGE ── */}
+      {/* ── ACESSO BLOQUEADO ── */}
       {!hasTrailAccess && (
-        <div className="flex flex-col items-center justify-center py-16 bg-gray-900/40 border border-gray-800 text-center mb-10">
-          <div className="flex h-16 w-16 items-center justify-center bg-gray-900 border border-gray-700 mb-4">
-            <Lock className="h-10 w-10 text-gray-300" />
+        <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-14 text-center px-4">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
+            <Lock className="h-5 w-5 text-gray-600" strokeWidth={1.5} />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Trilha Bloqueada</h2>
-          <p className="text-gray-400 max-w-md mb-6">
-            Esta trilha requer <span className="text-white font-semibold">
-              {trail.type === "golden" ? "Plano Golden" : trail.type === "smart" ? "Plano Smart ou Golden" : "Compra Individual"}
-            </span> para aceder.
+          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-3">
+            // acesso restrito
           </p>
-          <Link href="/dashboard/finances"
-            className={`flex items-center gap-2 px-6 py-3 font-bold transition-colors ${
+          <h2 className="text-lg font-bold text-gray-300 mb-2">Trilha bloqueada</h2>
+          <p className="text-sm text-gray-600 max-w-sm mb-6">
+            Esta trilha requer{" "}
+            <span className="font-semibold text-gray-400">
+              {trailRequiredPlanLabel(trail.type) || "compra individual"}
+            </span>{" "}
+            para aceder ao conteúdo completo.
+          </p>
+          <Link
+            href="/dashboard/finances"
+            className={`flex items-center gap-2 px-5 py-2.5 text-sm font-bold transition-colors ${
               trail.type === "golden"
-                ? "bg-yellow-500 hover:bg-yellow-400 text-gray-900"
-                : trail.type === "smart"
-                  ? "bg-green-600 hover:bg-green-500 text-white"
-                  : "bg-blue-600 hover:bg-blue-700 text-white"
-            }`}>
-            {trail.type === "golden" ? <Crown className="h-5 w-5" /> : trail.type === "smart" ? <Zap className="h-5 w-5" /> : <Zap className="h-5 w-5" />}
-            {trail.type === "golden" ? "Ativar Plano Golden" : trail.type === "smart" ? "Ativar Plano Smart" : "Saber Mais"}
+                ? "bg-yellow-500/80 hover:bg-yellow-400 text-gray-950"
+                : "bg-green hover:bg-green-light text-gray-950"
+            }`}
+          >
+            {trail.type === "golden"
+              ? <><Crown className="h-4 w-4" /> Ativar Golden</>
+              : <><Zap className="h-4 w-4" /> Ativar Smart</>
+            }
           </Link>
         </div>
       )}
 
-      {/* ── COURSES ── */}
-      {courses.length > 0 && (
-        <section className="mb-12">
-          <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-purple" />
-            Cursos na Trilha
-          </h2>
-          <div className="space-y-3">
-            {courses.map((course, idx) => {
-              const normType = normalizeCourseType(course.type);
-              const hasAccess = canAccessCourse(normType, course.id!, enrolledCourses, course.price, course.accessCode);
-              return (
-                <div key={course.id}
-                  className={`flex items-center gap-4 bg-gray-900/40 border p-4 transition-all ${
-                    hasAccess ? "hover:bg-gray-900/60 border-gray-800" : "border-gray-800/50 opacity-75"
-                  }`}>
-                  <span className="text-xs font-bold text-gray-500 w-8 shrink-0 text-center">{idx + 1}</span>
-                  <div className="w-16 h-12 bg-gray-800 overflow-hidden shrink-0">
-                    {course.thumbnail ? (
-                       <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-800">
-                        <BookOpen className="h-5 w-5 text-gray-600" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-white truncate">{course.title}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{course.modulesCount ?? 0} módulos · {course.lessonsCount ?? 0} aulas</p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {hasAccess ? (
-                      <Link href={`/dashboard/courses/${course.id}`}
-                        className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-bold transition-colors">
-                        <Play className="h-4 w-4" /> Aceder
-                      </Link>
-                    ) : (
-                      <div className="flex items-center gap-1.5 bg-gray-800 text-gray-500 px-4 py-2 text-sm">
-                        <Lock className="h-4 w-4" />
-                        {normType === "standalone"
-                          ? course.price ? `${course.price.toLocaleString("pt-AO")} Kz` : "Grátis"
-                          : requiredPlanLabel(normType)}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
+      {/* ── CONTEÚDO DA TRILHA ── */}
+      {hasTrailAccess && (
+        <div className="space-y-10">
+          {/* Cursos */}
+          <TrailCourseList courses={courses} enrolledCourses={enrolledCourses} />
 
-      {/* ── LIVES (referenciadas) ── */}
-      {lives.length > 0 && (
-        <section className="mb-12">
-          <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-            <Radio className="h-6 w-6 text-red-400" />
-            Aulas ao Vivo na Trilha
-          </h2>
-          <div className="space-y-3">
-            {lives.map((live, idx) => {
-              const hasAccess = isAdmin || live.target === "free"
-                || (live.target === "smart" && (plan === "smart" || plan === "golden"))
-                || (live.target === "golden" && plan === "golden");
+          {/* Lives referenciadas */}
+          <TrailLiveList lives={lives} />
 
-              return (
-                <div key={live.id}
-                  className="flex items-center gap-4 bg-gray-900/40 border border-gray-800 p-4">
-                  <span className="text-xs font-bold text-gray-500 w-8 shrink-0 text-center">{idx + 1}</span>
-                  <div className="w-16 h-12 bg-gray-800 overflow-hidden shrink-0">
-                    {live.thumbnail ? (
-                       <img src={live.thumbnail} alt={live.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-800">
-                        <Radio className="h-5 w-5 text-gray-600" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-white truncate">{live.title}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      {live.status === "live" ? (
-                        <span className="text-red-400 flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                          Ao Vivo agora
-                        </span>
-                      ) : live.status === "scheduled" ? (
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {formatDate(live.scheduledAt)}
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          Encerrada · {formatDate(live.scheduledAt)}
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {live.status === "live" && hasAccess ? (
-                      <Link href={`/dashboard/lives/${live.id}`}
-                        className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white px-4 py-2 text-sm font-bold transition-colors">
-                        <Play className="h-4 w-4" /> Entrar
-                      </Link>
-                    ) : live.status === "live" && !hasAccess ? (
-                      <div className="flex items-center gap-1.5 bg-gray-800 text-gray-500 px-4 py-2 text-sm">
-                        <Lock className="h-4 w-4" /> Requer {live.target === "golden" ? "Golden" : "Smart"}
-                      </div>
-                    ) : live.status === "scheduled" ? (
-                      <div className="flex items-center gap-1.5 bg-gray-800 text-gray-400 px-4 py-2 text-sm">
-                        <Calendar className="h-4 w-4" /> {new Date(live.scheduledAt).toLocaleDateString("pt-PT")}
-                      </div>
-                    ) : (
-                      <div className="text-sm text-gray-600 px-4 py-2">Encerrada</div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
+          {/* Sessões próprias da trilha */}
+          <TrailScheduleList sessions={trail.liveSessions ?? []} />
 
-      {/* ── AULAS PRÓPRIAS DA TRILHA ── */}
-      {trail.liveSessions?.length > 0 && (
-        <section className="mb-12">
-          <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-            <Radio className="h-6 w-6 text-orange-400" />
-            Cronograma da Trilha
-          </h2>
-          <div className="space-y-3">
-            {trail.liveSessions.map((sess, idx) => {
-              const isPast = new Date(sess.scheduledAt) < new Date();
-              const planLabel = sess.target === "free" ? "Grátis"
-                : sess.target === "smart" ? "Smart"
-                : sess.target === "golden" ? "Golden"
-                : "Standalone";
-              const planColor = sess.target === "free" ? "text-green-400 bg-green-500/10 border-green-500/20"
-                : sess.target === "smart" ? "text-blue-400 bg-blue-500/10 border-blue-500/20"
-                : sess.target === "golden" ? "text-yellow-400 bg-yellow-500/10 border-yellow-500/20"
-                : "text-purple-400 bg-purple-500/10 border-purple-500/20";
-              return (
-                <div key={idx}
-                  className="flex items-center gap-4 bg-gray-900/40 border border-gray-800 p-4">
-                  <span className="text-xs font-bold text-gray-500 w-8 shrink-0 text-center">{idx + 1}</span>
-                  <div className="w-16 h-12 bg-gray-800 overflow-hidden shrink-0">
-                    {sess.thumbnail ? (
-                       <img src={sess.thumbnail} alt={sess.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-800">
-                        <Calendar className="h-5 w-5 text-gray-600" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-bold text-white truncate">{sess.title}</p>
-                      <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 border ${planColor}`}>
-                        {planLabel}{sess.target === "standalone" && sess.price > 0 ? ` · ${sess.price.toLocaleString("pt-AO")} Kz` : ""}
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      {isPast ? (
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          Realizada a {formatDate(sess.scheduledAt)}
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {formatDate(sess.scheduledAt)}
-                        </span>
-                      )}
-                    </p>
-                    {sess.description && (
-                      <p className="text-xs text-gray-600 mt-0.5 line-clamp-1">{sess.description}</p>
-                    )}
-                  </div>
-                  <div className={`text-xs font-medium px-3 py-1.5 shrink-0 ${
-                    isPast ? "bg-gray-800 text-gray-500" : "bg-green-500/10 text-green-400 border border-green-500/20"
-                  }`}>
-                    {isPast ? "Realizada" : "Agendada"}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* ── EMPTY ── */}
-      {courses.length === 0 && lives.length === 0 && (!trail.liveSessions || trail.liveSessions.length === 0) && hasTrailAccess && (
-        <div className="flex flex-col items-center justify-center py-16 bg-gray-900/40 border border-gray-800 text-center">
-          <Sparkles className="h-12 w-12 text-gray-700 mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">Trilha vazia</h2>
-          <p className="text-gray-400">Esta trilha ainda não tem cursos ou aulas ao vivo.</p>
+          {/* Trilha vazia */}
+          {isEmpty && (
+            <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-16 text-center">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
+                <Sparkles className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
+              </div>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">
+                // em construção
+              </p>
+              <p className="text-sm text-gray-600">
+                Esta trilha ainda não tem conteúdo publicado.
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

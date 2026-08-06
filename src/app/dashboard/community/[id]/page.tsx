@@ -7,6 +7,7 @@ import { db } from "@/lib/firebase";
 import { doc, onSnapshot, getDoc, deleteDoc, setDoc, updateDoc, increment, serverTimestamp } from "firebase/firestore";
 import { ArrowLeft, Heart, Trash2, Loader2, AlertCircle, CheckCircle2, MessageCircle, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { Avatar } from "@/components/ui/Avatar";
 import PostTypeBadge from "@/components/dashboard/community/PostTypeBadge";
 import CommentSection from "@/components/dashboard/community/CommentSection";
 import type { CommunityPost } from "@/types/community";
@@ -156,13 +157,9 @@ export default function CommunityPostDetailPage() {
           {/* Header */}
           <div className="flex items-start justify-between gap-3">
             <Link href={`/dashboard/community/profile/${post.authorId}`} className="flex items-center gap-3 group">
-              {post.authorPhoto ? (
-                 <img src={post.authorPhoto} alt={post.authorName} className="h-12 w-12 rounded-full object-cover" />
-              ) : (
-                <div className="h-12 w-12 rounded-full bg-purple/20 flex items-center justify-center">
-                  <span className="text-lg font-bold text-purple-light">{post.authorName?.[0]?.toUpperCase() || "?"}</span>
-                </div>
-              )}
+              <div className="h-12 w-12 shrink-0 overflow-hidden border border-gray-800/60">
+                <Avatar uid={post.authorId} photoURL={post.authorPhoto} name={post.authorName} size={48} />
+              </div>
               <div>
                 <p className="text-base font-semibold text-white group-hover:text-purple-light transition-colors">{post.authorName}</p>
                 <p className="text-sm text-gray-500">{timeAgo(post.createdAt)}</p>

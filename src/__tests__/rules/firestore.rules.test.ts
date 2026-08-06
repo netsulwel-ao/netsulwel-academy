@@ -17,7 +17,7 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 import { describe, it, beforeAll, afterAll, beforeEach } from "vitest";
 import {
-  doc, getDoc, setDoc, updateDoc, deleteDoc,
+  doc, getDoc, setDoc, updateDoc,
   collection, addDoc,
 } from "firebase/firestore";
 
@@ -25,9 +25,23 @@ const PROJECT_ID = "test-netsulwel-academy";
 const RULES_PATH = resolve(__dirname, "../../../firestore.rules");
 
 let testEnv: RulesTestEnvironment;
+let emulatorAvailable = false;
+
+// ── Verificar disponibilidade do emulator ──────────────────
+async function checkEmulatorAvailable(): Promise<boolean> {
+  try {
+    const response = await fetch("http://127.0.0.1:8080/");
+    return response.ok || response.status < 500;
+  } catch {
+    return false;
+  }
+}
 
 // ── Setup ──────────────────────────────────────────────────
 beforeAll(async () => {
+  emulatorAvailable = await checkEmulatorAvailable();
+  if (!emulatorAvailable) return;
+
   testEnv = await initializeTestEnvironment({
     projectId: PROJECT_ID,
     firestore: {
@@ -39,11 +53,11 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await testEnv.cleanup();
+  if (testEnv) await testEnv.cleanup();
 });
 
 beforeEach(async () => {
-  await testEnv.clearFirestore();
+  if (testEnv) await testEnv.clearFirestore();
 });
 
 // ── Helpers ────────────────────────────────────────────────
@@ -64,15 +78,18 @@ function asAnonymous() {
 }
 
 async function setupUserRole(uid: string, role: string, plan = "free") {
-  // Escrever com admin bypass (sem rules)
   await testEnv.withSecurityRulesDisabled(async (ctx) => {
     await setDoc(doc(ctx.firestore(), "users", uid), { role, plan });
   });
 }
 
 // ── Tests ──────────────────────────────────────────────────
+// skipIf: salta o suite inteiro quando o emulator não está a correr.
+// Para ativar: firebase emulators:start --only firestore
 
-describe("users collection", () => {
+const describeEmulator = describe.skipIf(() => !emulatorAvailable);
+
+describeEmulator("users collection", () => {
   it("utilizador autenticado pode ler qualquer perfil", async () => {
     await testEnv.withSecurityRulesDisabled(async (ctx) => {
       await setDoc(doc(ctx.firestore(), "users", "other_user"), { role: "aluno" });
@@ -112,7 +129,7 @@ describe("users collection", () => {
   });
 });
 
-describe("courses collection", () => {
+describeEmulator("courses collection", () => {
   beforeEach(async () => {
     await setupUserRole("admin_uid", "admin");
     await setupUserRole("teacher_uid", "teacher");
@@ -186,7 +203,7 @@ describe("courses collection", () => {
   });
 });
 
-describe("progress subcollection", () => {
+describeEmulator("progress subcollection", () => {
   beforeEach(async () => {
     await setupUserRole("student_uid", "aluno");
     await setupUserRole("teacher_uid", "teacher");
@@ -241,7 +258,7 @@ describe("progress subcollection", () => {
   });
 });
 
-describe("certificates subcollection", () => {
+describeEmulator("certificates subcollection", () => {
   beforeEach(async () => {
     await setupUserRole("student_uid", "aluno");
   });
@@ -282,7 +299,7 @@ describe("certificates subcollection", () => {
   });
 });
 
-describe("notifications subcollection", () => {
+describeEmulator("notifications subcollection", () => {
   beforeEach(async () => {
     await setupUserRole("student_uid", "aluno");
   });
@@ -306,7 +323,7 @@ describe("notifications subcollection", () => {
     await assertFails(
       addDoc(collection(db, "users", "student_uid", "notifications"), {
         uid: "student_uid",
-        type: "admin_alert", // não está na whitelist
+        type: "admin_alert",
         title: "Hack",
         read: false,
         createdAt: new Date(),
@@ -327,7 +344,7 @@ describe("notifications subcollection", () => {
   });
 });
 
-describe("sales collection", () => {
+describeEmulator("sales collection", () => {
   beforeEach(async () => {
     await setupUserRole("student_uid", "aluno");
     await setupUserRole("admin_uid", "admin");

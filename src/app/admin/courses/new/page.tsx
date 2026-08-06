@@ -9,6 +9,8 @@ import CourseForm from "@/components/admin/CourseForm";
 import { useAuth } from "@/contexts/AuthContext";
 import { syncCourseTrail } from "@/lib/trail-sync";
 import { getOrCreateGroupChat } from "@/lib/chat";
+import { logger } from "@/lib/logger";
+import { toast } from "sonner";
 import type { Course } from "@/types/course";
 
 export default function NewCoursePage() {
@@ -17,7 +19,9 @@ export default function NewCoursePage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const handleSave = async (data: Omit<Course, "id" | "createdAt" | "updatedAt">) => {
+  const handleSave = async (
+    data: Omit<Course, "id" | "createdAt" | "updatedAt">,
+  ) => {
     setSaving(true);
     try {
       const docRef = await addDoc(collection(db, "courses"), {
@@ -27,28 +31,34 @@ export default function NewCoursePage() {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-      // Sincronizar Trail.courseIds se o curso foi atribuído a uma trilha
+
+      // Sincronizar trilha
       if (data.trailId) {
         await syncCourseTrail(docRef.id, data.trailId, undefined, data.trailOrder);
       }
-      // Criar chat de grupo do curso
+
+      // Criar chat de grupo (não bloqueia se falhar)
       if (user?.uid) {
-        const teacherName = user.displayName || "Professor";
-        const teacherPhoto = user.photoURL || "";
-        const participants = [user.uid];
-        const participantNames = { [user.uid]: teacherName };
-        const participantPhotos = teacherPhoto ? { [user.uid]: teacherPhoto } : {};
         try {
-          await getOrCreateGroupChat(docRef.id, data.title || "Curso", participants, participantNames, participantPhotos);
+          await getOrCreateGroupChat(
+            docRef.id,
+            data.title || "Curso",
+            [user.uid],
+            { [user.uid]: user.displayName || "Professor" },
+            user.photoURL ? { [user.uid]: user.photoURL } : {},
+          );
         } catch (err) {
-          console.error("Erro ao criar chat de grupo:", err);
+          logger.error("NewCoursePage: group chat creation failed", err, { courseId: docRef.id });
         }
       }
+
+      toast.success("Curso criado com sucesso!");
       setSuccess(true);
-      setTimeout(() => router.push("/admin/courses"), 1500);
+      setTimeout(() => router.push("/admin/courses"), 1200);
     } catch (err) {
-      console.error(err);
-      throw err;
+      logger.error("NewCoursePage: failed to create course", err);
+      toast.error("Erro ao criar o curso. Tenta novamente.");
+      throw err; // re-throw so CourseForm can handle saving=false
     } finally {
       setSaving(false);
     }
@@ -57,11 +67,11 @@ export default function NewCoursePage() {
   if (success) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <div className="flex h-16 w-16 items-center justify-center bg-green-500/10">
-          <CheckCircle2 className="h-8 w-8 text-green-400" />
+        <div className="flex h-16 w-16 items-center justify-center border border-green/25 bg-green/8">
+          <CheckCircle2 className="h-7 w-7 text-green/70" strokeWidth={1.5} />
         </div>
-        <h2 className="text-2xl font-bold text-white">Curso criado!</h2>
-        <p className="text-gray-400">A redirecionar...</p>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-600">// curso criado</p>
+        <p className="text-sm text-gray-600">A redirecionar...</p>
       </div>
     );
   }

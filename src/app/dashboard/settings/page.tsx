@@ -1,32 +1,37 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { Settings, User, Shield, ArrowUpRight, Loader2, Save, Camera, AlertCircle, CheckCircle2, Play } from "lucide-react";
+import {
+  User, Shield, Loader2, Save, Camera,
+  AlertCircle, CheckCircle2, Play,
+  Trash2, LogOut, AlertTriangle,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db, auth } from "@/lib/firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { updateProfile } from "firebase/auth";
+import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import {
+  updateProfile, deleteUser,
+  EmailAuthProvider, reauthenticateWithCredential,
+} from "firebase/auth";
 import { ImageCropModal } from "@/components/ImageCropModal";
 import { VideoPlayer } from "@/components/VideoPlayer";
+import { Avatar } from "@/components/ui/Avatar";
+import { logger } from "@/lib/logger";
 
+// ── Helpers de vídeo ──────────────────────────────────────────
 function getYoutubeId(url: string): string | null {
   try {
     const u = new URL(url);
-    if (u.hostname.includes("youtu.be")) {
-      return u.pathname.replace("/", "").trim() || null;
-    }
+    if (u.hostname.includes("youtu.be")) return u.pathname.replace("/", "").trim() || null;
     if (u.hostname.includes("youtube.com")) {
       const id = u.searchParams.get("v");
       if (id) return id;
       const parts = u.pathname.split("/").filter(Boolean);
-      const embedIdx = parts.indexOf("embed");
-      if (embedIdx !== -1 && parts[embedIdx + 1]) return parts[embedIdx + 1];
+      const idx = parts.indexOf("embed");
+      if (idx !== -1 && parts[idx + 1]) return parts[idx + 1];
     }
     return null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 function getVimeoId(url: string): string | null {
@@ -34,340 +39,414 @@ function getVimeoId(url: string): string | null {
     const u = new URL(url);
     if (!u.hostname.includes("vimeo.com")) return null;
     return u.pathname.split("/").filter(Boolean).pop() || null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 function buildVideoSource(url: string) {
-  const youtubeId = getYoutubeId(url);
-  if (youtubeId) return { type: "youtube" as const, youtubeId };
-  const vimeoId = getVimeoId(url);
-  if (vimeoId) return { type: "vimeo" as const, vimeoId };
+  const yt = getYoutubeId(url);
+  if (yt) return { type: "youtube" as const, youtubeId: yt };
+  const vi = getVimeoId(url);
+  if (vi) return { type: "vimeo" as const, vimeoId: vi };
   return { type: "direct" as const, src: url };
 }
 
+// ─────────────────────────────────────────────────────────────
 export default function DashboardSettingsPage() {
-  const { user, isAdmin, refreshUser } = useAuth();
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const { user, isAdmin, refreshUser, logout } = useAuth();
 
-
-  const [displayName, setDisplayName] = useState("");
-  const [photoURL, setPhotoURL] = useState("");
-  const [bannerURL, setBannerURL] = useState("");
+  // Perfil
+  const [saving, setSaving]             = useState(false);
+  const [error, setError]               = useState("");
+  const [success, setSuccess]           = useState("");
+  const [displayName, setDisplayName]   = useState("");
+  const [photoURL, setPhotoURL]         = useState("");
+  const [bannerURL, setBannerURL]       = useState("");
+  const [bio, setBio]                   = useState("");
+  const [promoVideoUrl, setPromoVideoUrl] = useState("");
   const [bannerCropImage, setBannerCropImage] = useState<string | null>(null);
   const [avatarCropImage, setAvatarCropImage] = useState<string | null>(null);
-  const [bio, setBio] = useState("");
-  const [promoVideoUrl, setPromoVideoUrl] = useState("");
-  const photoInputRef = useRef<HTMLInputElement>(null);
-  const bannerInputRef = useRef<HTMLInputElement>(null);
-  const promoVideoInputRef = useRef<HTMLInputElement>(null);
 
+  const photoInputRef       = useRef<HTMLInputElement>(null);
+  const bannerInputRef      = useRef<HTMLInputElement>(null);
+  const promoVideoInputRef  = useRef<HTMLInputElement>(null);
+
+  // Danger Zone
+  const [showDelete, setShowDelete]     = useState(false);
+  const [deletePass, setDeletePass]     = useState("");
+  const [deleting, setDeleting]         = useState(false);
+  const [deleteErr, setDeleteErr]       = useState("");
+
+  // ── Carregar dados ─────────────────────────────────────────
   useEffect(() => {
     if (!user) return;
-    setDisplayName(user.displayName || "");
-    setPhotoURL(user.photoURL || "");
+    setDisplayName(user.displayName ?? "");
+    setPhotoURL(user.photoURL ?? "");
     getDoc(doc(db, "users", user.uid)).then(snap => {
-      if (snap.exists()) {
-        const data = snap.data();
-        setBio(data.bio || "");
-        setPhotoURL(data.photoURL || user.photoURL || "");
-        setBannerURL(data.bannerURL || "");
-        setPromoVideoUrl(data.promoVideoUrl || "");
-      }
+      if (!snap.exists()) return;
+      const d = snap.data();
+      setBio(d.bio ?? "");
+      setPhotoURL(d.photoURL ?? user.photoURL ?? "");
+      setBannerURL(d.bannerURL ?? "");
+      setPromoVideoUrl(d.promoVideoUrl ?? "");
     }).catch(() => {});
-  }, [user]);
+  }, [user?.uid]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Guardar perfil ─────────────────────────────────────────
   const handleSave = async () => {
     if (!user) return;
-    setError("");
-    setSuccess("");
-    setSaving(true);
+    setError(""); setSuccess(""); setSaving(true);
     try {
-      const updates: Record<string, unknown> = {};
-      if (displayName.trim()) updates.name = displayName.trim();
-      if (photoURL) updates.photoURL = photoURL;
-      if (bio !== undefined) updates.bio = bio;
-      if (bannerURL !== undefined) updates.bannerURL = bannerURL;
-      if (promoVideoUrl !== undefined) updates.promoVideoUrl = promoVideoUrl;
-
-      await updateDoc(doc(db, "users", user.uid), updates);
-      await updateProfile(user, { displayName: displayName.trim() || null, photoURL: photoURL || null });
+      await updateDoc(doc(db, "users", user.uid), {
+        name: displayName.trim() || user.displayName,
+        photoURL, bio, bannerURL, promoVideoUrl,
+      });
+      await updateProfile(user, {
+        displayName: displayName.trim() || null,
+        photoURL: photoURL || null,
+      });
       await refreshUser();
       setSuccess("Perfil actualizado com sucesso!");
-    } catch {
+    } catch (err) {
+      logger.error("Settings: save failed", err);
       setError("Erro ao guardar perfil.");
     } finally {
       setSaving(false);
     }
   };
 
+  // ── Upload helper ──────────────────────────────────────────
+  const uploadFile = async (file: File, folder: string): Promise<string> => {
+    const token = await user!.getIdToken();
+    const res = await fetch("/api/upload/presign", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ filename: file.name, contentType: file.type, folder }),
+    });
+    if (!res.ok) throw new Error("presign failed");
+    const { presignedUrl, publicUrl } = await res.json();
+    const up = await fetch(presignedUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
+    if (!up.ok) throw new Error("upload failed");
+    return publicUrl;
+  };
+
+  // ── Eliminar conta ─────────────────────────────────────────
+  const handleDelete = async () => {
+    if (!user || !auth.currentUser) return;
+    setDeleting(true); setDeleteErr("");
+    try {
+      if (deletePass) {
+        const cred = EmailAuthProvider.credential(user.email!, deletePass);
+        await reauthenticateWithCredential(auth.currentUser, cred);
+      }
+      await deleteDoc(doc(db, "users", user.uid));
+      await deleteUser(auth.currentUser);
+      window.location.href = "/";
+    } catch (err) {
+      logger.error("Settings: delete account failed", err);
+      const code = (err as { code?: string })?.code ?? "";
+      if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
+        setDeleteErr("Palavra-passe incorrecta.");
+      } else if (code === "auth/requires-recent-login") {
+        setDeleteErr("Faz logout e volta a entrar antes de eliminar a conta.");
+      } else {
+        setDeleteErr("Erro ao eliminar. Tenta novamente.");
+      }
+      setDeleting(false);
+    }
+  };
+
   return (
-    <div className="max-w-[100rem] mx-auto animate-in fade-in duration-500">
-      <div className="flex items-start gap-3 sm:gap-4">
-        <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gray-500/10 border border-gray-700/60 flex items-center justify-center shrink-0">
-          <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-gray-300" />
-        </div>
-        <div className="min-w-0">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Definições</h1>
-          <p className="mt-1 text-sm sm:text-base text-gray-400">Dados do perfil e preferências da conta.</p>
-        </div>
+    <div className="max-w-[80rem] mx-auto space-y-8 animate-in fade-in duration-300">
+
+      {/* Cabeçalho */}
+      <div>
+        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gray-600 mb-2">// definições</p>
+        <h1 className="text-2xl font-bold text-gray-100">Definições da conta</h1>
+        <p className="mt-1 text-sm text-gray-600">Perfil, preferências e segurança.</p>
       </div>
 
+      {/* Alerts globais */}
       {error && (
-        <div className="mt-6 flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
-          <AlertCircle className="h-4 w-4 shrink-0" />{error}
+        <div className="flex items-start gap-2.5 border border-red-500/20 bg-red-500/5 px-4 py-3">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400/70" strokeWidth={1.5} />
+          <p className="text-sm text-red-400/80">{error}</p>
         </div>
       )}
       {success && (
-        <div className="mt-6 flex items-center gap-2 bg-green-500/10 border border-green-500/20 px-4 py-3 text-sm text-green-400">
-          <CheckCircle2 className="h-4 w-4 shrink-0" />{success}
+        <div className="flex items-start gap-2.5 border border-green-500/20 bg-green-500/5 px-4 py-3">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green/70" strokeWidth={1.5} />
+          <p className="text-sm text-green/80">{success}</p>
         </div>
       )}
 
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Profile Edit */}
-        <div className="bg-gray-900/40 border border-gray-800 p-6">
-          <h2 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <User className="h-5 w-5 text-purple-300" /> Editar Perfil
-          </h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-          <div className="mt-4 space-y-5">
-            {/* Photo */}
-            <div>
-              <label className="text-sm text-gray-400 block mb-2">Foto de Perfil</label>
-              <div className="flex items-center gap-4">
-                <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-800 border border-gray-700">
-                  {photoURL ? (
-                     <img src={photoURL} alt={`Foto de perfil de ${user?.displayName || "utilizador"}`} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-600 text-xl font-bold">
-                      {user?.displayName?.charAt(0)?.toUpperCase() || "?"}
-                    </div>
-                  )}
-                </div>
-                <button type="button" onClick={() => photoInputRef.current?.click()}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white text-sm transition-colors">
-                  <Camera className="h-4 w-4" />
-                  Alterar foto
-                </button>
-                <input ref={photoInputRef} type="file" accept="image/*" onChange={async (e) => {
+        {/* ── EDITAR PERFIL ── */}
+        <div className="border border-gray-800/60 bg-gray-900/20 p-6 space-y-5">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-1">// perfil</p>
+            <h2 className="text-base font-bold text-gray-200 flex items-center gap-2">
+              <User className="h-4 w-4 text-purple/70" strokeWidth={1.5} /> Editar perfil
+            </h2>
+          </div>
+
+          {/* Foto */}
+          <div>
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700 mb-2">foto de perfil</p>
+            <div className="flex items-center gap-4">
+              <div className="h-14 w-14 shrink-0 overflow-hidden border border-gray-800">
+                <Avatar uid={user?.uid ?? ""} photoURL={photoURL} name={displayName} size={56} />
+              </div>
+              <button type="button" onClick={() => photoInputRef.current?.click()}
+                className="flex items-center gap-1.5 border border-gray-800 bg-gray-900/60 px-3 py-2 text-xs text-gray-500 hover:border-gray-700 hover:text-gray-300 transition-all">
+                <Camera className="h-3.5 w-3.5" strokeWidth={1.5} /> Alterar foto
+              </button>
+              <input ref={photoInputRef} type="file" accept="image/*" className="hidden"
+                onChange={async e => {
                   const file = e.target.files?.[0];
                   if (!file || !user) return;
                   setError(""); setSuccess("");
                   try {
-                    const token = await user.getIdToken();
-                    const res = await fetch("/api/upload/presign", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                      body: JSON.stringify({ filename: file.name, contentType: file.type, folder: "avatars" }),
-                    });
-                    if (!res.ok) throw new Error("Erro ao obter URL");
-                    const { presignedUrl, publicUrl } = await res.json();
-                    const uploadRes = await fetch(presignedUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
-                    if (!uploadRes.ok) throw new Error("Erro ao fazer upload");
-                    setPhotoURL(publicUrl);
-                    setSuccess("Foto carregada! Clica em Guardar Perfil para salvar.");
+                    const url = await uploadFile(file, "avatars");
+                    setPhotoURL(url);
+                    setSuccess("Foto carregada. Clica em Guardar para salvar.");
                   } catch (err) {
-                    console.error("Upload direto falhou:", err);
+                    logger.error("Settings: photo upload", err);
                     setError("Erro ao fazer upload da foto.");
                   }
                   e.target.value = "";
-                }} className="hidden" />
-              </div>
+                }} />
             </div>
+          </div>
 
-            {/* Banner */}
-            <div>
-              <label className="text-sm text-gray-400 block mb-1">Banner / Capa</label>
-              <div className="flex items-center gap-4">
-                {bannerURL ? (
-                  <div className="relative w-40 h-20 rounded-lg overflow-hidden bg-gray-800 border border-gray-700">
-                     <img src={bannerURL} alt={`Banner de ${user?.displayName || "utilizador"}`} className="w-full h-full object-cover" />
-                  </div>
-                ) : (
-                  <div className="w-40 h-20 rounded-lg bg-gradient-to-br from-purple-900/30 via-gray-900 to-gray-950 border border-gray-700 flex items-center justify-center">
-                    <Camera className="h-5 w-5 text-gray-600" />
-                  </div>
-                )}
+          {/* Banner */}
+          <div>
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700 mb-2">banner / capa</p>
+            <div className="flex items-center gap-4">
+              <div className="h-14 w-24 shrink-0 overflow-hidden border border-gray-800/60 bg-gray-900">
+                {bannerURL
+                  ? <img src={bannerURL} alt="Banner" className="h-full w-full object-cover" />
+                  : <div className="flex h-full w-full items-center justify-center"><Camera className="h-4 w-4 text-gray-700" strokeWidth={1} /></div>
+                }
+              </div>
+              <div className="flex flex-col gap-1">
                 <button type="button" onClick={() => bannerInputRef.current?.click()}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white text-sm transition-colors">
-                  <Camera className="h-4 w-4" />
-                  {bannerURL ? "Alterar banner" : "Adicionar banner"}
+                  className="flex items-center gap-1.5 border border-gray-800 bg-gray-900/60 px-3 py-1.5 text-xs text-gray-500 hover:border-gray-700 hover:text-gray-300 transition-all">
+                  <Camera className="h-3 w-3" strokeWidth={1.5} />
+                  {bannerURL ? "Alterar" : "Adicionar"}
                 </button>
-                <input ref={bannerInputRef} type="file" accept="image/*" onChange={(e) => {
+                {bannerURL && (
+                  <button type="button" onClick={() => setBannerURL("")}
+                    className="text-xs text-gray-700 hover:text-red-400/70 transition-colors">Remover</button>
+                )}
+              </div>
+              <input ref={bannerInputRef} type="file" accept="image/*" className="hidden"
+                onChange={e => {
                   const file = e.target.files?.[0];
                   if (!file) return;
                   const reader = new FileReader();
                   reader.onload = () => setBannerCropImage(reader.result as string);
                   reader.readAsDataURL(file);
                   e.target.value = "";
-                }} className="hidden" />
-                {bannerURL && (
-                  <button onClick={() => setBannerURL("")}
-                    className="text-xs text-gray-500 hover:text-red-400 transition-colors">
-                    Remover
-                  </button>
-                )}
+                }} />
+            </div>
+          </div>
+
+          {/* Nome */}
+          <div className="space-y-1.5">
+            <label htmlFor="displayName" className="font-mono text-[9px] uppercase tracking-widest text-gray-700">nome</label>
+            <input id="displayName" type="text" value={displayName} onChange={e => setDisplayName(e.target.value)}
+              placeholder="O teu nome"
+              className="w-full border border-gray-800 bg-gray-900/60 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none transition-colors" />
+          </div>
+
+          {/* Bio */}
+          <div className="space-y-1.5">
+            <label htmlFor="bio" className="font-mono text-[9px] uppercase tracking-widest text-gray-700">biografia</label>
+            <textarea id="bio" value={bio} onChange={e => setBio(e.target.value)} rows={3}
+              placeholder="Fala sobre ti..."
+              className="w-full border border-gray-800 bg-gray-900/60 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none transition-colors resize-none" />
+          </div>
+
+          {/* Vídeo */}
+          <div className="space-y-1.5">
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">vídeo de apresentação</p>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => promoVideoInputRef.current?.click()}
+                className="flex items-center gap-1.5 border border-gray-800 bg-gray-900/60 px-3 py-2 text-xs text-gray-500 hover:border-gray-700 hover:text-gray-300 transition-all shrink-0">
+                <Play className="h-3 w-3" strokeWidth={1.5} /> Upload
+              </button>
+              <input type="url" value={promoVideoUrl} onChange={e => setPromoVideoUrl(e.target.value)}
+                placeholder="https://youtube.com/watch?v=..."
+                className="flex-1 border border-gray-800 bg-gray-900/60 px-3 py-2 text-xs text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none transition-colors" />
+              <input ref={promoVideoInputRef} type="file" accept="video/*" className="hidden"
+                onChange={async e => {
+                  const file = e.target.files?.[0];
+                  if (!file || !user) return;
+                  setError(""); setSuccess("");
+                  try {
+                    const url = await uploadFile(file, "videos");
+                    setPromoVideoUrl(url);
+                    setSuccess("Vídeo carregado. Clica em Guardar para salvar.");
+                  } catch (err) {
+                    logger.error("Settings: video upload", err);
+                    setError("Erro ao fazer upload do vídeo.");
+                  }
+                  e.target.value = "";
+                }} />
+            </div>
+            {promoVideoUrl && (
+              <div className="mt-2 aspect-video max-w-xs overflow-hidden border border-gray-800/60 bg-gray-950">
+                <VideoPlayer source={buildVideoSource(promoVideoUrl)} />
               </div>
+            )}
+          </div>
+
+          {/* Email (read-only) */}
+          <div className="space-y-1.5">
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">email</p>
+            <input type="text" value={user?.email ?? ""} disabled
+              className="w-full border border-gray-800/40 bg-gray-900/30 px-3 py-2.5 text-sm text-gray-700 cursor-not-allowed" />
+          </div>
+
+          {/* Guardar */}
+          <button type="button" onClick={handleSave} disabled={saving}
+            className="flex items-center gap-2 bg-purple px-5 py-2.5 text-sm font-bold text-white hover:bg-purple-light disabled:opacity-50 transition-colors">
+            {saving
+              ? <><Loader2 className="h-4 w-4 animate-spin" /> A guardar...</>
+              : <><Save className="h-4 w-4" /> Guardar perfil</>
+            }
+          </button>
+        </div>
+
+        {/* ── CONTA + DANGER ZONE ── */}
+        <div className="space-y-5">
+
+          {/* Info da conta */}
+          <div className="border border-gray-800/60 bg-gray-900/20 p-6">
+            <div className="mb-4">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-1">// conta</p>
+              <h2 className="text-base font-bold text-gray-200 flex items-center gap-2">
+                <Shield className="h-4 w-4 text-green/70" strokeWidth={1.5} /> Informações
+              </h2>
+            </div>
+            <div className="space-y-3">
+              {[
+                { label: "Email", value: user?.email ?? "" },
+                { label: "UID",   value: user?.uid ?? "" },
+                { label: "Email verificado", value: user?.emailVerified ? "sim" : "não" },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex items-center justify-between border-b border-gray-800/40 pb-2.5 last:border-0 last:pb-0">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-gray-700">{label}</span>
+                  <span className="font-mono text-[10px] text-gray-500 truncate max-w-[200px]">{value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* DANGER ZONE */}
+          <div className="border border-red-500/20">
+            <div className="flex items-center gap-2 border-b border-red-500/15 bg-red-500/5 px-5 py-3">
+              <AlertTriangle className="h-3.5 w-3.5 text-red-400/60 shrink-0" strokeWidth={1.5} />
+              <p className="font-mono text-[9px] uppercase tracking-widest text-red-400/60">// zona de perigo</p>
             </div>
 
-            {/* Name */}
-            <div>
-              <label className="text-sm text-gray-400 block mb-1">Nome</label>
-              <input type="text" value={displayName} onChange={e => setDisplayName(e.target.value)}
-                className="w-full bg-gray-950 border border-gray-700 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
-                placeholder="O teu nome" />
-            </div>
-
-            {/* Bio */}
-            <div>
-              <label className="text-sm text-gray-400 block mb-1">Biografia</label>
-              <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3}
-                className="w-full bg-gray-950 border border-gray-700 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors resize-none"
-                placeholder="Fala sobre ti..." />
-            </div>
-
-            {/* Promo Video */}
-            <div>
-              <label className="text-sm text-gray-400 block mb-1">Vídeo de Apresentação</label>
-              <div className="flex items-center gap-3 mb-2">
-                <button type="button" onClick={() => promoVideoInputRef.current?.click()}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white text-sm transition-colors">
-                  <Play className="h-4 w-4" />
-                  {promoVideoUrl ? "Alterar vídeo" : "Upload vídeo"}
+            <div className="p-5 space-y-5">
+              {/* Logout */}
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-gray-300">Terminar sessão</p>
+                  <p className="text-xs text-gray-600 mt-0.5">Sai da conta neste dispositivo.</p>
+                </div>
+                <button type="button"
+                  onClick={async () => { await logout(); window.location.href = "/login"; }}
+                  className="flex items-center gap-1.5 border border-gray-800 bg-gray-900/60 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:border-gray-700 hover:text-gray-400 transition-all shrink-0">
+                  <LogOut className="h-3 w-3" strokeWidth={1.5} /> Sair
                 </button>
-                <span className="text-xs text-gray-500">ou</span>
-                <input type="url" value={promoVideoUrl} onChange={e => setPromoVideoUrl(e.target.value)}
-                  placeholder="https://youtube.com/watch?v=..."
-                  className="flex-1 min-w-0 bg-gray-950 border border-gray-700 px-3 py-2 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 transition-colors" />
               </div>
-              <input ref={promoVideoInputRef} type="file" accept="video/*" onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file || !user) return;
-                setError(""); setSuccess("");
-                try {
-                  const token = await user.getIdToken();
-                  const res = await fetch("/api/upload/presign", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                    body: JSON.stringify({ filename: file.name, contentType: file.type || "video/mp4", folder: "videos" }),
-                  });
-                  if (!res.ok) throw new Error("Erro ao obter URL");
-                  const { presignedUrl, publicUrl } = await res.json();
-                  const uploadRes = await fetch(presignedUrl, { method: "PUT", headers: { "Content-Type": file.type || "video/mp4" }, body: file });
-                  if (!uploadRes.ok) throw new Error("Erro ao fazer upload");
-                  setPromoVideoUrl(publicUrl);
-                  setSuccess("Vídeo carregado! Clica em Guardar Perfil para salvar.");
-                } catch (err) {
-                  console.error("Upload vídeo falhou:", err);
-                  setError("Erro ao fazer upload do vídeo.");
-                }
-                e.target.value = "";
-              }} className="hidden" />
-              {promoVideoUrl && (
-                <div className="mt-3 aspect-video max-w-md rounded-lg overflow-hidden bg-black">
-                  <VideoPlayer source={buildVideoSource(promoVideoUrl)} />
+
+              <div className="border-t border-gray-800/40" />
+
+              {/* Eliminar conta */}
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-red-400/80">Eliminar conta</p>
+                  <p className="text-xs text-gray-600 mt-0.5">
+                    Remove permanentemente a conta e todos os dados. Irreversível.
+                  </p>
+                </div>
+                <button type="button"
+                  onClick={() => { setShowDelete(true); setDeleteErr(""); setDeletePass(""); }}
+                  className="flex items-center gap-1.5 border border-red-500/25 bg-red-500/8 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-red-400/70 hover:bg-red-500/15 transition-all shrink-0">
+                  <Trash2 className="h-3 w-3" strokeWidth={1.5} /> Eliminar
+                </button>
+              </div>
+
+              {/* Confirmação inline */}
+              {showDelete && (
+                <div className="border border-red-500/20 bg-red-500/5 p-4 space-y-3">
+                  <p className="text-xs text-red-400/80 leading-relaxed">
+                    <strong className="text-red-400">Atenção:</strong> esta acção é permanente e não pode ser desfeita.
+                    Todos os dados serão eliminados.
+                  </p>
+                  <input type="password" value={deletePass} onChange={e => setDeletePass(e.target.value)}
+                    placeholder="Confirma a tua palavra-passe"
+                    className="w-full border border-red-500/25 bg-gray-900/60 px-3 py-2 text-sm text-gray-300 placeholder-gray-700 focus:border-red-500/40 focus:outline-none transition-colors" />
+                  {deleteErr && <p className="text-xs text-red-400/80">{deleteErr}</p>}
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => setShowDelete(false)}
+                      className="flex-1 border border-gray-800 bg-gray-900/60 py-2 font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+                      Cancelar
+                    </button>
+                    <button type="button" onClick={handleDelete} disabled={deleting || !deletePass}
+                      className="flex flex-1 items-center justify-center gap-1.5 border border-red-500/30 bg-red-500/15 py-2 font-mono text-[10px] uppercase tracking-widest text-red-400/80 hover:bg-red-500/25 disabled:opacity-50 transition-all">
+                      {deleting
+                        ? <Loader2 className="h-3 w-3 animate-spin" />
+                        : <><Trash2 className="h-3 w-3" /> Confirmar</>
+                      }
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
-
-            {/* Email (read-only) */}
-            <div>
-              <label className="text-sm text-gray-400 block mb-1">Email</label>
-              <input type="text" value={user?.email || ""} disabled
-                className="w-full bg-gray-950/50 border border-gray-800 px-4 py-3 text-gray-500 cursor-not-allowed" />
-            </div>
-
-            <button onClick={handleSave} disabled={saving}
-              className="flex items-center gap-2 bg-purple hover:bg-purple-light disabled:opacity-50 text-white px-6 py-3 font-bold transition-colors">
-              {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
-              {saving ? "A guardar..." : "Guardar Perfil"}
-            </button>
-          </div>
-        </div>
-
-        {/* Account Info */}
-        <div className="bg-gray-900/40 border border-gray-800 p-6">
-          <h2 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <Shield className="h-5 w-5 text-green-300" /> Conta
-          </h2>
-          <p className="mt-2 text-base text-gray-400">
-            {isAdmin
-              ? "A tua conta tem permissões de administrador."
-              : "Em breve vais poder gerir preferências e segurança por aqui."}
-          </p>
-          <div className="mt-4">
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-5 py-3 font-bold transition-colors border border-gray-800"
-            >
-              Voltar ao início <ArrowUpRight className="h-5 w-5" />
-            </Link>
           </div>
         </div>
       </div>
+
+      {/* Modais de crop */}
       {avatarCropImage && user && (
-        <ImageCropModal
-          imageUrl={avatarCropImage}
-          title="Ajustar foto de perfil"
-          aspectRatio={1}
-          outputWidth={400}
-          outputHeight={400}
+        <ImageCropModal imageUrl={avatarCropImage} title="Ajustar foto de perfil"
+          aspectRatio={1} outputWidth={400} outputHeight={400}
           onCancel={() => setAvatarCropImage(null)}
-          onConfirm={async (blob: Blob) => {
+          onConfirm={async blob => {
             try {
-              const token = await user.getIdToken();
-              const contentType = blob.type || "image/png";
-              const ext = contentType === "image/png" ? "png" : "webp";
-              const res = await fetch("/api/upload/presign", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ filename: `avatar.${ext}`, contentType, folder: "avatars" }),
-              });
-              if (!res.ok) throw new Error();
-              const { presignedUrl, publicUrl } = await res.json();
-              await fetch(presignedUrl, { method: "PUT", headers: { "Content-Type": contentType }, body: blob });
-              setPhotoURL(publicUrl);
-              setAvatarCropImage(null);
-            } catch {
+              const ext = blob.type === "image/png" ? "png" : "webp";
+              const file = new File([blob], `avatar.${ext}`, { type: blob.type });
+              const url = await uploadFile(file, "avatars");
+              setPhotoURL(url);
+            } catch (err) {
+              logger.error("Settings: avatar crop upload", err);
               setError("Erro ao fazer upload da foto.");
-              setAvatarCropImage(null);
             }
-          }}
-        />
+            setAvatarCropImage(null);
+          }} />
       )}
       {bannerCropImage && user && (
-        <ImageCropModal
-          imageUrl={bannerCropImage}
-          title="Ajustar banner"
-          aspectRatio={1200 / 340}
-          outputWidth={1200}
-          outputHeight={340}
+        <ImageCropModal imageUrl={bannerCropImage} title="Ajustar banner"
+          aspectRatio={1200 / 340} outputWidth={1200} outputHeight={340}
           onCancel={() => setBannerCropImage(null)}
-          onConfirm={async (blob: Blob) => {
+          onConfirm={async blob => {
             try {
-              const token = await user.getIdToken();
-              const contentType = blob.type || "image/png";
-              const ext = contentType === "image/png" ? "png" : "webp";
-              const res = await fetch("/api/upload/presign", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ filename: `banner.${ext}`, contentType, folder: "avatars" }),
-              });
-              if (!res.ok) throw new Error();
-              const { presignedUrl, publicUrl } = await res.json();
-              await fetch(presignedUrl, { method: "PUT", headers: { "Content-Type": contentType }, body: blob });
-              setBannerURL(publicUrl);
-              setBannerCropImage(null);
-            } catch {
+              const ext = blob.type === "image/png" ? "png" : "webp";
+              const file = new File([blob], `banner.${ext}`, { type: blob.type });
+              const url = await uploadFile(file, "avatars");
+              setBannerURL(url);
+            } catch (err) {
+              logger.error("Settings: banner crop upload", err);
               setError("Erro ao fazer upload do banner.");
-              setBannerCropImage(null);
             }
-          }}
-        />
+            setBannerCropImage(null);
+          }} />
       )}
     </div>
   );

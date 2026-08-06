@@ -1,15 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { collection, query, where, getDocs, doc, getDoc, updateDoc, Timestamp } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, getDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
-import { Building2, ArrowLeft, Search, Loader2, Mail, UserPlus, GraduationCap, Users, Check, X } from "lucide-react";
+import {
+  Building2, ArrowLeft, Search, Loader2,
+  Mail, UserPlus, GraduationCap, Users,
+  Check, X, AlertTriangle, ChevronRight,
+} from "lucide-react";
 import { toast } from "sonner";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
+import { logger } from "@/lib/logger";
+import type { Institution } from "@/types/institution";
 
-interface InstitutionMember {
+// ── Types ─────────────────────────────────────────────────────
+interface Member {
   id: string;
   name: string;
   email: string;
@@ -17,273 +24,290 @@ interface InstitutionMember {
   createdAt: Date;
 }
 
-interface Institution {
-  id: string;
-  name: string;
-  email: string;
-  status: string;
+// ── Role badge ────────────────────────────────────────────────
+const ROLE_MAP: Record<string, { cls: string; label: string }> = {
+  admin:   { cls: "border-purple/25 text-purple/70",          label: "Admin"     },
+  teacher: { cls: "border-green/25 text-green/70",            label: "Professor" },
+  student: { cls: "border-blue-500/25 text-blue-400/70",      label: "Aluno"     },
+  aluno:   { cls: "border-blue-500/25 text-blue-400/70",      label: "Aluno"     },
+};
+
+function RoleBadge({ role }: { role: string }) {
+  const { cls, label } = ROLE_MAP[role] ?? ROLE_MAP.aluno;
+  return (
+    <span className={`font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 border ${cls}`}>
+      {label}
+    </span>
+  );
 }
 
+const inputCls =
+  "w-full border border-gray-800/60 bg-gray-900/40 py-2.5 px-3 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors";
+
+// ── Page ──────────────────────────────────────────────────────
 export default function InstitutionDetailPage() {
-  const { isAdmin } = useAuth();
-  const params = useParams();
-  const router = useRouter();
-  const institutionId = params.id as string;
-  
+  const { isAdmin }       = useAuth();
+  const { id }            = useParams<{ id: string }>();
+  const router            = useRouter();
+
   const [institution, setInstitution] = useState<Institution | null>(null);
-  const [members, setMembers] = useState<InstitutionMember[]>([]);
-  const [filtered, setFiltered] = useState<InstitutionMember[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [members,     setMembers]     = useState<Member[]>([]);
+  const [loading,     setLoading]     = useState(true);
+  const [error,       setError]       = useState<string | null>(null);
+  const [search,      setSearch]      = useState("");
+
+  // Invite form
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"teacher" | "student">("teacher");
-  const [inviting, setInviting] = useState(false);
+  const [inviteRole,  setInviteRole]  = useState<"teacher" | "student">("teacher");
+  const [inviting,    setInviting]    = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch institution
-        const institutionDoc = await getDoc(doc(db, "institutions", institutionId));
-        if (!institutionDoc.exists()) {
-          toast.error("Instituição não encontrada");
-          router.push("/admin/institutions");
-          return;
-        }
-        setInstitution({ id: institutionDoc.id, ...institutionDoc.data() } as Institution);
-
-        // Fetch members
-        const membersQuery = query(collection(db, "users"), where("institutionId", "==", institutionId));
-        const membersSnap = await getDocs(membersQuery);
-        const membersList: InstitutionMember[] = membersSnap.docs.map((d) => {
-          const data = d.data();
-          return {
-            id: d.id,
-            name: data.name || "Sem nome",
-            email: data.email || "",
-            institutionRole: data.institutionRole || "aluno",
-            createdAt: (data.createdAt as Timestamp)?.toDate?.() ?? new Date(data.createdAt as string),
-          };
-        });
-        setMembers(membersList);
-        setFiltered(membersList);
-      } catch (err) {
-        console.error(err);
-        toast.error("Erro ao carregar dados.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [institutionId, router]);
-
-  useEffect(() => {
-    let result = [...members];
-    if (search) {
-      const q = search.toLowerCase();
-      result = result.filter((m) => m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q));
-    }
-    setFiltered(result);
-  }, [search, members]);
-
-  const handleInvite = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!inviteEmail || !inviteRole) {
-      toast.error("Email e cargo são obrigatórios.");
-      return;
-    }
-
-    setInviting(true);
-
+  // ── Load ──────────────────────────────────────────────────
+  const load = useCallback(async () => {
+    setLoading(true); setError(null);
     try {
-      const res = await fetchWithAuth(`/api/institutions/${institutionId}/invite`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: inviteEmail,
-          role: inviteRole,
-          invitedBy: isAdmin ? "admin" : "teacher",
-          inviterName: "Administrador",
-        }),
-      });
+      const [instSnap, membersSnap] = await Promise.all([
+        getDoc(doc(db, "institutions", id)),
+        getDocs(query(collection(db, "users"), where("institutionId", "==", id))),
+      ]);
 
+      if (!instSnap.exists()) {
+        router.push("/admin/institutions");
+        return;
+      }
+      setInstitution({ id: instSnap.id, ...instSnap.data() } as Institution);
+
+      const list: Member[] = membersSnap.docs.map(d => {
+        const data = d.data();
+        return {
+          id:              d.id,
+          name:            data.name       || "Sem nome",
+          email:           data.email      || "",
+          institutionRole: data.institutionRole || "aluno",
+          createdAt:       (data.createdAt as Timestamp)?.toDate?.() ?? new Date(),
+        };
+      }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+      setMembers(list);
+    } catch (err) {
+      logger.error("InstitutionDetail: failed to load", err, { id });
+      setError("Não foi possível carregar os dados.");
+    } finally {
+      setLoading(false);
+    }
+  }, [id, router]);
+
+  useEffect(() => { load(); }, [load]);
+
+  // ── Filter ────────────────────────────────────────────────
+  const filtered = useMemo(() => {
+    if (!search.trim()) return members;
+    const q = search.toLowerCase();
+    return members.filter(m => m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q));
+  }, [members, search]);
+
+  // ── Invite ────────────────────────────────────────────────
+  const handleInvite = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteEmail.trim()) { toast.error("Email é obrigatório."); return; }
+    setInviting(true);
+    try {
+      const res = await fetchWithAuth(`/api/institutions/${id}/invite`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ email: inviteEmail.trim(), role: inviteRole, invitedBy: "admin", inviterName: "Administrador" }),
+      });
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Failed to send invitation");
+        throw new Error(data.error || "Falha ao enviar convite.");
       }
-
-      toast.success("Convite enviado com sucesso!");
+      toast.success(`Convite enviado para ${inviteEmail}.`);
       setInviteEmail("");
     } catch (err) {
-      console.error(err);
+      logger.error("InstitutionDetail: invite failed", err, { id, email: inviteEmail });
       toast.error(err instanceof Error ? err.message : "Erro ao enviar convite.");
     } finally {
       setInviting(false);
     }
-  };
+  }, [id, inviteEmail, inviteRole]);
 
-  const roleBadge = (role: string) => {
-    const colors: Record<string, string> = {
-      admin: "bg-purple-500/10 text-purple-400",
-      teacher: "bg-emerald-500/10 text-emerald-400",
-      aluno: "bg-blue-500/10 text-blue-400",
-    };
-    const labels: Record<string, string> = {
-      admin: "Administrador",
-      teacher: "Professor",
-      aluno: "Aluno",
-    };
-    return { color: colors[role] || colors.aluno, label: labels[role] || labels.aluno };
-  };
+  if (!isAdmin) return null;
 
-  if (!isAdmin) {
-    return (
-      <div className="text-center py-20">
-        <X className="h-12 w-12 text-red-400 mx-auto mb-4" />
-        <p className="text-gray-400">Apenas administradores podem gerir instituições.</p>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-purple" />
-      </div>
-    );
-  }
+  // ── Counts ────────────────────────────────────────────────
+  const teacherCount = members.filter(m => m.institutionRole === "teacher").length;
+  const studentCount = members.filter(m => ["student", "aluno"].includes(m.institutionRole)).length;
 
   return (
-    <div className="max-w-[100rem] mx-auto space-y-6 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => router.push("/admin/institutions")}
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5 text-gray-400" />
-          </button>
-          <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-white">{institution?.name}</h1>
-            <p className="mt-2 text-gray-400">Gerir membros da instituição.</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-gray-400">
-          <Users className="h-5 w-5 text-purple-400" />
-          <span className="font-bold text-white">{members.length}</span> membros
+    <div className="max-w-[80rem] mx-auto space-y-8 animate-in fade-in duration-300">
+
+      {/* ── Cabeçalho ── */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => router.push("/admin/institutions")}
+          className="flex h-8 w-8 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all shrink-0"
+        >
+          <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
+        </button>
+        <div>
+          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-700">// membros da instituição</p>
+          {loading
+            ? <div className="h-6 w-48 bg-gray-800 animate-pulse mt-0.5" />
+            : <h1 className="text-xl font-bold text-gray-100">{institution?.name}</h1>
+          }
         </div>
       </div>
 
-      {/* Invite Form */}
-      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <UserPlus className="h-5 w-5" />
-          Convidar Novo Membro
-        </h3>
-        <form onSubmit={handleInvite} className="flex gap-4">
-          <div className="flex-1 relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-            <input
-              type="email"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              placeholder="Email do convidado"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple"
-            />
-          </div>
-          <select
-            value={inviteRole}
-            onChange={(e) => setInviteRole(e.target.value as "teacher" | "student")}
-            className="bg-gray-800 border border-gray-700 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-purple"
-          >
-            <option value="teacher">Professor</option>
-            <option value="student">Aluno</option>
-          </select>
-          <button
-            type="submit"
-            disabled={inviting}
-            className="bg-purple hover:bg-purple-light text-white font-bold py-2.5 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {inviting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                A enviar...
-              </>
-            ) : (
-              <>
-                <Check className="h-4 w-4" />
-                Convidar
-              </>
-            )}
-          </button>
-        </form>
-      </div>
-
-      {/* Members List */}
-      <div className="bg-gray-900 border border-gray-800 overflow-hidden">
-        <div className="p-4 border-b border-gray-800 flex items-center gap-4">
-          <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-            <input
-              type="text"
-              placeholder="Pesquisar membro..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 py-2 pl-10 pr-4 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-purple rounded-lg"
-            />
-          </div>
+      {/* ── Erro ── */}
+      {error && (
+        <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
+          <p className="text-sm text-amber-400/80">{error}</p>
         </div>
+      )}
 
-        {filtered.length === 0 ? (
-          <div className="p-12 text-center">
-            <Users className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400">
-              {search ? "Nenhum membro encontrado" : "Ainda não há membros nesta instituição"}
+      {/* ── Loading ── */}
+      {loading && (
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="h-5 w-5 animate-spin text-gray-700" />
+        </div>
+      )}
+
+      {!loading && (
+        <>
+          {/* ── KPIs ── */}
+          <div className="grid grid-cols-3 gap-px bg-gray-800/30">
+            {[
+              { label: "Total",      value: members.length,  icon: Users },
+              { label: "Professores",value: teacherCount,    icon: GraduationCap },
+              { label: "Alunos",     value: studentCount,    icon: Users },
+            ].map(({ label, value, icon: Icon }) => (
+              <div key={label} className="border border-gray-800/60 bg-gray-900/10 px-4 py-3">
+                <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700 mb-1 flex items-center gap-1.5">
+                  <Icon className="h-3 w-3" strokeWidth={1.5} /> {label}
+                </p>
+                <p className="text-xl font-bold text-gray-200 tabular-nums">{value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Convidar ── */}
+          <div className="border border-gray-800/60 bg-gray-900/10 p-5">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-4 flex items-center gap-2">
+              <UserPlus className="h-3.5 w-3.5" strokeWidth={1.5} />
+              // convidar membro
             </p>
+            <form onSubmit={handleInvite} className="flex flex-col sm:flex-row gap-2">
+              <div className="relative flex-1">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-700" strokeWidth={1.5} />
+                <input
+                  type="email" value={inviteEmail}
+                  onChange={e => setInviteEmail(e.target.value)}
+                  placeholder="Email do convidado"
+                  className={`${inputCls} pl-9`}
+                />
+              </div>
+              <select
+                value={inviteRole}
+                onChange={e => setInviteRole(e.target.value as typeof inviteRole)}
+                className="border border-gray-800/60 bg-gray-900/40 py-2.5 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none sm:w-40 transition-colors"
+              >
+                <option value="teacher">Professor</option>
+                <option value="student">Aluno</option>
+              </select>
+              <button
+                type="submit" disabled={inviting}
+                className="flex items-center justify-center gap-1.5 border border-purple/25 bg-purple/8 px-5 py-2.5 font-mono text-[10px] uppercase tracking-widest text-purple/80 hover:bg-purple/15 disabled:opacity-40 transition-all whitespace-nowrap"
+              >
+                {inviting
+                  ? <><Loader2 className="h-3 w-3 animate-spin" /> A enviar...</>
+                  : <><Check className="h-3 w-3" strokeWidth={1.5} /> Convidar</>
+                }
+              </button>
+            </form>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <caption className="sr-only">Membros da instituição</caption>
-              <thead>
-                <tr className="border-b border-gray-800 text-left text-xs uppercase tracking-wider text-gray-500">
-                  <th scope="col" className="py-4 px-6 font-medium">Membro</th>
-                  <th scope="col" className="py-4 px-6 font-medium">Email</th>
-                  <th scope="col" className="py-4 px-6 font-medium">Cargo</th>
-                  <th scope="col" className="py-4 px-6 font-medium">Juntou-se</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-800">
-                {filtered.map((member) => (
-                  <tr key={member.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 font-bold text-sm">
-                          {member.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-white">{member.name}</p>
-                          <p className="text-xs text-gray-500 font-mono">{member.id.slice(0, 12)}...</p>
-                        </div>
+
+          {/* ── Lista de membros ── */}
+          <div className="border border-gray-800/60">
+            {/* Pesquisa */}
+            <div className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-800/40 bg-gray-900/20">
+              <div className="relative flex-1 max-w-xs">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-700" strokeWidth={1.5} />
+                <input
+                  type="text" value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Pesquisar membro..."
+                  className="w-full border border-gray-800/60 bg-gray-900/40 pl-9 pr-3 py-2 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors"
+                />
+              </div>
+              <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700 ml-auto">
+                {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+
+            {/* Header */}
+            <div className="hidden lg:grid grid-cols-[2fr_2fr_1fr_1fr] gap-4 px-5 py-3 border-b border-gray-800/40 bg-gray-900/10">
+              <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Membro</p>
+              <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Email</p>
+              <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Cargo</p>
+              <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Desde</p>
+            </div>
+
+            {filtered.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center border border-gray-800 bg-gray-900">
+                  <Users className="h-4 w-4 text-gray-700" strokeWidth={1.5} />
+                </div>
+                <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">
+                  {search ? "// sem resultados" : "// sem membros"}
+                </p>
+                <p className="text-sm text-gray-600 mt-1">
+                  {search ? "Tenta outro termo." : "Ainda não há membros nesta instituição."}
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-800/30">
+                {filtered.map(member => (
+                  <div
+                    key={member.id}
+                    className="grid grid-cols-1 lg:grid-cols-[2fr_2fr_1fr_1fr] gap-3 items-center px-5 py-3.5 hover:bg-gray-900/20 transition-colors"
+                  >
+                    {/* Nome */}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center border border-gray-800/60 bg-gray-900 font-semibold text-xs text-gray-500">
+                        {member.name.charAt(0).toUpperCase()}
                       </div>
-                    </td>
-                    <td className="py-4 px-6 text-sm text-gray-400">{member.email}</td>
-                    <td className="py-4 px-6">
-                      <span className={`px-2.5 py-1 text-xs font-medium ${roleBadge(member.institutionRole).color}`}>
-                        {roleBadge(member.institutionRole).label}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 text-sm text-gray-400">
+                      <div className="min-w-0">
+                        <p className="text-sm text-gray-200 truncate">{member.name}</p>
+                        <p className="font-mono text-[9px] text-gray-700 truncate lg:hidden">{member.email}</p>
+                      </div>
+                    </div>
+
+                    {/* Email */}
+                    <p className="hidden lg:block font-mono text-xs text-gray-500 truncate">{member.email}</p>
+
+                    {/* Cargo */}
+                    <div className="flex items-center gap-2">
+                      <RoleBadge role={member.institutionRole} />
+                      {/* Mobile badge inline com email */}
+                    </div>
+
+                    {/* Data */}
+                    <p className="hidden lg:block font-mono text-xs text-gray-700">
                       {member.createdAt.toLocaleDateString("pt-PT")}
-                    </td>
-                  </tr>
+                    </p>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            )}
+
+            {/* Footer */}
+            <div className="px-5 py-3 border-t border-gray-800/40 bg-gray-900/10">
+              <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">
+                {members.length} membro{members.length !== 1 ? "s" : ""} no total
+              </p>
+            </div>
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }

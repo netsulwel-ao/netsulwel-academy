@@ -22,7 +22,9 @@ service cloud.firestore {
     }
 
     function isAdminOrTeacher() {
-      return getRole() == "admin" || getRole() == "teacher";
+      // Single get() call — avoids hitting the 3-read limit per request
+      let role = getRole();
+      return role == "admin" || role == "teacher";
     }
 
     function isOwner(uid) {
@@ -64,7 +66,10 @@ service cloud.firestore {
 
     // ── users ─────────────────────────────────────────────
     match /users/{uid} {
-      allow read: if isAuth();
+      // Perfis públicos de teachers/institutions podem ser lidos sem autenticação
+      // (necessário para a landing page e página de professores)
+      allow read: if isAuth() ||
+        (resource.data.role in ["teacher", "institution"]);
       
       allow create: if isOwner(uid) &&
         hasRequiredFields(['email', 'role', 'plan']) &&
@@ -88,7 +93,8 @@ service cloud.firestore {
             request.resource.data.type in [
               "community_like", "community_comment",
               "payment_approved", "course_complete", "certificate_ready",
-              "institution_approved"
+              "institution_approved",
+              "live_approved", "live_rejected"
             ]);
         allow update: if isOwner(uid);
         allow delete: if isAdmin() || isOwner(uid);
@@ -97,8 +103,11 @@ service cloud.firestore {
 
     // ── courses ───────────────────────────────────────────
     match /courses/{courseId} {
-      allow read: if resource.data.status == "published" || isAdminOrTeacher();
-      // Teacher pode criar/editar apenas os seus próprios cursos
+      // Cursos publicados são visíveis publicamente (landing page)
+      // Professores podem ver os seus próprios cursos (rascunhos incluídos)
+      allow read: if resource.data.status == "published" ||
+        isAdminOrTeacher() ||
+        (isAuth() && resource.data.createdBy == request.auth.uid);
       allow create: if isAdminOrTeacher();
       allow update: if isAdmin() ||
         (isTeacher() && resource.data.createdBy == request.auth.uid);
@@ -108,6 +117,7 @@ service cloud.firestore {
 
     // ── trails ────────────────────────────────────────────
     match /trails/{trailId} {
+      // Trilhas publicadas são visíveis publicamente (landing page)
       allow read: if resource.data.status == "published" || isAdminOrTeacher();
       allow create: if isAdminOrTeacher();
       allow update: if isAdmin() ||
@@ -299,7 +309,8 @@ service cloud.firestore {
     match /exam-results/{userId} {
       match /exams/{examId} {
         allow read: if isAdminOrTeacher() || isOwner(userId);
-        allow create: if isAdmin(); // Only admin/backend can create results
+        // Aluno pode submeter o seu próprio resultado
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
         allow update: if isAdmin();
         allow delete: if isAdmin();
       }
@@ -324,7 +335,8 @@ service cloud.firestore {
     match /moduleQuizResults/{userId} {
       match /quizzes/{resultId} {
         allow read: if isAdminOrTeacher() || isOwner(userId);
-        allow create: if isAdmin(); // Only admin/backend can create results
+        // Aluno pode submeter o seu próprio resultado de quiz
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
         allow update: if isAdmin();
         allow delete: if isAdmin();
       }
@@ -334,20 +346,37 @@ service cloud.firestore {
 
     // ── courseChats ────────────────────────────────────────
     match /courseChats/{chatId} {
-      allow read: if isAuth() && request.auth.uid in resource.data.participants;
-      allow create: if isAuth() && request.auth.uid in request.resource.data.participants;
+      // Leitura: ser participante do chat, ou documento não existe (para verificar antes de criar)
+      allow read: if isAuth() && (
+        !exists(/databases/$(database)/documents/courseChats/$(chatId)) ||
+        request.auth.uid in resource.data.participants
+      );
+
+      // Criar chat: utilizador autenticado que se inclui como participante
+      // (professor inclui-se sempre em participants[0])
+      allow create: if isAuth() &&
+        request.auth.uid in request.resource.data.participants;
+
+      // Actualizar lastMessage: qualquer participante
       allow update: if isAuth() && request.auth.uid in resource.data.participants &&
         request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(["lastMessage", "lastMessageAt", "lastMessageBy", "lastMessageByName"]);
-      allow delete: if isAdmin();
+          .hasOnly(["lastMessage", "lastMessageAt", "lastMessageBy", "lastMessageByName", "participants", "participantNames", "participantPhotos"]);
+
+      allow delete: if isAdmin() ||
+        (isAdminOrTeacher() && resource.data.createdBy == request.auth.uid);
 
       match /messages/{msgId} {
+        // Ler mensagens: ser participante
         allow read: if isAuth() && request.auth.uid in
           get(/databases/$(database)/documents/courseChats/$(chatId)).data.participants;
+        // Enviar mensagem: ser participante e a mensagem pertence ao utilizador
         allow create: if isAuth() &&
-          request.resource.data.uid == request.auth.uid;
+          request.resource.data.uid == request.auth.uid &&
+          request.auth.uid in
+            get(/databases/$(database)/documents/courseChats/$(chatId)).data.participants;
         allow update: if isAdmin();
-        allow delete: if isAdmin();
+        allow delete: if isAdmin() ||
+          (isAuth() && resource.data.uid == request.auth.uid);
       }
     }
 

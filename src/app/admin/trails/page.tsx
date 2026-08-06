@@ -1,153 +1,389 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, deleteDoc, doc, orderBy, query, where } from "firebase/firestore";
-import { Plus, Trash2, Pencil, Loader2, BookOpen, AlertTriangle, Layers, Radio } from "lucide-react";
+import {
+  collection, getDocs, deleteDoc, doc, query, where, updateDoc, serverTimestamp,
+} from "firebase/firestore";
+import {
+  Plus, Trash2, Pencil, Loader2, BookOpen, AlertTriangle,
+  Layers, Radio, Search, X, Filter, Eye, EyeOff,
+} from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 import type { Trail } from "@/types/course";
 
-const TYPE_LABELS = { golden: "Golden", smart: "Smart", standalone: "Standalone" };
-const TYPE_COLORS = {
-  golden: "bg-yellow-500/15 text-yellow-400 border-yellow-500/25",
-  smart: "bg-green-500/15 text-green-400 border-green-500/25",
-  standalone: "bg-blue-500/15 text-blue-400 border-blue-500/25",
-};
+// ── Helpers ───────────────────────────────────────────────────
+function toDate(raw: unknown): Date {
+  if (!raw) return new Date(0);
+  if (raw instanceof Date) return raw;
+  if (typeof raw === "object" && raw !== null && "toDate" in raw)
+    return (raw as { toDate: () => Date }).toDate();
+  return new Date(0);
+}
 
+// ── Badges ────────────────────────────────────────────────────
+function TypeBadge({ type }: { type?: string }) {
+  const map: Record<string, string> = {
+    standalone: "border-blue-500/25 text-blue-400/70",
+    smart:      "border-green/25 text-green/70",
+    golden:     "border-amber-500/25 text-amber-400/70",
+  };
+  const label: Record<string, string> = { standalone: "standalone", smart: "smart", golden: "golden" };
+  const t = type ?? "standalone";
+  return (
+    <span className={`font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 border ${map[t] ?? "border-gray-700 text-gray-600"}`}>
+      {label[t] ?? t}
+    </span>
+  );
+}
+
+function StatusBadge({ status }: { status: "published" | "draft" }) {
+  return (
+    <span className={`font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 border ${
+      status === "published"
+        ? "border-green/30 text-green/70 bg-green/8"
+        : "border-amber-500/30 text-amber-400/70 bg-amber-500/8"
+    }`}>
+      {status === "published" ? "pub" : "draft"}
+    </span>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────
 export default function TrailsPage() {
   const { isAdmin, isTeacher, user } = useAuth();
-  const [trails, setTrails] = useState<Trail[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [trails,     setTrails]     = useState<Trail[]>([]);
+  const [loading,    setLoading]    = useState(true);
+  const [error,      setError]      = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
-  const fetchTrails = async () => {
+  // ── Filtros ────────────────────────────────────────────────
+  const [search,       setSearch]       = useState("");
+  const [filterStatus, setFilterStatus] = useState<"all" | "published" | "draft">("all");
+  const [filterType,   setFilterType]   = useState<"all" | "standalone" | "smart" | "golden">("all");
+  const [showFilters,  setShowFilters]  = useState(false);
+
+  // ── Load ──────────────────────────────────────────────────
+  const load = useCallback(async () => {
+    if (!user) return;
+    setLoading(true); setError(null);
     try {
-      // Teacher vê apenas as suas trilhas
-      const constraints = isTeacher && user?.uid
-        ? [orderBy("createdAt", "desc"), where("createdBy", "==", user.uid)]
-        : [orderBy("createdAt", "desc")];
-      const q = query(collection(db, "trails"), ...constraints);
+      // Sem orderBy composto — ordena em memória
+      const q = isTeacher && !isAdmin
+        ? query(collection(db, "trails"), where("createdBy", "==", user.uid))
+        : query(collection(db, "trails"));
       const snap = await getDocs(q);
-      setTrails(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Trail)));
+      const data = snap.docs
+        .map(d => ({ id: d.id, ...d.data() } as Trail))
+        .sort((a, b) => toDate(b.createdAt).getTime() - toDate(a.createdAt).getTime());
+      setTrails(data);
     } catch (err) {
-      console.error(err);
+      logger.error("AdminTrails: failed to load", err);
+      setError("Não foi possível carregar as trilhas.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.uid, isTeacher, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    fetchTrails();
-  }, [isTeacher, user?.uid]);
+  useEffect(() => { load(); }, [load]);
 
-  const handleDelete = async (id: string) => {
-    setDeletingId(id);
+  // ── Filtrar ────────────────────────────────────────────────
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    return trails.filter(t => {
+      if (filterStatus !== "all" && t.status !== filterStatus) return false;
+      if (filterType   !== "all" && t.type   !== filterType)   return false;
+      if (q) return t.title.toLowerCase().includes(q) || (t.description?.toLowerCase().includes(q) ?? false);
+      return true;
+    });
+  }, [trails, search, filterStatus, filterType]);
+
+  const hasFilters = filterStatus !== "all" || filterType !== "all" || search.trim() !== "";
+  const clearFilters = () => { setSearch(""); setFilterStatus("all"); setFilterType("all"); };
+
+  // ── Acções ─────────────────────────────────────────────────
+  const handleDelete = useCallback((trail: Trail) => {
+    toast.error(`Apagar "${trail.title}"?`, {
+      description: "Os cursos associados não serão apagados.",
+      action: {
+        label: "Apagar",
+        onClick: async () => {
+          setDeletingId(trail.id!);
+          try {
+            await deleteDoc(doc(db, "trails", trail.id!));
+            setTrails(prev => prev.filter(t => t.id !== trail.id));
+            toast.success("Trilha apagada.");
+          } catch (err) {
+            logger.error("AdminTrails: delete failed", err, { trailId: trail.id });
+            toast.error("Erro ao apagar a trilha.");
+          } finally {
+            setDeletingId(null);
+          }
+        },
+      },
+    });
+  }, []);
+
+  const handleToggleStatus = useCallback(async (trail: Trail) => {
+    const next = trail.status === "published" ? "draft" : "published";
+    setTogglingId(trail.id!);
     try {
-      await deleteDoc(doc(db, "trails", id));
-      setTrails((prev) => prev.filter((t) => t.id !== id));
+      await updateDoc(doc(db, "trails", trail.id!), { status: next, updatedAt: serverTimestamp() });
+      setTrails(prev => prev.map(t => t.id === trail.id ? { ...t, status: next } : t));
+      toast.success(next === "published" ? `"${trail.title}" publicada.` : `"${trail.title}" movida para rascunho.`);
     } catch (err) {
-      console.error(err);
+      logger.error("AdminTrails: toggle status failed", err, { trailId: trail.id });
+      toast.error("Erro ao alterar estado da trilha.");
     } finally {
-      setDeletingId(null);
-      setConfirmDelete(null);
+      setTogglingId(null);
     }
-  };
+  }, []);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
+    <div className="max-w-[80rem] mx-auto space-y-8 animate-in fade-in duration-300">
+
+      {/* ── Cabeçalho ── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Trilhas</h1>
-          <p className="mt-1 text-gray-400">{loading ? "A carregar..." : `${trails.length} trilha${trails.length !== 1 ? "s" : ""}`}</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+            // gestão de trilhas
+          </p>
+          <h1 className="text-2xl font-bold text-gray-100">Trilhas</h1>
+          <p className="mt-1 text-sm text-gray-600">
+            {loading ? "A carregar..." : `${filtered.length} de ${trails.length} trilha${trails.length !== 1 ? "s" : ""}`}
+          </p>
         </div>
-        <Link href="/admin/trails/new"
-          className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-2.5 font-semibold transition-colors">
-          <Plus className="w-4 h-4" /> Nova Trilha
+        <Link
+          href="/admin/trails/new"
+          className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all shrink-0"
+        >
+          <Plus className="h-3 w-3" /> Nova trilha
         </Link>
       </div>
 
-      {loading && <div className="flex items-center justify-center py-24" role="status" aria-live="polite"><Loader2 className="h-8 w-8 animate-spin text-purple" /><span className="sr-only">A carregar trilhas...</span></div>}
+      {/* ── Pesquisa + filtros ── */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-700" strokeWidth={1.5} />
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Pesquisar trilhas..."
+              className="w-full border border-gray-800/60 bg-gray-900/10 pl-9 pr-9 py-2.5 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
+                <X className="h-3 w-3 text-gray-700 hover:text-gray-500 transition-colors" />
+              </button>
+            )}
+          </div>
+          <button
+            onClick={() => setShowFilters(v => !v)}
+            className={`flex items-center gap-1.5 border px-3 py-2.5 font-mono text-[10px] uppercase tracking-widest transition-all shrink-0 ${
+              hasFilters
+                ? "border-purple/30 bg-purple/8 text-purple/70"
+                : "border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-400"
+            }`}
+          >
+            <Filter className="h-3 w-3" strokeWidth={1.5} />
+            Filtros
+            {hasFilters && <span className="h-1.5 w-1.5 bg-purple/70 rounded-full" />}
+          </button>
+        </div>
 
-      {!loading && trails.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-24 bg-gray-900/40 text-center">
-          <Layers className="h-12 w-12 text-gray-700 mb-3" />
-          <h2 className="text-xl font-bold text-white mb-2">Nenhuma trilha ainda</h2>
-          <p className="text-gray-400 mb-6 max-w-sm">Crie trilhas para agrupar cursos em sequências de aprendizagem.</p>
-          <Link href="/admin/trails/new" className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-6 py-3 font-bold transition-colors">
-            <Plus className="w-4 h-4" /> Criar Primeira Trilha
-          </Link>
+        {showFilters && (
+          <div className="flex flex-wrap items-center gap-2 border border-gray-800/40 bg-gray-900/10 px-4 py-3">
+            <select
+              value={filterStatus}
+              onChange={e => setFilterStatus(e.target.value as typeof filterStatus)}
+              className="border border-gray-800/60 bg-gray-900 text-xs text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
+            >
+              <option value="all">Todos os estados</option>
+              <option value="published">Publicada</option>
+              <option value="draft">Rascunho</option>
+            </select>
+            <select
+              value={filterType}
+              onChange={e => setFilterType(e.target.value as typeof filterType)}
+              className="border border-gray-800/60 bg-gray-900 text-xs text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
+            >
+              <option value="all">Todos os tipos</option>
+              <option value="standalone">Standalone</option>
+              <option value="smart">Smart</option>
+              <option value="golden">Golden</option>
+            </select>
+            {hasFilters && (
+              <button
+                onClick={clearFilters}
+                className="font-mono text-[9px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-1"
+              >
+                <X className="h-3 w-3" /> Limpar
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── Erro ── */}
+      {error && (
+        <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
+          <p className="text-sm text-amber-400/80">{error}</p>
         </div>
       )}
 
-      {!loading && trails.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {trails.map((trail) => (
-            <div key={trail.id} className="group bg-gray-900/40 backdrop-blur-xl flex flex-col overflow-hidden hover:bg-gray-900/60 transition-all">
-              <div className="relative h-40 bg-gray-800 overflow-hidden">
-                {trail.thumbnail ? (
-                  <img src={trail.thumbnail} alt={trail.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-900/40 to-gray-900">
-                    <Layers className="h-12 w-12 text-blue-500/40" />
-                  </div>
-                )}
-                <span className={`absolute top-3 right-3 px-2.5 py-1 text-xs font-bold uppercase tracking-wider border ${TYPE_COLORS[trail.type ?? "standalone"]}`}>
-                  {TYPE_LABELS[trail.type ?? "standalone"]}
-                </span>
-              </div>
+      {/* ── Loading ── */}
+      {loading && (
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="h-5 w-5 animate-spin text-gray-700" />
+        </div>
+      )}
 
-              <div className="flex flex-col flex-1 p-5">
-                <h3 className="font-bold text-white text-lg leading-snug">{trail.title}</h3>
-                <p className="mt-2 text-sm text-gray-400 line-clamp-2 flex-1">{trail.description || "Sem descrição."}</p>
-                <div className="mt-3 flex items-center gap-3 text-xs text-gray-500">
-                  <span className="flex items-center gap-1"><BookOpen className="h-3.5 w-3.5" />{trail.coursesCount ?? 0} cursos</span>
-<span className="flex items-center gap-1"><Radio className="h-3.5 w-3.5" />{trail.livesCount ?? 0} aulas</span>
-                  <span className={`px-2 py-0.5 border text-xs font-medium ${trail.status === "published" ? "bg-green-500/10 text-green-400 border-green-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20"}`}>
-                    {trail.status === "published" ? "Publicada" : "Rascunho"}
+      {/* ── Empty state ── */}
+      {!loading && filtered.length === 0 && (
+        <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-20 text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
+            <Layers className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
+          </div>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">
+            {hasFilters ? "// sem resultados" : "// sem trilhas"}
+          </p>
+          <p className="text-sm text-gray-600 mb-5">
+            {hasFilters ? "Nenhuma trilha corresponde aos filtros." : "Agrupa cursos em sequências de aprendizagem."}
+          </p>
+          {hasFilters ? (
+            <button onClick={clearFilters} className="font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+              ← Limpar filtros
+            </button>
+          ) : (
+            <Link
+              href="/admin/trails/new"
+              className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all"
+            >
+              <Plus className="h-3 w-3" /> Criar trilha
+            </Link>
+          )}
+        </div>
+      )}
+
+      {/* ── Tabela ── */}
+      {!loading && filtered.length > 0 && (
+        <div className="border border-gray-800/60">
+          {/* Cabeçalho */}
+          <div className="hidden lg:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 border-b border-gray-800/40 bg-gray-900/20">
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Trilha</p>
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Tipo</p>
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Conteúdo</p>
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Estado</p>
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Acções</p>
+          </div>
+
+          <div className="divide-y divide-gray-800/30">
+            {filtered.map(trail => (
+              <div
+                key={trail.id}
+                className="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 items-center px-5 py-4 hover:bg-gray-900/20 transition-colors"
+              >
+                {/* Thumbnail + título */}
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="h-12 w-16 shrink-0 overflow-hidden border border-gray-800/60 bg-gray-900">
+                    {trail.thumbnail
+                      ? <img src={trail.thumbnail} alt={trail.title} className="h-full w-full object-cover" />
+                      : <div className="flex h-full w-full items-center justify-center">
+                          <Layers className="h-4 w-4 text-gray-800" strokeWidth={1} />
+                        </div>
+                    }
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-200 truncate">{trail.title}</p>
+                    <p className="text-xs text-gray-600 truncate mt-0.5 line-clamp-1">
+                      {trail.description || "Sem descrição"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Tipo */}
+                <div className="hidden lg:block">
+                  <TypeBadge type={trail.type} />
+                </div>
+
+                {/* Conteúdo */}
+                <div className="hidden lg:flex items-center gap-3 font-mono text-xs text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <BookOpen className="h-3 w-3" strokeWidth={1.5} />
+                    {trail.coursesCount ?? 0}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Radio className="h-3 w-3" strokeWidth={1.5} />
+                    {trail.livesCount ?? 0}
                   </span>
                 </div>
 
-                <div className="mt-4 flex items-center gap-3 border-t border-gray-800 pt-4">
-                  <Link href={`/admin/trails/${trail.id}/edit`}
-                    className="flex flex-1 items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 text-white py-2 text-sm font-medium transition-colors">
-                    <Pencil className="h-4 w-4" /> Editar
+                {/* Estado */}
+                <div className="hidden lg:flex items-center">
+                  <StatusBadge status={trail.status} />
+                </div>
+
+                {/* Acções */}
+                <div className="flex items-center gap-1.5 flex-wrap lg:flex-nowrap">
+                  {/* Mobile badges */}
+                  <div className="flex items-center gap-1.5 lg:hidden">
+                    <StatusBadge status={trail.status} />
+                    <TypeBadge type={trail.type} />
+                  </div>
+
+                  {/* Toggle pub/draft */}
+                  <button
+                    onClick={() => handleToggleStatus(trail)}
+                    disabled={togglingId === trail.id}
+                    title={trail.status === "published" ? "Mover para rascunho" : "Publicar"}
+                    className="flex h-8 w-8 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-300 disabled:opacity-50 transition-all"
+                  >
+                    {togglingId === trail.id
+                      ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      : trail.status === "published"
+                        ? <EyeOff className="h-3.5 w-3.5" strokeWidth={1.5} />
+                        : <Eye className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    }
+                  </button>
+
+                  {/* Editar */}
+                  <Link
+                    href={`/admin/trails/${trail.id}/edit`}
+                    title="Editar trilha"
+                    className="flex h-8 w-8 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-purple/30 hover:text-purple/70 transition-all"
+                  >
+                    <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
                   </Link>
-        <button onClick={() => setConfirmDelete(trail.id!)}
-                    className="flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-3 py-2 text-sm transition-colors">
-                    <Trash2 className="h-4 w-4" />
+
+                  {/* Apagar */}
+                  <button
+                    onClick={() => handleDelete(trail)}
+                    disabled={deletingId === trail.id}
+                    title="Apagar trilha"
+                    className="flex h-8 w-8 items-center justify-center border border-red-500/15 bg-red-500/5 text-red-400/50 hover:border-red-500/30 hover:text-red-400/80 disabled:opacity-40 transition-all"
+                  >
+                    {deletingId === trail.id
+                      ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      : <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    }
                   </button>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
 
-      {/* Confirm delete modal */}
-      {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/80 backdrop-blur-sm">
-          <div className="bg-gray-900 border border-gray-800 p-8 max-w-sm w-full mx-4 shadow-2xl"
-            role="dialog" aria-modal="true" aria-labelledby="delete-trail-title" aria-describedby="delete-trail-desc"
-            onKeyDown={(e) => { if (e.key === "Escape") setConfirmDelete(null); }}>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center bg-red-500/10">
-                <AlertTriangle className="h-5 w-5 text-red-400" />
-              </div>
-              <h3 id="delete-trail-title" className="text-lg font-bold text-white">Apagar Trilha</h3>
-            </div>
-            <p id="delete-trail-desc" className="text-gray-400 text-sm mb-6">Tens a certeza? Os cursos associados não serão apagados, apenas a trilha.</p>
-            <div className="flex gap-3">
-              <button onClick={() => handleDelete(confirmDelete)} disabled={!!deletingId}
-                className="flex flex-1 items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2.5 font-bold transition-colors disabled:opacity-60">
-                {deletingId ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apagar"}
-              </button>
-              <button onClick={() => setConfirmDelete(null)}
-                className="flex flex-1 items-center justify-center bg-gray-800 hover:bg-gray-700 text-white py-2.5 font-medium transition-colors">
-                Cancelar
-              </button>
-            </div>
+          <div className="px-5 py-3 border-t border-gray-800/40 bg-gray-900/10">
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">
+              {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+              {hasFilters && ` (filtrado de ${trails.length})`}
+            </p>
           </div>
         </div>
       )}

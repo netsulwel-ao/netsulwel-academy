@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import PostCard from "@/components/dashboard/community/PostCard";
 import type { CommunityPost } from "@/types/community";
 import { useAuth } from "@/contexts/AuthContext";
+import { Avatar } from "@/components/ui/Avatar";
 
 interface ProfileData {
   name: string;
@@ -131,13 +132,9 @@ export default function CommunityProfilePage() {
       {/* Profile Card */}
       <div className="bg-gray-900/40 border border-gray-800 p-6 sm:p-8">
         <div className="flex items-start gap-5">
-          {profile.photoURL ? (
-             <img src={profile.photoURL} alt={profile.name} className="h-20 w-20 rounded-full object-cover shrink-0" />
-          ) : (
-            <div className="h-20 w-20 rounded-full bg-purple/20 flex items-center justify-center shrink-0">
-              <span className="text-3xl font-bold text-purple-light">{profile.name[0]?.toUpperCase() || "?"}</span>
-            </div>
-          )}
+          <div className="h-20 w-20 shrink-0 overflow-hidden border border-gray-800/60">
+            <Avatar uid={userId} photoURL={profile.photoURL} name={profile.name} size={80} className="h-full w-full" />
+          </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl font-bold text-white">{profile.name}</h1>

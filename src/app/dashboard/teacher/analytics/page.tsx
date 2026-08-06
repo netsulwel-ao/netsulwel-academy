@@ -1,223 +1,452 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
-import { TrendingUp, BookOpen, DollarSign, Users, Loader2, BarChart3, Radio } from "lucide-react";
-import Link from "next/link";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import {
+  TrendingUp, BookOpen, DollarSign, Loader2,
+  BarChart3, Radio, ArrowUpRight, Minus, AlertTriangle, Users,
+} from "lucide-react";
 import type { Course } from "@/types/course";
 import type { LiveSession } from "@/types/live";
+import type { Sale } from "@/types/settings";
+import { logger } from "@/lib/logger";
 
-interface Sale {
-  id: string;
-  amount: number;
-  netAmount?: number;
-  createdAt?: { toDate: () => Date };
-  status: string;
-  type: string;
-  itemId?: string;
+// ── Helpers ───────────────────────────────────────────────────
+function toDate(raw: unknown): Date | null {
+  if (!raw) return null;
+  if (raw instanceof Date) return raw;
+  if (typeof raw === "object" && raw !== null && "toDate" in raw)
+    return (raw as { toDate: () => Date }).toDate();
+  if (typeof raw === "string") { const d = new Date(raw); return isNaN(d.getTime()) ? null : d; }
+  return null;
 }
 
+function formatKz(v: number) {
+  return v.toLocaleString("pt-AO") + " Kz";
+}
+
+function monthKey(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function monthLabel(key: string) {
+  const [y, m] = key.split("-");
+  const d = new Date(Number(y), Number(m) - 1, 1);
+  return d.toLocaleDateString("pt-PT", { month: "short" }).replace(".", "");
+}
+
+// ── Stat card ─────────────────────────────────────────────────
+function StatCard({ label, value, sub, up, accent = "text-gray-200" }: {
+  label: string; value: string; sub?: string; up?: boolean; accent?: string;
+}) {
+  return (
+    <div className="border border-gray-800/60 bg-gray-900/10 p-5 flex flex-col gap-2">
+      <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-700">{label}</p>
+      <div className="flex items-end justify-between gap-2">
+        <p className={`text-2xl font-bold tabular-nums leading-none ${accent}`}>{value}</p>
+        {up !== undefined && (
+          up
+            ? <ArrowUpRight className="h-4 w-4 text-green/60 mb-0.5 shrink-0" strokeWidth={1.5} />
+            : <Minus className="h-4 w-4 text-gray-700 mb-0.5 shrink-0" strokeWidth={1.5} />
+        )}
+      </div>
+      {sub && <p className="text-xs text-gray-600 leading-snug">{sub}</p>}
+    </div>
+  );
+}
+
+// ── Bar chart ─────────────────────────────────────────────────
+function BarChart({ data }: { data: { key: string; label: string; value: number; revenue: number }[] }) {
+  const maxVal = Math.max(...data.map(d => d.value), 1);
+  const [hov, setHov] = useState<string | null>(null);
+  return (
+    <div className="flex items-end gap-2 h-36 w-full">
+      {data.map(({ key, label, value, revenue }) => {
+        const pct = value > 0 ? Math.max((value / maxVal) * 100, 6) : 3;
+        const isHov = hov === key;
+        return (
+          <div
+            key={key}
+            className="flex-1 flex flex-col items-center h-full justify-end group"
+            onMouseEnter={() => setHov(key)}
+            onMouseLeave={() => setHov(null)}
+          >
+            <div className={`mb-1 text-center transition-opacity duration-150 ${isHov ? "opacity-100" : "opacity-0"}`}>
+              <p className="font-mono text-[9px] text-white whitespace-nowrap">{value}v</p>
+              {revenue > 0 && <p className="font-mono text-[8px] text-green/60">{formatKz(revenue)}</p>}
+            </div>
+            <div
+              className={`w-full transition-colors duration-150 ${value > 0 ? (isHov ? "bg-green/50" : "bg-green/25") : "bg-gray-800/30"}`}
+              style={{ height: `${pct}%` }}
+            />
+            <p className="font-mono text-[8px] uppercase text-gray-700 mt-1">{label}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Revenue donut (CSS conic-gradient) ────────────────────────
+function RevenueSplit({ courseRev, liveRev }: { courseRev: number; liveRev: number }) {
+  const total = courseRev + liveRev;
+  if (total === 0) return <p className="text-xs text-gray-700 py-4">Sem receita ainda.</p>;
+  const pct = Math.round((courseRev / total) * 100);
+  return (
+    <div className="flex items-center gap-6">
+      <div
+        className="h-16 w-16 shrink-0"
+        style={{
+          borderRadius: "50%",
+          background: `conic-gradient(rgba(134,239,172,0.55) 0% ${pct}%, rgba(248,113,113,0.45) ${pct}% 100%)`,
+        }}
+      />
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 bg-green/55 shrink-0" />
+          <span className="text-xs text-gray-400">Cursos</span>
+          <span className="font-mono text-xs text-gray-200 ml-2">{pct}%</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 bg-red-400/45 shrink-0" />
+          <span className="text-xs text-gray-400">Lives</span>
+          <span className="font-mono text-xs text-gray-200 ml-2">{100 - pct}%</span>
+        </div>
+        <p className="font-mono text-[9px] text-gray-700 pt-1">{formatKz(total)} total</p>
+      </div>
+    </div>
+  );
+}
+
+// ── Main page ─────────────────────────────────────────────────
 export default function TeacherAnalyticsPage() {
   const { user, isTeacher } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
   const [lives, setLives] = useState<LiveSession[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user || !isTeacher) return;
+    if (!user || !isTeacher) { setLoading(false); return; }
+    let cancelled = false;
+
     const load = async () => {
       try {
+        // Sem orderBy composto — ordena em memória para evitar índices no Firestore
         const [coursesSnap, livesSnap, salesSnap] = await Promise.all([
-          getDocs(query(collection(db, "courses"), where("createdBy", "==", user.uid), orderBy("createdAt", "desc"))),
-          getDocs(query(collection(db, "lives"), where("createdBy", "==", user.uid), orderBy("createdAt", "desc"))),
-          getDocs(query(collection(db, "sales"), where("sellerId", "==", user.uid), where("status", "==", "confirmed"), orderBy("createdAt", "desc"))),
+          getDocs(query(collection(db, "courses"), where("createdBy", "==", user.uid))),
+          getDocs(query(collection(db, "lives"),   where("createdBy", "==", user.uid))),
+          getDocs(query(collection(db, "sales"),   where("sellerId", "==", user.uid), where("status", "==", "confirmed"))),
         ]);
-        setCourses(coursesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Course)));
-        setLives(livesSnap.docs.map(d => ({ id: d.id, ...d.data() } as LiveSession)));
-        setSales(salesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Sale)));
+        if (cancelled) return;
+
+        const sortByDate = (a: unknown, b: unknown) => {
+          const ta = toDate((a as { createdAt?: unknown }).createdAt)?.getTime() ?? 0;
+          const tb = toDate((b as { createdAt?: unknown }).createdAt)?.getTime() ?? 0;
+          return tb - ta;
+        };
+
+        setCourses(coursesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Course)).sort(sortByDate));
+        setLives(livesSnap.docs.map(d => ({ id: d.id, ...d.data() } as LiveSession))
+          .sort((a, b) => new Date(b.scheduledAt || 0).getTime() - new Date(a.scheduledAt || 0).getTime()));
+        setSales(salesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Sale)).sort(sortByDate));
       } catch (err) {
-        console.error(err);
+        logger.error("TeacherAnalytics: failed to load", err);
+        if (!cancelled) setError("Não foi possível carregar os dados de analytics.");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
+
     load();
-  }, [user, isTeacher]);
+    return () => { cancelled = true; };
+  }, [user?.uid, isTeacher]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const totalRevenue = sales.reduce((sum, s) => sum + (s.netAmount || s.amount), 0);
-  const totalSales = sales.length;
-  const totalCourses = courses.length;
-  const publishedCourses = courses.filter(c => c.status === "published").length;
-  const totalLives = lives.length;
-  const liveSales = sales.filter(s => s.type === "live").length;
-  const courseSales = sales.filter(s => s.type !== "live").length;
-  const avgPrice = totalSales > 0 ? Math.round(totalRevenue / totalSales) : 0;
+  // ── Métricas derivadas ──────────────────────────────────────
+  const m = useMemo(() => {
+    const totalRevenue  = sales.reduce((s, x) => s + (x.netAmount ?? x.amount ?? 0), 0);
+    const courseRevenue = sales.filter(s => s.type !== "live").reduce((s, x) => s + (x.netAmount ?? x.amount ?? 0), 0);
+    const liveRevenue   = sales.filter(s => s.type === "live").reduce((s, x) => s + (x.netAmount ?? x.amount ?? 0), 0);
+    const totalSales    = sales.length;
+    const courseSales   = sales.filter(s => s.type !== "live").length;
+    const liveSales     = sales.filter(s => s.type === "live").length;
+    const published     = courses.filter(c => c.status === "published").length;
+    const avgTicket     = totalSales > 0 ? Math.round(totalRevenue / totalSales) : 0;
+    const uniqueStudents = new Set(sales.filter(s => s.type === "standalone").map(s => s.userId)).size;
+    return { totalRevenue, courseRevenue, liveRevenue, totalSales, courseSales, liveSales, published, avgTicket, uniqueStudents };
+  }, [sales, courses]);
 
-  // Sales by month (last 6 months)
-  const monthMap = new Map<string, number>();
-  const now = new Date();
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    const label = d.toLocaleDateString("pt-PT", { month: "short", year: "2-digit" });
-    monthMap.set(key, 0);
-  }
-  sales.forEach(s => {
-    if (s.createdAt) {
-      const d = s.createdAt.toDate();
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      if (monthMap.has(key)) {
-        monthMap.set(key, (monthMap.get(key) || 0) + 1);
-      }
-    }
-  });
+  // ── Gráfico de barras: vendas por mês (últimos 6) ──────────
+  const chartData = useMemo(() => {
+    const now = new Date();
+    const months = Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+      return { key: monthKey(d), label: monthLabel(monthKey(d)), value: 0, revenue: 0 };
+    });
+    sales.forEach(s => {
+      const d = toDate(s.createdAt);
+      if (!d) return;
+      const k = monthKey(d);
+      const found = months.find(x => x.key === k);
+      if (found) { found.value++; found.revenue += s.netAmount ?? s.amount ?? 0; }
+    });
+    return months;
+  }, [sales]);
 
-  const formatKz = (v: number) => v.toLocaleString("pt-AO") + " Kz";
-  const maxVal = Math.max(...Array.from(monthMap.values()), 1);
+  // ── Cursos com contagem de vendas ──────────────────────────
+  const courseStats = useMemo(() =>
+    courses.map(c => {
+      const cs = sales.filter(s => s.itemId === c.id);
+      return { ...c, saleCount: cs.length, revenue: cs.reduce((s, x) => s + (x.netAmount ?? x.amount ?? 0), 0) };
+    }).sort((a, b) => b.revenue - a.revenue),
+  [courses, sales]);
 
-  if (!isTeacher) {
-    return <div className="text-center py-20"><p className="text-gray-400">Acesso não autorizado.</p></div>;
-  }
+  // ── Lives com contagem de vendas ───────────────────────────
+  const liveStats = useMemo(() =>
+    lives.map(l => {
+      const ls = sales.filter(s => s.itemId === l.id);
+      return { ...l, saleCount: ls.length, revenue: ls.reduce((s, x) => s + (x.netAmount ?? x.amount ?? 0), 0) };
+    }).sort((a, b) => b.revenue - a.revenue),
+  [lives, sales]);
+
+  // ── Últimas vendas ──────────────────────────────────────────
+  const recentSales = useMemo(() => sales.slice(0, 8), [sales]);
+
+  if (!isTeacher) return null;
 
   return (
-    <div className="max-w-6xl mx-auto animate-in fade-in duration-500 space-y-6">
+    <div className="max-w-[80rem] mx-auto space-y-10 animate-in fade-in duration-300">
+
+      {/* ── Cabeçalho ── */}
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-white">Analytics</h1>
-        <p className="mt-1 text-gray-400">Métricas de desempenho dos teus cursos</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+          // analytics
+        </p>
+        <h1 className="text-2xl font-bold text-gray-100">Analytics</h1>
+        <p className="mt-1 text-sm text-gray-600">
+          Desempenho dos teus cursos, lives e receita.
+        </p>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-green-400" /></div>
-      ) : (
+      {/* ── Erro ── */}
+      {error && (
+        <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
+          <p className="text-sm text-amber-400/80">{error}</p>
+        </div>
+      )}
+
+      {/* ── Loading ── */}
+      {loading && (
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="h-5 w-5 animate-spin text-gray-700" />
+        </div>
+      )}
+
+      {!loading && !error && (
         <>
-          {/* Summary cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-            <div className="bg-gray-900/40 border border-gray-800 p-5">
-              <div className="flex items-center gap-2 mb-2">
-                <BookOpen className="h-5 w-5 text-green-400" />
-                <span className="text-sm text-gray-400">Cursos</span>
+          {/* ── KPIs: 5 cards em grid ── */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-px bg-gray-800/30">
+            <StatCard
+              label="Receita líquida"
+              value={formatKz(m.totalRevenue)}
+              sub={`${m.totalSales} venda${m.totalSales !== 1 ? "s" : ""} confirmada${m.totalSales !== 1 ? "s" : ""}`}
+              up={m.totalRevenue > 0}
+              accent="text-green/80"
+            />
+            <StatCard
+              label="Ticket médio"
+              value={formatKz(m.avgTicket)}
+              sub="por transacção"
+            />
+            <StatCard
+              label="Alunos únicos"
+              value={String(m.uniqueStudents)}
+              sub="de vendas avulsas"
+              accent="text-purple/80"
+            />
+            <StatCard
+              label="Cursos"
+              value={String(courses.length)}
+              sub={`${m.published} pub · ${m.courseSales} venda${m.courseSales !== 1 ? "s" : ""}`}
+            />
+            <StatCard
+              label="Lives"
+              value={String(lives.length)}
+              sub={`${m.liveSales} venda${m.liveSales !== 1 ? "s" : ""} de lives`}
+            />
+          </div>
+
+          {/* ── Linha: Gráfico de barras + Divisão de receita ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            {/* Gráfico vendas/mês */}
+            <div className="lg:col-span-2 border border-gray-800/60 bg-gray-900/10 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-1">
+                    // vendas · últimos 6 meses
+                  </p>
+                  <p className="text-sm font-semibold text-gray-200">
+                    {m.totalSales} venda{m.totalSales !== 1 ? "s" : ""} no período
+                  </p>
+                </div>
+                <BarChart3 className="h-4 w-4 text-gray-700" strokeWidth={1.5} />
               </div>
-              <p className="text-2xl font-bold text-white">{totalCourses}</p>
-              <p className="text-xs text-gray-500 mt-1">{publishedCourses} publicado{publishedCourses !== 1 ? "s" : ""}</p>
+              <BarChart data={chartData} />
             </div>
-            <div className="bg-gray-900/40 border border-gray-800 p-5">
-              <div className="flex items-center gap-2 mb-2">
-                <Radio className="h-5 w-5 text-red-400" />
-                <span className="text-sm text-gray-400">Lives</span>
+
+            {/* Divisão de receita */}
+            <div className="border border-gray-800/60 bg-gray-900/10 p-6 flex flex-col gap-6">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-1">
+                  // receita por tipo
+                </p>
+                <p className="text-sm font-semibold text-gray-200">Distribuição</p>
               </div>
-              <p className="text-2xl font-bold text-white">{totalLives}</p>
-              <p className="text-xs text-gray-500 mt-1">{liveSales} venda{liveSales !== 1 ? "s" : ""}</p>
-            </div>
-            <div className="bg-gray-900/40 border border-gray-800 p-5">
-              <div className="flex items-center gap-2 mb-2">
-                <DollarSign className="h-5 w-5 text-green-400" />
-                <span className="text-sm text-gray-400">Receita</span>
+              <RevenueSplit courseRev={m.courseRevenue} liveRev={m.liveRevenue} />
+              <div className="mt-auto space-y-2 border-t border-gray-800/40 pt-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-600 flex items-center gap-1.5">
+                    <BookOpen className="h-3 w-3" strokeWidth={1.5} /> Cursos
+                  </span>
+                  <span className="font-mono text-xs text-gray-300">{formatKz(m.courseRevenue)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-600 flex items-center gap-1.5">
+                    <Radio className="h-3 w-3" strokeWidth={1.5} /> Lives
+                  </span>
+                  <span className="font-mono text-xs text-gray-300">{formatKz(m.liveRevenue)}</span>
+                </div>
               </div>
-              <p className="text-2xl font-bold text-white">{formatKz(totalRevenue)}</p>
-              <p className="text-xs text-gray-500 mt-1">{totalSales} venda{totalSales !== 1 ? "s" : ""}</p>
-            </div>
-            <div className="bg-gray-900/40 border border-gray-800 p-5">
-              <div className="flex items-center gap-2 mb-2">
-                <BarChart3 className="h-5 w-5 text-blue-400" />
-                <span className="text-sm text-gray-400">Ticket Médio</span>
-              </div>
-              <p className="text-2xl font-bold text-white">{formatKz(avgPrice)}</p>
-            </div>
-            <div className="bg-gray-900/40 border border-gray-800 p-5">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="h-5 w-5 text-yellow-400" />
-                <span className="text-sm text-gray-400">Conversão</span>
-              </div>
-              <p className="text-2xl font-bold text-white">{totalCourses > 0 ? Math.round((courseSales / totalCourses) * 100) : 0}%</p>
-              <p className="text-xs text-gray-500 mt-1">vendas / curso</p>
             </div>
           </div>
 
-          {/* Sales chart */}
-          <div className="bg-gray-900/40 border border-gray-800 p-6">
-            <h2 className="text-lg font-bold text-white mb-6">Vendas (últimos 6 meses)</h2>
-            <div className="flex items-end gap-3 h-40">
-              {Array.from(monthMap.entries()).map(([key, val]) => {
-                const height = val > 0 ? Math.max((val / maxVal) * 100, 8) : 8;
-                return (
-                  <div key={key} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
-                    <span className="text-xs text-gray-500 font-bold">{val}</span>
-                    <div className="w-full bg-green-500/20 rounded-t relative group" style={{ height: `${height}%` }}>
-                      <div className="absolute inset-0 bg-green-500/40 group-hover:bg-green-500/60 transition-colors rounded-t"></div>
-                    </div>
-                    <span className="text-[10px] text-gray-600">{key.split("-")[1]}/{key.split("-")[0].slice(2)}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          {/* ── Linha: Desempenho cursos + lives ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-          {/* Course performance */}
-          <div className="bg-gray-900/40 border border-gray-800">
-            <div className="p-5 border-b border-gray-800">
-              <h2 className="text-lg font-bold text-white">Desempenho por Curso</h2>
-            </div>
-            {courses.length === 0 ? (
-              <div className="p-12 text-center text-gray-500">Nenhum curso criado.</div>
-            ) : (
-              <div className="divide-y divide-gray-800">
-                {courses.map(course => (
-                  <div key={course.id} className="p-5 flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-white truncate">{course.title}</h3>
-                      <p className="text-sm text-gray-500">{course.lessonsCount ?? 0} aulas</p>
-                    </div>
-                    <div className="text-right shrink-0 ml-4">
-                      <p className="font-bold text-white">{formatKz(course.price)}</p>
-                      <p className="text-xs text-gray-500">{course.status === "published" ? "Publicado" : "Rascunho"}</p>
-                    </div>
-                  </div>
-                ))}
+            {/* Cursos */}
+            <div className="border border-gray-800/60">
+              <div className="px-5 py-4 border-b border-gray-800/40 flex items-center justify-between">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700">
+                  // cursos · {courses.length}
+                </p>
+                <BookOpen className="h-3.5 w-3.5 text-gray-700" strokeWidth={1.5} />
               </div>
-            )}
-          </div>
-
-          {/* Live performance */}
-          <div className="bg-gray-900/40 border border-gray-800">
-            <div className="p-5 border-b border-gray-800">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Radio className="h-4 w-4 text-red-400" /> Desempenho por Live
-              </h2>
-            </div>
-            {lives.length === 0 ? (
-              <div className="p-12 text-center text-gray-500">Nenhuma live criada.</div>
-            ) : (
-              <div className="divide-y divide-gray-800">
-                {lives.map(live => {
-                  const liveSaleCount = sales.filter(s => s.itemId === live.id).length;
-                  return (
-                    <div key={live.id} className="p-5 flex items-center justify-between">
+              {courseStats.length === 0 ? (
+                <div className="px-5 py-12 text-center">
+                  <p className="text-xs text-gray-700">Nenhum curso criado ainda.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-800/30">
+                  {courseStats.map((c, i) => (
+                    <div key={c.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-900/20 transition-colors">
+                      <span className="font-mono text-[9px] text-gray-700 w-4 shrink-0">{String(i + 1).padStart(2, "0")}</span>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-white truncate">{live.title}</h3>
-                        <p className="text-xs text-gray-500">
-                          {live.target === "free" ? "Gratuita"
-                            : live.target === "standalone" ? "Paga"
-                            : live.target === "smart" ? "Smart"
-                            : "Golden"}
+                        <p className="text-sm text-gray-200 truncate">{c.title}</p>
+                        <div className="flex items-center gap-2 mt-0.5 font-mono text-[9px] text-gray-700">
+                          <span>{c.lessonsCount ?? 0} aulas</span>
+                          <span>·</span>
+                          <span className={c.status === "published" ? "text-green/60" : "text-gray-700"}>
+                            {c.status === "published" ? "pub" : "draft"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="font-mono text-xs text-gray-300">{formatKz(c.revenue)}</p>
+                        <p className="font-mono text-[9px] text-gray-700">{c.saleCount}v</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Lives */}
+            <div className="border border-gray-800/60">
+              <div className="px-5 py-4 border-b border-gray-800/40 flex items-center justify-between">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700">
+                  // lives · {lives.length}
+                </p>
+                <Radio className="h-3.5 w-3.5 text-gray-700" strokeWidth={1.5} />
+              </div>
+              {liveStats.length === 0 ? (
+                <div className="px-5 py-12 text-center">
+                  <p className="text-xs text-gray-700">Nenhuma live criada ainda.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-800/30">
+                  {liveStats.map((l, i) => (
+                    <div key={l.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-900/20 transition-colors">
+                      <span className="font-mono text-[9px] text-gray-700 w-4 shrink-0">{String(i + 1).padStart(2, "0")}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-200 truncate">{l.title}</p>
+                        <p className="font-mono text-[9px] text-gray-700 mt-0.5">
+                          {l.target === "free" ? "gratuita" : l.target === "standalone" ? "paga" : l.target}
                         </p>
                       </div>
-                      <div className="text-right shrink-0 ml-4">
-                        {live.price ? (
-                          <p className="font-bold text-white">{formatKz(live.price)}</p>
-                        ) : (
-                          <p className="text-sm text-green-400 font-medium">Grátis</p>
-                        )}
-                        <p className="text-xs text-gray-500">{liveSaleCount} venda{liveSaleCount !== 1 ? "s" : ""}</p>
+                      <div className="text-right shrink-0">
+                        <p className="font-mono text-xs text-gray-300">
+                          {l.price ? formatKz(l.revenue) : <span className="text-green/60">grátis</span>}
+                        </p>
+                        <p className="font-mono text-[9px] text-gray-700">{l.saleCount}v</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ── Últimas vendas ── */}
+          {recentSales.length > 0 && (
+            <div className="border border-gray-800/60">
+              <div className="px-5 py-4 border-b border-gray-800/40 flex items-center justify-between">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700">
+                  // últimas vendas
+                </p>
+                <DollarSign className="h-3.5 w-3.5 text-gray-700" strokeWidth={1.5} />
+              </div>
+              <div className="divide-y divide-gray-800/30">
+                {recentSales.map(s => {
+                  const d = toDate(s.createdAt);
+                  const dateStr = d ? d.toLocaleDateString("pt-PT", { day: "2-digit", month: "short" }) : "—";
+                  return (
+                    <div key={s.id} className="flex items-center gap-4 px-5 py-3 hover:bg-gray-900/20 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-200 truncate">{s.userName}</p>
+                        <p className="font-mono text-[9px] text-gray-700 truncate mt-0.5">
+                          {s.itemTitle ?? (s.type === "smart" ? "Plano Smart" : s.type === "golden" ? "Plano Golden" : s.type)}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="font-mono text-xs text-green/70">{formatKz(s.netAmount ?? s.amount ?? 0)}</p>
+                        <p className="font-mono text-[9px] text-gray-700">{dateStr}</p>
                       </div>
                     </div>
                   );
                 })}
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* ── Empty state global ── */}
+          {courses.length === 0 && lives.length === 0 && sales.length === 0 && (
+            <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-20 text-center">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
+                <TrendingUp className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
+              </div>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">
+                // sem dados ainda
+              </p>
+              <p className="text-sm text-gray-600">
+                Cria cursos e lives para começar a ver as tuas métricas aqui.
+              </p>
+            </div>
+          )}
         </>
       )}
     </div>

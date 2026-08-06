@@ -4,40 +4,42 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
-import { useAuth } from "@/contexts/AuthContext";
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { Loader2, CheckCircle2, AlertCircle, Radio } from "lucide-react";
 import CourseForm from "@/components/admin/CourseForm";
 import { syncCourseTrail } from "@/lib/trail-sync";
+import { logger } from "@/lib/logger";
+import { toast } from "sonner";
 import type { Course } from "@/types/course";
 
 export default function EditCoursePage() {
   const { id } = useParams<{ id: string }>();
-  const router = useRouter();
-  const { isAdminOrTeacher } = useAuth();
+  const router  = useRouter();
 
   const [initialData, setInitialData] = useState<Partial<Course> | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [fetchError, setFetchError] = useState("");
+  const [loading,     setLoading]     = useState(true);
+  const [saving,      setSaving]      = useState(false);
+  const [success,     setSuccess]     = useState(false);
+  const [fetchError,  setFetchError]  = useState("");
 
   useEffect(() => {
-    const fetchCourse = async () => {
+    (async () => {
       try {
         const snap = await getDoc(doc(db, "courses", id));
         if (!snap.exists()) { setFetchError("Curso não encontrado."); return; }
         setInitialData({ id: snap.id, ...snap.data() } as Course);
-      } catch {
+      } catch (err) {
+        logger.error("EditCoursePage: failed to load course", err, { id });
         setFetchError("Erro ao carregar o curso.");
       } finally {
         setLoading(false);
       }
-    };
-    fetchCourse();
+    })();
   }, [id]);
 
-  const handleSave = async (data: Omit<Course, "id" | "createdAt" | "updatedAt">) => {
+  const handleSave = async (
+    data: Omit<Course, "id" | "createdAt" | "updatedAt">,
+  ) => {
     setSaving(true);
     try {
       const previousTrailId = initialData?.trailId;
@@ -45,14 +47,15 @@ export default function EditCoursePage() {
         ...data,
         updatedAt: serverTimestamp(),
       });
-      // Sincronizar Trail.courseIds se o trailId mudou
       if (data.trailId !== previousTrailId) {
         await syncCourseTrail(id, data.trailId, previousTrailId, data.trailOrder);
       }
+      toast.success("Curso actualizado!");
       setSuccess(true);
-      setTimeout(() => router.push("/admin/courses"), 1500);
+      setTimeout(() => router.push("/admin/courses"), 1200);
     } catch (err) {
-      console.error(err);
+      logger.error("EditCoursePage: failed to update course", err, { id });
+      toast.error("Erro ao actualizar o curso.");
       throw err;
     } finally {
       setSaving(false);
@@ -62,16 +65,17 @@ export default function EditCoursePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-purple" />
+        <Loader2 className="h-6 w-6 animate-spin text-gray-700" />
       </div>
     );
   }
 
   if (fetchError) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
-        <AlertCircle className="h-10 w-10 text-red-400" />
-        <p className="text-white font-bold">{fetchError}</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center">
+        <AlertCircle className="h-8 w-8 text-red-400/70" strokeWidth={1.5} />
+        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700">// erro</p>
+        <p className="text-sm text-gray-600">{fetchError}</p>
       </div>
     );
   }
@@ -79,32 +83,35 @@ export default function EditCoursePage() {
   if (success) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <div className="flex h-16 w-16 items-center justify-center bg-green-500/10">
-          <CheckCircle2 className="h-8 w-8 text-green-400" />
+        <div className="flex h-16 w-16 items-center justify-center border border-green/25 bg-green/8">
+          <CheckCircle2 className="h-7 w-7 text-green/70" strokeWidth={1.5} />
         </div>
-        <h2 className="text-2xl font-bold text-white">Curso atualizado!</h2>
-        <p className="text-gray-400">A redirecionar...</p>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-600">// curso actualizado</p>
+        <p className="text-sm text-gray-600">A redirecionar...</p>
       </div>
     );
   }
 
   return (
-    <>
+    <div className="flex flex-col h-full">
+      {/* Link para estúdio ao vivo (se for curso live) */}
       {initialData?.format === "live" && (
-        <div className="max-w-5xl mx-auto mb-4">
-          <Link href={`/admin/courses/${id}/live-studio`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold transition-colors">
-            <Radio className="h-4 w-4" /> Gerir Aulas ao Vivo
+        <div className="px-6 pt-4 shrink-0">
+          <Link
+            href={`/admin/courses/${id}/live-studio`}
+            className="inline-flex items-center gap-1.5 border border-red-500/25 bg-red-500/5 px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-red-400/70 hover:bg-red-500/15 transition-all"
+          >
+            <Radio className="h-3 w-3" strokeWidth={1.5} /> Estúdio ao vivo
           </Link>
         </div>
       )}
       <CourseForm
-      mode="edit"
-      initialData={initialData ?? undefined}
-      saving={saving}
-      onSave={handleSave}
-      backHref="/admin/courses"
+        mode="edit"
+        initialData={initialData ?? undefined}
+        saving={saving}
+        onSave={handleSave}
+        backHref="/admin/courses"
       />
-    </>
+    </div>
   );
 }

@@ -9,9 +9,10 @@ import {
   doc, updateDoc, writeBatch,
 } from "firebase/firestore";
 
-import { Bell, Menu, CheckCheck, Radio, CreditCard, Heart, MessageCircle, Award, DollarSign, Mail, Video, Building2 } from "lucide-react";
+import { Bell, Menu, CheckCheck, Radio, CreditCard, Heart, MessageCircle, Award, DollarSign, Mail, Video, Building2, Settings } from "lucide-react";
 import Link from "next/link";
 import type { AppNotification } from "@/types/notification";
+import { Avatar } from "@/components/ui/Avatar";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -296,8 +297,8 @@ export default function Header({ onMenuClick, theme = "dark" }: HeaderProps) {
 
         <div className={`h-7 w-px ${theme === "light" ? "bg-slate-200" : "bg-gray-800"}`} />
 
-        {/* ── User info ── */}
-        <div className="flex items-center gap-3">
+        {/* ── User info + Settings ── */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="hidden text-right sm:block">
             {isInstitution ? (
               <>
@@ -319,19 +320,38 @@ export default function Header({ onMenuClick, theme = "dark" }: HeaderProps) {
               </>
             )}
           </div>
-          <div className={`flex h-9 w-9 items-center justify-center text-sm font-bold shadow-md ${
-            isInstitution
-              ? "bg-gradient-to-br from-cyan-600 to-cyan-800 text-white"
-              : "bg-gradient-to-br from-purple to-purple-dark text-white"
-          }`}>
-            {user?.photoURL ? (
-              <img src={user.photoURL} alt="Avatar" className="h-full w-full object-cover" />
-            ) : isInstitution ? (
-              <Building2 className="h-4 w-4" />
-            ) : (
-              getInitials(user?.displayName)
-            )}
-          </div>
+
+          {/* Ícone de definições */}
+          <Link
+            href="/dashboard/settings"
+            aria-label="Definições da conta"
+            className={`flex h-8 w-8 items-center justify-center border transition-colors ${
+              theme === "light"
+                ? "border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-700"
+                : "border-gray-800 text-gray-600 hover:border-gray-700 hover:text-gray-300"
+            }`}
+          >
+            <Settings className="h-3.5 w-3.5" strokeWidth={1.5} />
+          </Link>
+
+          {/* Avatar — clicável para definições */}
+          <Link href="/dashboard/settings" aria-label="Ir para definições">
+            <div className={`h-9 w-9 overflow-hidden border transition-colors ${
+              theme === "light"
+                ? "border-slate-200 hover:border-slate-400"
+                : "border-gray-800/60 hover:border-gray-700"
+            }`}>
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt="Avatar" className="h-full w-full object-cover" />
+              ) : isInstitution ? (
+                <div className="flex h-full w-full items-center justify-center bg-gray-900">
+                  <Building2 className="h-4 w-4 text-blue-400/70" strokeWidth={1.5} />
+                </div>
+              ) : (
+                <Avatar uid={user?.uid ?? ""} photoURL={user?.photoURL} name={user?.displayName} size={36} />
+              )}
+            </div>
+          </Link>
         </div>
       </div>
     </header>

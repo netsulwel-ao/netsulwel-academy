@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Mail, Loader2, CheckCircle2, AlertCircle, RefreshCw, Sun, Moon, ArrowRight } from "lucide-react";
+import { Mail, Loader2, CheckCircle2, AlertCircle, ArrowRight, RefreshCw } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { sendEmailVerification } from "firebase/auth";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,43 +12,25 @@ function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/dashboard";
-  const { user, loading } = useAuth();
-  const [resending, setResending] = useState(false);
+  const { user, loading: authLoading } = useAuth();
+
   const [checking, setChecking] = useState(false);
+  const [resending, setResending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [mounted, setMounted] = useState(false);
+  // Guardar o email antes do redirect (user pode ser null depois)
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [theme]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("public-theme") as "dark" | "light" | null;
-    if (saved && saved !== theme) setTheme(saved);
-    setMounted(true);
+    if (auth.currentUser?.email) {
+      setUserEmail(auth.currentUser.email);
+    }
   }, []);
 
   useEffect(() => {
-    if (loading) return;
+    if (authLoading) return;
     if (!user) router.replace("/login");
-  }, [loading, user, router]);
-
-  const handleResend = async () => {
-    if (!auth.currentUser) return;
-    setResending(true);
-    setError("");
-    try {
-      await sendEmailVerification(auth.currentUser);
-      setSent(true);
-      setTimeout(() => setSent(false), 5000);
-    } catch {
-      setError("Erro ao reenviar. Tente novamente.");
-    } finally {
-      setResending(false);
-    }
-  };
+  }, [authLoading, user, router]);
 
   const handleCheck = async () => {
     if (!auth.currentUser) return;
@@ -68,147 +50,132 @@ function VerifyEmailContent() {
     }
   };
 
-  const toggleTheme = () => {
-    setTheme(prev => {
-      const next = prev === "dark" ? "light" : "dark";
-      localStorage.setItem("public-theme", next);
-      return next;
-    });
+  const handleResend = async () => {
+    if (!auth.currentUser) return;
+    setResending(true);
+    setError("");
+    try {
+      await sendEmailVerification(auth.currentUser);
+      setSent(true);
+      setTimeout(() => setSent(false), 8000);
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code ?? "";
+      setError(
+        code === "auth/too-many-requests"
+          ? "Muitos reenvios. Aguarde alguns minutos."
+          : "Erro ao reenviar. Tente novamente."
+      );
+    } finally {
+      setResending(false);
+    }
   };
 
-  return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-hidden flex flex-col items-center justify-center px-4" data-theme={theme}>
-      {/* Background Effects */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {/* Aurora Gradients */}
-        <div className="absolute top-0 right-1/4 w-96 h-96 md:w-[900px] md:h-[900px] bg-gradient-to-br from-purple-500/20 to-indigo-500/10 blur-3xl md:blur-[500px] rounded-full" />
-        <div className="absolute -bottom-32 left-1/3 w-72 h-72 md:w-[700px] md:h-[700px] bg-gradient-to-tr from-indigo-500/10 to-purple-500/5 blur-3xl md:blur-[500px] rounded-full" />
-        
-        {/* Grid Pattern */}
-        <svg className="absolute inset-0 w-full h-full opacity-[0.04]" preserveAspectRatio="none">
-          <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <circle cx="20" cy="20" r="0.5" fill="#fff" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-950">
+        <Loader2 className="h-6 w-6 animate-spin text-purple/60" />
       </div>
+    );
+  }
+
+  return (
+    <main className="relative flex min-h-screen flex-col items-center justify-center bg-gray-950 px-4">
+      {/* Fundo */}
+      <div className="pointer-events-none absolute inset-0 grid-bg opacity-[0.06]" />
+      <div className="pointer-events-none absolute top-1/4 left-1/2 -translate-x-1/2 h-[400px] w-[600px] bg-purple/10 blur-[120px]" />
 
       {/* Header */}
-      <header className="absolute top-0 left-0 right-0 px-6 md:px-20 py-6 md:py-8 flex items-center justify-between z-40">
-        <Link href="/" className="flex items-center gap-3 hover:opacity-75 transition-opacity">
-          <img src="/Logo-Academy-White.svg" alt="Academy" className="h-10 md:h-12 w-auto" />
-          <span className="text-xl md:text-2xl font-bold text-white">Netsulwel</span>
+      <header className="absolute top-0 left-0 right-0 flex items-center justify-between px-8 py-6 z-20">
+        <Link href="/" className="flex items-center gap-2.5 hover:opacity-75 transition-opacity">
+          <img src="/Logo-Academy-White.svg" alt="Academy" className="h-9 w-auto brightness-0 invert" />
+          <span className="text-base font-bold text-white">Netsulwel</span>
         </Link>
-        <button
-          onClick={toggleTheme}
-          className="h-10 w-10 flex items-center justify-center rounded-lg border border-gray-700/50 bg-white/5 hover:bg-white/10 transition-colors text-gray-300 hover:text-white"
-        >
-          {!mounted || theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-        </button>
+        <Link href="/login" className="text-xs text-gray-600 hover:text-gray-400 transition-colors">
+          Voltar ao login
+        </Link>
       </header>
 
-      {/* Centered Content */}
-      <div className="relative z-20 w-full max-w-md">
-        <div className="rounded-3xl bg-gradient-to-br from-white/10 to-white/5 border border-white/15 backdrop-blur-xl p-8 md:p-12 shadow-2xl">
-          
-          {/* Icon */}
-          <div className="flex justify-center mb-8">
-            <div className="h-16 w-16 rounded-full bg-gradient-to-br from-purple-500/40 to-indigo-500/30 flex items-center justify-center">
-              <Mail className="h-8 w-8 text-purple-200" />
-            </div>
+      {/* Card */}
+      <div className="relative z-10 w-full max-w-[400px]">
+
+        {/* Ícone */}
+        <div className="mb-8 flex flex-col items-center">
+          <div className="flex h-14 w-14 items-center justify-center border border-purple/30 bg-purple/10">
+            <Mail className="h-6 w-6 text-purple-light" />
           </div>
-
-          {/* Title and Description */}
-          <h1 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">
-            Verifique o seu email
-          </h1>
-          <p className="text-center text-gray-300 mb-8">
-            Enviámos um link de verificação para <br />
-            <strong className="text-white text-sm break-all">{auth.currentUser?.email}</strong>
-            <br />
-            Clique no link para ativar a sua conta.
-          </p>
-
-          {/* Success Message */}
-          {sent && (
-            <div className="mb-6 p-4 rounded-lg bg-green-500/10 border border-green-500/30 flex gap-3 text-sm text-green-300 animate-in fade-in">
-              <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <p>Email reenviado com sucesso. Verifique a sua caixa.</p>
-            </div>
-          )}
-
-          {/* Error Message */}
-          {error && (
-            <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/30 flex gap-3 text-sm text-red-300 animate-in fade-in">
-              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-              <p>{error}</p>
-            </div>
-          )}
-
-          {/* Action Buttons */}
-          <div className="space-y-3 mb-8">
-            <button
-              onClick={handleCheck}
-              disabled={checking}
-              className="w-full h-14 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 font-semibold text-white flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-purple-500/40 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {checking ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Verificando...</span>
-                </>
-              ) : (
-                <>
-                  <span>Já verifiquei o email</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-
-            <button
-              onClick={handleResend}
-              disabled={resending}
-              className="w-full h-14 rounded-2xl border border-gray-600/50 bg-white/5 hover:bg-white/10 transition-colors font-semibold text-white flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {resending ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Reenviando...</span>
-                </>
-              ) : (
-                <>
-                  <Mail className="h-5 w-5" />
-                  <span>Reenviar email</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* Footer Links */}
-          <div className="border-t border-gray-700/30 pt-6 space-y-3 text-center">
-            <p className="text-sm text-gray-400">
-              Não recebeu o email?{" "}
-              <span className="text-gray-500">
-                Verifique a pasta de spam ou solicitações outro link abaixo.
-              </span>
-            </p>
-            <p className="text-sm">
-              <Link href="/login" className="text-purple-400 hover:text-purple-300 font-semibold transition-colors">
-                Voltar ao login
-              </Link>
-            </p>
-          </div>
+          <div className="mt-4 h-px w-8 bg-purple/30" />
         </div>
 
-        {/* Tips Section */}
-        <div className="mt-8 space-y-3">
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-            <p className="text-sm text-gray-300">
-              <span className="font-semibold text-white">Dica:</span> O email de verificação pode levar alguns minutos. Verifique sua caixa de spam.
-            </p>
+        {/* Título */}
+        <div className="mb-6 text-center">
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-3">
+            // verificação de conta
+          </p>
+          <h1 className="text-2xl font-bold text-gray-100">
+            Verifique o seu email
+          </h1>
+          <p className="mt-2 text-sm text-gray-500 leading-relaxed">
+            Enviámos um link para{" "}
+            <span className="font-medium text-gray-300">
+              {userEmail ?? "o seu email"}
+            </span>
+            .<br />
+            Clique no link para ativar a conta.
+          </p>
+        </div>
+
+        {/* Alerts */}
+        {sent && (
+          <div className="mb-5 flex items-start gap-2.5 border border-green-500/20 bg-green-500/8 px-4 py-3 text-sm text-green-400">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+            <p>Email reenviado. Verifique a caixa de entrada e a pasta de spam.</p>
           </div>
+        )}
+        {error && (
+          <div className="mb-5 flex items-start gap-2.5 border border-red-500/20 bg-red-500/8 px-4 py-3 text-sm text-red-400">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <p>{error}</p>
+          </div>
+        )}
+
+        {/* Acções */}
+        <div className="space-y-3">
+          <button
+            onClick={handleCheck}
+            disabled={checking || resending}
+            className="flex w-full items-center justify-center gap-2 bg-purple py-3 text-sm font-bold text-white hover:bg-purple-light disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+          >
+            {checking ? (
+              <><Loader2 className="h-4 w-4 animate-spin" /> A verificar...</>
+            ) : (
+              <>Já verifiquei o email <ArrowRight className="h-4 w-4" /></>
+            )}
+          </button>
+
+          <button
+            onClick={handleResend}
+            disabled={resending || checking || sent}
+            className="flex w-full items-center justify-center gap-2 border border-gray-800 bg-gray-900/50 py-3 text-sm font-medium text-gray-400 hover:border-gray-700 hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            {resending ? (
+              <><Loader2 className="h-4 w-4 animate-spin" /> A enviar...</>
+            ) : (
+              <><RefreshCw className="h-4 w-4" /> Reenviar email</>
+            )}
+          </button>
+        </div>
+
+        {/* Nota */}
+        <div className="mt-8 border-t border-gray-800/60 pt-6">
+          <p className="text-xs text-gray-600 leading-relaxed text-center">
+            Não recebeu? Verifique a pasta de <strong className="text-gray-500">spam</strong>.
+            O email pode demorar alguns minutos.
+          </p>
+          <p className="mt-3 text-center text-xs">
+            <Link href="/login" className="text-gray-600 hover:text-gray-400 transition-colors">
+              ← Voltar ao login
+            </Link>
+          </p>
         </div>
       </div>
     </main>
@@ -217,11 +184,13 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-gray-950">
+          <Loader2 className="h-6 w-6 animate-spin text-purple/60" />
+        </div>
+      }
+    >
       <VerifyEmailContent />
     </Suspense>
   );

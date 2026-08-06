@@ -2,433 +2,482 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { User, Mail, Lock, Loader2, AlertCircle, Eye, EyeOff, CheckCircle2, Sun, Moon, Home, Phone, Globe, MapPin, Calendar } from "lucide-react";
+import {
+  User, Mail, Lock, Loader2, AlertCircle,
+  Eye, EyeOff, ArrowRight, ArrowLeft,
+  Phone, Globe, MapPin, Calendar, ChevronRight,
+} from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, type AuthProvider } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  sendEmailVerification,
+  signInWithPopup,
+  GoogleAuthProvider,
+  GithubAuthProvider,
+  type AuthProvider,
+} from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { GoogleIcon, GithubIcon } from "@/components/ui/AuthIcons";
+import { AuthCarousel } from "@/components/AuthCarousel";
 
-const carouselSlides = [
-  {
-    id: 1,
-    image: "https://images.pexels.com/photos/1181391/pexels-photo-1181391.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    title: "Cursos de programação",
-    desc: "Aprenda a programar do zero ao avançado com projectos práticos e mentoria ao vivo.",
-  },
-  {
-    id: 2,
-    image: "https://images.pexels.com/photos/4143800/pexels-photo-4143800.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    title: "Aulas ao vivo",
-    desc: "Participe de aulas em tempo real com instrutores experientes e tire dúvidas na hora.",
-  },
-  {
-    id: 3,
-    image: "https://images.pexels.com/photos/6953925/pexels-photo-6953925.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    title: "Comunidade de alunos",
-    desc: "Conecte-se com outros estudantes, troque conhecimento e cresça junto com a comunidade.",
-  }
-];
+type Step = 1 | 2;
 
 export default function RegisterPage() {
-  const [slideIndex, setSlideIndex] = useState(0);
+  const router = useRouter();
+  const [step, setStep] = useState<Step>(1);
+  const [redirectTo, setRedirectTo] = useState("/dashboard");
+
+  // Step 1 — conta
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [morada, setMorada] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  // Step 2 — perfil
+  const [telefone, setTelefone] = useState("");
   const [idade, setIdade] = useState("");
   const [genero, setGenero] = useState("");
-  const [nacionalidade, setNacionalidade] = useState("");
-  const [telefone, setTelefone] = useState("");
   const [pais, setPais] = useState("");
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [failedSlides, setFailedSlides] = useState<Set<number>>(new Set());
+  const [nacionalidade, setNacionalidade] = useState("");
+  const [morada, setMorada] = useState("");
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [providerLoading, setProviderLoading] = useState<string | null>(null);
-  const router = useRouter();
-  const [redirectTo, setRedirectTo] = useState("/dashboard");
+  const [socialLoading, setSocialLoading] = useState<string | null>(null);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("public-theme") as "dark" | "light" | null;
-    if (saved) setTheme(saved);
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [theme]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      let interval: ReturnType<typeof setInterval>;
-      const start = () => { interval = setInterval(() => setSlideIndex((prev) => (prev + 1) % carouselSlides.length), 5000); };
-      const stop = () => clearInterval(interval);
-      start();
-      const onVisibility = () => document.hidden ? stop() : start();
-      document.addEventListener("visibilitychange", onVisibility);
-      return () => { stop(); document.removeEventListener("visibilitychange", onVisibility); };
-    }
-  }, []);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const r = params.get("redirect");
     if (r && r.startsWith("/") && !r.startsWith("//") && !r.includes("://")) setRedirectTo(r);
   }, []);
 
+  // Validação step 1
+  const validateStep1 = (): string | null => {
+    if (!name.trim()) return "O nome é obrigatório.";
+    if (/\d/.test(name)) return "O nome não pode conter números.";
+    if (!email.trim()) return "O email é obrigatório.";
+    if (password.length < 6) return "A palavra-passe deve ter pelo menos 6 caracteres.";
+    if (password !== confirmPassword) return "As palavras-passe não coincidem.";
+    return null;
+  };
+
+  // Validação step 2
+  const validateStep2 = (): string | null => {
+    if (!telefone.trim()) return "O telefone é obrigatório.";
+    const idadeN = Number(idade);
+    if (!idade || isNaN(idadeN) || idadeN < 12 || idadeN > 120) return "Indique uma idade válida (12–120).";
+    if (!genero) return "Selecione o género.";
+    if (!pais.trim()) return "O país é obrigatório.";
+    if (!nacionalidade.trim()) return "A nacionalidade é obrigatória.";
+    if (!morada.trim()) return "A morada é obrigatória.";
+    return null;
+  };
+
+  const goToStep2 = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    const err = validateStep1();
+    if (err) { setError(err); return; }
+    setStep(2);
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!name.trim()) { setError("O nome é obrigatório."); return; }
-    if (/\d/.test(name)) { setError("O nome não pode conter números."); return; }
-    if (password !== confirmPassword) { setError("As palavras-passe não coincidem."); return; }
-    if (!morada.trim()) { setError("A morada é obrigatória."); return; }
-    if (!idade.trim() || isNaN(Number(idade)) || Number(idade) < 1 || Number(idade) > 150) { setError("Indique uma idade válida."); return; }
-    if (!genero) { setError("Selecione o género."); return; }
-    if (!nacionalidade.trim()) { setError("A nacionalidade é obrigatória."); return; }
-    if (!telefone.trim()) { setError("O número de telefone é obrigatório."); return; }
-    if (!pais.trim()) { setError("O país é obrigatório."); return; }
+    const err = validateStep2();
+    if (err) { setError(err); return; }
+
     setLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      if (name) await updateProfile(userCredential.user, { displayName: name });
-      await setDoc(doc(db, "users", userCredential.user.uid), {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(cred.user, { displayName: name });
+      await setDoc(doc(db, "users", cred.user.uid), {
         email,
         name,
         role: "aluno",
+        plan: "free",
         createdAt: new Date(),
-        morada,
+        telefone,
         idade: Number(idade),
         genero,
-        nacionalidade,
-        telefone,
         pais,
+        nacionalidade,
+        morada,
       });
-      await sendEmailVerification(userCredential.user);
+      await sendEmailVerification(cred.user);
       router.push(`/verify-email${redirectTo !== "/dashboard" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`);
     } catch (err: unknown) {
-      const code = (err as { code?: string })?.code || "";
+      const code = (err as { code?: string })?.code ?? "";
       const messages: Record<string, string> = {
         "auth/email-already-in-use": "Este email já está registado. Tente fazer login.",
         "auth/weak-password": "A palavra-passe deve ter pelo menos 6 caracteres.",
-        "auth/invalid-email": "O formato do email é inválido.",
-        "auth/too-many-requests": "Muitas tentativas. Espere alguns minutos e tente novamente.",
+        "auth/invalid-email": "Formato de email inválido.",
+        "auth/too-many-requests": "Muitas tentativas. Aguarde alguns minutos.",
       };
-      setError(messages[code] || "Erro ao criar conta. Tente novamente.");
+      setError(messages[code] ?? "Erro ao criar conta. Tente novamente.");
+      // Se erro na criação da conta, voltar ao step 1 se for erro de email/password
+      if (["auth/email-already-in-use", "auth/weak-password", "auth/invalid-email"].includes(code)) {
+        setStep(1);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const togglePublicTheme = () => {
-    setTheme(prev => {
-      const next = prev === "dark" ? "light" : "dark";
-      localStorage.setItem("public-theme", next);
-      return next;
-    });
-  };
-
-  const handleProviderRegister = async (provider: AuthProvider, providerName: string) => {
+  const handleSocial = async (provider: AuthProvider, name: string) => {
+    // Social login não precisa de validação de formulário
     setError("");
-    if (!name.trim()) { setError("O nome é obrigatório."); return; }
-    if (/\d/.test(name)) { setError("O nome não pode conter números."); return; }
-    if (!morada.trim()) { setError("A morada é obrigatória."); return; }
-    if (!idade.trim() || isNaN(Number(idade)) || Number(idade) < 1 || Number(idade) > 150) { setError("Indique uma idade válida."); return; }
-    if (!genero) { setError("Selecione o género."); return; }
-    if (!nacionalidade.trim()) { setError("A nacionalidade é obrigatória."); return; }
-    if (!telefone.trim()) { setError("O número de telefone é obrigatório."); return; }
-    if (!pais.trim()) { setError("O país é obrigatório."); return; }
-    setProviderLoading(providerName);
+    setSocialLoading(name);
     try {
-      const userCredential = await signInWithPopup(auth, provider);
-      const userDocRef = doc(db, "users", userCredential.user.uid);
-      const userDoc = await getDoc(userDocRef);
-      if (!userDoc.exists()) {
-        await setDoc(userDocRef, {
-          email: userCredential.user.email || email,
-          name: name || userCredential.user.displayName,
+      const cred = await signInWithPopup(auth, provider);
+      const ref = doc(db, "users", cred.user.uid);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        // Criar perfil mínimo — sem dados extras obrigatórios para social
+        await setDoc(ref, {
+          email: cred.user.email ?? "",
+          name: cred.user.displayName ?? "",
           role: "aluno",
+          plan: "free",
           createdAt: new Date(),
-          morada,
-          idade: Number(idade),
-          genero,
-          nacionalidade,
-          telefone,
-          pais,
         });
       }
       router.push(redirectTo);
     } catch (err: unknown) {
-        const code = (err as { code?: string })?.code || "";
-        if (code === "auth/popup-closed-by-user") { setProviderLoading(null); return; }
-        setError(code === "auth/popup-blocked"
-          ? "Popup bloqueado pelo navegador. Permita popups e tente novamente."
-          : `Falha ao registar com ${providerName}.`);
+      const code = (err as { code?: string })?.code ?? "";
+      if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") return;
+      setError(code === "auth/popup-blocked"
+        ? "Popup bloqueado. Permita popups e tente novamente."
+        : `Falha ao registar com ${name}.`);
     } finally {
-      setProviderLoading(null);
+      setSocialLoading(null);
     }
   };
 
+  const isAnyLoading = loading || !!socialLoading;
+
   return (
-    <main className="flex min-h-screen bg-gray-950 flex-col lg:flex-row overflow-hidden">
-      {/* Left carousel */}
-      <div className="relative hidden w-1/2 lg:flex flex-col items-center justify-center bg-gray-900 overflow-hidden">
-        {carouselSlides.map((slide, i) => (
-          <div key={slide.id} className={`absolute inset-0 z-0 transition-opacity duration-700 ${i === slideIndex ? "opacity-100" : "opacity-0"}`}>
-            {failedSlides.has(i) ? (
-              <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900" />
-            ) : (
-              <img src={slide.image} alt={slide.title} className="absolute inset-0 h-full w-full object-cover"
-                onError={() => setFailedSlides(prev => new Set(prev).add(i))} />
-            )}
-          </div>
-        ))}
-        <div className="absolute inset-0 bg-gray-950/20 z-10 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/60 to-transparent z-10 pointer-events-none" />
-        <Link href="/" className="absolute left-10 top-10 z-20 flex items-center gap-4 hover:opacity-80 transition-opacity">
-          <img src="/Logo-Academy-White.svg" alt="Academy Logo" className="h-12 w-auto" />
-          <span className="text-3xl font-light text-white/30">|</span>
-          <div className="flex items-center gap-2">
-            <img src="/logo.svg" alt="Netsulwel" className="h-7 w-auto brightness-0 invert" />
-            <span className="text-2xl font-bold text-white">Netsulwel</span>
-          </div>
-        </Link>
-        <div className="absolute bottom-16 left-10 right-10 z-20">
-          <h2 className="text-4xl lg:text-5xl font-bold text-white leading-tight drop-shadow-xl transition-all duration-500">
-            {carouselSlides[slideIndex].title}
-          </h2>
-          <p className="mt-4 text-lg text-gray-200 drop-shadow-md max-w-lg transition-all duration-500">
-            {carouselSlides[slideIndex].desc}
-          </p>
-          <div className="mt-8 flex gap-3">
-            {carouselSlides.map((_, i) => (
-              <div key={i} className={`h-1.5 transition-all duration-300 ${i === slideIndex ? "w-8 bg-white" : "w-2 bg-white/40"}`} />
-            ))}
-          </div>
-        </div>
-      </div>
+    <main className="flex min-h-screen bg-gray-950">
+      {/* Carousel — lado esquerdo */}
+      <AuthCarousel />
 
-      {/* Right panel — Register form */}
-      <div data-theme={theme} className="relative flex w-full flex-col lg:w-1/2 bg-gray-950 overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 grid-bg opacity-10" />
-        <div className="pointer-events-none absolute top-[-20%] left-[-10%] h-[600px] w-[600px] bg-purple/10 blur-[150px] hidden sm:block" />
+      {/* Form — lado direito */}
+      <div className="relative flex flex-1 flex-col overflow-y-auto">
+        {/* Fundo */}
+        <div className="pointer-events-none absolute inset-0 grid-bg opacity-[0.06]" />
+        <div className="pointer-events-none absolute -top-20 -left-20 h-[500px] w-[500px] bg-purple/6 blur-[140px]" />
 
-        <div className="flex items-center justify-between p-6 z-20">
-          <Link href="/" className="flex lg:hidden items-center gap-3">
-            <img src="/Logo-Academy-White.svg" alt="Academy Logo" className="h-10 w-auto" />
-            <img src="/logo.svg" alt="Netsulwel" className="h-6 w-auto brightness-0 invert" />
+        {/* Header */}
+        <header className="flex items-center justify-between px-8 pt-8 pb-4 relative z-10">
+          <Link href="/" className="flex items-center gap-2.5 lg:invisible">
+            <img src="/Logo-Academy-White.svg" alt="Academy" className="h-9 w-auto brightness-0 invert" />
+            <span className="text-base font-bold text-white">Netsulwel</span>
           </Link>
-          <div className="flex items-center gap-3">
-            <button onClick={togglePublicTheme} className="flex items-center justify-center h-9 w-9 rounded-lg border border-gray-800 bg-gray-900/60 backdrop-blur-md hover:bg-gray-800 hover:border-gray-600 transition-all text-gray-400 hover:text-white">
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
-            <Link href="/login" className="text-sm font-medium text-white px-6 py-2.5 border border-gray-800 bg-gray-900/60 backdrop-blur-md hover:bg-gray-800 hover:border-gray-600 transition-all">
-              Iniciar sessão
-            </Link>
-          </div>
-        </div>
+          <Link
+            href="/login"
+            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors"
+          >
+            Já tenho conta
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </header>
 
-        <div className="flex-1 flex flex-col justify-center px-6 sm:px-16 lg:px-24 z-20 pb-12 lg:pb-0">
-          <div className="w-full max-w-md mx-auto transition-all duration-300">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white mt-8 lg:mt-0">Comece a sua jornada.</h2>
-            <p className="mt-2 text-sm text-gray-400 mb-8">Crie uma conta gratuita em poucos segundos</p>
+        {/* Conteúdo */}
+        <div className="flex flex-1 flex-col justify-center px-8 py-8 relative z-10">
+          <div className="mx-auto w-full max-w-[400px]">
 
-            <div className="border border-gray-800/50 bg-gray-900/40 p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative">
-              <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-50 pointer-events-none" />
-
-              {error && (
-                <div className="mb-6 flex items-center gap-2 bg-red-500/10 p-4 text-sm text-red-400 border border-red-500/20 relative z-10 animate-in fade-in zoom-in duration-200">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  <p>{error}</p>
+            {/* Progress steps */}
+            <div className="mb-8 flex items-center gap-0">
+              {[1, 2].map((s) => (
+                <div key={s} className="flex items-center">
+                  <div
+                    className={`flex h-6 w-6 items-center justify-center text-[11px] font-bold transition-all ${
+                      s <= step
+                        ? "bg-purple text-white"
+                        : "border border-gray-700 text-gray-600"
+                    }`}
+                  >
+                    {s < step ? "✓" : s}
+                  </div>
+                  {s < 2 && (
+                    <div className={`h-px w-12 transition-all ${s < step ? "bg-purple/50" : "bg-gray-800"}`} />
+                  )}
                 </div>
-              )}
+              ))}
+              <span className="ml-4 text-xs text-gray-600 font-mono">
+                {step === 1 ? "conta" : "perfil"}
+              </span>
+            </div>
 
-              <form className="space-y-5 relative z-10" onSubmit={handleRegister}>
-                {/* Back Button */}
-                <Link href="/login" className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-6">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Voltar
-                </Link>
+            {/* Eyebrow */}
+            <div className="mb-6">
+              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/70 mb-2">
+                {step === 1 ? "// criar conta" : "// completar perfil"}
+              </p>
+              <h1 className="text-2xl font-bold text-gray-100">
+                {step === 1 ? "Comece a sua jornada" : "Quase lá"}
+              </h1>
+              <p className="mt-1 text-sm text-gray-500">
+                {step === 1
+                  ? "Crie a sua conta gratuita"
+                  : "Precisamos de mais alguns dados"}
+              </p>
+            </div>
 
-                {/* Grid Layout for Account Info - 2 columns on desktop, 1 on mobile */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Name */}
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="name">Nome completo</label>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <User className="h-5 w-5 text-gray-500" />
-                      </div>
-                      <input id="name" type="text" required disabled={loading} placeholder="João Silva"
-                        value={name} onChange={(e) => setName(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-                    </div>
+            {/* Error */}
+            {error && (
+              <div className="mb-5 flex items-start gap-2.5 border border-red-500/20 bg-red-500/8 px-4 py-3 text-sm text-red-400">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <p>{error}</p>
+              </div>
+            )}
+
+            {/* ── STEP 1 ─────────────────────────── */}
+            {step === 1 && (
+              <form onSubmit={goToStep2} className="space-y-4">
+                {/* Nome */}
+                <div className="space-y-1.5">
+                  <label htmlFor="name" className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Nome completo
+                  </label>
+                  <div className="relative">
+                    <User className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
+                    <input
+                      id="name" type="text" required autoComplete="name"
+                      disabled={isAnyLoading} placeholder="João Silva"
+                      value={name} onChange={(e) => setName(e.target.value)}
+                      className="block w-full border border-gray-800 bg-gray-900/60 py-2.5 pl-9 pr-3 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                    />
                   </div>
+                </div>
 
-                  {/* Email */}
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="email">Email</label>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <Mail className="h-5 w-5 text-gray-500" />
-                      </div>
-                      <input id="email" type="email" required disabled={loading} placeholder="email@exemplo.com"
-                        value={email} onChange={(e) => setEmail(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-                    </div>
+                {/* Email */}
+                <div className="space-y-1.5">
+                  <label htmlFor="email" className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Email
+                  </label>
+                  <div className="relative">
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
+                    <input
+                      id="email" type="email" required autoComplete="email"
+                      disabled={isAnyLoading} placeholder="email@exemplo.com"
+                      value={email} onChange={(e) => setEmail(e.target.value)}
+                      className="block w-full border border-gray-800 bg-gray-900/60 py-2.5 pl-9 pr-3 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                    />
                   </div>
+                </div>
 
-                  {/* Password */}
+                {/* Password + Confirmar — lado a lado */}
+                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="password">Palavra-passe</label>
+                    <label htmlFor="password" className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Senha
+                    </label>
                     <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <Lock className="h-5 w-5 text-gray-500" />
-                      </div>
-                      <input id="password" type={showPassword ? "text" : "password"} required disabled={loading}
-                        placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-10 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-                      <button type="button" disabled={loading} onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 focus:outline-none disabled:opacity-50">
-                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
+                      <input
+                        id="password" type={showPassword ? "text" : "password"} required
+                        autoComplete="new-password" disabled={isAnyLoading} placeholder="••••••"
+                        value={password} onChange={(e) => setPassword(e.target.value)}
+                        className="block w-full border border-gray-800 bg-gray-900/60 py-2.5 pl-9 pr-8 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                      />
+                      <button type="button" tabIndex={-1} onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-400">
+                        {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                       </button>
                     </div>
                   </div>
 
-                  {/* Confirm Password */}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="confirmPassword">Confirmar</label>
+                    <label htmlFor="confirm" className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Confirmar
+                    </label>
                     <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <Lock className="h-5 w-5 text-gray-500" />
-                      </div>
-                      <input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} required disabled={loading}
-                        placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-10 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-                      <button type="button" disabled={loading} onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 focus:outline-none disabled:opacity-50">
-                        {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
+                      <input
+                        id="confirm" type={showConfirm ? "text" : "password"} required
+                        autoComplete="new-password" disabled={isAnyLoading} placeholder="••••••"
+                        value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="block w-full border border-gray-800 bg-gray-900/60 py-2.5 pl-9 pr-8 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                      />
+                      <button type="button" tabIndex={-1} onClick={() => setShowConfirm(!showConfirm)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-400">
+                        {showConfirm ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                       </button>
                     </div>
                   </div>
+                </div>
 
-                  {/* Personal Data Section - Grid 2 cols */}
+                <button
+                  type="submit"
+                  disabled={isAnyLoading}
+                  className="mt-2 flex w-full items-center justify-center gap-2 bg-purple py-2.5 text-sm font-bold text-white transition-all hover:bg-purple-light disabled:opacity-60"
+                >
+                  Continuar <ChevronRight className="h-4 w-4" />
+                </button>
+
+                {/* Divisor + Social */}
+                <div className="mt-4 flex items-center gap-3">
+                  <div className="flex-1 border-t border-gray-800" />
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-gray-700">ou</span>
+                  <div className="flex-1 border-t border-gray-800" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    disabled={isAnyLoading}
+                    onClick={() => handleSocial(new GoogleAuthProvider(), "Google")}
+                    className="flex items-center justify-center gap-2 border border-gray-800 bg-gray-900/50 py-2.5 text-sm font-medium text-gray-400 hover:border-gray-700 hover:text-gray-200 disabled:opacity-50 transition-all"
+                  >
+                    {socialLoading === "Google" ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon className="h-4 w-4" />}
+                    Google
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isAnyLoading}
+                    onClick={() => handleSocial(new GithubAuthProvider(), "GitHub")}
+                    className="flex items-center justify-center gap-2 border border-gray-800 bg-gray-900/50 py-2.5 text-sm font-medium text-gray-400 hover:border-gray-700 hover:text-gray-200 disabled:opacity-50 transition-all"
+                  >
+                    {socialLoading === "GitHub" ? <Loader2 className="h-4 w-4 animate-spin" /> : <GithubIcon className="h-4 w-4" />}
+                    GitHub
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* ── STEP 2 ─────────────────────────── */}
+            {step === 2 && (
+              <form onSubmit={handleRegister} className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Telefone */}
+                  <div className="col-span-full space-y-1.5">
+                    <label htmlFor="telefone" className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Telefone
+                    </label>
+                    <div className="relative">
+                      <Phone className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
+                      <input
+                        id="telefone" type="tel" required disabled={isAnyLoading}
+                        placeholder="+244 900 000 000"
+                        value={telefone} onChange={(e) => setTelefone(e.target.value)}
+                        className="block w-full border border-gray-800 bg-gray-900/60 py-2.5 pl-9 pr-3 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                      />
+                    </div>
+                  </div>
+
                   {/* Idade */}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="idade">Idade</label>
+                    <label htmlFor="idade" className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Idade
+                    </label>
                     <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <Calendar className="h-5 w-5 text-gray-500" />
-                      </div>
-                      <input id="idade" type="number" required disabled={loading} placeholder="18" min="1" max="150"
+                      <Calendar className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
+                      <input
+                        id="idade" type="number" required min="12" max="120"
+                        disabled={isAnyLoading} placeholder="18"
                         value={idade} onChange={(e) => setIdade(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
+                        className="block w-full border border-gray-800 bg-gray-900/60 py-2.5 pl-9 pr-3 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                      />
                     </div>
                   </div>
 
                   {/* Género */}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="genero">Género</label>
-                    <select id="genero" required disabled={loading}
+                    <label htmlFor="genero" className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Género
+                    </label>
+                    <select
+                      id="genero" required disabled={isAnyLoading}
                       value={genero} onChange={(e) => setGenero(e.target.value)}
-                      className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-3 pr-3 text-white transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50 appearance-none">
-                      <option value="" disabled>Selecionar</option>
-                      <option value="Masculino">Masculino</option>
-                      <option value="Feminino">Feminino</option>
-                      <option value="Outro">Outro</option>
+                      className="block w-full border border-gray-800 bg-gray-900/60 py-2.5 px-3 text-sm text-gray-100 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors appearance-none"
+                    >
+                      <option value="" disabled className="bg-gray-900">Selecionar</option>
+                      <option value="Masculino" className="bg-gray-900">Masculino</option>
+                      <option value="Feminino" className="bg-gray-900">Feminino</option>
+                      <option value="Outro" className="bg-gray-900">Outro</option>
                     </select>
                   </div>
 
-                  {/* Telefone */}
+                  {/* País */}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="telefone">Telefone</label>
+                    <label htmlFor="pais" className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                      País
+                    </label>
                     <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <Phone className="h-5 w-5 text-gray-500" />
-                      </div>
-                      <input id="telefone" type="tel" required disabled={loading} placeholder="+244 900 000 000"
-                        value={telefone} onChange={(e) => setTelefone(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
+                      <Globe className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
+                      <input
+                        id="pais" type="text" required disabled={isAnyLoading} placeholder="Angola"
+                        value={pais} onChange={(e) => setPais(e.target.value)}
+                        className="block w-full border border-gray-800 bg-gray-900/60 py-2.5 pl-9 pr-3 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                      />
                     </div>
                   </div>
 
                   {/* Nacionalidade */}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="nacionalidade">Nacionalidade</label>
+                    <label htmlFor="nacionalidade" className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Nacionalidade
+                    </label>
                     <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <MapPin className="h-5 w-5 text-gray-500" />
-                      </div>
-                      <input id="nacionalidade" type="text" required disabled={loading} placeholder="Angolana"
+                      <MapPin className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
+                      <input
+                        id="nacionalidade" type="text" required disabled={isAnyLoading} placeholder="Angolana"
                         value={nacionalidade} onChange={(e) => setNacionalidade(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
+                        className="block w-full border border-gray-800 bg-gray-900/60 py-2.5 pl-9 pr-3 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                      />
                     </div>
                   </div>
 
-                  {/* País */}
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="pais">País</label>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <Globe className="h-5 w-5 text-gray-500" />
-                      </div>
-                      <input id="pais" type="text" required disabled={loading} placeholder="Angola"
-                        value={pais} onChange={(e) => setPais(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-                    </div>
-                  </div>
-
-                  {/* Morada - Full width */}
+                  {/* Morada — full width */}
                   <div className="col-span-full space-y-1.5">
-                    <label className="text-sm font-medium text-gray-300" htmlFor="morada">Morada</label>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <Home className="h-5 w-5 text-gray-500" />
-                      </div>
-                      <input id="morada" type="text" required disabled={loading} placeholder="Rua Principal, 123"
-                        value={morada} onChange={(e) => setMorada(e.target.value)}
-                        className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50" />
-                    </div>
+                    <label htmlFor="morada" className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Morada
+                    </label>
+                    <input
+                      id="morada" type="text" required disabled={isAnyLoading}
+                      placeholder="Rua Principal, 123, Luanda"
+                      value={morada} onChange={(e) => setMorada(e.target.value)}
+                      className="block w-full border border-gray-800 bg-gray-900/60 py-2.5 px-3 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                    />
                   </div>
                 </div>
 
-                <button type="submit" disabled={loading}
-                  className="group glow-purple mt-6 flex w-full items-center justify-center gap-2 bg-white py-3.5 text-sm font-bold text-gray-950 transition-all hover:bg-gray-200 disabled:opacity-70 disabled:cursor-not-allowed">
-                  {loading ? <Loader2 className="h-5 w-5 animate-spin text-gray-950" /> : "Criar Conta Grátis"}
-                </button>
+                {/* Botões */}
+                <div className="flex gap-3 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => { setStep(1); setError(""); }}
+                    disabled={isAnyLoading}
+                    className="flex items-center gap-1.5 border border-gray-800 px-4 py-2.5 text-sm text-gray-500 hover:text-gray-300 hover:border-gray-700 transition-all disabled:opacity-50"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" /> Voltar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isAnyLoading}
+                    className="flex flex-1 items-center justify-center gap-2 bg-purple py-2.5 text-sm font-bold text-white hover:bg-purple-light disabled:opacity-60 transition-all"
+                  >
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Criar conta grátis <ArrowRight className="h-3.5 w-3.5" /></>}
+                  </button>
+                </div>
               </form>
+            )}
 
-              <div className="animate-in fade-in duration-500">
-                <div className="mt-8 mb-6 flex items-center relative z-10">
-                  <div className="w-full border-t border-gray-800"></div>
-                  <div className="px-4 text-xs font-medium text-gray-500 whitespace-nowrap">Ou com Google / GitHub</div>
-                  <div className="w-full border-t border-gray-800"></div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 relative z-10">
-                  <button type="button" disabled={!!providerLoading}
-                    onClick={() => handleProviderRegister(new GoogleAuthProvider(), "Google")}
-                    className="flex w-full items-center justify-center gap-2 border border-gray-700 bg-gray-950/50 py-2.5 text-sm font-semibold text-white transition-all hover:border-gray-500 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
-                    {providerLoading === "Google" ? <Loader2 className="h-5 w-5 animate-spin" /> : <GoogleIcon className="h-5 w-5" />} Google
-                  </button>
-                  <button type="button" disabled={!!providerLoading}
-                    onClick={() => handleProviderRegister(new GithubAuthProvider(), "GitHub")}
-                    className="flex w-full items-center justify-center gap-2 border border-gray-700 bg-gray-950/50 py-2.5 text-sm font-semibold text-white transition-all hover:border-gray-500 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
-                    {providerLoading === "GitHub" ? <Loader2 className="h-5 w-5 animate-spin" /> : <GithubIcon className="h-5 w-5" />} GitHub
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <p className="mt-8 text-center text-sm text-gray-400 relative z-20">
-              Já tem uma conta? <Link href="/login" className="font-semibold text-purple-light hover:text-purple transition-colors">Iniciar sessão</Link>
-            </p>
-            <p className="mt-2 text-center text-sm relative z-20">
-              <Link href="/login?view=forgot" className="text-gray-500 hover:text-gray-300 transition-colors">Esqueceu a palavra-passe?</Link>
+            {/* Links de rodapé */}
+            <p className="mt-8 text-center text-xs text-gray-600">
+              Ao criar conta aceita os{" "}
+              <Link href="/terms" className="hover:text-gray-400 transition-colors underline underline-offset-2">
+                Termos de Uso
+              </Link>
+              {" "}e a{" "}
+              <Link href="/privacy" className="hover:text-gray-400 transition-colors underline underline-offset-2">
+                Política de Privacidade
+              </Link>
             </p>
           </div>
         </div>

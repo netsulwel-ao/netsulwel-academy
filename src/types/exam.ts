@@ -4,20 +4,28 @@ export interface Question {
   id: string;
   type: QuestionType;
   question: string;
-  options?: string[];        // for multiple_choice and true_false
-  correctAnswer: string;     // the correct option index or text
+  options?: string[];
+  correctAnswer: string;
   points: number;
 }
 
 export interface Exam {
   id?: string;
+  // Ligação ao conteúdo — obrigatório courseId OU liveId
   courseId: string;
   courseTitle?: string;
+  /** Tipo do curso (standalone/smart/golden) — usado para verificar acesso */
+  courseType?: "standalone" | "smart" | "golden";
+  /** Preço do curso — usado para verificar se é gratuito */
+  coursePrice?: number;
+  /** Se o exame é sobre uma aula ao vivo em vez de um curso */
+  liveId?: string;
+  liveTitle?: string;
   title: string;
   description: string;
   questions: Question[];
-  passingScore: number;       // percentage (0-100)
-  timeLimit?: number;         // minutes, optional
+  passingScore: number;
+  timeLimit?: number | null;
   maxAttempts: number;
   createdBy: string;
   createdAt?: unknown;
@@ -29,10 +37,11 @@ export interface ExamResult {
   examId: string;
   examTitle: string;
   courseId: string;
+  liveId?: string;
   userId: string;
   userName: string;
-  answers: Record<string, string>;  // questionId → answer
-  score: number;                     // percentage (0-100)
+  answers: Record<string, string>;
+  score: number;
   passed: boolean;
   startedAt?: unknown;
   completedAt?: unknown;

@@ -1,20 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { db } from "@/lib/firebase";
+import { collection, getDocs, deleteDoc, doc, query, where, updateDoc, serverTimestamp } from "firebase/firestore";
 import {
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-  orderBy,
-  query,
-  where,
-} from "firebase/firestore";
-import { Plus, Pencil, Trash2, Loader2, Video, BookOpen, AlertTriangle, Share2, CheckCircle2 } from "lucide-react";
+  Plus, Pencil, Trash2, Loader2, BookOpen, AlertTriangle,
+  Share2, CheckCircle2, Radio, Search, X, Filter,
+  Eye, EyeOff, ChevronDown,
+} from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
+// ── Types ─────────────────────────────────────────────────────
 interface Course {
   id: string;
   title: string;
@@ -24,248 +23,445 @@ interface Course {
   lessonsCount: number;
   status: "published" | "draft";
   format?: "recorded" | "live";
-  createdAt: Date;
+  type?: "standalone" | "smart" | "golden";
+  category?: string;
+  level?: string;
+  price?: number;
   createdBy?: string;
+  createdAt: unknown;
 }
 
+function toDate(raw: unknown): Date {
+  if (!raw) return new Date(0);
+  if (raw instanceof Date) return raw;
+  if (typeof raw === "object" && raw !== null && "toDate" in raw)
+    return (raw as { toDate: () => Date }).toDate();
+  return new Date(0);
+}
+
+function formatKz(v: number) {
+  return v.toLocaleString("pt-AO") + " Kz";
+}
+
+// ── Badge helpers ─────────────────────────────────────────────
+function StatusBadge({ status }: { status: "published" | "draft" }) {
+  return (
+    <span className={`font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 border ${
+      status === "published"
+        ? "border-green/30 text-green/70 bg-green/8"
+        : "border-amber-500/30 text-amber-400/70 bg-amber-500/8"
+    }`}>
+      {status === "published" ? "pub" : "draft"}
+    </span>
+  );
+}
+
+function TypeBadge({ type }: { type?: string }) {
+  const map: Record<string, string> = {
+    standalone: "border-blue-500/25 text-blue-400/70",
+    smart:      "border-green/25 text-green/70",
+    golden:     "border-amber-500/25 text-amber-400/70",
+  };
+  if (!type) return null;
+  return (
+    <span className={`font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 border ${map[type] ?? "border-gray-700 text-gray-600"}`}>
+      {type}
+    </span>
+  );
+}
+
+// ── Main page ─────────────────────────────────────────────────
 export default function CoursesPage() {
   const { isAdmin, isTeacher, user } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const handleCopyLink = (id: string) => {
-    const url = `${window.location.origin}/preview/course/${id}`;
-    navigator.clipboard.writeText(url);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
+  // ── Filtros / pesquisa ──────────────────────────────────────
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState<"all" | "published" | "draft">("all");
+  const [filterType, setFilterType]     = useState<"all" | "standalone" | "smart" | "golden">("all");
+  const [filterFormat, setFilterFormat] = useState<"all" | "recorded" | "live">("all");
+  const [showFilters, setShowFilters]   = useState(false);
 
-  const fetchCourses = async () => {
+  // ── Load ────────────────────────────────────────────────────
+  const load = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    setError(null);
     try {
-      const constraints: any[] = [orderBy("createdAt", "desc")];
-      if (isTeacher && user?.uid) {
-        constraints.push(where("createdBy", "==", user.uid));
-      }
-      const q = query(collection(db, "courses"), ...constraints);
-      const snapshot = await getDocs(q);
-      const data = snapshot.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-        createdAt: d.data().createdAt?.toDate?.() ?? new Date(),
-      })) as Course[];
+      // Sem orderBy composto — ordena em memória
+      const q = isTeacher && !isAdmin
+        ? query(collection(db, "courses"), where("createdBy", "==", user.uid))
+        : query(collection(db, "courses"));
+
+      const snap = await getDocs(q);
+      const data = snap.docs
+        .map(d => ({ id: d.id, ...d.data() } as Course))
+        .sort((a, b) => toDate(b.createdAt).getTime() - toDate(a.createdAt).getTime());
       setCourses(data);
-    } catch (error) {
-      console.error("Erro ao carregar cursos:", error);
+    } catch (err) {
+      logger.error("AdminCourses: failed to load", err);
+      setError("Não foi possível carregar os cursos.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.uid, isTeacher, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchCourses();
-  }, [isTeacher, user?.uid]);
+  useEffect(() => { load(); }, [load]);
 
-  const handleDelete = async (id: string) => {
-    setDeletingId(id);
+  // ── Filtrar/pesquisar ────────────────────────────────────────
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    return courses.filter(c => {
+      if (filterStatus !== "all" && c.status !== filterStatus) return false;
+      if (filterType   !== "all" && c.type   !== filterType)   return false;
+      if (filterFormat !== "all" && c.format !== filterFormat) return false;
+      if (q) return c.title.toLowerCase().includes(q) || (c.description?.toLowerCase().includes(q) ?? false);
+      return true;
+    });
+  }, [courses, search, filterStatus, filterType, filterFormat]);
+
+  // ── Acções ──────────────────────────────────────────────────
+  const handleDelete = useCallback((course: Course) => {
+    toast.error(`Apagar "${course.title}"?`, {
+      description: "Esta acção é irreversível.",
+      action: {
+        label: "Apagar",
+        onClick: async () => {
+          setDeletingId(course.id);
+          try {
+            await deleteDoc(doc(db, "courses", course.id));
+            setCourses(prev => prev.filter(c => c.id !== course.id));
+            toast.success("Curso apagado.");
+          } catch (err) {
+            logger.error("AdminCourses: delete failed", err, { courseId: course.id });
+            toast.error("Erro ao apagar o curso.");
+          } finally {
+            setDeletingId(null);
+          }
+        },
+      },
+    });
+  }, []);
+
+  const handleToggleStatus = useCallback(async (course: Course) => {
+    const next = course.status === "published" ? "draft" : "published";
+    setTogglingId(course.id);
     try {
-      await deleteDoc(doc(db, "courses", id));
-      setCourses((prev) => prev.filter((c) => c.id !== id));
-    } catch (error) {
-      console.error("Erro ao apagar curso:", error);
+      await updateDoc(doc(db, "courses", course.id), { status: next, updatedAt: serverTimestamp() });
+      setCourses(prev => prev.map(c => c.id === course.id ? { ...c, status: next } : c));
+      toast.success(next === "published" ? `"${course.title}" publicado.` : `"${course.title}" movido para rascunho.`);
+    } catch (err) {
+      logger.error("AdminCourses: toggle status failed", err, { courseId: course.id });
+      toast.error("Erro ao alterar estado do curso.");
     } finally {
-      setDeletingId(null);
-      setConfirmDelete(null);
+      setTogglingId(null);
     }
-  };
+  }, []);
+
+  const handleCopyLink = useCallback((id: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/dashboard/courses/${id}`);
+    setCopiedId(id);
+    toast.success("Link copiado.");
+    setTimeout(() => setCopiedId(null), 2000);
+  }, []);
+
+  const hasFilters = filterStatus !== "all" || filterType !== "all" || filterFormat !== "all" || search.trim() !== "";
+  const clearFilters = () => { setSearch(""); setFilterStatus("all"); setFilterType("all"); setFilterFormat("all"); };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="max-w-[80rem] mx-auto space-y-8 animate-in fade-in duration-300">
+
+      {/* ── Cabeçalho ── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Cursos</h1>
-          <p className="mt-1 text-gray-400">
-            {loading ? "A carregar..." : `${courses.length} curso${courses.length !== 1 ? "s" : ""} na plataforma`}
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+            // gestão de cursos
+          </p>
+          <h1 className="text-2xl font-bold text-gray-100">Cursos</h1>
+          <p className="mt-1 text-sm text-gray-600">
+            {loading ? "A carregar..." : `${filtered.length} de ${courses.length} curso${courses.length !== 1 ? "s" : ""}`}
           </p>
         </div>
         <Link
           href="/admin/courses/new"
-          className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-2.5 font-semibold transition-colors"
+          className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all shrink-0"
         >
-          <Plus className="w-4 h-4" />
-          Novo Curso
+          <Plus className="h-3 w-3" /> Novo curso
         </Link>
       </div>
 
-      {/* Loading */}
-      {loading && (
-        <div className="flex items-center justify-center py-24" role="status" aria-live="polite">
-          <Loader2 className="h-8 w-8 animate-spin text-purple" />
-          <span className="sr-only">A carregar cursos...</span>
-        </div>
-      )}
-
-      {/* Empty state */}
-      {!loading && courses.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-24 bg-gray-900/40 backdrop-blur-xl text-center">
-          <div className="flex h-16 w-16 items-center justify-center bg-blue-500/10 mb-4">
-            <Video className="h-8 w-8 text-blue-400" />
+      {/* ── Barra de pesquisa + filtros ── */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          {/* Search */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-700" strokeWidth={1.5} />
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Pesquisar por título ou descrição..."
+              className="w-full border border-gray-800/60 bg-gray-900/10 pl-9 pr-9 py-2.5 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
+                <X className="h-3 w-3 text-gray-700 hover:text-gray-500 transition-colors" />
+              </button>
+            )}
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">Nenhum curso ainda</h2>
-          <p className="text-gray-400 mb-6 max-w-sm">
-            Crie o primeiro curso da plataforma para que os alunos possam começar a aprender.
-          </p>
-          <Link
-            href="/admin/courses/new"
-            className="flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-6 py-3 font-bold transition-colors"
+
+          {/* Toggle filtros */}
+          <button
+            onClick={() => setShowFilters(v => !v)}
+            className={`flex items-center gap-1.5 border px-3 py-2.5 font-mono text-[10px] uppercase tracking-widest transition-all shrink-0 ${
+              hasFilters
+                ? "border-purple/30 bg-purple/8 text-purple/70"
+                : "border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-400"
+            }`}
           >
-            <Plus className="w-4 h-4" />
-            Criar Primeiro Curso
-          </Link>
+            <Filter className="h-3 w-3" strokeWidth={1.5} />
+            Filtros
+            {hasFilters && <span className="h-1.5 w-1.5 bg-purple/70 rounded-full" />}
+          </button>
+        </div>
+
+        {/* Filtros expandidos */}
+        {showFilters && (
+          <div className="flex flex-wrap items-center gap-2 border border-gray-800/40 bg-gray-900/10 px-4 py-3">
+            {/* Status */}
+            <select
+              value={filterStatus}
+              onChange={e => setFilterStatus(e.target.value as typeof filterStatus)}
+              className="border border-gray-800/60 bg-gray-900 text-xs text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
+            >
+              <option value="all">Todos os estados</option>
+              <option value="published">Publicado</option>
+              <option value="draft">Rascunho</option>
+            </select>
+
+            {/* Tipo */}
+            <select
+              value={filterType}
+              onChange={e => setFilterType(e.target.value as typeof filterType)}
+              className="border border-gray-800/60 bg-gray-900 text-xs text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
+            >
+              <option value="all">Todos os tipos</option>
+              <option value="standalone">Standalone</option>
+              <option value="smart">Smart</option>
+              <option value="golden">Golden</option>
+            </select>
+
+            {/* Formato */}
+            <select
+              value={filterFormat}
+              onChange={e => setFilterFormat(e.target.value as typeof filterFormat)}
+              className="border border-gray-800/60 bg-gray-900 text-xs text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
+            >
+              <option value="all">Todos os formatos</option>
+              <option value="recorded">Gravado</option>
+              <option value="live">Ao vivo</option>
+            </select>
+
+            {hasFilters && (
+              <button
+                onClick={clearFilters}
+                className="font-mono text-[9px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-1"
+              >
+                <X className="h-3 w-3" /> Limpar
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── Erro ── */}
+      {error && (
+        <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
+          <p className="text-sm text-amber-400/80">{error}</p>
         </div>
       )}
 
-      {/* Courses grid */}
-      {!loading && courses.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {courses.map((course) => (
-            <div
-              key={course.id}
-              className="group bg-gray-900/40 backdrop-blur-xl flex flex-col overflow-hidden hover:bg-gray-900/60 transition-all"
+      {/* ── Loading ── */}
+      {loading && (
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="h-5 w-5 animate-spin text-gray-700" />
+        </div>
+      )}
+
+      {/* ── Empty state ── */}
+      {!loading && filtered.length === 0 && (
+        <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-20 text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
+            <BookOpen className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
+          </div>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">
+            {hasFilters ? "// sem resultados" : "// sem cursos"}
+          </p>
+          <p className="text-sm text-gray-600 mb-5">
+            {hasFilters ? "Nenhum curso corresponde aos filtros activos." : "Cria o primeiro curso para os alunos começarem a aprender."}
+          </p>
+          {hasFilters ? (
+            <button
+              onClick={clearFilters}
+              className="font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors"
             >
-              {/* Thumbnail */}
-              <div className="relative h-44 bg-gray-800 overflow-hidden">
-                {course.thumbnail ? (
-                  <img
-                    src={course.thumbnail}
-                    alt={course.title}
-                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-900/40 to-gray-900">
-                    <BookOpen className="h-12 w-12 text-blue-500/40" />
+              ← Limpar filtros
+            </button>
+          ) : (
+            <Link
+              href="/admin/courses/new"
+              className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all"
+            >
+              <Plus className="h-3 w-3" /> Criar curso
+            </Link>
+          )}
+        </div>
+      )}
+
+      {/* ── Tabela de cursos ── */}
+      {!loading && filtered.length > 0 && (
+        <div className="border border-gray-800/60">
+          {/* Cabeçalho da tabela */}
+          <div className="hidden lg:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 border-b border-gray-800/40 bg-gray-900/20">
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Curso</p>
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Tipo · Formato</p>
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Aulas</p>
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Estado</p>
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Acções</p>
+          </div>
+
+          <div className="divide-y divide-gray-800/30">
+            {filtered.map(course => (
+              <div
+                key={course.id}
+                className="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 items-center px-5 py-4 hover:bg-gray-900/20 transition-colors"
+              >
+                {/* Curso: thumb + título */}
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="h-12 w-16 shrink-0 overflow-hidden border border-gray-800/60 bg-gray-900">
+                    {course.thumbnail
+                      ? <img src={course.thumbnail} alt={course.title} className="h-full w-full object-cover" />
+                      : <div className="flex h-full w-full items-center justify-center">
+                          <BookOpen className="h-4 w-4 text-gray-800" strokeWidth={1} />
+                        </div>
+                    }
                   </div>
-                )}
-                {/* Status badge */}
-                <span
-                  className={`absolute top-3 right-3 px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${
-                    course.status === "published"
-                      ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                      : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                  }`}
-                >
-                  {course.status === "published" ? "Publicado" : "Rascunho"}
-                </span>
-              </div>
-
-              {/* Content */}
-              <div className="flex flex-col flex-1 p-5">
-                <h3 className="font-bold text-white text-lg leading-snug line-clamp-2">
-                  {course.title}
-                </h3>
-                <p className="mt-2 text-sm text-gray-400 line-clamp-2 flex-1">
-                  {course.description || "Sem descrição."}
-                </p>
-
-                <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
-                  <span className="flex items-center gap-1">
-                    <BookOpen className="h-3.5 w-3.5" />
-                    {course.modulesCount ?? 0} módulos
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Video className="h-3.5 w-3.5" />
-                    {course.lessonsCount ?? 0} aulas
-                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-200 truncate">{course.title}</p>
+                    <p className="text-xs text-gray-600 truncate mt-0.5 line-clamp-1">
+                      {course.description || "Sem descrição"}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Actions */}
-                <div className="mt-5 flex items-center gap-3 border-t border-gray-800 pt-4">
-                  <Link
-                    href={`/admin/courses/${course.id}/edit`}
-                    className="flex flex-1 items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 text-white py-2 text-sm font-medium transition-colors"
-                  >
-                    <Pencil className="h-4 w-4" />
-                    Editar
-                  </Link>
+                {/* Tipo + Formato */}
+                <div className="flex flex-wrap items-center gap-1.5 lg:flex-col lg:items-start">
+                  <TypeBadge type={course.type} />
+                  {course.format === "live" && (
+                    <span className="font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 border border-red-500/25 text-red-400/70 flex items-center gap-1">
+                      <Radio className="h-2.5 w-2.5" strokeWidth={1.5} /> live
+                    </span>
+                  )}
+                  {course.price !== undefined && course.price > 0 && (
+                    <span className="font-mono text-[9px] text-gray-600">{formatKz(course.price)}</span>
+                  )}
+                </div>
 
+                {/* Aulas */}
+                <div className="hidden lg:block">
+                  <p className="font-mono text-xs text-gray-300">{course.lessonsCount ?? 0}</p>
+                  <p className="font-mono text-[9px] text-gray-700">{course.modulesCount ?? 0} módulo{(course.modulesCount ?? 0) !== 1 ? "s" : ""}</p>
+                </div>
+
+                {/* Estado */}
+                <div className="hidden lg:flex items-center gap-2">
+                  <StatusBadge status={course.status} />
+                </div>
+
+                {/* Acções */}
+                <div className="flex items-center gap-1.5 flex-wrap lg:flex-nowrap">
+                  {/* Mobile: badges inline */}
+                  <div className="flex items-center gap-1.5 lg:hidden">
+                    <StatusBadge status={course.status} />
+                    <TypeBadge type={course.type} />
+                  </div>
+
+                  {/* Toggle pub/draft */}
+                  <button
+                    onClick={() => handleToggleStatus(course)}
+                    disabled={togglingId === course.id}
+                    title={course.status === "published" ? "Mover para rascunho" : "Publicar"}
+                    className="flex h-8 w-8 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-300 disabled:opacity-50 transition-all"
+                  >
+                    {togglingId === course.id
+                      ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      : course.status === "published"
+                        ? <EyeOff className="h-3.5 w-3.5" strokeWidth={1.5} />
+                        : <Eye className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    }
+                  </button>
+
+                  {/* Copiar link */}
+                  <button
+                    onClick={() => handleCopyLink(course.id)}
+                    title="Copiar link"
+                    className="flex h-8 w-8 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all"
+                  >
+                    {copiedId === course.id
+                      ? <CheckCircle2 className="h-3.5 w-3.5 text-green/60" strokeWidth={1.5} />
+                      : <Share2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    }
+                  </button>
+
+                  {/* Live studio (se formato live) */}
                   {course.format === "live" && (
                     <Link
                       href={`/admin/courses/${course.id}/live-studio`}
-                      className="flex flex-1 items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white py-2 text-sm font-bold transition-colors"
+                      title="Estúdio ao vivo"
+                      className="flex h-8 w-8 items-center justify-center border border-red-500/25 bg-red-500/5 text-red-400/70 hover:bg-red-500/15 transition-all"
                     >
-                      <Video className="h-4 w-4" />
-                      Estúdio
+                      <Radio className="h-3.5 w-3.5" strokeWidth={1.5} />
                     </Link>
                   )}
 
-                  {confirmDelete === course.id ? (
-                    <div className="flex flex-1 items-center gap-2">
-                      <button
-                        onClick={() => handleDelete(course.id)}
-                        disabled={deletingId === course.id}
-                        className="flex flex-1 items-center justify-center gap-1 bg-red-600 hover:bg-red-700 text-white py-2 text-sm font-bold transition-colors disabled:opacity-60"
-                      >
-                        {deletingId === course.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          "Confirmar"
-                        )}
-                      </button>
-                      <button
-                        onClick={() => setConfirmDelete(null)}
-                        className="flex flex-1 items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 py-2 text-sm transition-colors"
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setConfirmDelete(course.id)}
-                      aria-label="Apagar curso"
-                      className="flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-3 py-2 text-sm font-medium transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  )}
+                  {/* Editar */}
+                  <Link
+                    href={`/admin/courses/${course.id}/edit`}
+                    title="Editar curso"
+                    className="flex h-8 w-8 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-purple/30 hover:text-purple/70 transition-all"
+                  >
+                    <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
+                  </Link>
+
+                  {/* Apagar */}
+                  <button
+                    onClick={() => handleDelete(course)}
+                    disabled={deletingId === course.id}
+                    title="Apagar curso"
+                    className="flex h-8 w-8 items-center justify-center border border-red-500/15 bg-red-500/5 text-red-400/50 hover:border-red-500/30 hover:text-red-400/80 disabled:opacity-40 transition-all"
+                  >
+                    {deletingId === course.id
+                      ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      : <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    }
+                  </button>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
 
-      {/* Confirm delete modal overlay */}
-      {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/80 backdrop-blur-sm">
-          <div className="bg-gray-900 border border-gray-800 p-8 max-w-sm w-full mx-4 shadow-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center bg-red-500/10">
-                <AlertTriangle className="h-5 w-5 text-red-400" />
-              </div>
-              <h3 className="text-lg font-bold text-white">Apagar Curso</h3>
-            </div>
-            <p className="text-gray-400 text-sm mb-6">
-              Tens a certeza que queres apagar este curso? Esta ação é irreversível.
+          {/* Footer com contagem */}
+          <div className="px-5 py-3 border-t border-gray-800/40 bg-gray-900/10">
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">
+              {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+              {hasFilters && ` (filtrado de ${courses.length})`}
             </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => handleDelete(confirmDelete)}
-                disabled={!!deletingId}
-                className="flex flex-1 items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2.5 font-bold transition-colors disabled:opacity-60"
-              >
-                {deletingId ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apagar"}
-              </button>
-              <button
-                onClick={() => setConfirmDelete(null)}
-                className="flex flex-1 items-center justify-center bg-gray-800 hover:bg-gray-700 text-white py-2.5 font-medium transition-colors"
-              >
-                Cancelar
-              </button>
-            </div>
           </div>
         </div>
       )}

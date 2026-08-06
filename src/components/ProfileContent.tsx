@@ -6,6 +6,7 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import { BookOpen, Radio, Users, GraduationCap, Loader2, Play, X } from "lucide-react";
 import { VideoPlayer } from "@/components/VideoPlayer";
+import { Avatar } from "@/components/ui/Avatar";
 import type { Course } from "@/types/course";
 import type { LiveSession } from "@/types/live";
 
@@ -104,13 +105,14 @@ export function useProfile(userId: string | undefined) {
   return { profile, courses, lives, loading };
 }
 
-export function ProfileContent({ profile, courses, lives, courseHref, coverClassName, contentClassName }: {
+export function ProfileContent({ profile, courses, lives, courseHref, coverClassName, contentClassName, userId }: {
   profile: ProfileData;
   courses: Course[];
   lives: LiveSession[];
   courseHref: (courseId: string) => string;
   coverClassName?: string;
   contentClassName?: string;
+  userId?: string;
 }) {
   const roleInfo = ROLE_LABELS[profile.role] || ROLE_LABELS.aluno;
   const totalStudents = courses.reduce((sum, c) => sum + (c.views || 0), 0);
@@ -147,11 +149,11 @@ export function ProfileContent({ profile, courses, lives, courseHref, coverClass
         {profile.photoURL ? (
           <button type="button" onClick={() => setPhotoPreviewUrl(profile.photoURL!)}
             className="shrink-0 cursor-pointer focus:outline-none">
-             <img src={profile.photoURL} alt={profile.name} className="h-20 w-20 sm:h-28 sm:w-28 rounded-full border-4 border-gray-950 object-cover hover:brightness-75 transition-all" />
+             <img src={profile.photoURL} alt={profile.name} className="h-20 w-20 sm:h-28 sm:w-28 border-4 border-gray-950 object-cover hover:brightness-75 transition-all" />
           </button>
         ) : (
-          <div className="h-20 w-20 sm:h-28 sm:w-28 rounded-full border-4 border-gray-950 bg-gradient-to-br from-purple-500/30 to-purple-700/30 flex items-center justify-center shrink-0">
-            <span className="text-3xl sm:text-5xl font-bold text-purple-300">{profile.name[0]?.toUpperCase() || "?"}</span>
+          <div className="h-20 w-20 sm:h-28 sm:w-28 border-4 border-gray-950 overflow-hidden shrink-0">
+            <Avatar uid={userId ?? ""} name={profile.name} size={112} className="h-full w-full" />
           </div>
         )}
         <div className="flex-1 min-w-0 pb-1">

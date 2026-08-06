@@ -1,147 +1,195 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { MessageCircle, Users, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { listenUserChats } from "@/lib/chat";
-import { MessageCircle, Users, User, ChevronRight, Clock } from "lucide-react";
-import Link from "next/link";
+import { Avatar } from "@/components/ui/Avatar";
 import type { CourseChat } from "@/types/chat";
 
+// ── Helper: formatar timestamp ────────────────────────────────
+function fmtTime(raw: unknown): string {
+  if (!raw) return "";
+  const d: Date | null =
+    raw instanceof Date ? raw :
+    (typeof raw === "object" && "toDate" in (raw as object))
+      ? (raw as { toDate: () => Date }).toDate()
+      : null;
+  if (!d) return "";
+  const diff = Date.now() - d.getTime();
+  if (diff < 86_400_000) return d.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
+  if (diff < 604_800_000) return d.toLocaleDateString("pt-PT", { weekday: "short" });
+  return d.toLocaleDateString("pt-PT", { day: "numeric", month: "short" });
+}
+
+// ── Avatar de chat ────────────────────────────────────────────
+function ChatAvatar({ chat, currentUid }: { chat: CourseChat; currentUid: string }) {
+  if (chat.type === "group") {
+    return (
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800/60 bg-gray-900">
+        <Users className="h-4 w-4 text-purple/70" strokeWidth={1.5} />
+      </div>
+    );
+  }
+
+  const otherId = chat.participants.find(p => p !== currentUid) ?? "";
+  const photo   = otherId ? chat.participantPhotos[otherId] : undefined;
+  const name    = otherId ? chat.participantNames[otherId]  : "";
+
+  return (
+    <div className="h-10 w-10 shrink-0 overflow-hidden border border-gray-800/60">
+      <Avatar uid={otherId} photoURL={photo} name={name} size={40} />
+    </div>
+  );
+}
+
+// ── Item de chat ──────────────────────────────────────────────
+interface ChatItemProps {
+  chat: CourseChat;
+  currentUid: string;
+  href: string;
+  onSelect?: (chatId: string) => void;
+}
+
+function ChatItem({ chat, currentUid, href, onSelect }: ChatItemProps) {
+  const otherId   = chat.participants.find(p => p !== currentUid) ?? "";
+  const otherName = chat.participantNames[otherId] ?? "Chat Individual";
+  const displayName = chat.type === "group" ? chat.courseTitle : otherName;
+  const lastMsgPrefix =
+    chat.lastMessageBy && chat.lastMessageBy !== currentUid && chat.lastMessageByName
+      ? `${chat.lastMessageByName}: `
+      : "";
+
+  const content = (
+    <>
+      <ChatAvatar chat={chat} currentUid={currentUid} />
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm font-semibold text-gray-200 truncate">{displayName}</p>
+          <span className="shrink-0 font-mono text-[9px] text-gray-700">
+            {fmtTime(chat.lastMessageAt)}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 mt-0.5">
+          {chat.type === "group" && (
+            <span className="font-mono text-[9px] uppercase tracking-widest border border-purple/20 bg-purple/8 text-purple/60 px-1.5 py-px shrink-0">
+              grupo
+            </span>
+          )}
+          <p className="text-xs text-gray-600 truncate">
+            {lastMsgPrefix}{chat.lastMessage ?? "Sem mensagens ainda"}
+          </p>
+        </div>
+        {chat.type === "group" && (
+          <p className="text-[10px] font-mono text-gray-700 mt-0.5 truncate">
+            {chat.courseTitle}
+          </p>
+        )}
+      </div>
+
+      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-gray-800 group-hover:text-gray-600 transition-colors" />
+    </>
+  );
+
+  const cls = "group flex items-center gap-3 px-4 py-3.5 border-b border-gray-800/40 hover:bg-gray-900/30 transition-colors";
+
+  if (onSelect) {
+    return (
+      <button type="button" onClick={() => onSelect(chat.id!)} className={`w-full text-left ${cls}`}>
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <Link href={href} className={cls}>
+      {content}
+    </Link>
+  );
+}
+
+// ── Componente principal ──────────────────────────────────────
 interface ChatListProps {
-  theme?: "dark" | "light";
   courseId?: string;
   onSelect?: (chatId: string) => void;
   linkPrefix?: string;
 }
 
-export default function ChatList({ theme = "dark", courseId, onSelect, linkPrefix = "/dashboard/chats" }: ChatListProps) {
+export default function ChatList({ courseId, onSelect, linkPrefix = "/dashboard/chats" }: ChatListProps) {
   const { user } = useAuth();
   const [chats, setChats] = useState<CourseChat[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
-    const unsub = listenUserChats(user.uid, setChats);
-    return () => unsub();
-  }, [user?.uid]);
+    let cancelled = false;
+    const unsub = listenUserChats(user.uid, (list) => {
+      if (!cancelled) { setChats(list); setLoading(false); }
+    });
+    return () => { cancelled = true; unsub(); };
+  }, [user?.uid]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const filtered = courseId ? chats.filter((c) => c.courseId === courseId) : chats;
+  const filtered = courseId ? chats.filter(c => c.courseId === courseId) : chats;
+  const groups   = filtered.filter(c => c.type === "group");
+  const indivs   = filtered.filter(c => c.type === "individual");
 
-  const groupChats = filtered.filter((c) => c.type === "group");
-  const individualChats = filtered.filter((c) => c.type === "individual");
-
-  const formatTime = (date: Date | undefined) => {
-    if (!date) return "";
-    const d = date instanceof Date ? date : (date as any).toDate?.();
-    if (!d) return "";
-    const now = new Date();
-    const diff = now.getTime() - d.getTime();
-    if (diff < 86400000) return d.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
-    if (diff < 604800000) return d.toLocaleDateString("pt-PT", { weekday: "short" });
-    return d.toLocaleDateString("pt-PT", { day: "numeric", month: "short" });
-  };
+  if (loading) return null;
 
   if (filtered.length === 0) {
     return (
-      <div className={`flex flex-col items-center justify-center py-16 text-center ${theme === "light" ? "text-gray-400" : "text-gray-600"}`}>
-        <MessageCircle className="h-12 w-12 mb-4 opacity-40" />
-        <p className="text-sm font-medium">Nenhuma conversa</p>
-        <p className="text-xs mt-1">As conversas de grupo e individuais aparecerão aqui</p>
-      </div>
-    );
-  }
-
-  function renderChatList(title: string, icon: React.ReactNode, items: CourseChat[]) {
-    if (items.length === 0) return null;
-    return (
-      <div className="mb-6">
-        <div className={`flex items-center gap-2 px-4 mb-2 ${theme === "light" ? "text-gray-500" : "text-gray-500"}`}>
-          {icon}
-          <span className="text-xs font-bold uppercase tracking-widest">{title}</span>
-          <span className="text-[10px] opacity-60">({items.length})</span>
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
+          <MessageCircle className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
         </div>
-        <div className="space-y-0.5">
-          {items.map((chat) => {
-            const otherParticipantId = chat.participants.find((p) => p !== user?.uid);
-            const otherName = otherParticipantId ? chat.participantNames[otherParticipantId] : "";
-            return (
-              <div key={chat.id}>
-                {onSelect ? (
-                  <button onClick={() => onSelect(chat.id!)} className={`w-full flex items-center gap-3 px-4 py-3 transition-colors text-left ${
-                    theme === "light" ? "hover:bg-gray-100" : "hover:bg-gray-900"
-                  }`}>
-                    {renderAvatar(chat, otherParticipantId)}
-                    {renderChatInfo(chat, otherName, formatTime)}
-                  </button>
-                ) : (
-                  <Link href={`${linkPrefix}/${chat.id}`} className={`flex items-center gap-3 px-4 py-3 transition-colors ${
-                    theme === "light" ? "hover:bg-gray-100" : "hover:bg-gray-900"
-                  }`}>
-                    {renderAvatar(chat, otherParticipantId)}
-                    {renderChatInfo(chat, otherName, formatTime)}
-                  </Link>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  function renderAvatar(chat: CourseChat, otherParticipantId?: string) {
-    if (chat.type === "group") {
-      return (
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center ${theme === "light" ? "bg-purple/10 text-purple" : "bg-purple/20 text-purple"}`}>
-          <Users className="h-5 w-5" />
-        </div>
-      );
-    }
-    const photo = otherParticipantId ? chat.participantPhotos[otherParticipantId] : undefined;
-    if (photo) {
-       return <img src={photo} alt="Foto de perfil" className="h-10 w-10 shrink-0 object-cover" />;
-    }
-    return (
-      <div className={`flex h-10 w-10 shrink-0 items-center justify-center ${theme === "light" ? "bg-green-500/10 text-green-600" : "bg-green-500/20 text-green-400"}`}>
-        <User className="h-5 w-5" />
-      </div>
-    );
-  }
-
-  function renderChatInfo(chat: CourseChat, otherName: string, fmt: (d: Date | undefined) => string) {
-    return (
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-2">
-          <p className={`text-sm font-medium truncate ${theme === "light" ? "text-gray-900" : "text-gray-200"}`}>
-            {chat.type === "group" ? chat.courseTitle : otherName || "Chat Individual"}
-          </p>
-          <div className="flex items-center gap-1 shrink-0">
-            {chat.lastMessageAt && (
-              <span className={`text-[10px] ${theme === "light" ? "text-gray-400" : "text-gray-600"}`}>
-                {fmt(chat.lastMessageAt)}
-              </span>
-            )}
-            <ChevronRight className={`h-3.5 w-3.5 ${theme === "light" ? "text-gray-300" : "text-gray-700"}`} />
-          </div>
-        </div>
-        <div className="flex items-center gap-2 mt-0.5">
-          {chat.type === "group" && (
-            <span className={`text-[10px] font-medium ${theme === "light" ? "text-purple/60" : "text-purple/50"}`}>
-              Grupo
-            </span>
-          )}
-          <p className={`text-xs truncate ${theme === "light" ? "text-gray-500" : "text-gray-500"}`}>
-            {chat.lastMessageByName && chat.lastMessageBy !== user?.uid ? `${chat.lastMessageByName}: ` : ""}
-            {chat.lastMessage || "Sem mensagens ainda"}
-          </p>
-        </div>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">// sem conversas</p>
+        <p className="text-sm text-gray-600">
+          {courseId
+            ? "Ainda não há conversas neste curso."
+            : "As conversas de grupo e individuais aparecem aqui."}
+        </p>
       </div>
     );
   }
 
   return (
     <div>
-      {renderChatList("Grupos", <Users className="h-3.5 w-3.5" />, groupChats)}
-      {renderChatList("Individuais", <User className="h-3.5 w-3.5" />, individualChats)}
+      {/* Grupos */}
+      {groups.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-800/40">
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">// grupos · {groups.length}</p>
+          </div>
+          {groups.map(chat => (
+            <ChatItem
+              key={chat.id}
+              chat={chat}
+              currentUid={user?.uid ?? ""}
+              href={`${linkPrefix}/${chat.id}`}
+              onSelect={onSelect}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Individuais */}
+      {indivs.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-800/40">
+            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">// individuais · {indivs.length}</p>
+          </div>
+          {indivs.map(chat => (
+            <ChatItem
+              key={chat.id}
+              chat={chat}
+              currentUid={user?.uid ?? ""}
+              href={`${linkPrefix}/${chat.id}`}
+              onSelect={onSelect}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

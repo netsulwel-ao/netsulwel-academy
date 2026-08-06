@@ -1,216 +1,144 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { db } from "@/lib/firebase";
-import { doc, getDoc, addDoc, collection, query, where, getDocs, serverTimestamp } from "firebase/firestore";
-import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft, Loader2, AlertCircle, Clock } from "lucide-react";
-import type { Exam, ExamResult } from "@/types/exam";
+import Link from "next/link";
+import { ChevronLeft, Clock, AlertCircle, Loader2, ArrowRight } from "lucide-react";
+import { useExamSession } from "../_hooks/useExamSession";
+import { QuestionCard } from "../_components/QuestionCard";
+import { formatTime, isTimeCritical } from "../_types/exams";
 
 export default function TakeExamPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { user } = useAuth();
-
-  const [exam, setExam] = useState<Exam | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [submitting, setSubmitting] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const [error, setError] = useState("");
-  const autoSubmitted = useRef(false);
-
-  // Load exam
-  useEffect(() => {
-    if (!id || !user) return;
-    const load = async () => {
-      try {
-        const snap = await getDoc(doc(db, "exams", id));
-        if (!snap.exists()) { router.push("/dashboard/exams"); return; }
-        const data = { id: snap.id, ...snap.data() } as Exam;
-        setExam(data);
-        if (data.timeLimit) setTimeLeft(data.timeLimit * 60);
-
-        // Check existing attempts — count actual result docs for this exam
-        const resSnap = await getDocs(
-          query(collection(db, "exam-results", user.uid, "exams"), where("examId", "==", id))
-        );
-        const attempts = resSnap.size;
-        if (attempts >= data.maxAttempts) {
-          router.push(`/dashboard/exams/${id}/result`);
-          return;
-        }
-      } catch { router.push("/dashboard/exams"); } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [id, user, router]);
-
-  // Timer countdown
-  useEffect(() => {
-    if (timeLeft === null || timeLeft <= 0) return;
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => (prev !== null ? prev - 1 : null));
-    }, 1000);
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeLeft]);
-
-  // Auto-submit when timer reaches 0 (exactly once)
-  useEffect(() => {
-    if (timeLeft !== 0) {
-      autoSubmitted.current = false;
-      return;
-    }
-    if (autoSubmitted.current) return;
-    autoSubmitted.current = true;
-    handleSubmit();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeLeft]);
-
-  const handleSubmit = useCallback(async () => {
-    if (!exam || !user || submitting) return;
-    setSubmitting(true);
-    try {
-      let correct = 0;
-      exam.questions.forEach((q) => {
-        if (answers[q.id] === q.correctAnswer) correct++;
-      });
-      const score = (correct / exam.questions.length) * 100;
-      const passed = score >= exam.passingScore;
-
-      await addDoc(collection(db, "exam-results", user.uid, "exams"), {
-        examId: exam.id,
-        examTitle: exam.title,
-        courseId: exam.courseId,
-        userId: user.uid,
-        userName: user.displayName || "Aluno",
-        answers,
-        score,
-        passed,
-        completedAt: serverTimestamp(),
-      });
-
-      router.push(`/dashboard/exams/${id}/result`);
-    } catch {
-      setError("Erro ao submeter avaliação. Tenta novamente.");
-      setSubmitting(false);
-    }
-  }, [exam, user, answers, submitting, id, router]);
+  const {
+    exam, answers, setAnswer,
+    timeLeft, loading, submitting,
+    error, answeredCount, submit,
+  } = useExamSession(id);
 
   if (loading) {
     return (
-      <div className="max-w-3xl mx-auto flex items-center justify-center py-24">
-        <Loader2 className="h-8 w-8 animate-spin text-purple" />
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-5 w-5 animate-spin text-gray-700" />
       </div>
     );
   }
 
   if (!exam) return null;
 
-  const formatTime = (s: number) => {
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${m}:${sec.toString().padStart(2, "0")}`;
-  };
+  const allAnswered = answeredCount >= exam.questions.length;
+  const progress = Math.round((answeredCount / exam.questions.length) * 100);
 
   return (
-    <div className="max-w-3xl mx-auto animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-6">
-        <div>
-          <button onClick={() => router.push("/dashboard/exams")} className="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-1 mb-2">
-            <ArrowLeft className="h-4 w-4" /> Voltar
+    <div className="max-w-[56rem] mx-auto space-y-6 animate-in fade-in duration-300">
+
+      {/* ── Barra superior sticky ── */}
+      <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-10 px-4 sm:px-6 md:px-8 lg:px-10 py-3 bg-gray-950/95 backdrop-blur-sm border-b border-gray-800/60">
+        <div className="flex items-center justify-between gap-4 max-w-[56rem] mx-auto">
+          {/* Back */}
+          <button
+            onClick={() => router.push("/dashboard/exams")}
+            className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-gray-700 hover:text-gray-500 transition-colors"
+          >
+            <ChevronLeft className="h-3 w-3" /> Avaliações
           </button>
-          <h1 className="text-2xl font-bold text-white">{exam.title}</h1>
-          <p className="text-gray-400 mt-1">{exam.description}</p>
-        </div>
-        {timeLeft !== null && (
-          <div className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-bold shrink-0 ${
-            timeLeft < 120 ? "bg-red-500/20 text-red-400" : "bg-gray-800 text-gray-300"
-          }`}>
-            <Clock className="h-4 w-4" />
-            {formatTime(timeLeft)}
+
+          <div className="flex items-center gap-3">
+            {/* Timer */}
+            {timeLeft !== null && (
+              <div className={`flex items-center gap-1.5 border px-3 py-1.5 font-mono text-[11px] font-bold transition-colors ${
+                isTimeCritical(timeLeft)
+                  ? "border-red-500/30 bg-red-500/8 text-red-400/80"
+                  : "border-gray-800 bg-gray-900/60 text-gray-500"
+              }`}>
+                <Clock className="h-3 w-3" strokeWidth={1.5} />
+                {formatTime(timeLeft)}
+              </div>
+            )}
+
+            {/* Progresso */}
+            <span className="font-mono text-[10px] text-gray-700">
+              {answeredCount}/{exam.questions.length}
+            </span>
           </div>
-        )}
+        </div>
+
+        {/* Barra de progresso */}
+        <div className="mt-2 h-0.5 bg-gray-800/60 max-w-[56rem] mx-auto overflow-hidden">
+          <div
+            className="h-full bg-purple/50 transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
       </div>
 
+      {/* ── Cabeçalho do exame ── */}
+      <div>
+        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+          // avaliação em curso
+        </p>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-100">{exam.title}</h1>
+        {exam.description && (
+          <p className="mt-1 text-sm text-gray-600">{exam.description}</p>
+        )}
+        <div className="mt-2 flex flex-wrap items-center gap-3 font-mono text-[10px] text-gray-700">
+          <span>{exam.questions.length} perguntas</span>
+          <span>·</span>
+          <span>mín. {exam.passingScore}%</span>
+          {exam.timeLimit && (
+            <>
+              <span>·</span>
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3" strokeWidth={1.5} />
+                {exam.timeLimit} min
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ── Erro de submissão ── */}
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 p-3 text-sm text-red-400 border border-red-500/20 mb-6">
-          <AlertCircle className="h-4 w-4 shrink-0" /> {error}
+        <div className="flex items-start gap-2.5 border border-red-500/20 bg-red-500/5 px-4 py-3">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400/70" strokeWidth={1.5} />
+          <p className="text-sm text-red-400/80">{error}</p>
         </div>
       )}
 
-      {/* Questions */}
-      <div className="space-y-6">
+      {/* ── Perguntas ── */}
+      <div className="space-y-4">
         {exam.questions.map((q, i) => (
-          <div key={q.id} className="bg-gray-900/40 border border-gray-800 p-5 sm:p-6">
-            <p className="text-sm text-gray-500 mb-1">Pergunta {i + 1} de {exam.questions.length}</p>
-            <p className="text-lg font-semibold text-white mb-4">{q.question}</p>
-
-            {q.type === "multiple_choice" && q.options && (
-              <div className="space-y-2">
-                {q.options.map((opt, oi) => (
-                  <label key={oi}
-                    className={`flex items-center gap-3 p-3 border cursor-pointer transition-colors ${
-                      answers[q.id] === String(oi)
-                        ? "border-purple bg-purple/10"
-                        : "border-gray-800 bg-gray-950/40 hover:border-gray-700"
-                    }`}>
-                    <input type="radio" name={q.id} value={String(oi)}
-                      checked={answers[q.id] === String(oi)}
-                      onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: String(oi) }))}
-                      className="accent-purple" />
-                    <span className="text-white">{opt}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-
-            {q.type === "true_false" && (
-              <div className="flex gap-3">
-                {["Verdadeiro", "Falso"].map((opt, oi) => (
-                  <label key={oi}
-                    className={`flex items-center gap-2 px-5 py-3 border cursor-pointer transition-colors ${
-                      answers[q.id] === String(oi)
-                        ? "border-purple bg-purple/10"
-                        : "border-gray-800 bg-gray-950/40 hover:border-gray-700"
-                    }`}>
-                    <input type="radio" name={q.id} value={String(oi)}
-                      checked={answers[q.id] === String(oi)}
-                      onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: String(oi) }))}
-                      className="accent-purple" />
-                    <span className="text-white">{opt}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-
-            {q.type === "short_answer" && (
-              <input type="text"
-                value={answers[q.id] || ""}
-                onChange={(e) => setAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
-                placeholder="Escreve a tua resposta..."
-                className="w-full bg-gray-950/40 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white placeholder-gray-600 focus:outline-none transition-colors" />
-            )}
-          </div>
+          <QuestionCard
+            key={q.id}
+            question={q}
+            index={i}
+            total={exam.questions.length}
+            answer={answers[q.id]}
+            onAnswer={val => setAnswer(q.id, val)}
+          />
         ))}
       </div>
 
-      {/* Submit */}
-      <div className="mt-8 flex items-center justify-between gap-4">
-        <p className="text-sm text-gray-500">
-          {Object.keys(answers).length} de {exam.questions.length} respondidas
-        </p>
-        <button
-          onClick={handleSubmit}
-          disabled={submitting || Object.keys(answers).length < exam.questions.length}
-          className="bg-green hover:bg-green-light text-gray-900 px-8 py-4 font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : "Submeter Avaliação"}
-        </button>
+      {/* ── Rodapé com submit ── */}
+      <div className="sticky bottom-0 -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-10 px-4 sm:px-6 md:px-8 lg:px-10 py-4 bg-gray-950/95 backdrop-blur-sm border-t border-gray-800/60">
+        <div className="flex items-center justify-between gap-4 max-w-[56rem] mx-auto">
+          <p className="font-mono text-[10px] text-gray-700">
+            {!allAnswered
+              ? `${exam.questions.length - answeredCount} pergunta${exam.questions.length - answeredCount !== 1 ? "s" : ""} por responder`
+              : "todas respondidas"}
+          </p>
+
+          <button
+            onClick={submit}
+            disabled={submitting || !allAnswered}
+            className="flex items-center gap-2 bg-green px-5 py-2.5 text-sm font-bold text-gray-950 hover:bg-green-light disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            {submitting
+              ? <Loader2 className="h-4 w-4 animate-spin" />
+              : <><span>Submeter</span> <ArrowRight className="h-4 w-4" /></>
+            }
+          </button>
+        </div>
       </div>
     </div>
   );

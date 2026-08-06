@@ -8,6 +8,14 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Mapeados para as variáveis CSS definidas no :root do globals.css
+        purple: "var(--purple)",
+        "purple-light": "var(--purple-light)",
+        "purple-dark": "var(--purple-dark)",
+        green: "var(--green)",
+        "green-light": "var(--green-light)",
+        background: "var(--background)",
+        foreground: "var(--foreground)",
         primary: {
           50: "#f8f7ff",
           100: "#f2e8ff",

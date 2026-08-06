@@ -62,7 +62,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   <div className={`flex flex-1 flex-col transition-all duration-300 h-full overflow-hidden ${isCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'}`}>
    <div className="shrink-0"><CountdownBanner /></div>
    <Header onMenuClick={() => setMobileOpen(true)} theme={theme} />
-     <main id="main-content" className="flex-1 overflow-y-auto p-3 sm:p-5 md:p-6 lg:p-8 bg-background">
+     <main id="main-content" className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-8 lg:px-10 lg:py-10 bg-background">
     {children}
      </main>
   </div>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -10,6 +10,7 @@ import {
   Image as ImageIcon, Target, Loader2, Save, Sparkles, AlertCircle, MailQuestion, CheckCircle2, DollarSign,
 } from "lucide-react";
 import Link from "next/link";
+import { logger } from "@/lib/logger";
 import MaterialEditor from "@/components/shared/MaterialEditor";
 import type { LiveTarget } from "@/types/live";
 import type { CourseMaterial } from "@/types/course";
@@ -41,7 +42,6 @@ export default function TeacherNewLivePage() {
     if (!file) return;
     setUploadingThumb(true);
     try {
-      const { auth } = await import("@/lib/firebase");
       const token = auth.currentUser ? await auth.currentUser.getIdToken() : "";
       const res = await fetch("/api/upload/presign", {
         method: "POST",
@@ -56,7 +56,7 @@ export default function TeacherNewLivePage() {
       await fetch(presignedUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
       setThumbnail(publicUrl);
     } catch (err) {
-      console.error(err);
+      logger.error("NewLive: thumbnail upload failed", err);
       setError("Erro ao fazer upload da thumbnail.");
     } finally {
       setUploadingThumb(false);
@@ -81,7 +81,7 @@ export default function TeacherNewLivePage() {
       });
       router.push("/dashboard/teacher/lives");
     } catch (err) {
-      console.error(err);
+      logger.error("NewLive: failed to create", err);
       setError("Erro ao criar a live.");
     } finally {
       setSaving(false);
@@ -109,7 +109,7 @@ export default function TeacherNewLivePage() {
       });
       setRequestSent(true);
     } catch (err) {
-      console.error(err);
+      logger.error("NewLive: failed to send free request", err);
       setError("Erro ao enviar pedido.");
     } finally {
       setSaving(false);

@@ -1,106 +1,195 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendMessage, listenMessages } from "@/lib/chat";
 import { Send, Loader2, MessageCircle } from "lucide-react";
+import { Avatar } from "@/components/ui/Avatar";
+import { logger } from "@/lib/logger";
 import type { ChatMessage } from "@/types/chat";
 
+// ── Helper: timestamp → hora legível ──────────────────────────
+function fmtMsgTime(raw: unknown): string {
+  if (!raw) return "";
+  const d: Date | null =
+    raw instanceof Date ? raw :
+    (typeof raw === "object" && "toDate" in (raw as object))
+      ? (raw as { toDate: () => Date }).toDate()
+      : null;
+  if (!d) return "";
+  return d.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
+}
+
+// ── Bolha de mensagem ─────────────────────────────────────────
+interface BubbleProps {
+  msg: ChatMessage;
+  isMe: boolean;
+  showSender: boolean; // mostrar nome quando há mensagens consecutivas do mesmo utilizador
+}
+
+function Bubble({ msg, isMe, showSender }: BubbleProps) {
+  if (msg.type === "system") {
+    return (
+      <div className="flex items-center gap-3 py-1">
+        <div className="flex-1 h-px bg-gray-800/60" />
+        <span className="font-mono text-[9px] uppercase tracking-widest text-gray-700 shrink-0">
+          {msg.text}
+        </span>
+        <div className="flex-1 h-px bg-gray-800/60" />
+      </div>
+    );
+  }
+
+  return (
+    <div className={`flex items-end gap-2 ${isMe ? "justify-end" : "justify-start"}`}>
+      {/* Avatar — só para mensagens de outros */}
+      {!isMe && (
+        <div className="h-7 w-7 shrink-0 overflow-hidden border border-gray-800/60 mb-0.5">
+          <Avatar uid={msg.uid} photoURL={msg.photoURL} name={msg.displayName} size={28} />
+        </div>
+      )}
+
+      <div className={`max-w-[72%] sm:max-w-[60%] ${isMe ? "items-end" : "items-start"} flex flex-col gap-0.5`}>
+        {showSender && !isMe && (
+          <span className="font-mono text-[9px] uppercase tracking-widest text-gray-700 ml-1">
+            {msg.displayName}
+          </span>
+        )}
+
+        <div className={`px-3.5 py-2.5 text-sm leading-relaxed break-words ${
+          isMe
+            ? "bg-purple text-white"
+            : "border border-gray-800/60 bg-gray-900/60 text-gray-200"
+        }`}>
+          {msg.text}
+        </div>
+
+        <span className="font-mono text-[9px] text-gray-700 mx-1">
+          {fmtMsgTime(msg.createdAt)}
+        </span>
+      </div>
+
+      {/* Espaço onde ficaria avatar do lado direito — mantém alinhamento */}
+      {isMe && <div className="w-7 shrink-0" />}
+    </div>
+  );
+}
+
+// ── Componente principal ──────────────────────────────────────
 interface ChatRoomProps {
   chatId: string;
-  theme?: "dark" | "light";
   height?: string;
 }
 
-export default function ChatRoom({ chatId, theme = "dark", height = "h-full" }: ChatRoomProps) {
+export default function ChatRoom({ chatId, height = "h-full" }: ChatRoomProps) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef  = useRef<HTMLInputElement>(null);
 
+  // Listener em tempo real
   useEffect(() => {
     const unsub = listenMessages(chatId, setMessages);
     return () => unsub();
   }, [chatId]);
 
+  // Scroll automático para a última mensagem
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = async (e: React.FormEvent) => {
+  const handleSend = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!text.trim() || !user || sending) return;
+    setError("");
     setSending(true);
     try {
-      await sendMessage(chatId, user.uid, user.displayName || "Utilizador", user.photoURL || undefined, text.trim());
+      await sendMessage(
+        chatId,
+        user.uid,
+        user.displayName ?? "Utilizador",
+        user.photoURL ?? undefined,
+        text.trim()
+      );
       setText("");
-    } catch { }
-    setSending(false);
-    inputRef.current?.focus();
+    } catch (err) {
+      logger.error("ChatRoom: failed to send message", err, { chatId });
+      setError("Não foi possível enviar. Tenta novamente.");
+    } finally {
+      setSending(false);
+      inputRef.current?.focus();
+    }
+  }, [chatId, text, user, sending]);
+
+  // Determinar se deve mostrar o nome do remetente
+  // (só quando muda de remetente ou após mensagem do sistema)
+  const showSender = (i: number): boolean => {
+    if (i === 0) return true;
+    const prev = messages[i - 1];
+    const curr = messages[i];
+    return prev.uid !== curr.uid || prev.type === "system";
   };
 
   return (
     <div className={`flex flex-col ${height}`}>
-      <div className={`flex-1 overflow-y-auto p-4 space-y-3 ${theme === "light" ? "bg-gray-50" : "bg-gray-950/60"}`}>
+      {/* ── Mensagens ── */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2 bg-gray-950/40">
         {messages.length === 0 && (
-          <div className={`flex flex-col items-center justify-center h-full text-center ${theme === "light" ? "text-gray-400" : "text-gray-600"}`}>
-            <MessageCircle className="h-10 w-10 mb-3 opacity-50" />
-            <p className="text-sm">Nenhuma mensagem ainda.</p>
-            <p className="text-xs mt-1">Seja o primeiro a enviar uma mensagem!</p>
+          <div className="flex flex-col items-center justify-center h-full text-center py-16">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
+              <MessageCircle className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
+            </div>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">// sem mensagens</p>
+            <p className="text-sm text-gray-600">Sê o primeiro a enviar uma mensagem.</p>
           </div>
         )}
-        {messages.map((msg) => {
-          const isMe = msg.uid === user?.uid;
-          const isSystem = msg.type === "system";
-          return (
-            <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-              {isSystem ? (
-                <div className={`text-xs text-center italic w-full py-2 ${theme === "light" ? "text-gray-400" : "text-gray-600"}`}>
-                  {msg.text}
-                </div>
-              ) : (
-                <div className={`max-w-[75%] ${isMe ? "order-1" : "order-1"}`}>
-                  {!isMe && (
-                    <p className={`text-[11px] font-medium mb-1 ml-1 ${theme === "light" ? "text-gray-500" : "text-gray-500"}`}>
-                      {msg.displayName}
-                    </p>
-                  )}
-                  <div className={`px-3.5 py-2.5 text-sm leading-relaxed ${
-                    isMe
-                      ? theme === "light"
-                        ? "bg-purple text-white rounded-tl-lg rounded-br-lg rounded-bl-lg"
-                        : "bg-purple text-white rounded-tl-lg rounded-br-lg rounded-bl-lg"
-                      : theme === "light"
-                        ? "bg-white border border-gray-200 text-gray-800 rounded-tr-lg rounded-br-lg rounded-bl-lg"
-                        : "bg-gray-800/70 text-gray-200 rounded-tr-lg rounded-br-lg rounded-bl-lg"
-                  }`}>
-                    {msg.text}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
+
+        {messages.map((msg, i) => (
+          <Bubble
+            key={msg.id}
+            msg={msg}
+            isMe={msg.uid === user?.uid}
+            showSender={showSender(i)}
+          />
+        ))}
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={handleSend} className={`flex items-center gap-2 p-3 border-t shrink-0 ${
-        theme === "light" ? "border-gray-200 bg-white" : "border-gray-800 bg-gray-950/40"
-      }`}>
-        <input ref={inputRef} type="text" value={text}
-          onChange={e => setText(e.target.value)}
-          placeholder="Escreva uma mensagem..."
+      {/* ── Erro de envio ── */}
+      {error && (
+        <div className="px-4 py-2 bg-red-500/8 border-t border-red-500/20">
+          <p className="text-xs text-red-400/80">{error}</p>
+        </div>
+      )}
+
+      {/* ── Input ── */}
+      <form
+        onSubmit={handleSend}
+        className="flex items-center gap-2 px-3 py-3 border-t border-gray-800/60 bg-gray-950/60 shrink-0"
+      >
+        <input
+          ref={inputRef}
+          type="text"
+          value={text}
+          onChange={e => { setText(e.target.value); setError(""); }}
+          placeholder="Escreve uma mensagem..."
           disabled={sending}
-          className={`flex-1 border py-2.5 px-4 text-sm transition-colors focus:outline-none disabled:opacity-50 ${
-            theme === "dark"
-              ? "border-gray-700 bg-gray-900 text-white placeholder-gray-500 focus:border-purple focus:ring-1 focus:ring-purple"
-              : "border-gray-300 bg-gray-50 text-gray-900 placeholder-gray-400 focus:border-purple focus:ring-1 focus:ring-purple"
-          }`} />
-        <button type="submit" disabled={!text.trim() || sending}
-          className="flex items-center justify-center h-10 w-10 bg-purple hover:bg-purple-light text-white transition-colors disabled:opacity-50 shrink-0">
-          {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          maxLength={1000}
+          className="flex-1 border border-gray-800 bg-gray-900/60 py-2.5 px-3 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none disabled:opacity-50 transition-colors"
+        />
+        <button
+          type="submit"
+          disabled={!text.trim() || sending}
+          className="flex h-10 w-10 shrink-0 items-center justify-center bg-purple hover:bg-purple-light text-white transition-colors disabled:opacity-40"
+          aria-label="Enviar mensagem"
+        >
+          {sending
+            ? <Loader2 className="h-4 w-4 animate-spin" />
+            : <Send className="h-4 w-4" />
+          }
         </button>
       </form>
     </div>

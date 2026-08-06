@@ -147,6 +147,25 @@ export async function POST(req: NextRequest) {
 
       if (type === "standalone" && itemId) {
         await userRef.update({ enrolledCourses: admin.firestore.FieldValue.arrayUnion(itemId) });
+
+        // Se já existe chat de grupo para este curso, adicionar o aluno como participante
+        const groupChatId = `course_${itemId}`;
+        const chatRef = db.collection("courseChats").doc(groupChatId);
+        const chatSnap = await chatRef.get();
+        if (chatSnap.exists) {
+          const chatData = chatSnap.data()!;
+          if (!chatData.participants?.includes(uid)) {
+            const studentName = userData?.displayName || userData?.name || "Aluno";
+            const chatUpdate: Record<string, unknown> = {
+              participants: admin.firestore.FieldValue.arrayUnion(uid),
+              [`participantNames.${uid}`]: studentName,
+            };
+            if (userData?.photoURL) {
+              chatUpdate[`participantPhotos.${uid}`] = userData.photoURL;
+            }
+            await chatRef.update(chatUpdate);
+          }
+        }
       } else if (type === "live" && itemId) {
         await userRef.update({ enrolledLives: admin.firestore.FieldValue.arrayUnion(itemId) });
       } else if (type === "smart" || type === "golden") {

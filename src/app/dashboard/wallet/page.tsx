@@ -1,156 +1,295 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
-import { collection, query, where, orderBy, getDocs, doc, getDoc } from "firebase/firestore";
-import { DollarSign, TrendingUp, ArrowDown, ArrowUp, Calendar, Loader2, CreditCard } from "lucide-react";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
+import { DollarSign, TrendingUp, ArrowDown, Calendar, Loader2, CreditCard } from "lucide-react";
+import { logger } from "@/lib/logger";
 import type { Sale } from "@/types/settings";
 
+// ── Helpers ────────────────────────────────────────────────────
+function toDate(d: unknown): Date | null {
+  if (!d) return null;
+  if (typeof d === "object" && "toDate" in (d as object))
+    return (d as { toDate: () => Date }).toDate();
+  return null;
+}
+function fmtDate(d: unknown): string {
+  const dt = toDate(d);
+  if (!dt) return "—";
+  return dt.toLocaleDateString("pt-PT", { day: "2-digit", month: "short", year: "numeric" });
+}
+function fmtKz(v: number): string {
+  return v.toLocaleString("pt-AO") + " Kz";
+}
+
+// ── Cartão virtual SVG ─────────────────────────────────────────
+function VirtualCard({
+  name,
+  balance,
+}: {
+  name: string;
+  balance: number;
+}) {
+  // Últimos 4 dígitos pseudo-aleatórios baseados no nome
+  const last4 = useMemo(() => {
+    let h = 0;
+    for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) | 0;
+    return String(Math.abs(h) % 10000).padStart(4, "0");
+  }, [name]);
+
+  return (
+    <div className="relative w-full max-w-sm aspect-[1.586/1] select-none">
+      {/* Sombra de profundidade */}
+      <div className="absolute inset-0 translate-y-3 translate-x-2 bg-gray-800/60 blur-sm" />
+
+      {/* Cartão principal */}
+      <div className="relative h-full w-full overflow-hidden border border-white/10"
+        style={{
+          background: "linear-gradient(135deg, #1a0533 0%, #2d0a5e 35%, #16213e 70%, #0f3460 100%)",
+          borderRadius: "16px",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)",
+        }}
+      >
+        {/* Círculos decorativos */}
+        <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full opacity-20"
+          style={{ background: "radial-gradient(circle, #a855f7, transparent)" }} />
+        <div className="absolute -left-8 -bottom-8 h-36 w-36 rounded-full opacity-15"
+          style={{ background: "radial-gradient(circle, #06b6d4, transparent)" }} />
+        <div className="absolute right-24 bottom-8 h-24 w-24 rounded-full opacity-10"
+          style={{ background: "radial-gradient(circle, #10b981, transparent)" }} />
+
+        {/* Padrão de linhas */}
+        <svg className="absolute inset-0 w-full h-full opacity-5" viewBox="0 0 400 252" preserveAspectRatio="xMidYMid slice">
+          {[...Array(12)].map((_, i) => (
+            <line key={i} x1={-50 + i * 40} y1="0" x2={-50 + i * 40 + 100} y2="252"
+              stroke="white" strokeWidth="1" />
+          ))}
+        </svg>
+
+        <div className="relative flex h-full flex-col justify-between p-6">
+          {/* Topo — logo e chip */}
+          <div className="flex items-center justify-between">
+            {/* Chip EMV */}
+            <div className="h-9 w-12 rounded-md border border-amber-300/60 bg-gradient-to-br from-amber-200/80 to-amber-400/80 flex items-center justify-center"
+              style={{ boxShadow: "inset 0 1px 2px rgba(255,255,255,0.4)" }}>
+              <div className="grid grid-cols-2 gap-[2px] opacity-60">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="h-2 w-3 bg-amber-700/60 rounded-[1px]" />
+                ))}
+              </div>
+            </div>
+
+            {/* Logo */}
+            <div className="text-right">
+              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/50">Academia</p>
+              <p className="font-mono text-xs font-bold text-white/80 tracking-wider">NETSULWEL</p>
+            </div>
+          </div>
+
+          {/* Número do cartão */}
+          <div>
+            <p className="font-mono text-sm tracking-[0.3em] text-white/70 mb-1">
+              •••• •••• •••• {last4}
+            </p>
+          </div>
+
+          {/* Rodapé — nome e saldo */}
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="font-mono text-[8px] uppercase tracking-widest text-white/40 mb-0.5">titular</p>
+              <p className="font-mono text-xs font-bold text-white/80 uppercase tracking-wider truncate max-w-[140px]">
+                {name || "Professor"}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="font-mono text-[8px] uppercase tracking-widest text-white/40 mb-0.5">saldo líquido</p>
+              <p className="font-mono text-sm font-bold text-white/90">{fmtKz(balance)}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Reflexo de luz no topo */}
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-white/10 via-transparent to-transparent" />
+      </div>
+    </div>
+  );
+}
+
+// ── Página ─────────────────────────────────────────────────────
 export default function WalletPage() {
   const { user, isTeacher, isInstitution } = useAuth();
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
-  const [balance, setBalance] = useState(0);
-  const [totalSales, setTotalSales] = useState(0);
-  const [totalFees, setTotalFees] = useState(0);
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
-    const loadWallet = async () => {
-      if (!user) return;
+    if (!user) { setLoading(false); return; }
+    let cancelled = false;
+
+    const load = async () => {
       try {
-        // Get user profile to check if they're a teacher or institution admin
         const userSnap = await getDoc(doc(db, "users", user.uid));
-        if (!userSnap.exists()) {
-          setLoading(false);
-          return;
-        }
-        
-        const userData = userSnap.data();
-        const isContentCreator = userData.role === "teacher" || userData.role === "institution";
-        
-        if (!isContentCreator) {
-          setLoading(false);
-          return;
-        }
+        if (!userSnap.exists()) { setLoading(false); return; }
 
-        // Fetch sales for this content creator
-        const salesQuery = query(
-          collection(db, "sales"),
-          where("sellerId", "==", user.uid),
-          where("status", "==", "confirmed"),
-          orderBy("createdAt", "desc")
+        const data = userSnap.data();
+        setUserName(data.name ?? user.displayName ?? "");
+
+        const isCreator = data.role === "teacher" || data.role === "institution";
+        if (!isCreator) { if (!cancelled) setLoading(false); return; }
+
+        // Sem orderBy para evitar índice composto — ordenar em memória
+        const snap = await getDocs(
+          query(
+            collection(db, "sales"),
+            where("sellerId", "==", user.uid),
+            where("status", "==", "confirmed")
+          )
         );
-        
-        const salesSnap = await getDocs(salesQuery);
-        const salesData = salesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Sale));
-        setSales(salesData);
 
-        // Calculate totals
-        const total = salesData.reduce((sum, s) => sum + s.amount, 0);
-        const fees = salesData.reduce((sum, s) => sum + (s.fee || 0), 0);
-        const net = salesData.reduce((sum, s) => sum + (s.netAmount || s.amount), 0);
-        
-        setTotalSales(total);
-        setTotalFees(fees);
-        setBalance(net);
-      } catch (error) {
-        console.error("Error loading wallet:", error);
+        const data2 = snap.docs
+          .map(d => ({ id: d.id, ...d.data() } as Sale))
+          .sort((a, b) => (toDate(b.createdAt)?.getTime() ?? 0) - (toDate(a.createdAt)?.getTime() ?? 0));
+
+        if (!cancelled) setSales(data2);
+      } catch (err) {
+        logger.error("Wallet: failed to load", err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
-    loadWallet();
-  }, [user]);
+    load();
+    return () => { cancelled = true; };
+  }, [user?.uid]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const formatKz = (v: number) => v.toLocaleString("pt-AO") + " Kz";
-  const formatDate = (ts: unknown) => {
-    const d = (ts as { toDate?: () => Date })?.toDate?.();
-    if (!d) return "—";
-    return d.toLocaleDateString("pt-AO", { day: "2-digit", month: "short", year: "numeric" });
-  };
+  const stats = useMemo(() => ({
+    balance:    sales.reduce((sum, s) => sum + (s.netAmount ?? s.amount), 0),
+    totalSales: sales.reduce((sum, s) => sum + s.amount, 0),
+    totalFees:  sales.reduce((sum, s) => sum + (s.fee ?? 0), 0),
+  }), [sales]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-purple" />
+        <Loader2 className="h-5 w-5 animate-spin text-gray-700" />
       </div>
     );
   }
 
   if (!isTeacher && !isInstitution) {
     return (
-      <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
-        <div className="text-center py-20">
-          <CreditCard className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-2">Carteira não disponível</h1>
-          <p className="text-gray-400">A carteira está disponível apenas para professores e instituições.</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
+          <CreditCard className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
         </div>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">// sem acesso</p>
+        <p className="text-sm text-gray-600">A carteira está disponível apenas para professores e instituições.</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto animate-in fade-in duration-500 space-y-8">
-      {/* Header */}
+    <div className="max-w-[80rem] mx-auto space-y-8 animate-in fade-in duration-300">
+
+      {/* Cabeçalho */}
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-white">Minha Carteira</h1>
-        <p className="mt-1 text-gray-400">Gere os teus ganhos e vê o histórico de vendas.</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-green/60 mb-2">// carteira</p>
+        <h1 className="text-2xl font-bold text-gray-100">Minha Carteira</h1>
+        <p className="mt-1 text-sm text-gray-600">
+          {sales.length} venda{sales.length !== 1 ? "s" : ""} confirmada{sales.length !== 1 ? "s" : ""}
+        </p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gray-900/40 border border-gray-800 p-6">
-          <div className="flex items-center gap-3 mb-2">
-            <DollarSign className="h-6 w-6 text-green-400" />
-            <p className="text-sm text-gray-400">Saldo Líquido</p>
-          </div>
-          <p className="text-3xl font-bold text-white">{formatKz(balance)}</p>
-          <p className="text-xs text-gray-500 mt-1">Após dedução de taxas</p>
+      {/* ── Layout: cartão + stats ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 lg:gap-8 items-start">
+
+        {/* Cartão virtual */}
+        <div className="flex flex-col items-center sm:items-start gap-4">
+          <VirtualCard name={userName} balance={stats.balance} />
+          <p className="font-mono text-[9px] text-gray-700 uppercase tracking-widest">
+            cartão virtual · netsulwel academy
+          </p>
         </div>
-        <div className="bg-gray-900/40 border border-gray-800 p-6">
-          <div className="flex items-center gap-3 mb-2">
-            <TrendingUp className="h-6 w-6 text-blue-400" />
-            <p className="text-sm text-gray-400">Total de Vendas</p>
-          </div>
-          <p className="text-3xl font-bold text-white">{formatKz(totalSales)}</p>
-          <p className="text-xs text-gray-500 mt-1">Valor bruto das vendas</p>
-        </div>
-        <div className="bg-gray-900/40 border border-gray-800 p-6">
-          <div className="flex items-center gap-3 mb-2">
-            <ArrowDown className="h-6 w-6 text-red-400" />
-            <p className="text-sm text-gray-400">Taxas Deduzidas</p>
-          </div>
-          <p className="text-3xl font-bold text-white">{formatKz(totalFees)}</p>
-          <p className="text-xs text-gray-500 mt-1">Taxas da plataforma</p>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3">
+          {[
+            {
+              icon: DollarSign,
+              label: "Saldo líquido",
+              value: fmtKz(stats.balance),
+              sub: "Após dedução de taxas",
+              accent: "text-green/70",
+            },
+            {
+              icon: TrendingUp,
+              label: "Total de vendas",
+              value: fmtKz(stats.totalSales),
+              sub: "Valor bruto",
+              accent: "text-purple/70",
+            },
+            {
+              icon: ArrowDown,
+              label: "Taxas deduzidas",
+              value: fmtKz(stats.totalFees),
+              sub: "Comissão da plataforma",
+              accent: "text-red-400/60",
+            },
+          ].map(({ icon: Icon, label, value, sub, accent }) => (
+            <div key={label} className="flex items-center gap-4 border border-gray-800/60 bg-gray-900/20 p-4">
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800 bg-gray-900`}>
+                <Icon className={`h-4 w-4 ${accent}`} strokeWidth={1.5} />
+              </div>
+              <div className="min-w-0">
+                <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">{label}</p>
+                <p className="font-mono text-lg font-bold text-gray-200">{value}</p>
+                <p className="font-mono text-[9px] text-gray-700">{sub}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Sales History */}
-      <div className="bg-gray-900/40 border border-gray-800">
-        <div className="p-6 border-b border-gray-800">
-          <h2 className="text-lg font-bold text-white">Histórico de Vendas</h2>
-        </div>
+      {/* ── Histórico ── */}
+      <div>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-3">
+          // histórico · {sales.length}
+        </p>
+
         {sales.length === 0 ? (
-          <div className="p-12 text-center">
-            <p className="text-gray-400">Ainda não tens vendas confirmadas.</p>
+          <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-16 text-center">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
+              <Calendar className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
+            </div>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">// sem vendas</p>
+            <p className="text-sm text-gray-600">Ainda não tens vendas confirmadas.</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-800">
-            {sales.map((sale) => (
-              <div key={sale.id} className="p-6 flex items-center justify-between hover:bg-gray-800/30 transition-colors">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Calendar className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-500">{formatDate(sale.createdAt)}</span>
+          <div className="border border-gray-800/60 divide-y divide-gray-800/40">
+            {sales.map(sale => (
+              <div key={sale.id} className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-gray-900/20 transition-colors">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-gray-200 truncate">
+                    {sale.itemTitle ?? sale.type}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2 mt-0.5 font-mono text-[9px] text-gray-700">
+                    <span>{sale.userName ?? "Aluno"}</span>
+                    <span>·</span>
+                    <span>{fmtDate(sale.createdAt)}</span>
                   </div>
-                  <p className="font-medium text-white">{sale.itemTitle || sale.type}</p>
-                  <p className="text-sm text-gray-400">{sale.userName}</p>
                 </div>
-                <div className="text-right">
-                  <p className="font-bold text-white">{formatKz(sale.netAmount || sale.amount)}</p>
-                  <p className="text-xs text-gray-500">Bruto: {formatKz(sale.amount)} | Taxa: {formatKz(sale.fee || 0)}</p>
+                <div className="text-right shrink-0">
+                  <p className="font-mono text-sm font-bold text-green/80">
+                    +{fmtKz(sale.netAmount ?? sale.amount)}
+                  </p>
+                  {(sale.fee ?? 0) > 0 && (
+                    <p className="font-mono text-[9px] text-gray-700">
+                      taxa: {fmtKz(sale.fee ?? 0)}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}

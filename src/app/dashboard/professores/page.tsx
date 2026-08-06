@@ -1,174 +1,100 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, query, where, limit } from "firebase/firestore";
-import { Search, GraduationCap, BookOpen, Radio, Loader2, X, Users } from "lucide-react";
-import Link from "next/link";
-
-interface TeacherProfile {
-  id: string;
-  name: string;
-  photoURL?: string;
-  role: string;
-  courseCount: number;
-  liveCount: number;
-}
+import { useRef, useEffect } from "react";
+import { Search, X, GraduationCap, Loader2, AlertTriangle } from "lucide-react";
+import { useTeachers } from "./_hooks/useTeachers";
+import { TeacherCard } from "./_components/TeacherCard";
 
 export default function DashboardProfessoresPage() {
-  const [teachers, setTeachers] = useState<TeacherProfile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [results, setResults] = useState<TeacherProfile[]>([]);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const fetchAll = async () => {
-      try {
-        const q = query(
-          collection(db, "users"),
-          where("role", "in", ["teacher", "institution"]),
-          limit(100)
-        );
-        const snap = await getDocs(q);
-        const ids = snap.docs.map(d => d.id);
-
-        let courseCounts: Record<string, number> = {};
-        let liveCounts: Record<string, number> = {};
-
-        try {
-          const [coursesSnap, livesSnap] = await Promise.all([
-            ids.length > 0 ? getDocs(query(collection(db, "courses"), where("createdBy", "in", ids.slice(0, 30)), where("status", "==", "published"))) : Promise.resolve({ docs: [] } as any),
-            ids.length > 0 ? getDocs(query(collection(db, "lives"), where("createdBy", "in", ids.slice(0, 30)))) : Promise.resolve({ docs: [] } as any),
-          ]);
-
-          courseCounts = {};
-          coursesSnap.docs.forEach((d: { data: () => Record<string, unknown>; id: string }) => { const c = d.data().createdBy as string | undefined; if (c) courseCounts[c] = (courseCounts[c] || 0) + 1; });
-          liveCounts = {};
-          livesSnap.docs.forEach((d: { data: () => Record<string, unknown>; id: string }) => { const c = d.data().createdBy as string | undefined; if (c) liveCounts[c] = (liveCounts[c] || 0) + 1; });
-        } catch (err) {
-          console.error("Erro ao carregar contagens de cursos/aulas:", err);
-        }
-
-        setTeachers(snap.docs.map(d => ({
-          id: d.id,
-          name: d.data().name || "Utilizador",
-          photoURL: d.data().photoURL || "",
-          role: d.data().role || "teacher",
-          courseCount: courseCounts[d.id] || 0,
-          liveCount: liveCounts[d.id] || 0,
-        })));
-      } catch (err) {
-        console.error("Erro ao carregar professores:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAll();
-  }, []);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  const handleSearch = useCallback((value: string) => {
-    setSearch(value);
-    if (value.trim().length < 2) { setResults([]); setShowDropdown(false); return; }
-    const q = value.toLowerCase();
-    setResults(teachers.filter(t => t.name.toLowerCase().includes(q)).slice(0, 8));
-    setShowDropdown(true);
-  }, [teachers]);
-
-  const filtered = search.trim().length >= 2
-    ? teachers.filter(t => t.name.toLowerCase().includes(search.toLowerCase()))
-    : teachers;
+  const { filtered, search, setSearch, loading, error } = useTeachers();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="mx-auto max-w-6xl">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white">
-          Professores
-        </h1>
-        <p className="mt-1 text-sm text-gray-400">
-          {loading ? "..." : `${teachers.length} professores e instituições`}
+    <div className="max-w-[80rem] mx-auto space-y-8 animate-in fade-in duration-300">
+
+      {/* ── Cabeçalho ── */}
+      <div>
+        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-green/60 mb-2">
+          // professores
+        </p>
+        <h1 className="text-2xl font-bold text-gray-100">Professores e Instituições</h1>
+        <p className="mt-1 text-sm text-gray-600">
+          {loading
+            ? "A carregar..."
+            : `${filtered.length} resultado${filtered.length !== 1 ? "s" : ""}`}
         </p>
       </div>
 
-      {/* Search */}
-      <div ref={searchRef} className="relative max-w-xl mb-8">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
-        <input type="text" value={search} onChange={(e) => handleSearch(e.target.value)}
+      {/* ── Erro ── */}
+      {error && (
+        <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
+          <p className="text-sm text-amber-400/80">{error}</p>
+        </div>
+      )}
+
+      {/* ── Pesquisa ── */}
+      <div className="relative max-w-md">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600" />
+        <input
+          ref={inputRef}
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
           placeholder="Pesquisar por nome..."
-          className="w-full bg-gray-900 border border-gray-800 focus:border-purple/50 py-3.5 pl-12 pr-10 text-white placeholder-gray-600 text-base focus:outline-none transition-all rounded-lg" />
+          className="w-full border border-gray-800 bg-gray-900/60 py-2.5 pl-9 pr-8 text-sm text-gray-200 placeholder-gray-700 focus:border-green/40 focus:outline-none transition-colors"
+        />
         {search && (
-          <button onClick={() => { setSearch(""); setShowDropdown(false); }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors">
+          <button
+            type="button"
+            onClick={() => { setSearch(""); inputRef.current?.focus(); }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700 hover:text-gray-400 transition-colors"
+            aria-label="Limpar pesquisa"
+          >
             <X className="h-4 w-4" />
           </button>
         )}
-        {showDropdown && results.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 border border-gray-800 shadow-2xl z-50 rounded-lg overflow-hidden">
-            {results.map((t) => (
-              <Link key={t.id} href={`/dashboard/professores/${t.id}`}
-                onClick={() => { setShowDropdown(false); setSearch(""); }}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800/50 transition-colors">
-                {t.photoURL ? (
-                   <img src={t.photoURL} alt={t.name} className="h-10 w-10 rounded-full object-cover" />
-                ) : (
-                  <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-                    <span className="text-sm font-bold text-purple-300">{t.name[0] || "?"}</span>
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{t.name}</p>
-                  <p className="text-xs text-gray-500">{t.role === "institution" ? "Instituição" : "Professor"}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* Grid */}
-      {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>
-      ) : filtered.length === 0 ? (
-        <div className="text-center py-20">
-          <GraduationCap className="h-16 w-16 text-gray-700 mx-auto mb-4" />
-          <p className="text-gray-500">Nenhum professor encontrado.</p>
+      {/* ── Loading ── */}
+      {loading && (
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="h-5 w-5 animate-spin text-gray-700" />
         </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filtered.map((t) => (
-            <Link key={t.id} href={`/dashboard/professores/${t.id}`}
-              className="group bg-gray-900/40 border border-gray-800/60 hover:border-purple/30 p-6 transition-all duration-300 text-center rounded-xl">
-              {t.photoURL ? (
-                 <img src={t.photoURL} alt={t.name} className="h-20 w-20 rounded-full object-cover mx-auto mb-4 ring-2 ring-purple-500/20 group-hover:ring-purple-500/40 transition-all" />
-              ) : (
-                <div className="h-20 w-20 rounded-full mx-auto mb-4 bg-gradient-to-br from-purple-500/30 to-purple-700/30 flex items-center justify-center ring-2 ring-purple-500/20 group-hover:ring-purple-500/40 transition-all">
-                  <span className="text-2xl font-bold text-purple-300">{t.name[0]?.toUpperCase() || "?"}</span>
-                </div>
-              )}
-              <h3 className="text-lg font-bold text-white group-hover:text-purple-300 transition-colors truncate">{t.name}</h3>
-              <span className={`inline-block mt-1 text-xs font-bold px-2.5 py-1 border rounded ${
-                t.role === "institution" ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/25" : "bg-green-500/15 text-green-400 border-green-500/25"
-              }`}>
-                {t.role === "institution" ? "Instituição" : "Professor"}
-              </span>
-              <div className="flex items-center justify-center gap-4 mt-4 text-sm text-gray-500">
-                <span className="flex items-center gap-1"><BookOpen className="h-4 w-4" />{t.courseCount}</span>
-                <span className="flex items-center gap-1"><Radio className="h-4 w-4" />{t.liveCount}</span>
-              </div>
-            </Link>
-          ))}
+      )}
+
+      {/* ── Empty state ── */}
+      {!loading && filtered.length === 0 && !error && (
+        <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-20 text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
+            <GraduationCap className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
+          </div>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">
+            // sem resultados
+          </p>
+          <p className="text-sm text-gray-600">
+            {search ? `Nenhum professor com o nome "${search}".` : "Ainda não há professores registados."}
+          </p>
+        </div>
+      )}
+
+      {/* ── Lista editorial ──
+          Primeiro professor em destaque (maior),
+          restantes em grid de 2 colunas.
+      ── */}
+      {!loading && filtered.length > 0 && (
+        <div className="space-y-4">
+          {/* Destaque — primeiro resultado */}
+          <TeacherCard teacher={filtered[0]} featured />
+
+          {/* Restantes em grid */}
+          {filtered.length > 1 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {filtered.slice(1).map(t => (
+                <TeacherCard key={t.id} teacher={t} />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

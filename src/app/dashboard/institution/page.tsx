@@ -1,248 +1,269 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
-import { collection, query, where, orderBy, getDocs, doc, onSnapshot } from "firebase/firestore";
-import { Building2, Users, GraduationCap, DollarSign, TrendingUp, Loader2, Mail, ArrowRight } from "lucide-react";
+import {
+  collection, query, where, getDocs,
+  doc, onSnapshot,
+} from "firebase/firestore";
+import {
+  Building2, Users, GraduationCap, DollarSign,
+  TrendingUp, Loader2, Mail, ArrowRight,
+} from "lucide-react";
 import Link from "next/link";
 import type { Institution } from "@/types/institution";
 import type { Sale } from "@/types/settings";
+import { Avatar } from "@/components/ui/Avatar";
+import { logger } from "@/lib/logger";
+
+// ── Helpers ───────────────────────────────────────────────────
+function toDate(raw: unknown): Date {
+  if (!raw) return new Date(0);
+  if (raw instanceof Date) return raw;
+  if (typeof raw === "object" && raw !== null && "toDate" in raw)
+    return (raw as { toDate: () => Date }).toDate();
+  return new Date(0);
+}
+
+function formatKz(v: number) {
+  return v.toLocaleString("pt-AO") + " Kz";
+}
+
+interface MemberRaw {
+  id: string; name: string; email: string;
+  institutionRole: string; photoURL?: string; createdAt: unknown;
+}
 
 export default function InstitutionOverviewPage() {
   const { user, institutionId } = useAuth();
   const [institution, setInstitution] = useState<Institution | null>(null);
-  const [members, setMembers] = useState<any[]>([]);
-  const [sales, setSales] = useState<Sale[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ totalTeachers: 0, totalStudents: 0, totalRevenue: 0, totalSales: 0 });
+  const [members,     setMembers]     = useState<MemberRaw[]>([]);
+  const [sales,       setSales]       = useState<Sale[]>([]);
+  const [loading,     setLoading]     = useState(true);
+  const [stats, setStats] = useState({ teachers: 0, students: 0, revenue: 0, salesCount: 0 });
 
+  // Real-time institution status
   useEffect(() => {
     if (!institutionId) return;
     const unsub = onSnapshot(doc(db, "institutions", institutionId), snap => {
-      if (snap.exists()) {
-        setInstitution({ id: snap.id, ...snap.data() } as Institution);
-      }
+      if (snap.exists()) setInstitution({ id: snap.id, ...snap.data() } as Institution);
     });
     return () => unsub();
   }, [institutionId]);
 
-  useEffect(() => {
+  // Load members + sales — sem orderBy composto
+  const load = useCallback(async () => {
     if (!user || !institutionId) return;
-    loadData();
-  }, [user, institutionId]);
-
-  const loadData = async () => {
+    let cancelled = false;
     try {
-      const membersQuery = query(
-        collection(db, "users"),
-        where("institutionId", "==", institutionId),
-        orderBy("createdAt", "desc")
-      );
-      const membersSnap = await getDocs(membersQuery);
-      const membersData: any[] = membersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const [membersSnap, salesSnap] = await Promise.all([
+        getDocs(query(collection(db, "users"), where("institutionId", "==", institutionId))),
+        getDocs(query(collection(db, "sales"), where("sellerId", "==", institutionId), where("status", "==", "confirmed"))),
+      ]);
+      if (cancelled) return;
+
+      const membersData: MemberRaw[] = membersSnap.docs
+        .map(d => ({ id: d.id, ...d.data() } as MemberRaw))
+        .sort((a, b) => toDate(b.createdAt).getTime() - toDate(a.createdAt).getTime());
+
+      const salesData: Sale[] = salesSnap.docs
+        .map(d => ({ id: d.id, ...d.data() } as Sale))
+        .sort((a, b) => toDate(b.createdAt).getTime() - toDate(a.createdAt).getTime());
+
       setMembers(membersData);
-
-      const teachers = membersData.filter(m => m.institutionRole === "teacher").length;
-      const students = membersData.filter(m => m.institutionRole === "student").length;
-
-      const salesQuery = query(
-        collection(db, "sales"),
-        where("sellerId", "==", institutionId),
-        where("status", "==", "confirmed"),
-        orderBy("createdAt", "desc")
-      );
-      const salesSnap = await getDocs(salesQuery);
-      const salesData = salesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Sale));
       setSales(salesData);
-
-      const totalRevenue = salesData.reduce((sum, s) => sum + (s.netAmount || s.amount), 0);
-      setStats({ totalTeachers: teachers, totalStudents: students, totalRevenue, totalSales: salesData.length });
-    } catch (error) {
-      console.error("Error loading institution data:", error);
+      setStats({
+        teachers:   membersData.filter(m => m.institutionRole === "teacher").length,
+        students:   membersData.filter(m => ["student","aluno"].includes(m.institutionRole)).length,
+        revenue:    salesData.reduce((s, x) => s + (x.netAmount ?? x.amount ?? 0), 0),
+        salesCount: salesData.length,
+      });
+    } catch (err) {
+      logger.error("InstitutionOverview: failed to load data", err, { institutionId });
     } finally {
-      setLoading(false);
+      if (!cancelled) setLoading(false);
     }
-  };
+    return () => { cancelled = true; };
+  }, [user?.uid, institutionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const formatKz = (v: number) => v.toLocaleString("pt-AO") + " Kz";
+  useEffect(() => { load(); }, [load]);
 
+  // ── Loading ───────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="space-y-6 animate-in fade-in duration-500">
-        <div className="h-8 w-64 bg-gray-800 rounded-lg animate-pulse" />
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-28 bg-gray-800/50 rounded-xl animate-pulse" />
-          ))}
+      <div className="space-y-6 animate-in fade-in duration-300">
+        <div className="h-16 bg-gray-800/40 animate-pulse" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[...Array(4)].map((_, i) => <div key={i} className="h-24 bg-gray-800/40 animate-pulse" />)}
         </div>
-        <div className="h-80 bg-gray-800/50 rounded-xl animate-pulse" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {[...Array(2)].map((_, i) => <div key={i} className="h-64 bg-gray-800/40 animate-pulse" />)}
+        </div>
       </div>
     );
   }
 
+  // ── Pending / Suspended ───────────────────────────────────
   if (institution?.status !== "approved") {
     return (
-      <div className="max-w-2xl mx-auto text-center py-20 animate-in fade-in duration-500">
-        <div className="relative inline-flex mb-6">
-          <div className="absolute inset-0 bg-purple-500/20 blur-3xl rounded-full" />
-          <Building2 className="h-20 w-20 text-purple-400 relative" />
+      <div className="max-w-md mx-auto py-20 animate-in fade-in duration-300">
+        <div className="border border-gray-800/60 bg-gray-900/20 p-10 text-center">
+          <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
+            <Building2 className="h-5 w-5 text-gray-600" strokeWidth={1.5} />
+          </div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gray-700 mb-4">
+            // estado da instituição
+          </p>
+          {institution?.status === "pending" ? (
+            <>
+              <h2 className="text-lg font-bold text-gray-200 mb-2">Aguarda aprovação</h2>
+              <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                A tua instituição está sob revisão pela equipa Netsulwel.
+                Receberás uma notificação assim que for aprovada.
+              </p>
+              <div className="inline-flex items-center gap-2 border border-amber-500/20 bg-amber-500/5 px-3 py-1.5 font-mono text-xs text-amber-400/80">
+                <span className="h-1.5 w-1.5 bg-amber-400/60 animate-pulse" />
+                pendente
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className="text-lg font-bold text-gray-200 mb-2">Instituição suspensa</h2>
+              <p className="text-sm text-gray-500 mb-6">Contacta a administração para mais informações.</p>
+              <div className="inline-flex items-center gap-2 border border-red-500/20 bg-red-500/5 px-3 py-1.5 font-mono text-xs text-red-400/80">
+                suspensa
+              </div>
+            </>
+          )}
         </div>
-        {institution?.status === "pending" ? (
-          <>
-            <h2 className="text-3xl font-bold text-white mb-3">Instituição Pendente</h2>
-            <p className="text-gray-400 mb-8 max-w-md mx-auto">
-              A tua instituição ainda está a aguardar aprovação pela administração. Receberás uma notificação assim que for aprovada.
-            </p>
-            <span className="inline-flex items-center gap-2 px-5 py-2.5 bg-yellow-500/10 text-yellow-400 rounded-full text-sm font-bold border border-yellow-500/20">
-              <span className="h-2 w-2 rounded-full bg-yellow-400 animate-pulse" />
-              Pendente
-            </span>
-          </>
-        ) : (
-          <>
-            <h2 className="text-3xl font-bold text-white mb-3">Instituição Suspensa</h2>
-            <p className="text-gray-400 mb-8">Contacta a administração para mais informações.</p>
-            <span className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-500/10 text-red-400 rounded-full text-sm font-bold border border-red-500/20">
-              Suspensa
-            </span>
-          </>
-        )}
       </div>
     );
   }
 
-  const statsConfig = [
-    { icon: GraduationCap, label: "Professores", value: stats.totalTeachers, color: "from-purple-500 to-purple-300", bg: "bg-purple-500/10" },
-    { icon: Users, label: "Alunos", value: stats.totalStudents, color: "from-blue-500 to-blue-300", bg: "bg-blue-500/10" },
-    { icon: DollarSign, label: "Receita Líquida", value: formatKz(stats.totalRevenue), color: "from-green-500 to-green-300", bg: "bg-green-500/10" },
-    { icon: TrendingUp, label: "Vendas", value: stats.totalSales, color: "from-yellow-500 to-yellow-300", bg: "bg-yellow-500/10" },
+  const kpis = [
+    { icon: GraduationCap, label: "Professores",     value: stats.teachers,              accent: "text-green/80" },
+    { icon: Users,         label: "Alunos",          value: stats.students,              accent: "text-blue-400/80" },
+    { icon: DollarSign,    label: "Receita Líquida", value: formatKz(stats.revenue),     accent: "text-amber-400/80" },
+    { icon: TrendingUp,    label: "Vendas",          value: stats.salesCount,            accent: "text-purple/80" },
   ];
 
   return (
-    <div className="max-w-[100rem] space-y-8 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900/80 to-gray-950/80 border border-gray-800/60 p-6 sm:p-8">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/5 blur-3xl rounded-full" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 blur-3xl rounded-full" />
-        <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center shadow-lg shadow-purple-500/20 shrink-0">
-              <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white truncate">{institution?.name}</h1>
-              <p className="text-sm sm:text-base text-gray-400">Visão geral da tua instituição</p>
-            </div>
+    <div className="max-w-[80rem] space-y-8 animate-in fade-in duration-300">
+
+      {/* ── Cabeçalho ── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-gray-800/60 pb-6">
+        <div className="flex items-center gap-4">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center border border-gray-800 bg-gray-900">
+            <Building2 className="h-5 w-5 text-blue-400/70" strokeWidth={1.5} />
           </div>
-          <Link
-            href="/dashboard/institution/members"
-            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-purple hover:bg-purple-light text-white px-5 py-2.5 sm:px-6 sm:py-3 font-bold rounded-xl transition-all hover:shadow-lg hover:shadow-purple-500/25 text-sm sm:text-base"
-          >
-            <Mail className="h-4 w-4 sm:h-5 sm:w-5" />
-            Convidar Membros
-          </Link>
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-blue-500/60 mb-1">// instituição</p>
+            <h1 className="text-xl font-bold text-gray-100">{institution?.name}</h1>
+            <p className="text-xs text-gray-600 mt-0.5">Visão geral da tua organização</p>
+          </div>
         </div>
+        <Link
+          href="/dashboard/institution/members"
+          className="flex items-center gap-1.5 border border-blue-500/25 bg-blue-500/8 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-blue-400/80 hover:bg-blue-500/15 transition-all shrink-0"
+        >
+          <Mail className="h-3 w-3" /> Convidar membros
+        </Link>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-        {statsConfig.map((stat, i) => (
-          <div key={i} className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900/60 to-gray-950/60 border border-gray-800/70 p-4 sm:p-6 hover:border-purple/30 transition-all duration-300">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl rounded-full" style={{ backgroundImage: `linear-gradient(to bottom right, ${stat.color.replace("from-", "").split(" ")[0]}, transparent)` }} />
-            <div className="relative">
-              <div className={`inline-flex p-3 rounded-lg ${stat.bg} mb-3`}>
-                <stat.icon className={`h-6 w-6 bg-gradient-to-br ${stat.color} bg-clip-text text-transparent`} />
-              </div>
-              <p className="text-sm text-gray-400 mb-1">{stat.label}</p>
-              <p className="text-2xl font-bold text-white">{stat.value}</p>
+      {/* ── KPIs ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-gray-800/30">
+        {kpis.map(({ icon: Icon, label, value, accent }) => (
+          <div key={label} className="border border-gray-800/60 bg-gray-900/10 p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Icon className="h-4 w-4 shrink-0 text-gray-600" strokeWidth={1.5} />
+              <span className="font-mono text-[9px] uppercase tracking-widest text-gray-600">{label}</span>
             </div>
+            <p className={`text-2xl font-bold tabular-nums ${accent}`}>{value}</p>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Members */}
-        <div className="rounded-xl bg-gradient-to-br from-gray-900/60 to-gray-950/60 border border-gray-800/70 overflow-hidden hover:border-purple/20 transition-colors">
-          <div className="p-4 sm:p-6 border-b border-gray-800/70 flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-400" />
-              </div>
-              <h2 className="text-base sm:text-lg font-bold text-white">Membros Recentes</h2>
-            </div>
-            <Link href="/dashboard/institution/members" className="group flex items-center gap-1 text-xs sm:text-sm text-purple-400 hover:text-purple-300 font-bold transition-colors">
-              Ver todos
-              <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+      {/* ── Membros + Vendas ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+        {/* Membros recentes */}
+        <div className="border border-gray-800/60">
+          <div className="flex items-center justify-between border-b border-gray-800/60 px-5 py-4">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-gray-600">// membros recentes</p>
+            <Link href="/dashboard/institution/members" className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+              Ver todos <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           {members.length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="h-16 w-16 rounded-full bg-gray-800/50 flex items-center justify-center mx-auto mb-4">
-                <Users className="h-8 w-8 text-gray-600" />
+            <div className="flex flex-col items-center justify-center p-10 text-center">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center border border-gray-800 bg-gray-900">
+                <Users className="h-4 w-4 text-gray-700" strokeWidth={1.5} />
               </div>
-              <p className="text-gray-400 mb-4">Ainda não tens membros.</p>
-              <Link href="/dashboard/institution/members" className="inline-flex items-center gap-2 text-sm bg-purple hover:bg-purple-light text-white px-4 py-2 rounded-lg font-bold transition-all">
-                Convidar primeiro membro
+              <p className="text-sm text-gray-600 mb-3">Ainda não tens membros.</p>
+              <Link href="/dashboard/institution/members" className="font-mono text-[9px] uppercase tracking-widest text-blue-400/60 hover:text-blue-400 transition-colors">
+                Convidar primeiro membro →
               </Link>
             </div>
           ) : (
-            <div className="divide-y divide-gray-800/50">
-              {members.slice(0, 5).map((member) => (
-                <div key={member.id} className="p-3 sm:p-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500/20 to-purple-700/20 flex items-center justify-center text-purple-400 font-bold text-sm border border-purple-500/10">
-                      {member.name?.charAt(0).toUpperCase() || "?"}
+            <div className="divide-y divide-gray-800/40">
+              {members.slice(0, 5).map(member => (
+                <div key={member.id} className="flex items-center justify-between px-5 py-3.5">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-8 w-8 shrink-0 overflow-hidden border border-gray-800/60 bg-gray-900">
+                      <Avatar uid={member.id} photoURL={member.photoURL} name={member.name} size={32} />
                     </div>
-                    <div>
-                      <p className="font-medium text-white text-sm">{member.name || "Sem nome"}</p>
-                      <p className="text-xs text-gray-500">{member.email}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm text-gray-300 truncate">{member.name || "Sem nome"}</p>
+                      <p className="font-mono text-[9px] text-gray-700 truncate">{member.email}</p>
                     </div>
                   </div>
-                  <span className={`px-2.5 py-1 text-xs font-bold rounded-full border ${
-                    member.institutionRole === "teacher" ? "bg-purple-500/10 text-purple-400 border-purple-500/20" :
-                    member.institutionRole === "admin" ? "bg-green-500/10 text-green-400 border-green-500/20" :
-                    "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                  <span className={`shrink-0 font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 border ${
+                    member.institutionRole === "teacher" ? "border-green/20 text-green/70"
+                    : member.institutionRole === "admin" ? "border-purple/20 text-purple/70"
+                    : "border-gray-700/40 text-gray-600"
                   }`}>
-                    {member.institutionRole === "teacher" ? "Professor" :
-                     member.institutionRole === "admin" ? "Admin" : "Aluno"}
+                    {member.institutionRole === "teacher" ? "Prof." : member.institutionRole === "admin" ? "Admin" : "Aluno"}
                   </span>
                 </div>
               ))}
+              {members.length > 5 && (
+                <div className="px-5 py-3 border-t border-gray-800/40">
+                  <Link href="/dashboard/institution/members" className="font-mono text-[9px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+                    +{members.length - 5} mais →
+                  </Link>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        {/* Sales */}
-        <div className="rounded-xl bg-gradient-to-br from-gray-900/60 to-gray-950/60 border border-gray-800/70 overflow-hidden hover:border-purple/20 transition-colors">
-          <div className="p-4 sm:p-6 border-b border-gray-800/70 flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-                <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-400" />
-              </div>
-              <h2 className="text-base sm:text-lg font-bold text-white">Vendas Recentes</h2>
-            </div>
-            <Link href="/dashboard/wallet" className="group flex items-center gap-1 text-xs sm:text-sm text-purple-400 hover:text-purple-300 font-bold transition-colors">
-              Ver carteira
-              <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+        {/* Vendas recentes */}
+        <div className="border border-gray-800/60">
+          <div className="flex items-center justify-between border-b border-gray-800/60 px-5 py-4">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-gray-600">// vendas recentes</p>
+            <Link href="/dashboard/wallet" className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+              Ver carteira <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           {sales.length === 0 ? (
-            <div className="p-8 sm:p-12 text-center">
-              <div className="h-16 w-16 rounded-full bg-gray-800/50 flex items-center justify-center mx-auto mb-4">
-                <DollarSign className="h-8 w-8 text-gray-600" />
+            <div className="flex flex-col items-center justify-center p-10 text-center">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center border border-gray-800 bg-gray-900">
+                <DollarSign className="h-4 w-4 text-gray-700" strokeWidth={1.5} />
               </div>
-              <p className="text-gray-400">Ainda não tens vendas.</p>
+              <p className="text-sm text-gray-600">Ainda não tens vendas.</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-800/50">
-              {sales.slice(0, 5).map((sale) => (
-                <div key={sale.id} className="p-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
-                  <div>
-                    <p className="font-medium text-white text-sm">{sale.itemTitle || sale.type}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{sale.userName}</p>
+            <div className="divide-y divide-gray-800/40">
+              {sales.slice(0, 5).map(sale => (
+                <div key={sale.id} className="flex items-center justify-between px-5 py-3.5">
+                  <div className="min-w-0">
+                    <p className="text-sm text-gray-300 truncate">{sale.itemTitle ?? sale.type}</p>
+                    <p className="font-mono text-[9px] text-gray-700 mt-0.5">{sale.userName}</p>
                   </div>
-                  <p className="font-bold text-white text-sm">{formatKz(sale.netAmount || sale.amount)}</p>
+                  <p className="ml-4 shrink-0 font-mono text-sm font-bold text-green/80">
+                    {formatKz(sale.netAmount ?? sale.amount ?? 0)}
+                  </p>
                 </div>
               ))}
             </div>
