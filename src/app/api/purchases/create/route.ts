@@ -124,6 +124,7 @@ export async function POST(req: NextRequest) {
       amount,
       fee,
       netAmount,
+      feePercentage: feePercentage ?? 0,
       paymentMethod,
       receiptUrl: receiptUrl || "",
       status: isConfirmed ? "confirmed" : "pending",

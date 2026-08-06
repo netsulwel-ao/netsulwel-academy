@@ -284,30 +284,34 @@ export default function CourseDetailPage() {
       track("course_complete", course.id, "course").catch(() => {});
     }
     if (justCompleted && course.hasCertificate) {
-      const certId = `CERT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-      const estHours = course.totalDuration ? parseInt(course.totalDuration) : course.lessonsCount ?? 0;
-      await setDoc(doc(collection(db, "certificates", user.uid, "courses"), course.id), {
-        userId: user.uid,
-        courseId: course.id,
-        courseTitle: course.title,
-        studentName: user.displayName || user.email || "Aluno",
-        completedAt: serverTimestamp(),
-        hours: estHours,
-        certificateId: certId,
-      });
-      // Notificar o aluno que o certificado está disponível
-      await setDoc(
-        doc(db, "users", user.uid, "notifications", `cert_${course.id}`),
-        {
-          uid: user.uid,
-          type: "certificate_ready",
-          title: "Certificado disponível!",
-          message: `Concluíste "${course.title}". O teu certificado está pronto.`,
-          link: `/dashboard/certificates/${course.id}`,
-          read: false,
-          createdAt: serverTimestamp(),
-        }
-      );
+      // Verificar se já existe certificado para evitar duplicados (double-click, múltiplos tabs)
+      const existingCert = await getDoc(doc(db, "certificates", user.uid, "courses", course.id));
+      if (!existingCert.exists()) {
+        const certId = `CERT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+        const estHours = course.totalDuration ? parseInt(course.totalDuration) : course.lessonsCount ?? 0;
+        await setDoc(doc(collection(db, "certificates", user.uid, "courses"), course.id), {
+          userId: user.uid,
+          courseId: course.id,
+          courseTitle: course.title,
+          studentName: user.displayName || user.email || "Aluno",
+          completedAt: serverTimestamp(),
+          hours: estHours,
+          certificateId: certId,
+        });
+        // Notificar o aluno que o certificado está disponível
+        await setDoc(
+          doc(db, "users", user.uid, "notifications", `cert_${course.id}`),
+          {
+            uid: user.uid,
+            type: "certificate_ready",
+            title: "Certificado disponível!",
+            message: `Concluíste "${course.title}". O teu certificado está pronto.`,
+            link: `/dashboard/certificates/${course.id}`,
+            read: false,
+            createdAt: serverTimestamp(),
+          }
+        );
+      }
     }
 
     // Auto-avançar para a próxima aula não concluída

@@ -150,9 +150,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Não autorizado." }, { status: 403 });
     }
 
-    const { saleId, userId, itemTitle, itemType, amount } = await req.json();
+    const { saleId, userId, itemId, itemTitle, itemType, amount } = await req.json();
     if (!saleId || !userId || !itemTitle || !amount) {
       return NextResponse.json({ error: "Campos obrigatórios em falta." }, { status: 400 });
+    }
+
+    // Resolve o ID real do item (curso/live) — usa itemId se fornecido, senão busca da venda
+    let resolvedItemId = itemId;
+    if (!resolvedItemId) {
+      const saleSnap = await db.collection("sales").doc(saleId).get();
+      if (saleSnap.exists) {
+        resolvedItemId = saleSnap.data()?.itemId || saleId;
+      } else {
+        resolvedItemId = saleId;
+      }
     }
 
     // Fetch student email
@@ -178,8 +189,8 @@ export async function POST(req: NextRequest) {
     const siteUrl = origin || `https://${req.headers.get("host") || "academia.netsulwel.tech"}`;
 
     const dashboardUrl = itemType === "live"
-      ? `${siteUrl}/dashboard/lives/${saleId}`
-      : `${siteUrl}/dashboard/courses/${saleId}`;
+      ? `${siteUrl}/dashboard/lives/${resolvedItemId}`
+      : `${siteUrl}/dashboard/courses/${resolvedItemId}`;
 
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,

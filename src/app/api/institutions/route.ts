@@ -80,11 +80,10 @@ export async function POST(req: NextRequest) {
     
     const docRef = await db.collection("institutions").add(institutionData);
     
-    // Update the user to have institution admin role
+    // Marcar o utilizador como pendente — o role será atribuído apenas após aprovação
+    // pelo admin global em /api/institutions/[id]/approve
     await db.collection("users").doc(adminId).update({
-      role: "institution",
-      institutionId: docRef.id,
-      institutionRole: "admin",
+      pendingInstitutionId: docRef.id,
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     });
     

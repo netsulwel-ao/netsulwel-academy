@@ -39,10 +39,12 @@ export async function PUT(
     const admin = getFirebaseAdmin();
     const db = admin.firestore();
 
-    // Verificar se é admin da instituição ou admin global
+    // Verificar se é admin global OU admin da instituição (não student/teacher)
     const userSnap = await db.collection("users").doc(uid).get();
     const userData = userSnap.data();
-    if (userData?.role !== "admin" && userData?.institutionId !== id) {
+    const isGlobalAdmin = userData?.role === "admin";
+    const isInstitutionAdmin = userData?.institutionId === id && userData?.institutionRole === "admin";
+    if (!isGlobalAdmin && !isInstitutionAdmin) {
       return NextResponse.json({ error: "Sem permissão para editar esta instituição." }, { status: 403 });
     }
     

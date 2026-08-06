@@ -101,17 +101,17 @@ export async function GET(
       });
     }
 
-    // Se user está autenticado, conceder acesso e atualizar o link
-    const updatedUsedBy = [...(link.usedBy || [])];
-    if (!updatedUsedBy.includes(uid)) {
-      updatedUsedBy.push(uid);
+    // Só incrementar usedCount se o user é novo — evitar que o mesmo user esgote maxUses
+    const isNewUser = !(link.usedBy || []).includes(uid);
+    const updatePayload: Record<string, unknown> = {
+      lastAccessedAt: new Date().toISOString(),
+    };
+    if (isNewUser) {
+      updatePayload.usedCount = admin.firestore.FieldValue.increment(1);
+      updatePayload.usedBy = admin.firestore.FieldValue.arrayUnion(uid);
     }
 
-    await db.collection("private_access_links").doc(link.id!).update({
-      usedCount: (link.usedCount || 0) + 1,
-      usedBy: updatedUsedBy,
-      lastAccessedAt: new Date().toISOString(),
-    });
+    await db.collection("private_access_links").doc(link.id!).update(updatePayload);
 
     // Conceder acesso ao usuário (arrayUnion — atomic, no race condition)
     const userRef = db.collection("users").doc(uid);
