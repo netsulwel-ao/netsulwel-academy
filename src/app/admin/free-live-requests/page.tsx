@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
@@ -27,12 +27,20 @@ interface FreeLiveRequest {
 }
 
 // ── Helpers ───────────────────────────────────────────────────
-function toDate(raw: unknown): Date | null {
-  if (!raw) return null;
+function toDate(raw: unknown): Date {
+  if (!raw) return new Date(0);
   if (raw instanceof Date) return raw;
   if (typeof raw === "object" && raw !== null && "toDate" in raw)
     return (raw as { toDate: () => Date }).toDate();
-  return null;
+  return new Date(0);
+}
+
+/** Returns formatted date string, or null if raw is falsy / epoch */
+function fmtRaw(raw: unknown): string | null {
+  if (!raw) return null;
+  const d = toDate(raw);
+  if (d.getTime() === 0) return null;
+  return d.toLocaleDateString("pt-PT");
 }
 
 function fmtDate(iso?: string) {
@@ -278,10 +286,10 @@ export default function FreeLiveRequestsPage() {
                               {fmtDate(req.scheduledAt)}
                             </span>
                           )}
-                          {toDate(req.createdAt).getTime() > 0 && (
+                          {fmtRaw(req.createdAt) !== null && (
                             <span className="flex items-center gap-1.5 font-mono text-[10px] text-gray-700">
                               <Clock className="h-3 w-3" strokeWidth={1.5} />
-                              pedido em {toDate(req.createdAt).toLocaleDateString("pt-PT")}
+                              pedido em {fmtRaw(req.createdAt)}
                             </span>
                           )}
                         </div>
