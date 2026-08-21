@@ -167,9 +167,9 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: EASE }}
         >
-          <TransitionLink href="/" className="flex items-center gap-2.5 lg:invisible">
-            <img src="/Logo-Academy-White.svg" alt="Academy" className="h-9 w-auto brightness-0 invert" />
-            <span className="text-base font-bold text-white">Netsulwel</span>
+          <TransitionLink href="/" className="group flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors">
+            <ArrowRight className="h-3.5 w-3.5 rotate-180 transition-transform group-hover:-translate-x-0.5" />
+            Voltar
           </TransitionLink>
           <TransitionLink
             href="/register"

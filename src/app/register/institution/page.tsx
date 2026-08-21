@@ -122,9 +122,9 @@ export default function InstitutionRegisterPage() {
 
         {/* Header */}
         <header className="flex items-center justify-between px-8 pt-8 pb-4 relative z-10">
-          <Link href="/" className="flex items-center gap-2.5 lg:invisible">
-            <img src="/Logo-Academy-White.svg" alt="Academy" className="h-9 w-auto brightness-0 invert" />
-            <span className="text-base font-bold text-white">Netsulwel</span>
+          <Link href="/" className="group flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors">
+            <ArrowRight className="h-3.5 w-3.5 rotate-180 transition-transform group-hover:-translate-x-0.5" />
+            Voltar
           </Link>
           <Link href="/login" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors">
             Já tenho conta <ArrowRight className="h-3.5 w-3.5" />
