@@ -7,7 +7,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import {
-  CreditCard, Crown, Zap, Lock, ArrowUpRight, Building2,
+  CreditCard, Lock, ArrowUpRight, Building2,
   Smartphone, Loader2, CheckCircle2, AlertCircle, Copy,
   ExternalLink, Upload, FileText, X, ChevronRight, Globe,
 } from "lucide-react";
@@ -17,8 +17,7 @@ import type { PlatformSettings } from "@/types/settings";
 import type { Course } from "@/types/course";
 import type { LiveSession } from "@/types/live";
 
-type PlanId = "smart" | "golden";
-type Step = "plan" | "method" | "checkout";
+type Step = "method" | "checkout";
 
 async function uploadReceipt(file: File, token: string): Promise<string> {
   const res = await fetch("/api/upload/presign", {
@@ -38,7 +37,7 @@ async function uploadReceipt(file: File, token: string): Promise<string> {
 }
 
 export default function DashboardFinancesPage() {
-  const { user, plan: currentPlan, isAdmin } = useAuth();
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
   const courseId = searchParams.get("courseId");
@@ -48,8 +47,7 @@ export default function DashboardFinancesPage() {
   const [course, setCourse] = useState<Course | null>(null);
   const [live, setLive] = useState<LiveSession | null>(null);
   const [loading, setLoading] = useState(true);
-  const [step, setStep] = useState<Step>("plan");
-  const [selectedPlan, setSelectedPlan] = useState<PlanId | null>(null);
+  const [step, setStep] = useState<Step>("method");
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<{ file: File; preview: string } | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -67,12 +65,10 @@ export default function DashboardFinancesPage() {
         if (courseSnap?.exists()) {
           const c = { id: courseSnap.id, ...courseSnap.data() } as Course;
           setCourse(c);
-          setStep("method");
         }
         if (liveSnap?.exists()) {
           const l = { id: liveSnap.id, ...liveSnap.data() } as LiveSession;
           setLive(l);
-          setStep("method");
         }
       } catch {
         toast.error("Erro ao carregar dados.");
@@ -83,7 +79,6 @@ export default function DashboardFinancesPage() {
     load();
   }, [courseId, liveId]);
 
-  const plans = settings?.plans;
   const methods = settings?.paymentMethods;
 
   const activeMethods = methods ? [
@@ -108,8 +103,7 @@ export default function DashboardFinancesPage() {
 
   const handlePurchase = async (paypalTransactionId?: string) => {
     if (!selectedMethod || !user) return;
-    if (!course && !live && !selectedPlan) return;
-    if (!course && !live && (!selectedPlan || !plans)) return;
+    if (!course && !live) return;
     setSubmitting(true);
     try {
       let receiptUrl = "";
@@ -118,10 +112,9 @@ export default function DashboardFinancesPage() {
         receiptUrl = await uploadReceipt(receipt.file, token);
       }
 
-      const saleType = live ? "live" : course ? "standalone" : selectedPlan!;
-      const itemId = live?.id ?? course?.id ?? selectedPlan;
+      const saleType = live ? "live" : "standalone";
+      const itemId = live?.id ?? course?.id;
 
-      // Idempotency key prevents duplicate purchases on double-click
       const idempotencyKey = `${user.uid}-${saleType}-${itemId}-${Date.now()}`;
 
       const res = await fetchWithAuth("/api/purchases/create", {
@@ -151,10 +144,6 @@ export default function DashboardFinancesPage() {
 
       if (course) { router.push("/dashboard/courses/" + course.id); return; }
       if (live) { router.push("/dashboard/lives/" + live.id); return; }
-      setSelectedPlan(null);
-      setSelectedMethod(null);
-      setReceipt(null);
-      setStep("plan");
     } catch (e) {
       console.error("Erro no pagamento:", e);
       const msg = e instanceof Error ? e.message : "Erro ao registar pedido. Tenta novamente.";
@@ -172,24 +161,6 @@ export default function DashboardFinancesPage() {
     );
   }
 
-  const planPill = isAdmin ? (
-    <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-bold border bg-purple-500/15 text-purple-300 border-purple-500/25">
-      <Crown className="h-4 w-4" /> Admin
-    </span>
-  ) : currentPlan === "golden" ? (
-    <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-bold border bg-yellow-500/15 text-yellow-300 border-yellow-500/25">
-      <Crown className="h-4 w-4" /> Golden
-    </span>
-  ) : currentPlan === "smart" ? (
-    <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-bold border bg-green-500/15 text-green-300 border-green-500/25">
-      <Zap className="h-4 w-4" /> Smart
-    </span>
-  ) : (
-    <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-bold border bg-gray-500/10 text-gray-300 border-gray-700/60">
-      <Lock className="h-4 w-4" /> Grátis
-    </span>
-  );
-
   return (
     <div className="max-w-4xl mx-auto animate-in fade-in duration-500 space-y-8">
       {/* Header */}
@@ -199,33 +170,15 @@ export default function DashboardFinancesPage() {
         </div>
         <div className="min-w-0">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Checkout</h1>
-          <p className="mt-1 text-gray-400">Escolhe o plano e o método de pagamento.</p>
-          <div className="mt-3">{planPill}</div>
+          <p className="mt-1 text-gray-400">Escolhe o método de pagamento.</p>
         </div>
       </div>
 
-      {/* Steps bar */}
-      <div className="flex items-center gap-2 text-base flex-wrap">
-        {(["plan", "method", "checkout"] as Step[]).map((s, i) => (
-          <div key={s} className="flex items-center gap-2">
-            <span className={`flex items-center justify-center w-7 h-7 text-sm font-bold border ${
-              step === s ? "border-blue-500 bg-blue-500/10 text-blue-400" :
-              ["plan", "method", "checkout"].indexOf(step) >= i ? "border-green-500 bg-green-500/10 text-green-400" :
-              "border-gray-700 text-gray-600"
-            }`}>{i + 1}</span>
-            <span className={`${step === s ? "text-white" : "text-gray-500"}`}>
-              {s === "plan" ? "Plano" : s === "method" ? "Pagamento" : "Confirmação"}
-            </span>
-            {i < 2 && <span className="text-gray-700">—</span>}
-          </div>
-        ))}
-      </div>
-
-      {/* Item info (standalone purchase) */}
+      {/* Item info */}
       {course && (
         <section>
-          <div className="border border-gray-800 bg-gray-900/40 p-6">
-            <p className="text-sm text-gray-500 uppercase tracking-wider mb-1">Curso Avulso</p>
+          <div className="border border-gray-800 bg-gray-900 p-6">
+            <p className="text-sm text-gray-500 uppercase tracking-wider mb-1">Curso</p>
             <h2 className="text-3xl font-bold text-white mb-2">{course.title}</h2>
             <p className="text-gray-400 text-base mb-4">{course.description}</p>
             <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
@@ -236,7 +189,7 @@ export default function DashboardFinancesPage() {
       )}
       {live && (
         <section>
-          <div className="border border-gray-800 bg-gray-900/40 p-6">
+          <div className="border border-gray-800 bg-gray-900 p-6">
             <p className="text-sm text-gray-500 uppercase tracking-wider mb-1">Aula ao Vivo</p>
             <h2 className="text-3xl font-bold text-white mb-2">{live.title}</h2>
             <p className="text-gray-400 text-base mb-4">{live.description}</p>
@@ -247,60 +200,9 @@ export default function DashboardFinancesPage() {
         </section>
       )}
 
-      {/* Step 1: Plans (only when not buying a course or live) */}
-      {step === "plan" && !course && !live && plans && (
+      {/* Step 1: Payment Method */}
+      {step === "method" && (
         <section>
-          <h2 className="text-xl font-bold text-white mb-4">Seleciona o teu Plano</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {(["smart", "golden"] as PlanId[]).map((id) => {
-              const plan = plans[id];
-              const isCurrent = currentPlan === id;
-              const selected = selectedPlan === id;
-              return (
-                <button
-                  key={id}
-                  onClick={() => { setSelectedPlan(id); setStep("method"); }}
-                  disabled={isCurrent || isAdmin}
-                  className={`text-left border p-6 transition-all ${
-                    selected
-                      ? "border-blue-500 bg-blue-500/10"
-                      : isCurrent
-                        ? "border-green-500/30 bg-green-500/5 opacity-60"
-                        : "border-gray-800 bg-gray-900/40 hover:border-gray-700"
-                  }`}
-                >
-                  <div className="flex flex-wrap items-center justify-between mb-4">
-                    <div className={`flex items-center gap-3 ${id === "golden" ? "text-yellow-400" : "text-green-400"}`}>
-                      {id === "golden" ? <Crown className="h-6 w-6" /> : <Zap className="h-6 w-6" />}
-                      <span className="text-3xl font-bold text-white">{plan.label}</span>
-                    </div>
-                    {isCurrent && <span className="text-sm font-bold text-green-400 border border-green-500/30 px-2 py-1">Atual</span>}
-                  </div>
-                  <p className="text-gray-400 text-base mb-4">{plan.description}</p>
-                  <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
-                    {plan.price.toLocaleString("pt-AO")} <span className="text-lg sm:text-xl text-gray-500 font-normal">Kz</span>
-                  </p>
-                  {plan.features.length > 0 && (
-                    <ul className="space-y-2">
-                      {plan.features.map((f, i) => (
-                        <li key={i} className="flex items-start gap-2 text-base text-gray-300">
-                          <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0 mt-0.5" />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* Step 2: Payment Method */}
-      {step === "method" && (selectedPlan || course || live) && (
-        <section>
-          <button onClick={() => { if (course || live) { router.push("/dashboard"); } else { setStep("plan"); } }} className="text-base text-gray-400 hover:text-white transition-colors mb-4">&larr; {course || live ? "Voltar" : "Voltar aos planos"}</button>
           <h2 className="text-xl font-bold text-white mb-4">Método de Pagamento</h2>
           {activeMethods.length === 0 ? (
             <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 px-4 py-3 text-base text-amber-200">
@@ -311,14 +213,11 @@ export default function DashboardFinancesPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {activeMethods.map((method) => {
                 const Icon = method.icon;
-                const selected = selectedMethod === method.id;
                 return (
                   <button
                     key={method.id}
                     onClick={() => { setSelectedMethod(method.id); setStep("checkout"); }}
-                    className={`flex items-center gap-3 border p-4 transition-all ${
-                      selected ? "border-blue-500 bg-blue-500/10" : "border-gray-800 bg-gray-900/40 hover:border-gray-700"
-                    }`}
+                    className="flex items-center gap-3 border border-gray-800 bg-gray-900 p-4 transition-all hover:border-gray-700"
                   >
                     <Icon className="h-6 w-6 text-gray-300 shrink-0" />
                     <span className="text-base font-medium text-white">{method.label}</span>
@@ -331,25 +230,21 @@ export default function DashboardFinancesPage() {
         </section>
       )}
 
-      {/* Step 3: Checkout / Confirmation */}
-      {step === "checkout" && selectedMethod && methods && (selectedPlan || course || live) && (
+      {/* Step 2: Checkout / Confirmation */}
+      {step === "checkout" && selectedMethod && methods && (
         <section>
           <button onClick={() => setStep("method")} className="text-base text-gray-400 hover:text-white transition-colors mb-4">&larr; Voltar aos métodos</button>
 
-          <div className="border border-gray-800 bg-gray-900/40 p-6 space-y-6">
+          <div className="border border-gray-800 bg-gray-900 p-6 space-y-6">
             {/* Resumo */}
             <div>
               <h3 className="text-base font-bold text-white uppercase tracking-wider mb-3">Resumo</h3>
-              <div className="bg-gray-950/50 border border-gray-800 p-4 space-y-2 text-base">
+              <div className="bg-gray-950 border border-gray-800 p-4 space-y-2 text-base">
                 {live ? (
                   <>
                     <div className="flex justify-between">
                       <span className="text-gray-400">Aula ao Vivo</span>
                       <span className="text-white font-medium text-right">{live.title}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Tipo</span>
-                      <span className="text-white font-medium">Aula Avulsa</span>
                     </div>
                   </>
                 ) : course ? (
@@ -358,20 +253,11 @@ export default function DashboardFinancesPage() {
                       <span className="text-gray-400">Curso</span>
                       <span className="text-white font-medium text-right">{course.title}</span>
                     </div>
-                    <div className="flex flex-wrap justify-between">
-                      <span className="text-gray-400">Tipo</span>
-                      <span className="text-white font-medium">Curso Avulso</span>
-                    </div>
                   </>
-                ) : (
-                  <div className="flex flex-wrap justify-between">
-                    <span className="text-gray-400">Plano</span>
-                    <span className="text-white font-medium">{plans?.[selectedPlan!]?.label}</span>
-                  </div>
-                )}
+                ) : null}
                 <div className="flex flex-wrap justify-between">
                   <span className="text-gray-400">Valor</span>
-                  <span className="text-white font-bold">{(live ? (live.price ?? 0) : course ? (course.price ?? 0) : (plans?.[selectedPlan!]?.price ?? 0)).toLocaleString("pt-AO")} Kz</span>
+                  <span className="text-white font-bold">{(live ? (live.price ?? 0) : (course?.price ?? 0)).toLocaleString("pt-AO")} Kz</span>
                 </div>
                 <div className="flex flex-wrap justify-between">
                   <span className="text-gray-400">Método</span>
@@ -384,7 +270,7 @@ export default function DashboardFinancesPage() {
             {selectedMethod === "bankTransfer" && methods.bankTransfer.enabled && (
               <div>
                 <h3 className="text-base font-bold text-white uppercase tracking-wider mb-3">Dados Bancários</h3>
-                <div className="space-y-3 text-base bg-gray-950/50 border border-gray-800 p-4">
+                <div className="space-y-3 text-base bg-gray-950 border border-gray-800 p-4">
                   {methods.bankTransfer.bankName && (
                     <div className="flex flex-wrap items-center justify-between">
                       <span className="text-gray-400">Banco</span>
@@ -420,7 +306,7 @@ export default function DashboardFinancesPage() {
             {selectedMethod === "multicaixa" && methods.multicaixa.enabled && (
               <div>
                 <h3 className="text-base font-bold text-white uppercase tracking-wider mb-3">Multicaixa</h3>
-                <div className="space-y-3 text-base bg-gray-950/50 border border-gray-800 p-4">
+                <div className="space-y-3 text-base bg-gray-950 border border-gray-800 p-4">
                   <div className="flex flex-wrap items-center justify-between">
                     <span className="text-gray-400">Entidade</span>
                     <span className="text-white font-medium">{methods.multicaixa.entity}</span>
@@ -449,15 +335,14 @@ export default function DashboardFinancesPage() {
                       <PayPalButtons
                         style={{ color: "blue", shape: "rect", label: "pay", height: 48 }}
                         createOrder={(_data, actions) => {
-                          const kzAmount = live ? (live.price ?? 0) : course ? (course.price ?? 0) : (plans?.[selectedPlan!]?.price ?? 0);
-                          // Convert Kz to USD — set PAYPAL_EXCHANGE_RATE env var (Kz per 1 USD)
+                          const kzAmount = live ? (live.price ?? 0) : (course?.price ?? 0);
                           const rate = Number(process.env.NEXT_PUBLIC_PAYPAL_EXCHANGE_RATE) || 830;
                           const usdAmount = Math.round((kzAmount / rate) * 100) / 100;
                           return actions.order.create({
                             intent: "CAPTURE",
                             purchase_units: [{
                               amount: { value: usdAmount.toString(), currency_code: "USD" },
-                              description: live ? live.title : course ? course.title : (plans?.[selectedPlan!]?.label || "Plano"),
+                              description: live ? live.title : (course?.title || "Curso"),
                             }],
                           });
                         }}
@@ -479,7 +364,7 @@ export default function DashboardFinancesPage() {
                       PayPal não configurado — o administrador precisa definir o Client ID nas configurações.
                     </div>
                     {methods.paypal.email && (
-                      <div className="flex flex-wrap items-center justify-between bg-gray-950/50 border border-gray-800 px-4 py-3">
+                      <div className="flex flex-wrap items-center justify-between bg-gray-950 border border-gray-800 px-4 py-3">
                         <span className="text-base text-white font-medium">{methods.paypal.email}</span>
                         <button onClick={() => handleCopy(methods.paypal.email)} className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white">
                           <Copy className="h-4 w-4" /> Copiar
@@ -516,7 +401,7 @@ export default function DashboardFinancesPage() {
                     <input type="file" accept="image/png,image/jpeg,image/jpg,application/pdf" onChange={handleReceiptChange} className="hidden" />
                   </label>
                 ) : (
-                  <div className="border border-gray-800 bg-gray-950/50 p-4">
+                  <div className="border border-gray-800 bg-gray-950 p-4">
                     <div className="flex flex-wrap items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <FileText className="h-5 w-5 text-blue-400" />

@@ -38,7 +38,7 @@ export function useScreenRecording() {
         canvas.height = videoElement.videoHeight || 720;
 
         // Criar stream do canvas
-        const canvasStream = (canvas as any).captureStream(30); // 30 FPS
+        const canvasStream = (canvas as HTMLCanvasElement & { captureStream: (fps?: number) => MediaStream }).captureStream(30);
         screenStream = canvasStream;
 
         // Animar canvas com o vídeo

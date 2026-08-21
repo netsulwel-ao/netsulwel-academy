@@ -21,17 +21,17 @@ export function FormTopBar({
   return (
     <>
       {/* Sticky bar */}
-      <div className="sticky top-0 z-20 flex items-center justify-between gap-4 bg-gray-950/95 backdrop-blur-xl border-b border-gray-800/60 px-6 py-4">
+      <div className="sticky top-0 z-20 flex items-center justify-between gap-4 bg-gray-950 border-b border-gray-800 px-6 py-4">
         <div className="flex items-center gap-3">
           <Link
             href={backHref}
             aria-label="Voltar"
-            className="flex h-8 w-8 items-center justify-center border border-gray-800/60 bg-gray-900/40 text-gray-600 hover:text-gray-300 hover:border-gray-700 transition-all"
+            className="flex h-8 w-8 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:text-gray-300 hover:border-gray-700 transition-all"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
           </Link>
           <div>
-            <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-700 mb-0.5">
+            <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-gray-700 mb-0.5">
               {mode === "create" ? "// novo curso" : "// editar curso"}
             </p>
             <h1 className="text-base font-bold text-gray-100 leading-none">
@@ -45,7 +45,7 @@ export function FormTopBar({
             type="button"
             onClick={onDraft}
             disabled={disabled}
-            className="flex items-center gap-1.5 border border-gray-700/60 bg-gray-900/40 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-gray-500 hover:text-gray-300 hover:border-gray-600 disabled:opacity-40 transition-all"
+            className="flex items-center gap-1.5 border border-gray-700 bg-gray-900 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-500 hover:text-gray-300 hover:border-gray-600 disabled:opacity-40 transition-all"
           >
             {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
             Rascunho
@@ -54,7 +54,7 @@ export function FormTopBar({
             type="button"
             onClick={onPublish}
             disabled={disabled}
-            className="flex items-center gap-1.5 border border-purple/30 bg-purple/10 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-purple/80 hover:bg-purple/20 disabled:opacity-40 transition-all"
+            className="flex items-center gap-1.5 border border-purple/30 bg-purple/10 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-purple/80 hover:bg-purple/20 disabled:opacity-40 transition-all"
           >
             {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
             {mode === "edit" ? "Actualizar" : "Publicar"}

@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { PixelText } from "./PixelText";
+import { Reveal } from "./motion/Reveal";
 
 const faqs = [
  {
@@ -33,6 +35,7 @@ export function FAQ() {
  return (
  <section id="faq" className="py-20 md:py-28">
  <div className="mx-auto max-w-3xl px-6">
+ <Reveal>
  <div className="text-center">
  <PixelText size="md" className="text-purple-light">
  {"// faq"}
@@ -41,12 +44,13 @@ export function FAQ() {
  Perguntas frequentes
  </h2>
  </div>
+ </Reveal>
 
  <div className="mt-12 space-y-3">
   {faqs.map((faq, index) => (
+  <Reveal key={faq.question} delay={index * 0.08} y={24}>
  <div
- key={faq.question}
- className="overflow-hidden border border-gray-700 bg-gray-800/50 transition-colors hover:border-gray-600"
+ className="overflow-hidden border border-gray-700 bg-gray-800 transition-colors hover:border-gray-600"
  >
  <button
  type="button"
@@ -59,29 +63,34 @@ export function FAQ() {
  id={`faq-button-${index}`}
  >
  {faq.question}
- <ChevronDown
- className={`h-5 w-5 shrink-0 text-purple-light transition-transform duration-300 ${
- openIndex === index ? "rotate-180" : ""
- }`}
- />
+ <motion.span
+ animate={{ rotate: openIndex === index ? 180 : 0 }}
+ transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+ className="shrink-0 text-purple-light"
+ >
+ <ChevronDown className="h-5 w-5" />
+ </motion.span>
  </button>
- <div
+ <AnimatePresence initial={false}>
+ {openIndex === index && (
+ <motion.div
  id={`faq-panel-${index}`}
  role="region"
  aria-labelledby={`faq-button-${index}`}
- className={`grid transition-all duration-300 ${
- openIndex === index
- ? "grid-rows-[1fr] opacity-100"
- : "grid-rows-[0fr] opacity-0"
- }`}
+ initial={{ height: 0, opacity: 0 }}
+ animate={{ height: "auto", opacity: 1 }}
+ exit={{ height: 0, opacity: 0 }}
+ transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+ className="overflow-hidden"
  >
- <div className="overflow-hidden">
  <div className="border-t border-gray-700 px-6 py-4 text-sm leading-relaxed text-gray-300">
  {faq.answer}
  </div>
+ </motion.div>
+ )}
+ </AnimatePresence>
  </div>
- </div>
- </div>
+ </Reveal>
  ))}
  </div>
  </div>

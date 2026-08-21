@@ -1,8 +1,8 @@
 "use client";
 
 import { Loader2, Sparkles, Award, Plus, X, Tag, Radio, Video } from "lucide-react";
-import type { CourseType, CourseLevel, CourseCategory, CourseFormat, Trail } from "@/types/course";
-import { COURSE_TYPES, LEVELS, CATEGORIES, inputCls, selectCls } from "./_constants";
+import type { CourseLevel, CourseCategory, CourseFormat, Trail } from "@/types/course";
+import { LEVELS, CATEGORIES, inputCls, selectCls } from "./_constants";
 import { FieldLabel, Toggle } from "./_ui";
 import { ThumbnailUpload } from "./ThumbnailUpload";
 
@@ -16,8 +16,7 @@ interface Props {
   title: string; setTitle: (v: string) => void;
   description: string; setDescription: (v: string) => void;
   generatingDesc: boolean; onGenerateDesc: () => void;
-  // type / format
-  courseType: CourseType; setCourseType: (v: CourseType) => void;
+  // format
   format: CourseFormat; setFormat: (v: CourseFormat) => void;
   // price / access
   price: string; setPrice: (v: string) => void;
@@ -39,11 +38,10 @@ interface Props {
 }
 
 export function SettingsPanel(p: Props) {
-  const isFreeStandalone =
-    p.courseType === "standalone" && (!p.price || parseInt(p.price) <= 0);
+  const isFreeCourse = !p.price || parseInt(p.price) <= 0;
 
   return (
-    <div className="w-full lg:w-[360px] shrink-0 border-b lg:border-b-0 lg:border-r border-gray-800/60 overflow-y-auto p-6 space-y-6">
+    <div className="w-full lg:w-[360px] shrink-0 border-b lg:border-b-0 lg:border-r border-gray-800 overflow-y-auto p-6 space-y-6">
 
       {/* Thumbnail */}
       <ThumbnailUpload
@@ -73,7 +71,7 @@ export function SettingsPanel(p: Props) {
             type="button"
             onClick={p.onGenerateDesc}
             disabled={p.generatingDesc || !p.title.trim()}
-            className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-purple/60 hover:text-purple/80 disabled:opacity-30 transition-colors"
+            className="flex items-center gap-1 font-mono text-[13px] uppercase tracking-widest text-purple/60 hover:text-purple/80 disabled:opacity-30 transition-colors"
           >
             {p.generatingDesc
               ? <><Loader2 className="h-2.5 w-2.5 animate-spin" /> A gerar...</>
@@ -90,37 +88,10 @@ export function SettingsPanel(p: Props) {
             className={`${inputCls} resize-none`}
           />
           {p.generatingDesc && (
-            <div className="absolute inset-0 bg-gray-900/70 flex items-center justify-center">
+            <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
               <Sparkles className="h-4 w-4 text-purple/60 animate-pulse" />
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Tipo de acesso */}
-      <div>
-        <FieldLabel>// tipo de acesso</FieldLabel>
-        <div className="space-y-1.5">
-          {COURSE_TYPES.map((t) => (
-            <button
-              key={t.value}
-              type="button"
-              onClick={() => p.setCourseType(t.value)}
-              className={`w-full flex items-center gap-3 px-4 py-3 border text-left transition-all ${
-                p.courseType === t.value
-                  ? "border-purple/40 bg-purple/8"
-                  : "border-gray-800/60 bg-gray-900/10 hover:border-gray-700"
-              }`}
-            >
-              <span className={`h-2 w-2 shrink-0 ${p.courseType === t.value ? "bg-purple" : "bg-gray-700"}`} />
-              <div>
-                <p className={`text-sm font-semibold ${p.courseType === t.value ? "text-purple/80" : "text-gray-400"}`}>
-                  {t.label}
-                </p>
-                <p className="font-mono text-[9px] text-gray-700">{t.desc}</p>
-              </div>
-            </button>
-          ))}
         </div>
       </div>
 
@@ -137,7 +108,7 @@ export function SettingsPanel(p: Props) {
                 className={`flex items-center justify-center gap-2 py-2.5 border text-sm transition-all ${
                   p.format === val
                     ? "border-purple/40 bg-purple/8 text-purple/80"
-                    : "border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700"
+                    : "border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700"
                 }`}
               >
                 <Icon className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -149,25 +120,23 @@ export function SettingsPanel(p: Props) {
       </div>
 
       {/* Preço */}
-      {p.courseType === "standalone" && (
-        <div>
-          <FieldLabel>// preço (Kz)</FieldLabel>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-gray-600">Kz</span>
-            <input
-              type="number"
-              min="0"
-              value={p.price}
-              onChange={(e) => p.setPrice(e.target.value)}
-              placeholder="0 = Gratuito"
-              className={`${inputCls} pl-10`}
-            />
-          </div>
+      <div>
+        <FieldLabel>// preço (Kz)</FieldLabel>
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-sm text-gray-600">Kz</span>
+          <input
+            type="number"
+            min="0"
+            value={p.price}
+            onChange={(e) => p.setPrice(e.target.value)}
+            placeholder="0 = Gratuito"
+            className={`${inputCls} pl-10`}
+          />
         </div>
-      )}
+      </div>
 
       {/* Código de acesso */}
-      {isFreeStandalone && (
+      {isFreeCourse && (
         <div>
           <FieldLabel>// código de acesso</FieldLabel>
           <p className="font-mono text-[8px] text-gray-700 mb-2">
@@ -189,7 +158,7 @@ export function SettingsPanel(p: Props) {
                   Array.from({ length: n }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
                 p.setAccessCode(`${rand(4)}-${rand(4)}`);
               }}
-              className="border border-gray-800/60 bg-gray-900/10 px-3 font-mono text-[9px] uppercase tracking-widest text-gray-600 hover:border-gray-700 hover:text-gray-400 transition-all whitespace-nowrap"
+              className="border border-gray-800 bg-gray-900 px-3 font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:border-gray-700 hover:text-gray-400 transition-all whitespace-nowrap"
             >
               Gerar
             </button>
@@ -215,7 +184,7 @@ export function SettingsPanel(p: Props) {
 
       {/* Certificado + Destaque */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between border border-gray-800/60 bg-gray-900/10 px-4 py-3">
+        <div className="flex items-center justify-between border border-gray-800 bg-gray-900 px-4 py-3">
           <div>
             <p className="text-sm text-gray-300 flex items-center gap-2">
               <Award className="h-3.5 w-3.5 text-amber-400/70" strokeWidth={1.5} /> Certificado
@@ -224,7 +193,7 @@ export function SettingsPanel(p: Props) {
           </div>
           <Toggle checked={p.hasCertificate} onChange={() => p.setHasCertificate(!p.hasCertificate)} label="Ativar certificado" />
         </div>
-        <div className="flex items-center justify-between border border-gray-800/60 bg-gray-900/10 px-4 py-3">
+        <div className="flex items-center justify-between border border-gray-800 bg-gray-900 px-4 py-3">
           <div>
             <p className="text-sm text-gray-300 flex items-center gap-2">
               <Sparkles className="h-3.5 w-3.5 text-blue-400/70" strokeWidth={1.5} /> Em destaque
@@ -272,7 +241,7 @@ export function SettingsPanel(p: Props) {
           <button
             type="button"
             onClick={p.addTag}
-            className="border border-gray-800/60 bg-gray-900/10 px-3 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all"
+            className="border border-gray-800 bg-gray-900 px-3 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all"
           >
             <Plus className="h-3.5 w-3.5" />
           </button>
@@ -280,7 +249,7 @@ export function SettingsPanel(p: Props) {
         {p.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {p.tags.map((t) => (
-              <span key={t} className="flex items-center gap-1 border border-purple/20 bg-purple/8 text-purple/70 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest">
+              <span key={t} className="flex items-center gap-1 border border-purple/20 bg-purple/8 text-purple/70 px-2 py-0.5 font-mono text-[13px] uppercase tracking-widest">
                 {t}
                 <button onClick={() => p.removeTag(t)} aria-label={`Remover tag ${t}`}>
                   <X className="h-2.5 w-2.5 hover:text-white transition-colors" />
@@ -292,21 +261,18 @@ export function SettingsPanel(p: Props) {
       </div>
 
       {/* Resumo */}
-      <div className="border border-gray-800/60 bg-gray-900/20 p-4 space-y-2">
-        <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">// resumo</p>
+      <div className="border border-gray-800 bg-gray-900 p-4 space-y-2">
+        <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">// resumo</p>
         {[
           ["Módulos",    String(p.modulesCount)],
           ["Aulas",      String(p.lessonsCount)],
-          ["Tipo",       p.courseType],
-          ...(p.courseType === "standalone"
-            ? [["Preço", p.price ? `${parseInt(p.price).toLocaleString("pt-AO")} Kz` : "Gratuito"]]
-            : []),
+          ["Preço", p.price ? `${parseInt(p.price).toLocaleString("pt-AO")} Kz` : "Gratuito"],
           ["Certificado", p.hasCertificate ? "Sim" : "Não"],
           ["Destaque",    p.featured       ? "Sim" : "Não"],
         ].map(([k, v]) => (
           <div key={k} className="flex items-center justify-between">
-            <span className="font-mono text-[9px] text-gray-600">{k}</span>
-            <span className="font-mono text-[9px] text-gray-300 capitalize">{v}</span>
+            <span className="font-mono text-[13px] text-gray-600">{k}</span>
+            <span className="font-mono text-[13px] text-gray-300 capitalize">{v}</span>
           </div>
         ))}
       </div>

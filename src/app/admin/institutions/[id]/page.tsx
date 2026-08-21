@@ -35,14 +35,14 @@ const ROLE_MAP: Record<string, { cls: string; label: string }> = {
 function RoleBadge({ role }: { role: string }) {
   const { cls, label } = ROLE_MAP[role] ?? ROLE_MAP.aluno;
   return (
-    <span className={`font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 border ${cls}`}>
+    <span className={`font-mono text-[13px] uppercase tracking-widest px-2 py-0.5 border ${cls}`}>
       {label}
     </span>
   );
 }
 
 const inputCls =
-  "w-full border border-gray-800/60 bg-gray-900/40 py-2.5 px-3 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors";
+  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors";
 
 // ── Page ──────────────────────────────────────────────────────
 export default function InstitutionDetailPage() {
@@ -143,12 +143,12 @@ export default function InstitutionDetailPage() {
       <div className="flex items-center gap-3">
         <button
           onClick={() => router.push("/admin/institutions")}
-          className="flex h-8 w-8 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all shrink-0"
+          className="flex h-8 w-8 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all shrink-0"
         >
           <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
         </button>
         <div>
-          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-700">// membros da instituição</p>
+          <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-gray-700">// membros da instituição</p>
           {loading
             ? <div className="h-6 w-48 bg-gray-800 animate-pulse mt-0.5" />
             : <h1 className="text-xl font-bold text-gray-100">{institution?.name}</h1>
@@ -174,14 +174,14 @@ export default function InstitutionDetailPage() {
       {!loading && (
         <>
           {/* ── KPIs ── */}
-          <div className="grid grid-cols-3 gap-px bg-gray-800/30">
+          <div className="grid grid-cols-3 gap-px bg-gray-800">
             {[
               { label: "Total",      value: members.length,  icon: Users },
               { label: "Professores",value: teacherCount,    icon: GraduationCap },
               { label: "Alunos",     value: studentCount,    icon: Users },
             ].map(({ label, value, icon: Icon }) => (
-              <div key={label} className="border border-gray-800/60 bg-gray-900/10 px-4 py-3">
-                <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700 mb-1 flex items-center gap-1.5">
+              <div key={label} className="border border-gray-800 bg-gray-900 px-4 py-3">
+                <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-1 flex items-center gap-1.5">
                   <Icon className="h-3 w-3" strokeWidth={1.5} /> {label}
                 </p>
                 <p className="text-xl font-bold text-gray-200 tabular-nums">{value}</p>
@@ -190,8 +190,8 @@ export default function InstitutionDetailPage() {
           </div>
 
           {/* ── Convidar ── */}
-          <div className="border border-gray-800/60 bg-gray-900/10 p-5">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-4 flex items-center gap-2">
+          <div className="border border-gray-800 bg-gray-900 p-5">
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-4 flex items-center gap-2">
               <UserPlus className="h-3.5 w-3.5" strokeWidth={1.5} />
               // convidar membro
             </p>
@@ -208,14 +208,14 @@ export default function InstitutionDetailPage() {
               <select
                 value={inviteRole}
                 onChange={e => setInviteRole(e.target.value as typeof inviteRole)}
-                className="border border-gray-800/60 bg-gray-900/40 py-2.5 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none sm:w-40 transition-colors"
+                className="border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none sm:w-40 transition-colors"
               >
                 <option value="teacher">Professor</option>
                 <option value="student">Aluno</option>
               </select>
               <button
                 type="submit" disabled={inviting}
-                className="flex items-center justify-center gap-1.5 border border-purple/25 bg-purple/8 px-5 py-2.5 font-mono text-[10px] uppercase tracking-widest text-purple/80 hover:bg-purple/15 disabled:opacity-40 transition-all whitespace-nowrap"
+                className="flex items-center justify-center gap-1.5 border border-purple/25 bg-purple/8 px-5 py-2.5 font-mono text-[13px] uppercase tracking-widest text-purple/80 hover:bg-purple/15 disabled:opacity-40 transition-all whitespace-nowrap"
               >
                 {inviting
                   ? <><Loader2 className="h-3 w-3 animate-spin" /> A enviar...</>
@@ -226,29 +226,29 @@ export default function InstitutionDetailPage() {
           </div>
 
           {/* ── Lista de membros ── */}
-          <div className="border border-gray-800/60">
+          <div className="border border-gray-800">
             {/* Pesquisa */}
-            <div className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-800/40 bg-gray-900/20">
+            <div className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-800 bg-gray-900">
               <div className="relative flex-1 max-w-xs">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-700" strokeWidth={1.5} />
                 <input
                   type="text" value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Pesquisar membro..."
-                  className="w-full border border-gray-800/60 bg-gray-900/40 pl-9 pr-3 py-2 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors"
+                  className="w-full border border-gray-800 bg-gray-900 pl-9 pr-3 py-2 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors"
                 />
               </div>
-              <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700 ml-auto">
+              <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 ml-auto">
                 {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
               </p>
             </div>
 
             {/* Header */}
-            <div className="hidden lg:grid grid-cols-[2fr_2fr_1fr_1fr] gap-4 px-5 py-3 border-b border-gray-800/40 bg-gray-900/10">
-              <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Membro</p>
-              <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Email</p>
-              <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Cargo</p>
-              <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Desde</p>
+            <div className="hidden lg:grid grid-cols-[2fr_2fr_1fr_1fr] gap-4 px-5 py-3 border-b border-gray-800 bg-gray-900">
+              <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Membro</p>
+              <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Email</p>
+              <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Cargo</p>
+              <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Desde</p>
             </div>
 
             {filtered.length === 0 ? (
@@ -256,7 +256,7 @@ export default function InstitutionDetailPage() {
                 <div className="mb-3 flex h-10 w-10 items-center justify-center border border-gray-800 bg-gray-900">
                   <Users className="h-4 w-4 text-gray-700" strokeWidth={1.5} />
                 </div>
-                <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">
+                <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">
                   {search ? "// sem resultados" : "// sem membros"}
                 </p>
                 <p className="text-sm text-gray-600 mt-1">
@@ -264,25 +264,25 @@ export default function InstitutionDetailPage() {
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-800/30">
+              <div className="divide-y divide-gray-800">
                 {filtered.map(member => (
                   <div
                     key={member.id}
-                    className="grid grid-cols-1 lg:grid-cols-[2fr_2fr_1fr_1fr] gap-3 items-center px-5 py-3.5 hover:bg-gray-900/20 transition-colors"
+                    className="grid grid-cols-1 lg:grid-cols-[2fr_2fr_1fr_1fr] gap-3 items-center px-5 py-3.5 hover:bg-gray-900 transition-colors"
                   >
                     {/* Nome */}
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center border border-gray-800/60 bg-gray-900 font-semibold text-xs text-gray-500">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center border border-gray-800 bg-gray-900 font-semibold text-sm text-gray-500">
                         {member.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm text-gray-200 truncate">{member.name}</p>
-                        <p className="font-mono text-[9px] text-gray-700 truncate lg:hidden">{member.email}</p>
+                        <p className="font-mono text-[13px] text-gray-700 truncate lg:hidden">{member.email}</p>
                       </div>
                     </div>
 
                     {/* Email */}
-                    <p className="hidden lg:block font-mono text-xs text-gray-500 truncate">{member.email}</p>
+                    <p className="hidden lg:block font-mono text-sm text-gray-500 truncate">{member.email}</p>
 
                     {/* Cargo */}
                     <div className="flex items-center gap-2">
@@ -291,7 +291,7 @@ export default function InstitutionDetailPage() {
                     </div>
 
                     {/* Data */}
-                    <p className="hidden lg:block font-mono text-xs text-gray-700">
+                    <p className="hidden lg:block font-mono text-sm text-gray-700">
                       {member.createdAt.toLocaleDateString("pt-PT")}
                     </p>
                   </div>
@@ -300,8 +300,8 @@ export default function InstitutionDetailPage() {
             )}
 
             {/* Footer */}
-            <div className="px-5 py-3 border-t border-gray-800/40 bg-gray-900/10">
-              <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">
+            <div className="px-5 py-3 border-t border-gray-800 bg-gray-900">
+              <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">
                 {members.length} membro{members.length !== 1 ? "s" : ""} no total
               </p>
             </div>

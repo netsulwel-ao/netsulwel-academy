@@ -27,7 +27,7 @@ export default function TeacherEditLivePage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
-  const [target, setTarget] = useState<LiveTarget>("smart");
+  const [target, setTarget] = useState<LiveTarget>("free");
   const [price, setPrice] = useState("");
   const [thumbnail, setThumbnail] = useState("");
   const [uploadingThumb, setUploadingThumb] = useState(false);
@@ -50,7 +50,7 @@ export default function TeacherEditLivePage() {
           const d = typeof sa === "object" && "toDate" in sa ? (sa as { toDate: () => Date }).toDate() : new Date(sa as string);
           setScheduledAt(d.toISOString().slice(0, 16));
         }
-        setTarget(data.target || "smart");
+        setTarget(data.target || "free");
         setPrice(data.price ? String(data.price) : "");
         setThumbnail(data.thumbnail || "");
         setMaterials(data.materials || []);
@@ -151,20 +151,20 @@ export default function TeacherEditLivePage() {
           <label className="flex items-center gap-2 text-sm font-medium text-gray-300"><Type className="h-4 w-4 text-gray-500" /> Título</label>
           <input type="text" value={title} onChange={e => setTitle(e.target.value)}
             placeholder="Ex: Introdução ao React — Aula ao Vivo"
-            className="w-full bg-gray-900/60 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors" required />
+            className="w-full bg-gray-900 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors" required />
         </div>
 
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-sm font-medium text-gray-300"><AlignLeft className="h-4 w-4 text-gray-500" /> Descrição</label>
           <textarea value={description} onChange={e => setDescription(e.target.value)}
             placeholder="Descreva o que será abordado..." rows={4}
-            className="w-full bg-gray-900/60 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors resize-none" />
+            className="w-full bg-gray-900 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors resize-none" />
         </div>
 
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-sm font-medium text-gray-300"><Calendar className="h-4 w-4 text-gray-500" /> Data e Hora</label>
           <input type="datetime-local" value={scheduledAt} onChange={e => setScheduledAt(e.target.value)}
-            className="w-full bg-gray-900/60 border border-gray-800 px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors [color-scheme:dark]" required />
+            className="w-full bg-gray-900 border border-gray-800 px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors [color-scheme:dark]" required />
         </div>
 
         {target === "standalone" && (
@@ -172,7 +172,7 @@ export default function TeacherEditLivePage() {
             <label className="flex items-center gap-2 text-sm font-medium text-gray-300"><DollarSign className="h-4 w-4 text-gray-500" /> Preço (Kz)</label>
             <input type="number" min="0" value={price} onChange={e => setPrice(e.target.value)}
               placeholder="Ex: 5000"
-              className="w-full bg-gray-900/60 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
+              className="w-full bg-gray-900 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
           </div>
         )}
 
@@ -182,10 +182,10 @@ export default function TeacherEditLivePage() {
             <div className="relative group">
                <img src={thumbnail} alt="Thumbnail da aula ao vivo" className="w-full h-48 object-cover" />
               <button type="button" onClick={() => setThumbnail("")}
-                className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">Remover</button>
+                className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity">Remover</button>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-700 hover:border-gray-600 bg-gray-900/30 cursor-pointer transition-colors">
+            <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-700 hover:border-gray-600 bg-gray-900 cursor-pointer transition-colors">
               {uploadingThumb ? <Loader2 className="h-8 w-8 animate-spin text-green-400" />
                 : <><ImageIcon className="h-8 w-8 text-gray-600 mb-2" /><span className="text-sm text-gray-500">Clique para enviar uma imagem</span></>}
               <input type="file" accept="image/*" onChange={handleThumbnailUpload} className="hidden" disabled={uploadingThumb} />

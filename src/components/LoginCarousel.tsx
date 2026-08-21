@@ -60,7 +60,7 @@ export default function LoginCarousel() {
             key={index}
             onClick={() => setSlideIndex(index)}
             className={`h-2 rounded-full transition-all ${
-              index === slideIndex ? "w-8 bg-white" : "w-2 bg-white/50"
+              index === slideIndex ? "w-8 bg-white" : "w-2 bg-white"
             }`}
           />
         ))}

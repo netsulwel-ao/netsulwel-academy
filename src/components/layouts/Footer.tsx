@@ -3,9 +3,7 @@ import { Code2, Share2, Play, MessagesSquare } from "lucide-react";
 
 const links = {
   Produto: [
-    { label: "Trilhas", href: "#trilhas" },
     { label: "Planos", href: "#planos" },
-    { label: "Comunidade", href: "#comunidade" },
     { label: "Blog", href: "#blog" },
   ],
   Empresa: [

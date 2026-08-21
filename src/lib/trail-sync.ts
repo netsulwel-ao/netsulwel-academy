@@ -3,13 +3,14 @@
  * Garante que Trail.courseIds está sempre atualizado e Trail.coursesCount correto.
  */
 import { db } from "@/lib/firebase";
-import { doc, getDoc, updateDoc, arrayUnion, arrayRemove, increment } from "firebase/firestore";
+import { doc, updateDoc, arrayUnion, arrayRemove, increment } from "firebase/firestore";
 
 export async function syncCourseTrail(
   courseId: string,
   newTrailId: string | undefined,
   previousTrailId: string | undefined,
-  trailOrder?: number,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _trailOrder?: number,
 ) {
   // Nada a fazer se trail não mudou e não há trail
   if (!newTrailId && !previousTrailId) return;

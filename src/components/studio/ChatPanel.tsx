@@ -52,10 +52,10 @@ export function ChatPanel({ liveId, pinnedMsg, onPin, hostName }: Props) {
       {pinnedMsg && (
         <div className="mx-3 mt-3 px-3 py-2 bg-amber-500/8 border-l-2 border-amber-400 flex items-start gap-2">
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-400/70 mb-0.5">Fixado</p>
-            <p className="text-xs text-white/60 truncate">{pinnedMsg.text}</p>
+            <p className="text-[13px] font-bold uppercase tracking-widest text-amber-400/70 mb-0.5">Fixado</p>
+            <p className="text-sm text-white truncate">{pinnedMsg.text}</p>
           </div>
-          <button onClick={() => onPin(null)} className="text-white/20 hover:text-white/50 shrink-0 mt-0.5 text-base leading-none">×</button>
+          <button onClick={() => onPin(null)} className="text-white hover:text-white shrink-0 mt-0.5 text-base leading-none">×</button>
         </div>
       )}
 
@@ -67,11 +67,11 @@ export function ChatPanel({ liveId, pinnedMsg, onPin, hostName }: Props) {
           return (
             <div key={msg.id} className="group">
               {msg.type === "hand_raise" ? (
-                <div className="flex items-center justify-between gap-2 px-3 py-2 bg-amber-500/8 border-l-2 border-amber-400/50 text-amber-300/80 text-xs my-2">
+                <div className="flex items-center justify-between gap-2 px-3 py-2 bg-amber-500/8 border-l-2 border-amber-400/50 text-amber-300/80 text-sm my-2">
                   <div className="flex items-center gap-2">
                     <Hand className="h-3.5 w-3.5 shrink-0" />
                     <span className="font-bold">{msg.displayName}</span>
-                    <span className="text-white/30">pediu a palavra</span>
+                    <span className="text-white">pediu a palavra</span>
                   </div>
                   <button
                     onClick={() => deleteDoc(doc(db, "lives", liveId, "chat", msg.id!))}
@@ -80,18 +80,18 @@ export function ChatPanel({ liveId, pinnedMsg, onPin, hostName }: Props) {
                   >×</button>
                 </div>
               ) : msg.type === "system" ? (
-                <div className="text-center text-[11px] text-white/20 py-2 italic">{msg.text}</div>
+                <div className="text-center text-[13px] text-white py-2 italic">{msg.text}</div>
               ) : (
                 <div className="flex gap-2 items-start hover:bg-white/[3%] px-2 py-1.5 -mx-2 transition-colors">
                   <Avatar name={msg.displayName || "?"} size={22} />
                   <div className="flex-1 min-w-0">
-                    <span className="text-[11px] font-bold text-white/50 mr-1.5">{msg.displayName}</span>
-                    <span className="text-sm text-white/80 break-words">{msg.text}</span>
+                    <span className="text-[13px] font-bold text-white mr-1.5">{msg.displayName}</span>
+                    <span className="text-sm text-white break-words">{msg.text}</span>
                   </div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
                     <button
                       onClick={() => onPin(pinnedMsg?.id === msg.id ? null : msg)}
-                      className="p-1 text-white/20 hover:text-amber-400 transition-colors shrink-0"
+                      className="p-1 text-white hover:text-amber-400 transition-colors shrink-0"
                       title="Fixar"
                     >📌</button>
                     <button
@@ -111,16 +111,16 @@ export function ChatPanel({ liveId, pinnedMsg, onPin, hostName }: Props) {
       </div>
 
       {/* Input */}
-      <div className="p-3 border-t border-white/8 shrink-0">
+      <div className="p-3 border-t border-white shrink-0">
         <form onSubmit={send} className="flex gap-2">
           <input
             type="text" value={text} onChange={e => setText(e.target.value)}
             placeholder="Escrever mensagem..."
-            className="flex-1 bg-white/5 border border-white/10 px-3 py-2 text-sm text-white placeholder-white/25 focus:outline-none focus:border-white/25 transition-colors"
+            className="flex-1 bg-white border border-white px-3 py-2 text-sm text-white placeholder-white/25 focus:outline-none focus:border-white transition-colors"
           />
           <button
             type="submit" disabled={!text.trim()}
-            className="flex items-center justify-center h-9 w-9 bg-white disabled:bg-white/10 disabled:text-white/20 text-black hover:bg-white/90 transition-colors"
+            className="flex items-center justify-center h-9 w-9 bg-white disabled:bg-white disabled:text-white text-black hover:bg-white transition-colors"
           >
             <Send className="h-4 w-4" />
           </button>

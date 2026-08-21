@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, GripVertical } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { generateQuestionId } from "@/lib/quiz";
 import type { ModuleQuizQuestion } from "@/types/quiz";
 
@@ -34,7 +34,7 @@ export default function QuizForm({ initialQuestions, initialPassingScore, initia
     setQuestions((prev) => prev.filter((q) => q.id !== id));
   };
 
-  const updateQuestion = (id: string, field: keyof ModuleQuizQuestion, value: any) => {
+  const updateQuestion = (id: string, field: keyof ModuleQuizQuestion, value: ModuleQuizQuestion[keyof ModuleQuizQuestion]) => {
     setQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, [field]: value } : q)));
   };
 
@@ -77,26 +77,26 @@ export default function QuizForm({ initialQuestions, initialPassingScore, initia
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Settings */}
-      <div className="bg-gray-900/40 border border-gray-800 p-5">
+      <div className="bg-gray-900 border border-gray-800 p-5">
         <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Configurações</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1.5">Nota mínima (%)</label>
             <input type="number" min={0} max={100} value={passingScore}
               onChange={(e) => setPassingScore(Number(e.target.value))}
-              className="w-full border border-gray-700 bg-gray-950/50 text-white px-3 py-2.5 text-sm focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple" />
+              className="w-full border border-gray-700 bg-gray-950 text-white px-3 py-2.5 text-sm focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1.5">Máximo de tentativas</label>
             <input type="number" min={1} max={10} value={maxAttempts}
               onChange={(e) => setMaxAttempts(Number(e.target.value))}
-              className="w-full border border-gray-700 bg-gray-950/50 text-white px-3 py-2.5 text-sm focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple" />
+              className="w-full border border-gray-700 bg-gray-950 text-white px-3 py-2.5 text-sm focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple" />
           </div>
         </div>
       </div>
 
       {/* Questions */}
-      <div className="bg-gray-900/40 border border-gray-800 p-5">
+      <div className="bg-gray-900 border border-gray-800 p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">
             Perguntas ({questions.length})
@@ -108,18 +108,18 @@ export default function QuizForm({ initialQuestions, initialPassingScore, initia
         </div>
 
         {questions.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-8">Nenhuma pergunta. Clique em "Adicionar Pergunta" para começar.</p>
+          <p className="text-sm text-gray-500 text-center py-8">Nenhuma pergunta. Clique em &quot;Adicionar Pergunta&quot; para começar.</p>
         ) : (
           <div className="space-y-4">
             {questions.map((q, qi) => (
-              <div key={q.id} className="bg-gray-950/30 border border-gray-800 p-4">
+              <div key={q.id} className="bg-gray-950 border border-gray-800 p-4">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <span className="text-sm font-bold text-purple-400 shrink-0">#{qi + 1}</span>
                     <input type="text" value={q.question}
                       onChange={(e) => updateQuestion(q.id, "question", e.target.value)}
                       placeholder="Escreva a pergunta..."
-                      className="flex-1 border border-gray-700 bg-gray-950/50 text-white px-3 py-2 text-sm focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple" />
+                      className="flex-1 border border-gray-700 bg-gray-950 text-white px-3 py-2 text-sm focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple" />
                   </div>
                   <button type="button" onClick={() => removeQuestion(q.id)}
                     className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0">
@@ -140,7 +140,7 @@ export default function QuizForm({ initialQuestions, initialPassingScore, initia
                         className={`flex-1 border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${
                           q.correctAnswer === oi
                             ? "border-green-700 bg-green-950/20 text-green-300 focus:border-green-500 focus:ring-green-500"
-                            : "border-gray-700 bg-gray-950/50 text-white focus:border-purple focus:ring-purple"
+                            : "border-gray-700 bg-gray-950 text-white focus:border-purple focus:ring-purple"
                         }`} />
                       {q.options.length > 2 && (
                         <button type="button" onClick={() => removeOption(q.id, oi)}
@@ -151,7 +151,7 @@ export default function QuizForm({ initialQuestions, initialPassingScore, initia
                     </div>
                   ))}
                   <button type="button" onClick={() => addOption(q.id)}
-                    className="text-xs text-gray-500 hover:text-purple-400 transition-colors ml-6 mt-1">
+                    className="text-sm text-gray-500 hover:text-purple-400 transition-colors ml-6 mt-1">
                     + Adicionar opção
                   </button>
                 </div>

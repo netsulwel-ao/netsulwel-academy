@@ -7,7 +7,7 @@ import { COURSE_TYPES, LEVELS, CATEGORIES, inputCls, selectCls } from "../_types
 // ── Shared UI atoms ───────────────────────────────────────────
 function FieldLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
-    <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600 mb-2">
+    <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-gray-600 mb-2">
       {children}{required && <span className="text-red-400/80 ml-1">*</span>}
     </p>
   );
@@ -80,7 +80,7 @@ export function FormLeftPanel({
   const isFree = courseType === "standalone" && (!price || parseFloat(price) <= 0);
 
   return (
-    <div className="w-full lg:w-[360px] shrink-0 border-b lg:border-b-0 lg:border-r border-gray-800/40 overflow-y-auto p-6 space-y-6">
+    <div className="w-full lg:w-[360px] shrink-0 border-b lg:border-b-0 lg:border-r border-gray-800 overflow-y-auto p-6 space-y-6">
 
       {/* Thumbnail */}
       <div>
@@ -89,16 +89,16 @@ export function FormLeftPanel({
           onClick={() => thumbInputRef.current?.click()}
           onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); thumbInputRef.current?.click(); } }}
           role="button" tabIndex={0} aria-label="Carregar capa do curso"
-          className="relative w-full aspect-video border border-dashed border-gray-800 bg-gray-900/40 hover:border-purple/30 cursor-pointer overflow-hidden group transition-colors"
+          className="relative w-full aspect-video border border-dashed border-gray-800 bg-gray-900 hover:border-purple/30 cursor-pointer overflow-hidden group transition-colors"
         >
           {thumbnailPreview ? (
             <>
               <img src={thumbnailPreview} alt="preview" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gray-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div className="absolute inset-0 bg-gray-950 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <ImagePlus className="h-6 w-6 text-white" />
               </div>
               {thumbnailUploading && (
-                <div className="absolute inset-0 bg-gray-950/70 flex items-center justify-center">
+                <div className="absolute inset-0 bg-gray-950 flex items-center justify-center">
                   <Loader2 className="h-6 w-6 animate-spin text-purple/70" />
                 </div>
               )}
@@ -106,18 +106,18 @@ export function FormLeftPanel({
           ) : (
             <div className="flex flex-col items-center justify-center h-full gap-2 text-gray-700 group-hover:text-gray-500 transition-colors">
               <ImagePlus className="h-8 w-8" strokeWidth={1} />
-              <p className="font-mono text-[9px] uppercase tracking-widest">PNG · JPG · WEBP</p>
+              <p className="font-mono text-[13px] uppercase tracking-widest">PNG · JPG · WEBP</p>
             </div>
           )}
         </div>
         <input ref={thumbInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={onThumbnailChange} />
         {thumbnailUploading && (
-          <p className="mt-1.5 font-mono text-[9px] text-gray-600 flex items-center gap-1">
+          <p className="mt-1.5 font-mono text-[13px] text-gray-600 flex items-center gap-1">
             <Loader2 className="h-2.5 w-2.5 animate-spin" /> A enviar...
           </p>
         )}
         {thumbnail && !thumbnailUploading && (
-          <p className="mt-1.5 font-mono text-[9px] text-green/60 flex items-center gap-1">
+          <p className="mt-1.5 font-mono text-[13px] text-green/60 flex items-center gap-1">
             <CheckCircle2 className="h-2.5 w-2.5" /> Upload concluído
           </p>
         )}
@@ -140,7 +140,7 @@ export function FormLeftPanel({
           <button
             type="button" onClick={onGenerateDesc}
             disabled={generatingDesc || !title.trim()}
-            className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-purple/60 hover:text-purple/80 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-1 font-mono text-[13px] uppercase tracking-widest text-purple/60 hover:text-purple/80 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             {generatingDesc ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Sparkles className="h-2.5 w-2.5" />}
             {generatingDesc ? "A gerar..." : "IA"}
@@ -153,8 +153,8 @@ export function FormLeftPanel({
             className={`${inputCls} resize-none`}
           />
           {generatingDesc && (
-            <div className="absolute inset-0 bg-gray-900/70 flex items-center justify-center">
-              <div className="flex items-center gap-1.5 text-purple/70 font-mono text-[10px]">
+            <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
+              <div className="flex items-center gap-1.5 text-purple/70 font-mono text-[13px]">
                 <Sparkles className="h-3 w-3 animate-pulse" /> A gerar...
               </div>
             </div>
@@ -173,13 +173,13 @@ export function FormLeftPanel({
               className={`w-full flex items-center gap-3 border px-3 py-2.5 text-left transition-all ${
                 courseType === t.value
                   ? "border-purple/30 bg-purple/8"
-                  : "border-gray-800/60 bg-gray-900/20 hover:border-gray-700"
+                  : "border-gray-800 bg-gray-900 hover:border-gray-700"
               }`}
             >
               <span className={`h-2 w-2 shrink-0 border ${courseType === t.value ? "bg-purple/70 border-purple/50" : "border-gray-700"}`} />
               <div>
                 <p className={`text-sm font-semibold ${courseType === t.value ? "text-purple/90" : "text-gray-400"}`}>{t.label}</p>
-                <p className="font-mono text-[9px] text-gray-700">{t.desc}</p>
+                <p className="font-mono text-[13px] text-gray-700">{t.desc}</p>
               </div>
             </button>
           ))}
@@ -198,7 +198,7 @@ export function FormLeftPanel({
                   ? val === "live"
                     ? "border-red-500/30 bg-red-500/8 text-red-400/80"
                     : "border-purple/30 bg-purple/8 text-purple/80"
-                  : "border-gray-800/60 bg-gray-900/20 text-gray-600 hover:border-gray-700"
+                  : "border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700"
               }`}
             >
               <Icon className="h-3.5 w-3.5" strokeWidth={1.5} /> {lbl}
@@ -212,7 +212,7 @@ export function FormLeftPanel({
         <div>
           <FieldLabel>Preço (Kz)</FieldLabel>
           <div className="relative">
-            <span className="absolute left-3 top-2.5 font-mono text-[10px] text-gray-600">Kz</span>
+            <span className="absolute left-3 top-2.5 font-mono text-[13px] text-gray-600">Kz</span>
             <input
               type="number" min="0" value={price} onChange={e => setPrice(e.target.value)}
               placeholder="0 = Gratuito"
@@ -226,7 +226,7 @@ export function FormLeftPanel({
       {isFree && (
         <div>
           <FieldLabel>Código de Acesso</FieldLabel>
-          <p className="font-mono text-[9px] text-gray-700 mb-2">Opcional — os alunos precisam deste código para entrar.</p>
+          <p className="font-mono text-[13px] text-gray-700 mb-2">Opcional — os alunos precisam deste código para entrar.</p>
           <div className="flex items-center gap-1.5">
             <input
               type="text" value={accessCode}
@@ -236,7 +236,7 @@ export function FormLeftPanel({
             />
             <button
               type="button" onClick={onGenerateCode}
-              className="border border-gray-800/60 bg-gray-900/40 px-3 py-2.5 font-mono text-[9px] uppercase tracking-widest text-gray-600 hover:text-gray-300 hover:border-gray-600 transition-all whitespace-nowrap"
+              className="border border-gray-800 bg-gray-900 px-3 py-2.5 font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:text-gray-300 hover:border-gray-600 transition-all whitespace-nowrap"
             >
               Gerar
             </button>
@@ -262,22 +262,22 @@ export function FormLeftPanel({
 
       {/* Certificado + Destaque */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between border border-gray-800/40 bg-gray-900/10 px-4 py-3">
+        <div className="flex items-center justify-between border border-gray-800 bg-gray-900 px-4 py-3">
           <div className="flex items-center gap-2.5">
             <Award className={`h-4 w-4 shrink-0 ${hasCertificate ? "text-amber-400/70" : "text-gray-700"}`} strokeWidth={1.5} />
             <div>
               <p className="text-sm text-gray-300">Certificado</p>
-              <p className="font-mono text-[9px] text-gray-700">Gerado ao completar 100%</p>
+              <p className="font-mono text-[13px] text-gray-700">Gerado ao completar 100%</p>
             </div>
           </div>
           <Toggle checked={hasCertificate} onChange={() => setHasCertificate(!hasCertificate)} label="Activar certificado" />
         </div>
-        <div className="flex items-center justify-between border border-gray-800/40 bg-gray-900/10 px-4 py-3">
+        <div className="flex items-center justify-between border border-gray-800 bg-gray-900 px-4 py-3">
           <div className="flex items-center gap-2.5">
             <Sparkles className={`h-4 w-4 shrink-0 ${featured ? "text-purple/70" : "text-gray-700"}`} strokeWidth={1.5} />
             <div>
               <p className="text-sm text-gray-300">Destaque</p>
-              <p className="font-mono text-[9px] text-gray-700">Aparece na landing page</p>
+              <p className="font-mono text-[13px] text-gray-700">Aparece na landing page</p>
             </div>
           </div>
           <Toggle checked={featured} onChange={() => setFeatured(!featured)} label="Destacar na landing page" />
@@ -316,7 +316,7 @@ export function FormLeftPanel({
           </div>
           <button
             type="button" onClick={onAddTag}
-            className="border border-gray-800/60 bg-gray-900/40 px-3 text-gray-600 hover:text-gray-300 hover:border-gray-600 transition-all"
+            className="border border-gray-800 bg-gray-900 px-3 text-gray-600 hover:text-gray-300 hover:border-gray-600 transition-all"
           >
             <Plus className="h-3.5 w-3.5" />
           </button>
@@ -324,7 +324,7 @@ export function FormLeftPanel({
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {tags.map(t => (
-              <span key={t} className="flex items-center gap-1 border border-purple/20 bg-purple/8 px-2 py-0.5 font-mono text-[9px] text-purple/70">
+              <span key={t} className="flex items-center gap-1 border border-purple/20 bg-purple/8 px-2 py-0.5 font-mono text-[13px] text-purple/70">
                 {t}
                 <button type="button" onClick={() => onRemoveTag(t)} aria-label={`Remover tag ${t}`}>
                   <X className="h-2.5 w-2.5 hover:text-white transition-colors" />
@@ -336,8 +336,8 @@ export function FormLeftPanel({
       </div>
 
       {/* Resumo */}
-      <div className="border border-gray-800/40 bg-gray-900/10 p-4 space-y-2">
-        <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-700 mb-3">// resumo</p>
+      <div className="border border-gray-800 bg-gray-900 p-4 space-y-2">
+        <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-gray-700 mb-3">// resumo</p>
         {[
           ["Módulos",     String(modulesCount)],
           ["Aulas",       String(lessonsCount)],
@@ -348,8 +348,8 @@ export function FormLeftPanel({
           ["Destaque",    featured ? "Sim" : "Não"],
         ].map(([k, v]) => (
           <div key={k} className="flex items-center justify-between">
-            <span className="text-xs text-gray-600">{k}</span>
-            <span className="font-mono text-xs text-gray-300">{v}</span>
+            <span className="text-sm text-gray-600">{k}</span>
+            <span className="font-mono text-sm text-gray-300">{v}</span>
           </div>
         ))}
       </div>

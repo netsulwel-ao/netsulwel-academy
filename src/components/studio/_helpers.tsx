@@ -21,7 +21,7 @@ export function Avatar({ name, size = 28 }: { name: string; size?: number }) {
   return (
     <div
       style={{ width: size, height: size, minWidth: size, background: avatarColor(name), fontSize: size * 0.36 }}
-      className="flex items-center justify-center font-semibold text-white/90 shrink-0"
+      className="flex items-center justify-center font-semibold text-white shrink-0"
     >
       {initial(name)}
     </div>
@@ -64,16 +64,16 @@ export function ElapsedTimer({ since }: { since: string }) {
     const t = setInterval(tick, 1000);
     return () => clearInterval(t);
   }, [since]);
-  return <span className="font-mono tabular-nums text-white/80 text-xs tracking-widest">{elapsed}</span>;
+  return <span className="font-mono tabular-nums text-white text-sm tracking-widest">{elapsed}</span>;
 }
 
 // ── SectionLabel ──────────────────────────────────────────────
 export function SectionLabel({ children, count }: { children: React.ReactNode; count?: number }) {
   return (
-    <div className="flex items-center justify-between px-4 py-2 border-b border-white/5">
-      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/30">{children}</span>
+    <div className="flex items-center justify-between px-4 py-2 border-b border-white">
+      <span className="text-[13px] font-bold uppercase tracking-[0.12em] text-white">{children}</span>
       {count !== undefined && (
-        <span className="text-[10px] font-bold text-white/30">{count}</span>
+        <span className="text-[13px] font-bold text-white">{count}</span>
       )}
     </div>
   );
@@ -83,8 +83,8 @@ export function SectionLabel({ children, count }: { children: React.ReactNode; c
 export function EmptyState({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-12 px-6 text-center">
-      <span className="text-white/15 text-3xl">{icon}</span>
-      <p className="text-xs text-white/25 leading-relaxed">{text}</p>
+      <span className="text-white text-3xl">{icon}</span>
+      <p className="text-sm text-white leading-relaxed">{text}</p>
     </div>
   );
 }

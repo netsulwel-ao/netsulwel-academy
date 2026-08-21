@@ -1,5 +1,6 @@
+"use client";
+
 import {
-  Route,
   FolderCode,
   Users,
   Video,
@@ -7,6 +8,8 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
+import { motion } from "framer-motion";
+import { Reveal } from "./motion/Reveal";
 
 const features: {
   icon: LucideIcon;
@@ -15,10 +18,10 @@ const features: {
   tag: string;
 }[] = [
   {
-    icon: Route,
-    title: "Trilhas guiadas",
-    description: "Percursos do básico ao avançado com checkpoints e projetos para consolidar cada etapa.",
-    tag: "estrutura",
+    icon: Zap,
+    title: "Aprendizado contínuo",
+    description: "Conteúdo sempre atualizado com as tendências mais recentes do mercado.",
+    tag: "atualização",
   },
   {
     icon: FolderCode,
@@ -61,8 +64,9 @@ export function Features() {
         <div className="grid grid-cols-1 gap-16 lg:grid-cols-[280px_1fr] lg:gap-24 items-start">
 
           {/* Coluna sticky — título */}
+          <Reveal x={-24} y={0}>
           <div className="lg:sticky lg:top-32">
-            <p className="font-mono text-xs font-bold uppercase tracking-[0.25em] text-purple-light mb-4">
+            <p className="font-mono text-sm font-bold uppercase tracking-[0.25em] text-purple-light mb-4">
               por que netsulwel
             </p>
             <h2 className="text-3xl font-extrabold leading-tight text-gray-100 md:text-4xl">
@@ -76,37 +80,52 @@ export function Features() {
               com suporte real e uma comunidade que não te
               deixa desistir.
             </p>
-            <div className="mt-8 h-px w-12 bg-purple/50" />
+            <motion.div
+              className="mt-8 h-px w-12 bg-purple/50"
+              initial={{ width: 0 }}
+              whileInView={{ width: 48 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+            />
           </div>
+          </Reveal>
 
           {/* Coluna direita — lista de features estilo manifesto */}
-          <div className="space-y-0 divide-y divide-gray-800/60">
+          <div className="space-y-0 divide-y divide-gray-800">
             {features.map((feature, i) => (
-              <div
+              <motion.div
                 key={feature.title}
-                className="group flex items-start gap-6 py-6 transition-colors hover:bg-gray-900/30 px-2 -mx-2"
+                className="group flex items-start gap-6 py-6 transition-colors hover:bg-gray-900 px-2 -mx-2"
+                initial={{ opacity: 0, x: 40, filter: "blur(6px)" }}
+                whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.55, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
               >
                 {/* Número */}
-                <span className="mt-0.5 min-w-[2rem] font-mono text-xs text-gray-700 group-hover:text-purple-light/50 transition-colors">
+                <span className="mt-0.5 min-w-[2rem] font-mono text-sm text-gray-700 group-hover:text-purple-light/50 transition-colors">
                   {String(i + 1).padStart(2, "0")}
                 </span>
 
                 {/* Ícone */}
-                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center border border-gray-800 bg-gray-900 text-gray-500 group-hover:border-purple/40 group-hover:text-purple-light transition-all">
+                <motion.div
+                  className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center border border-gray-800 bg-gray-900 text-gray-500 transition-all group-hover:border-purple/40 group-hover:text-purple-light"
+                  whileHover={{ scale: 1.1, rotate: 6 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                >
                   <feature.icon className="h-4 w-4" strokeWidth={1.75} />
-                </div>
+                </motion.div>
 
                 {/* Conteúdo */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3">
                     <h3 className="text-base font-semibold text-gray-100">{feature.title}</h3>
-                    <span className="hidden sm:inline-block px-2 py-0.5 font-mono text-[10px] text-gray-600 border border-gray-800">
+                    <span className="hidden sm:inline-block px-2 py-0.5 font-mono text-[13px] text-gray-600 border border-gray-800">
                       {feature.tag}
                     </span>
                   </div>
                   <p className="mt-1 text-sm text-gray-500 leading-relaxed">{feature.description}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

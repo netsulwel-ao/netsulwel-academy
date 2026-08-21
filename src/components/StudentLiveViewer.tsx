@@ -61,37 +61,37 @@ function StudentChat({ liveId }: { liveId: string }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#0e0e11] border border-white/8 rounded-lg overflow-hidden">
+    <div className="flex flex-col h-full bg-[#0e0e11] border border-white rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="px-3 sm:px-4 py-2.5 border-b border-white/8 flex items-center gap-2">
-        <MessageSquare className="h-4 w-4 text-white/60" />
-        <span className="text-xs sm:text-sm font-semibold text-white/80">Chat Ao Vivo</span>
+      <div className="px-3 sm:px-4 py-2.5 border-b border-white flex items-center gap-2">
+        <MessageSquare className="h-4 w-4 text-white" />
+        <span className="text-sm sm:text-sm font-semibold text-white">Chat Ao Vivo</span>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-2 sm:px-3 py-3 space-y-2">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-2 text-center">
-            <MessageSquare className="h-8 w-8 text-white/10" />
-            <p className="text-xs text-white/20">Nenhuma mensagem ainda</p>
+            <MessageSquare className="h-8 w-8 text-white" />
+            <p className="text-sm text-white">Nenhuma mensagem ainda</p>
           </div>
         ) : (
           messages.map((msg) => (
-            <div key={msg.id} className="text-xs">
+            <div key={msg.id} className="text-sm">
               {msg.type === "hand_raise" ? (
                 <div className="flex items-center gap-2 px-2 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded">
                   <Hand className="h-3 w-3 text-amber-400 shrink-0" />
                   <span className="font-bold text-amber-300">{msg.displayName}</span>
-                  <span className="text-white/40">pediu a palavra</span>
+                  <span className="text-white">pediu a palavra</span>
                 </div>
               ) : msg.type === "system" ? (
-                <div className="text-center text-white/20 italic py-1">{msg.text}</div>
+                <div className="text-center text-white italic py-1">{msg.text}</div>
               ) : (
                 <div className="flex gap-2">
-                  <span className="font-semibold text-white/60 shrink-0 line-clamp-1">
+                  <span className="font-semibold text-white shrink-0 line-clamp-1">
                     {msg.displayName}
                   </span>
-                  <span className="text-white/70 break-words flex-1">{msg.text}</span>
+                  <span className="text-white break-words flex-1">{msg.text}</span>
                 </div>
               )}
             </div>
@@ -101,19 +101,19 @@ function StudentChat({ liveId }: { liveId: string }) {
       </div>
 
       {/* Input */}
-      <form onSubmit={send} className="px-3 sm:px-4 py-3 border-t border-white/8 flex gap-2">
+      <form onSubmit={send} className="px-3 sm:px-4 py-3 border-t border-white flex gap-2">
         <input
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Escrever mensagem..."
           disabled={loading}
-          className="flex-1 bg-white/5 border border-white/10 px-2.5 py-1.5 text-xs sm:text-sm text-white placeholder-white/25 rounded focus:outline-none focus:border-white/25 transition-colors disabled:opacity-50"
+          className="flex-1 bg-white border border-white px-2.5 py-1.5 text-sm sm:text-sm text-white placeholder-white/25 rounded focus:outline-none focus:border-white transition-colors disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={!text.trim() || loading}
-          className="flex items-center justify-center h-8 w-8 bg-blue-600 hover:bg-blue-700 disabled:bg-white/10 disabled:text-white/20 text-white rounded transition-colors disabled:cursor-not-allowed"
+          className="flex items-center justify-center h-8 w-8 bg-blue-600 hover:bg-blue-700 disabled:bg-white disabled:text-white text-white rounded transition-colors disabled:cursor-not-allowed"
           title="Enviar"
         >
           {loading ? (
@@ -160,7 +160,7 @@ function HandRaiseButton({ liveId }: { liveId: string }) {
     <button
       onClick={raiseHand}
       disabled={loading}
-      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 disabled:bg-white/10 text-white font-semibold text-xs sm:text-sm rounded transition-colors disabled:cursor-not-allowed"
+      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 disabled:bg-white text-white font-semibold text-sm sm:text-sm rounded transition-colors disabled:cursor-not-allowed"
     >
       {loading ? (
         <>
@@ -189,29 +189,29 @@ export function StudentLiveViewer({
   return (
     <div className="flex flex-col md:flex-row h-screen bg-[#0a0a0c] gap-0 md:gap-3 p-0 md:p-3">
       {/* Video Area */}
-      <div className="flex-1 flex flex-col min-h-0 md:rounded-lg overflow-hidden bg-black border-0 md:border border-white/8">
+      <div className="flex-1 flex flex-col min-h-0 md:rounded-lg overflow-hidden bg-black border-0 md:border border-white">
         {/* Header */}
-        <div className="h-10 md:h-11 bg-[#0e0e11] border-b border-white/8 px-3 sm:px-4 py-2 flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="h-10 md:h-11 bg-[#0e0e11] border-b border-white px-3 sm:px-4 py-2 flex items-center gap-2 sm:gap-3 shrink-0">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <Radio className="h-3.5 w-3.5 text-white/30 shrink-0" />
-            <span className="text-xs sm:text-sm font-semibold text-white/80 truncate">
+            <Radio className="h-3.5 w-3.5 text-white shrink-0" />
+            <span className="text-sm sm:text-sm font-semibold text-white truncate">
               {live.title}
             </span>
           </div>
 
           <div className="hidden sm:flex items-center gap-1 bg-red-600/15 border border-red-500/20 px-2 py-0.5 rounded shrink-0">
             <span className="w-1.5 h-1.5 bg-red-500 animate-pulse" />
-            <span className="text-[11px] font-bold text-red-400">AO VIVO</span>
+            <span className="text-[13px] font-bold text-red-400">AO VIVO</span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-white/40 text-xs">
+          <div className="flex items-center gap-1.5 text-white text-sm">
             <Users className="h-3.5 w-3.5 shrink-0" />
             <span>{participantCount}</span>
           </div>
 
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="md:hidden p-1.5 text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded transition-colors"
+            className="md:hidden p-1.5 text-white hover:text-white bg-white hover:bg-white rounded transition-colors"
           >
             {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
@@ -223,11 +223,11 @@ export function StudentLiveViewer({
         </div>
 
         {/* Actions - Bottom on Mobile */}
-        <div className="md:hidden px-3 py-2 space-y-2 bg-[#0e0e11] border-t border-white/8 shrink-0">
+        <div className="md:hidden px-3 py-2 space-y-2 bg-[#0e0e11] border-t border-white shrink-0">
           <HandRaiseButton liveId={live.id!} />
           <button
             onClick={() => setShowChat(!showChat)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded transition-colors"
           >
             <MessageSquare className="h-4 w-4" />
             {showChat ? "Fechar Chat" : "Abrir Chat"}
@@ -240,7 +240,7 @@ export function StudentLiveViewer({
         className={`
           fixed md:relative bottom-0 left-0 right-0 md:static
           bg-[#0a0a0c] md:bg-transparent
-          border-t md:border-0 border-white/8
+          border-t md:border-0 border-white
           h-[40vh] md:h-full
           transition-all duration-300
           ${sidebarOpen ? "translate-y-0" : "translate-y-full md:translate-y-0"}
@@ -252,23 +252,23 @@ export function StudentLiveViewer({
         `}
       >
         {/* Tabs - Mobile Only */}
-        <div className="md:hidden flex border-b border-white/8 shrink-0">
+        <div className="md:hidden flex border-b border-white shrink-0">
           <button
             onClick={() => setShowChat(true)}
-            className={`flex-1 py-2 text-xs font-semibold transition-colors ${
+            className={`flex-1 py-2 text-sm font-semibold transition-colors ${
               showChat
                 ? "text-white border-b-2 border-white bg-white/[3%]"
-                : "text-white/40 hover:text-white/60"
+                : "text-white hover:text-white"
             }`}
           >
             Chat
           </button>
           <button
             onClick={() => setShowChat(false)}
-            className={`flex-1 py-2 text-xs font-semibold transition-colors ${
+            className={`flex-1 py-2 text-sm font-semibold transition-colors ${
               !showChat
                 ? "text-white border-b-2 border-white bg-white/[3%]"
-                : "text-white/40 hover:text-white/60"
+                : "text-white hover:text-white"
             }`}
           >
             Informações
@@ -283,20 +283,20 @@ export function StudentLiveViewer({
             <div className="p-3 sm:p-4 space-y-4 overflow-y-auto h-full">
               {/* Live Info */}
               <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-wider text-white/30">
+                <p className="text-sm font-semibold uppercase tracking-wider text-white">
                   Informações
                 </p>
-                <p className="text-sm text-white/70 leading-relaxed">
+                <p className="text-sm text-white leading-relaxed">
                   {live.description}
                 </p>
               </div>
 
               {/* Participants */}
-              <div className="pt-2 border-t border-white/8 space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-wider text-white/30">
+              <div className="pt-2 border-t border-white space-y-2">
+                <p className="text-sm font-semibold uppercase tracking-wider text-white">
                   Conectados
                 </p>
-                <p className="text-sm font-mono text-white/60">
+                <p className="text-sm font-mono text-white">
                   {participantCount} participante{participantCount !== 1 ? "s" : ""}
                 </p>
               </div>
@@ -305,7 +305,7 @@ export function StudentLiveViewer({
         </div>
 
         {/* Hidden on mobile, shown on desktop */}
-        <div className="hidden md:flex flex-col gap-2 p-4 border-t border-white/8 bg-[#0e0e11] shrink-0">
+        <div className="hidden md:flex flex-col gap-2 p-4 border-t border-white bg-[#0e0e11] shrink-0">
           <HandRaiseButton liveId={live.id!} />
         </div>
       </div>

@@ -3,7 +3,7 @@ import { getFirebaseAdmin } from "@/lib/firebase-admin";
 import { verifyAuth } from "@/lib/api-auth";
 
 interface PurchaseBody {
-  type: "standalone" | "smart" | "golden" | "live";
+  type: "standalone" | "live";
   itemId?: string;
   paymentMethod: string;
   receiptUrl?: string;
@@ -79,14 +79,6 @@ export async function POST(req: NextRequest) {
       itemTitle = live.title;
       sellerId = live.createdBy;
       feePercentage = live.feePercentage;
-    } else if (type === "smart" || type === "golden") {
-      const settingsSnap = await db.collection("settings").doc("platform").get();
-      if (!settingsSnap.exists) {
-        return NextResponse.json({ error: "Configurações da plataforma não encontradas." }, { status: 500 });
-      }
-      const settings = settingsSnap.data()!;
-      amount = settings.plans?.[type]?.price ?? 0;
-      itemTitle = settings.plans?.[type]?.label || type;
     }
 
     // Fetch seller name if we have a sellerId
@@ -169,8 +161,6 @@ export async function POST(req: NextRequest) {
         }
       } else if (type === "live" && itemId) {
         await userRef.update({ enrolledLives: admin.firestore.FieldValue.arrayUnion(itemId) });
-      } else if (type === "smart" || type === "golden") {
-        await userRef.update({ plan: type });
       }
     }
 

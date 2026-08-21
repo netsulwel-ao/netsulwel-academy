@@ -9,10 +9,12 @@ import { Teachers } from "@/components/Teachers";
 import { FAQ } from "@/components/FAQ";
 import { CTA } from "@/components/CTA";
 import { Footer } from "@/components/Footer";
+import { PageTransition } from "@/components/PageTransition";
 
 export default function Home() {
   return (
-    <>
+    <PageTransition type="default" preserveScroll>
+      <div className="h-screen overflow-y-auto">
       <Header />
       <main>
         {/* 1. Hook — quem és e o que fazes */}
@@ -43,6 +45,7 @@ export default function Home() {
         <CTA />
       </main>
       <Footer />
-    </>
+      </div>
+    </PageTransition>
   );
 }

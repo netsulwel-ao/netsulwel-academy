@@ -13,7 +13,7 @@ interface Props {
   onEnd: () => void;
 }
 
-export function ControlsBar({ live, onEnd }: Props) {
+export function ControlsBar({ onEnd }: Props) {
   const { localParticipant } = useLocalParticipant();
   const [showConfirm, setShowConfirm] = useState(false);
   const [fullscreen,  setFullscreen]  = useState(false);
@@ -37,14 +37,14 @@ export function ControlsBar({ live, onEnd }: Props) {
   };
 
   const btnBase = "flex flex-col items-center justify-center gap-0.5 sm:gap-1 h-12 sm:h-14 w-12 sm:w-fit sm:min-w-[64px] sm:px-1 px-0 transition-colors select-none";
-  const btnText = "hidden sm:inline text-[10px] font-medium tracking-wide leading-none";
-  const btnDefault = "text-white/70 hover:text-white hover:bg-white/8";
+  const btnText = "hidden sm:inline text-[13px] font-medium tracking-wide leading-none";
+  const btnDefault = "text-white hover:text-white hover:bg-white";
   const btnOff     = "text-red-400 bg-red-500/10 hover:bg-red-500/20";
   const btnActive  = "text-blue-300 bg-blue-500/15 hover:bg-blue-500/25";
 
   return (
     <>
-      <div className="h-14 sm:h-16 bg-[#0e0e11] border-t border-white/8 flex items-center px-2 sm:px-4 gap-1 sm:gap-2 shrink-0 overflow-x-auto">
+      <div className="h-14 sm:h-16 bg-[#0e0e11] border-t border-white flex items-center px-2 sm:px-4 gap-1 sm:gap-2 shrink-0 overflow-x-auto">
         <div className="flex-1" />
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
 
@@ -66,7 +66,7 @@ export function ControlsBar({ live, onEnd }: Props) {
             <span className={btnText}>Cam</span>
           </button>
 
-          <div className="w-px h-8 bg-white/8 mx-1 sm:mx-2 hidden sm:block" />
+          <div className="w-px h-8 bg-white mx-1 sm:mx-2 hidden sm:block" />
 
           <button
             onClick={() => localParticipant?.setScreenShareEnabled(!isScreenOn)}
@@ -77,7 +77,7 @@ export function ControlsBar({ live, onEnd }: Props) {
             <span className={btnText}>Partilha</span>
           </button>
 
-          <div className="w-px h-8 bg-white/8 mx-1 sm:mx-2 hidden sm:block" />
+          <div className="w-px h-8 bg-white mx-1 sm:mx-2 hidden sm:block" />
 
           {/* Mute all — TODO */}
           <button className={`${btnBase} ${btnDefault} opacity-40 cursor-not-allowed`} title="Silenciar todos (em desenvolvimento)">
@@ -98,7 +98,7 @@ export function ControlsBar({ live, onEnd }: Props) {
         <div className="flex-1 flex justify-end">
           <button
             onClick={() => setShowConfirm(true)}
-            className="flex items-center gap-1 sm:gap-2 h-10 px-3 sm:px-5 bg-red-700 hover:bg-red-600 text-white font-bold text-xs sm:text-sm transition-colors whitespace-nowrap"
+            className="flex items-center gap-1 sm:gap-2 h-10 px-3 sm:px-5 bg-red-700 hover:bg-red-600 text-white font-bold text-sm sm:text-sm transition-colors whitespace-nowrap"
           >
             <PhoneOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Encerrar</span>
@@ -109,19 +109,19 @@ export function ControlsBar({ live, onEnd }: Props) {
       {/* End confirm dialog */}
       {showConfirm && (
         <>
-          <div className="fixed inset-0 z-50 bg-black/75" onClick={() => setShowConfirm(false)} />
+          <div className="fixed inset-0 z-50 bg-black" onClick={() => setShowConfirm(false)} />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div
               role="dialog" aria-modal="true"
               aria-labelledby="end-title" aria-describedby="end-desc"
-              className="bg-[#111114] border border-white/10 p-6 sm:p-8 max-w-sm w-full space-y-5"
+              className="bg-[#111114] border border-white p-6 sm:p-8 max-w-sm w-full space-y-5"
               onKeyDown={e => { if (e.key === "Escape") setShowConfirm(false); }}
             >
               <div className="flex items-start gap-3">
                 <AlertTriangle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
                 <div>
                   <h3 id="end-title" className="text-base font-bold text-white">Encerrar aula?</h3>
-                  <p id="end-desc" className="text-xs sm:text-sm text-white/40 mt-1">
+                  <p id="end-desc" className="text-sm sm:text-sm text-white mt-1">
                     Todos os participantes serão desconectados imediatamente.
                   </p>
                 </div>
@@ -129,13 +129,13 @@ export function ControlsBar({ live, onEnd }: Props) {
               <div className="flex gap-2 sm:gap-3">
                 <button
                   onClick={() => setShowConfirm(false)}
-                  className="flex-1 py-2.5 text-xs sm:text-sm font-medium text-white/50 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
+                  className="flex-1 py-2.5 text-sm sm:text-sm font-medium text-white hover:text-white bg-white hover:bg-white transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={() => { setShowConfirm(false); onEnd(); }}
-                  className="flex-1 py-2.5 text-xs sm:text-sm font-bold text-white bg-red-700 hover:bg-red-600 transition-colors"
+                  className="flex-1 py-2.5 text-sm sm:text-sm font-bold text-white bg-red-700 hover:bg-red-600 transition-colors"
                 >
                   Sim, encerrar
                 </button>

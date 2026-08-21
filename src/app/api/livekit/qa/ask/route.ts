@@ -106,10 +106,11 @@ async function notifyTeacher(
     if (teacherId) {
       await admin
         .firestore()
+        .collection("users")
+        .doc(teacherId)
         .collection("notifications")
         .add({
-          userId: teacherId,
-          liveId,
+          uid: teacherId,
           type: "new_question",
           title: "Nova Pergunta",
           message: `${askerName}: "${question.substring(0, 100)}..."`,

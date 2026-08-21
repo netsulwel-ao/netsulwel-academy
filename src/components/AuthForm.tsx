@@ -36,7 +36,7 @@ export default function AuthForm({
             placeholder="email@exemplo.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50"
+            className="block w-full border border-gray-700 bg-gray-950 py-3 pl-10 pr-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50"
           />
         </div>
       </div>
@@ -56,7 +56,7 @@ export default function AuthForm({
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="block w-full border border-gray-700 bg-gray-950/50 py-3 pl-10 pr-10 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50"
+              className="block w-full border border-gray-700 bg-gray-950 py-3 pl-10 pr-10 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple disabled:opacity-50"
             />
             <button
               type="button"

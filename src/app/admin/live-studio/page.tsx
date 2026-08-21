@@ -95,8 +95,8 @@ function BroadcastChat({ roomName }: { roomName: string }) {
           <p className="text-sm text-gray-600 text-center py-8">Sem mensagens ainda.</p>
         )}
         {messages.map((msg) => (
-          <div key={msg.id} className="flex gap-2 items-start hover:bg-white/5 px-1 py-0.5 -mx-1">
-              <div className="w-6 h-6 bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shrink-0 text-[9px] font-bold text-white mt-0.5">
+          <div key={msg.id} className="flex gap-2 items-start hover:bg-white px-1 py-0.5 -mx-1">
+              <div className="w-6 h-6 bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shrink-0 text-[13px] font-bold text-white mt-0.5">
               {msg.displayName?.[0]?.toUpperCase() || "?"}
             </div>
             <div className="flex-1 min-w-0">
@@ -179,7 +179,7 @@ function BroadcastInterior({ roomName, backUrl }: { roomName: string; backUrl: s
 
       {/* Confirm modal */}
       {showConfirm && (
-        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black flex items-center justify-center p-4">
           <div className="bg-gray-900 border border-gray-700 p-6 max-w-sm w-full space-y-4"
             role="dialog" aria-modal="true" aria-labelledby="end-live-title" aria-describedby="end-live-desc"
             onKeyDown={(e) => { if (e.key === "Escape") setShowConfirm(false); }}>

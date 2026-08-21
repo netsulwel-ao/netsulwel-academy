@@ -66,14 +66,14 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
 
     if (as === "link" && href) {
       return (
-        <Link href={href} className={baseClasses} ref={ref as any}>
+        <Link href={href} className={baseClasses} ref={ref as React.RefObject<HTMLAnchorElement>}>
           {content}
         </Link>
       );
     }
 
     return (
-      <button className={baseClasses} disabled={disabled || isLoading} {...props} ref={ref as any}>
+      <button className={baseClasses} disabled={disabled || isLoading} {...props} ref={ref as React.RefObject<HTMLButtonElement>}>
         {content}
       </button>
     );

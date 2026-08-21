@@ -27,7 +27,7 @@ const VARIANT_MAP: Record<CountdownVariant, React.ComponentType<VariantProps>> =
 };
 
 export default function CountdownBanner() {
-  const { user, plan } = useAuth();
+  const { user } = useAuth();
   const [banners, setBanners] = useState<CountdownBannerType[]>([]);
   const [dismissed, setDismissed] = useState<string[]>([]);
 
@@ -43,11 +43,7 @@ export default function CountdownBanner() {
           .map((d) => ({ id: d.id, ...d.data() } as CountdownBannerType))
           .filter((b) => {
             if (new Date(b.endsAt) <= now) return false;
-            const targets: AnnouncementTarget[] = ["all"];
-            if (plan === "smart") targets.push("smart");
-            if (plan === "golden") targets.push("smart", "golden");
-            if (plan === "free") targets.push("free");
-            return targets.includes(b.target);
+            return true;
           });
         setBanners(all);
       } catch (err) {
@@ -55,7 +51,7 @@ export default function CountdownBanner() {
       }
     };
     fetch();
-  }, [plan]);
+  }, [user?.uid]);
 
   const visible = banners.filter((b) => !dismissed.includes(b.id!));
   if (visible.length === 0) return null;

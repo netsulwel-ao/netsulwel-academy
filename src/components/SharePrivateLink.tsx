@@ -78,7 +78,7 @@ export function SharePrivateLink({ courseId, liveId, title }: SharePrivateLinkPr
       {/* Modal Dialog */}
       {showDialog && (
         <>
-          <div className="fixed inset-0 z-40 bg-black/50" onClick={() => setShowDialog(false)} />
+          <div className="fixed inset-0 z-40 bg-black" onClick={() => setShowDialog(false)} />
 
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="bg-card border border-gray-700 rounded-xl max-w-md w-full shadow-2xl">
@@ -138,12 +138,12 @@ export function SharePrivateLink({ courseId, liveId, title }: SharePrivateLinkPr
                         className="w-full bg-gray-900 border border-gray-700 text-white px-3 py-2 rounded-lg focus:border-purple focus:outline-none text-sm"
                         placeholder="0 = ilimitado"
                       />
-                      <p className="text-xs text-gray-500 mt-1">0 = sem limite de usos</p>
+                      <p className="text-sm text-gray-500 mt-1">0 = sem limite de usos</p>
                     </div>
 
                     {/* Info Box */}
                     <div className="bg-purple/10 border border-purple/30 rounded-lg p-3">
-                      <p className="text-xs text-purple-200 leading-relaxed">
+                      <p className="text-sm text-purple-200 leading-relaxed">
                         <strong>Como funciona:</strong> Alunos clicam no link → login automático → acesso concedido
                       </p>
                     </div>
@@ -152,13 +152,13 @@ export function SharePrivateLink({ courseId, liveId, title }: SharePrivateLinkPr
                   <>
                     {/* Generated Link Display */}
                     <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 space-y-3">
-                      <p className="text-xs text-gray-400 font-medium">URL DO LINK:</p>
+                      <p className="text-sm text-gray-400 font-medium">URL DO LINK:</p>
                       <div className="flex gap-2 items-center">
                         <input
                           type="text"
                           value={generatedLink}
                           readOnly
-                          className="flex-1 bg-gray-800 border border-gray-600 text-gray-200 px-3 py-2 rounded text-xs font-mono"
+                          className="flex-1 bg-gray-800 border border-gray-600 text-gray-200 px-3 py-2 rounded text-sm font-mono"
                         />
                         <button
                           onClick={handleCopy}
@@ -175,7 +175,7 @@ export function SharePrivateLink({ courseId, liveId, title }: SharePrivateLinkPr
                     </div>
 
                     {/* Settings Display */}
-                    <div className="bg-gray-900 rounded-lg p-3 space-y-2 text-xs">
+                    <div className="bg-gray-900 rounded-lg p-3 space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-400">Validade:</span>
                         <span className="text-gray-200 font-medium">
@@ -192,7 +192,7 @@ export function SharePrivateLink({ courseId, liveId, title }: SharePrivateLinkPr
 
                     {/* Share Info */}
                     <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
-                      <p className="text-xs text-green-200 leading-relaxed">
+                      <p className="text-sm text-green-200 leading-relaxed">
                         ✓ Link criado com sucesso! Podes agora compartilhar com os teus alunos.
                       </p>
                     </div>

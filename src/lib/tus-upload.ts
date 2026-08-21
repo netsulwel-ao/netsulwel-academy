@@ -98,7 +98,7 @@ export async function uploadLargeFile({
 
   // Restore state from localStorage if resuming
   const storageKey = `tus_upload_${uploadId}`;
-  let state: UploadState = (() => {
+  const state: UploadState = (() => {
     try {
       const saved = localStorage.getItem(storageKey);
       if (saved) return JSON.parse(saved);

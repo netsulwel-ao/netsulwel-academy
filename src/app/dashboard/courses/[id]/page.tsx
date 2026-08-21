@@ -9,7 +9,7 @@ import { useAccess } from "@/hooks/useAccess";
 import { useTrack } from "@/hooks/useTrack";
 import {
   Lock, Play, BookOpen, Award, ChevronLeft, Clock,
-  Loader2, CheckCircle2, ChevronDown, ChevronRight, Crown, Zap,
+  Loader2, CheckCircle2, ChevronDown, ChevronRight, Zap,
   Heart, HeartOff, Radio, Circle, Search, MessageCircle, Send, HelpCircle, ClipboardCheck, KeyRound,
 } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -25,11 +25,6 @@ import type { Course, CourseType } from "@/types/course";
 const LEVEL_LABEL: Record<string, string> = {
   beginner: "Iniciante", intermediate: "Intermédio", advanced: "Avançado",
 };
-
-function normalizeCourseType(type: unknown): CourseType {
-  if (type === "standalone" || type === "smart" || type === "golden") return type;
-  return "standalone";
-}
 
 function getYoutubeId(url: string): string | null {
   try {
@@ -118,7 +113,7 @@ export default function CourseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
-  const { canAccessCourse, requiredPlanLabel, needsAccessCode } = useAccess();
+  const { canAccessCourse, needsAccessCode } = useAccess();
   const { track } = useTrack();
 
   const [course, setCourse] = useState<Course | null>(null);
@@ -363,11 +358,10 @@ export default function CourseDetailPage() {
     </div>
   );
 
-  const normalizedType = normalizeCourseType(course.type);
-  const hasAccess = canAccessCourse(normalizedType, course.id!, enrolledCourses, course.price, course.accessCode);
-  const showAccessCode = needsAccessCode(normalizedType, course.id!, enrolledCourses, course.price, course.accessCode);
+  const required = "compra individual";
+  const hasAccess = canAccessCourse(course.id!, enrolledCourses, course.price, course.accessCode);
+  const showAccessCode = needsAccessCode(course.id!, enrolledCourses, course.price, course.accessCode);
   const currentVideo = activeLesson ? course.modules?.[activeLesson.mi]?.videos?.[activeLesson.vi] : null;
-  const required = requiredPlanLabel(normalizedType);
   const youtubeEmbed = currentVideo?.url ? getYoutubeEmbedUrl(currentVideo.url) : null;
   const vimeoEmbed = currentVideo?.url ? getVimeoEmbedUrl(currentVideo.url) : null;
 
@@ -410,7 +404,7 @@ export default function CourseDetailPage() {
     <div className="max-w-[100rem] mx-auto animate-in fade-in duration-500">
 
       {/* Back */}
-      <Link href="/dashboard/courses" className="inline-flex items-center gap-2 text-base text-gray-400 hover:text-white transition-colors mb-6">
+      <Link href="/dashboard/courses" className="inline-flex items-center gap-2 text-base text-text-muted hover:text-text-primary transition-colors mb-6">
         <ChevronLeft className="h-5 w-5" /> Voltar ao catálogo
       </Link>
 
@@ -421,48 +415,48 @@ export default function CourseDetailPage() {
           <>
             {/* LEFT: Schedule timeline */}
             <div className="flex-1 min-w-0 space-y-6">
-              <div className="bg-gray-900/40 border border-gray-800 p-6">
-                <h2 className="text-lg font-bold text-white mb-1">{course.title}</h2>
-                <p className="text-sm text-gray-400">{course.modules.reduce((a, m) => a + m.videos.length, 0)} aulas ao vivo</p>
+              <div className="bg-bg-surface border border-border-default p-6">
+                <h2 className="text-lg font-bold text-text-primary mb-1">{course.title}</h2>
+                <p className="text-sm text-text-muted">{course.modules.reduce((a, m) => a + m.videos.length, 0)} aulas ao vivo</p>
               </div>
 
               <div className="space-y-3">
                 {course.modules.map((module, mi) => (
-                  <div key={mi} className="bg-gray-900/40 border border-gray-800 overflow-hidden">
-                    <div className="px-5 py-3 border-b border-gray-800">
+                  <div key={mi} className="bg-bg-surface border border-border-default overflow-hidden">
+                    <div className="px-5 py-3 border-b border-border-default">
                       <p className="text-sm font-bold text-blue-400 uppercase tracking-wider">Módulo {mi + 1}{module.title ? ` — ${module.title}` : ""}</p>
                     </div>
-                    <div className="divide-y divide-gray-800/60">
+                    <div className="divide-y divide-border-default">
                       {module.videos.map((video, vi) => {
                         const st = getLessonStatus(video.scheduledAt, video.duration);
                         return (
                           <div key={vi} className="flex items-center gap-4 px-5 py-4">
                             <div className={`flex h-10 w-10 shrink-0 items-center justify-center ${
                               st.status === "live" ? "bg-green-600 animate-pulse" :
-                              st.status === "ended" ? "bg-gray-800" : "bg-gray-800"
+                              st.status === "ended" ? "bg-bg-surface-2" : "bg-bg-surface-2"
                             }`}>
-                              {st.status === "live" ? <Radio className="h-5 w-5 text-white" /> :
-                               st.status === "ended" ? <CheckCircle2 className="h-5 w-5 text-gray-500" /> :
-                               <Clock className="h-5 w-5 text-gray-400" />}
+                              {st.status === "live" ? <Radio className="h-5 w-5 text-text-primary" /> :
+                               st.status === "ended" ? <CheckCircle2 className="h-5 w-5 text-text-muted" /> :
+                               <Clock className="h-5 w-5 text-text-muted" />}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-base font-medium text-white truncate">{video.title || `Aula ${vi + 1}`}</p>
+                              <p className="text-base font-medium text-text-primary truncate">{video.title || `Aula ${vi + 1}`}</p>
                               {video.scheduledAt && (
-                                <p className="text-sm text-gray-500 mt-0.5">{formatDate(video.scheduledAt)}</p>
+                                <p className="text-sm text-text-muted mt-0.5">{formatDate(video.scheduledAt)}</p>
                               )}
                               {video.duration && (
-                                <p className="text-sm text-gray-500">Duração: {video.duration} min</p>
+                                <p className="text-sm text-text-muted">Duração: {video.duration} min</p>
                               )}
                             </div>
                             <div className="flex items-center gap-3 shrink-0">
-                              <span className={`px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${
+                              <span className={`px-2.5 py-1 text-sm font-bold uppercase tracking-wider ${
                                 st.status === "live" ? "bg-green-500/15 text-green-400 border border-green-500/25" :
-                                st.status === "ended" ? "bg-gray-800 text-gray-500 border border-gray-700" :
+                                st.status === "ended" ? "bg-bg-surface-2 text-text-muted border border-border-strong" :
                                 "bg-blue-500/15 text-blue-400 border border-blue-500/25"
                               }`}>{st.label}</span>
                               {st.status === "live" && hasAccess && (
                                 <Link href={`/dashboard/courses/${course.id}/live/${mi}/${vi}`}
-                                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold transition-colors">
+                                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-text-primary text-sm font-bold transition-colors">
                                   <Radio className="h-4 w-4" /> Entrar
                                 </Link>
                               )}
@@ -478,47 +472,38 @@ export default function CourseDetailPage() {
 
             {/* RIGHT: Course info sidebar */}
             <div className="xl:w-96 shrink-0">
-              <div className="bg-gray-900/40 border border-gray-800 p-5 space-y-3 sticky top-6">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Sobre o Curso</p>
-                {course.description && <p className="text-sm text-gray-300 leading-relaxed">{course.description}</p>}
+              <div className="bg-bg-surface border border-border-default p-5 space-y-3 sticky top-6">
+                <p className="text-sm font-bold text-text-muted uppercase tracking-wider">Sobre o Curso</p>
+                {course.description && <p className="text-sm text-text-secondary leading-relaxed">{course.description}</p>}
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between"><span className="text-gray-500">Formato</span><span className="text-purple-400 font-medium">Ao Vivo</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Tipo</span><span className="text-white font-medium capitalize">{course.type}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Módulos</span><span className="text-white font-medium">{course.modulesCount}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Aulas</span><span className="text-white font-medium">{course.lessonsCount}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Nível</span><span className="text-white font-medium">{LEVEL_LABEL[course.level] ?? course.level}</span></div>
+                  <div className="flex justify-between"><span className="text-text-muted">Formato</span><span className="text-purple-400 font-medium">Ao Vivo</span></div>
+                  <div className="flex justify-between"><span className="text-text-muted">Tipo</span><span className="text-text-primary font-medium capitalize">{course.type}</span></div>
+                  <div className="flex justify-between"><span className="text-text-muted">Módulos</span><span className="text-text-primary font-medium">{course.modulesCount}</span></div>
+                  <div className="flex justify-between"><span className="text-text-muted">Aulas</span><span className="text-text-primary font-medium">{course.lessonsCount}</span></div>
+                  <div className="flex justify-between"><span className="text-text-muted">Nível</span><span className="text-text-primary font-medium">{LEVEL_LABEL[course.level] ?? course.level}</span></div>
                 </div>
                 {!hasAccess && (
-                  <div className="pt-3 border-t border-gray-800">
+                  <div className="pt-3 border-t border-border-default">
                     <p className="text-sm text-amber-300 mb-2">Requer {required}</p>
-                    {normalizedType === "standalone" ? (
-                      <Link href={`/dashboard/finances?courseId=${course.id}`}
-                        className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2.5 font-bold text-sm transition-colors">
-                        <Zap className="h-4 w-4" /> Comprar
-                      </Link>
-                    ) : (
-                      <Link href="/dashboard/finances"
-                        className={`flex items-center justify-center gap-2 py-2.5 font-bold text-sm transition-colors ${
-                          normalizedType === "golden" ? "bg-yellow-500 hover:bg-yellow-400 text-gray-900" : "bg-green-600 hover:bg-green-500 text-white"
-                        }`}>
-                        <Crown className="h-4 w-4" /> Ativar {normalizedType === "golden" ? "Golden" : "Smart"}
-                      </Link>
-                    )}
+                    <Link href={`/dashboard/finances?courseId=${course.id}`}
+                      className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-text-primary py-2.5 font-bold text-sm transition-colors">
+                      <Zap className="h-4 w-4" /> Comprar
+                    </Link>
                   </div>
                 )}
                 {course.tags?.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 pt-3 border-t border-gray-800">
-                    {course.tags.map((t) => <span key={t} className="px-2 py-0.5 bg-gray-800 text-gray-400 text-xs">{t}</span>)}
+                  <div className="flex flex-wrap gap-1.5 pt-3 border-t border-border-default">
+                    {course.tags.map((t) => <span key={t} className="px-2 py-0.5 bg-bg-surface-2 text-text-muted text-sm">{t}</span>)}
                   </div>
                 )}
                 {course.createdBy && (
                   <button onClick={toggleFollow}
                     className={`flex items-center gap-2 px-3 py-2 text-sm font-bold transition-colors w-full justify-center ${
-                      followed ? "bg-red-600 text-white hover:bg-red-700" : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
+                      followed ? "bg-red-600 text-text-primary hover:bg-red-700" : "bg-bg-surface-2 text-text-muted hover:bg-hover-bg hover:text-text-primary"
                     }`}>
                     {followed ? <Heart className="h-4 w-4 fill-current" /> : <HeartOff className="h-4 w-4" />}
                     {followed ? "A Seguir" : "Seguir"}
-                    {followCount > 0 && <span className="text-xs opacity-70">({followCount})</span>}
+                    {followCount > 0 && <span className="text-sm opacity-70">({followCount})</span>}
                   </button>
                 )}
               </div>
@@ -529,7 +514,7 @@ export default function CourseDetailPage() {
         <div className="flex-1 min-w-0 space-y-6">
 
           {/* Player area */}
-          <div className="w-full bg-gray-900 min-h-[200px] flex items-center justify-center">
+          <div className="w-full bg-bg-surface min-h-[200px] flex items-center justify-center">
             {hasAccess && currentVideo?.url ? (
               <VideoPlayer source={buildVideoSource(currentVideo.url, course.thumbnail)}
                 onProgress={(time, dur) => {
@@ -541,7 +526,7 @@ export default function CourseDetailPage() {
                 }}
               />
             ) : hasAccess && !currentVideo?.url ? (
-              <div className="flex flex-col items-center justify-center h-full gap-3 text-gray-500">
+              <div className="flex flex-col items-center justify-center h-full gap-3 text-text-muted">
                 <Play className="h-12 w-12" />
                 <p className="text-base">Seleciona uma aula para começar</p>
               </div>
@@ -550,13 +535,13 @@ export default function CourseDetailPage() {
                 {course.thumbnail && (
                   <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover opacity-20 blur-sm" />
                 )}
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-gray-950/80 p-8 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center bg-gray-900 border border-gray-700">
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-bg-page p-8 text-center">
+                  <div className="flex h-16 w-16 items-center justify-center bg-bg-surface border border-border-strong">
                     <KeyRound className="h-10 w-10 text-amber-400" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-white">Código de Acesso</h3>
-                    <p className="mt-2 text-gray-400 text-base max-w-sm">
+                    <h3 className="text-2xl font-bold text-text-primary">Código de Acesso</h3>
+                    <p className="mt-2 text-text-muted text-base max-w-sm">
                       Este curso é gratuito mas requer um código de acesso para visualizar.
                     </p>
                   </div>
@@ -573,7 +558,7 @@ export default function CourseDetailPage() {
                         onChange={(e) => { setAccessCodeInput(e.target.value.toUpperCase()); setAccessCodeError(""); }}
                         onKeyDown={(e) => e.key === "Enter" && verifyAccessCode()}
                         placeholder="Introduza o código de acesso"
-                        className="w-full px-4 py-3 bg-gray-900 border border-gray-700 text-white text-center text-lg font-mono tracking-widest placeholder-gray-600 focus:outline-none focus:border-amber-500 transition-colors"
+                        className="w-full px-4 py-3 bg-bg-surface border border-border-strong text-text-primary text-center text-lg font-mono tracking-widest placeholder-gray-600 focus:outline-none focus:border-amber-500 transition-colors"
                         disabled={accessCodeLoading}
                         autoFocus
                       />
@@ -583,7 +568,7 @@ export default function CourseDetailPage() {
                       <button
                         onClick={verifyAccessCode}
                         disabled={accessCodeLoading || !accessCodeInput.trim()}
-                        className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-gray-900 px-6 py-3 font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-text-primary px-6 py-3 font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {accessCodeLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
                         {accessCodeLoading ? "A verificar..." : "Desbloquear"}
@@ -597,34 +582,22 @@ export default function CourseDetailPage() {
                 {course.thumbnail && (
                   <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover opacity-20 blur-sm" />
                 )}
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-gray-950/80 p-8 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center bg-gray-900 border border-gray-700">
-                    <Lock className="h-10 w-10 text-gray-300" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-bg-page p-8 text-center">
+                  <div className="flex h-16 w-16 items-center justify-center bg-bg-surface border border-border-strong">
+                    <Lock className="h-10 w-10 text-text-secondary" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-white">Conteúdo Bloqueado</h3>
-                    <p className="mt-2 text-gray-400 text-base max-w-sm">
-                      Este curso requer <span className="text-white font-semibold">{required}</span> para aceder.
+                    <h3 className="text-2xl font-bold text-text-primary">Conteúdo Bloqueado</h3>
+                    <p className="mt-2 text-text-muted text-base max-w-sm">
+                      Este curso requer <span className="text-text-primary font-semibold">{required}</span> para aceder.
                     </p>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-3">
-                    {normalizedType === "standalone" ? (
-                      <Link href={`/dashboard/finances?courseId=${course.id}`}
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 font-bold transition-colors">
-                        <Zap className="h-5 w-5" />
-                        Comprar por {course.price ? `${course.price.toLocaleString("pt-AO")} Kz` : "Grátis"}
-                      </Link>
-                    ) : (
-                      <Link href="/dashboard/finances"
-                        className={`flex items-center gap-2 px-6 py-3 font-bold transition-colors ${
-                          normalizedType === "golden"
-                            ? "bg-yellow-500 hover:bg-yellow-400 text-gray-900"
-                            : "bg-green-600 hover:bg-green-500 text-white"
-                        }`}>
-                        <Crown className="h-5 w-5" />
-                        Ativar {normalizedType === "golden" ? "Plano Golden" : "Plano Smart"}
-                      </Link>
-                    )}
+                    <Link href={`/dashboard/finances?courseId=${course.id}`}
+                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-text-primary px-6 py-3 font-bold transition-colors">
+                      <Zap className="h-5 w-5" />
+                      Comprar por {course.price ? `${course.price.toLocaleString("pt-AO")} Kz` : "Grátis"}
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -633,15 +606,15 @@ export default function CourseDetailPage() {
 
           {/* Current lesson title */}
           {hasAccess && currentVideo && (
-            <div className="bg-gray-900/40 px-5 py-4 border border-gray-800">
+            <div className="bg-bg-surface px-5 py-4 border border-border-default">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-sm text-gray-500 uppercase tracking-wider font-bold mb-1">
+                  <p className="text-sm text-text-muted uppercase tracking-wider font-bold mb-1">
                     Módulo {(activeLesson?.mi ?? 0) + 1} · Aula {(activeLesson?.vi ?? 0) + 1}
                   </p>
-                  <h2 className="text-xl font-bold text-white">{currentVideo.title}</h2>
+                  <h2 className="text-xl font-bold text-text-primary">{currentVideo.title}</h2>
                   {currentVideo.duration && (
-                    <p className="text-base text-gray-400 mt-1 flex items-center gap-1">
+                    <p className="text-base text-text-muted mt-1 flex items-center gap-1">
                       <Clock className="h-4 w-4" /> {currentVideo.duration}
                     </p>
                   )}
@@ -649,8 +622,8 @@ export default function CourseDetailPage() {
                 <button onClick={toggleComplete}
                   className={`shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-bold transition-colors ${
                     lessonCompleted
-                      ? "bg-green-600 hover:bg-green-700 text-white"
-                      : "bg-gray-800 hover:bg-gray-700 text-gray-300"
+                      ? "bg-green-600 hover:bg-green-700 text-text-primary"
+                      : "bg-bg-surface-2 hover:bg-hover-bg text-text-secondary"
                   }`}>
                   {lessonCompleted ? <><CheckCircle2 className="h-4 w-4" /> Concluída</> : <><Circle className="h-4 w-4" /> Marcar conclusão</>}
                 </button>
@@ -660,14 +633,14 @@ export default function CourseDetailPage() {
 
           {/* Materials */}
           {hasAccess && currentVideo?.materials && currentVideo.materials.length > 0 && (
-            <div className="bg-gray-900/40 px-5 py-4 border border-gray-800">
+            <div className="bg-bg-surface px-5 py-4 border border-border-default">
               <MaterialsList materials={currentVideo.materials} />
             </div>
           )}
 
           {/* Exercises */}
           {hasAccess && currentVideo?.exercises && currentVideo.exercises.length > 0 && (
-            <div className="bg-gray-900/40 px-5 py-4 border border-gray-800">
+            <div className="bg-bg-surface px-5 py-4 border border-border-default">
               <ExerciseBlock exercises={currentVideo.exercises} />
             </div>
           )}
@@ -675,27 +648,23 @@ export default function CourseDetailPage() {
           {/* Course info */}
           <div className="space-y-4">
             <div>
-              <h1 className="text-3xl font-bold text-white">{course.title}</h1>
+              <h1 className="text-3xl font-bold text-text-primary">{course.title}</h1>
               <div className="flex flex-wrap items-center gap-3 mt-2">
-                <span className={`px-2.5 py-1 text-sm font-bold uppercase tracking-wider border ${
-                  normalizedType === "golden" ? "bg-yellow-500/15 text-yellow-400 border-yellow-500/25"
-                  : normalizedType === "smart" ? "bg-green-500/15 text-green-400 border-green-500/25"
-                  : "bg-blue-500/15 text-blue-400 border-blue-500/25"
-                }`}>{normalizedType === "golden" ? "Golden" : normalizedType === "smart" ? "Smart" : "Avulso"}</span>
+                <span className="px-2.5 py-1 text-sm font-bold uppercase tracking-wider border bg-blue-500/15 text-blue-400 border-blue-500/25">Avulso</span>
                 {course.hasCertificate && (
                   <span className="flex items-center gap-1 px-2.5 py-1 text-sm font-bold uppercase tracking-wider border bg-amber-500/15 text-amber-400 border-amber-500/25">
                     <Award className="h-4 w-4" /> Certificado
                   </span>
                 )}
-                <span className="text-sm text-gray-500">{LEVEL_LABEL[course.level] ?? course.level}</span>
-                <span className="text-sm text-gray-500 flex items-center gap-1"><BookOpen className="h-4 w-4" />{course.modulesCount} módulos · {course.lessonsCount} aulas</span>
+                <span className="text-sm text-text-muted">{LEVEL_LABEL[course.level] ?? course.level}</span>
+                <span className="text-sm text-text-muted flex items-center gap-1"><BookOpen className="h-4 w-4" />{course.modulesCount} módulos · {course.lessonsCount} aulas</span>
               </div>
             </div>
-            {course.description && <p className="text-gray-300 text-base leading-relaxed">{course.description}</p>}
+            {course.description && <p className="text-text-secondary text-base leading-relaxed">{course.description}</p>}
             {course.tags?.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {course.tags.map((t) => (
-                  <span key={t} className="px-2.5 py-1 bg-gray-800 text-gray-400 text-sm">{t}</span>
+                  <span key={t} className="px-2.5 py-1 bg-bg-surface-2 text-text-muted text-sm">{t}</span>
                 ))}
               </div>
             )}
@@ -703,8 +672,8 @@ export default function CourseDetailPage() {
               <button onClick={toggleFollow}
                 className={`flex items-center gap-2 px-3 py-2 font-bold text-base transition-colors ${
                   followed
-                    ? "bg-red-600 text-white hover:bg-red-700"
-                    : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
+                    ? "bg-red-600 text-text-primary hover:bg-red-700"
+                    : "bg-bg-surface-2 text-text-muted hover:bg-hover-bg hover:text-text-primary"
                 }`}
               >
                 {followed ? <Heart className="h-5 w-5 fill-current" /> : <HeartOff className="h-5 w-5" />}
@@ -717,17 +686,17 @@ export default function CourseDetailPage() {
 
         {/* ── RIGHT: Curriculum ── */}
         <div className="xl:w-96 shrink-0">
-          <div className="bg-gray-900/40 border border-gray-800 overflow-hidden sticky top-6">
-            <div className="px-5 py-4 border-b border-gray-800">
-              <h3 className="font-bold text-white">Conteúdo do Curso</h3>
-              <p className="text-sm text-gray-500 mt-0.5">{course.modulesCount} módulos · {course.lessonsCount} aulas</p>
+          <div className="bg-bg-surface border border-border-default overflow-hidden sticky top-6">
+            <div className="px-5 py-4 border-b border-border-default">
+              <h3 className="font-bold text-text-primary">Conteúdo do Curso</h3>
+              <p className="text-sm text-text-muted mt-0.5">{course.modulesCount} módulos · {course.lessonsCount} aulas</p>
               {progressLoaded && (
                 <div className="mt-3">
-                  <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+                  <div className="flex items-center justify-between text-sm text-text-muted mb-1">
                     <span>{completedCount} de {totalLessons} concluídas</span>
                     <span>{progressPct}%</span>
                   </div>
-                  <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-bg-surface-2 rounded-full overflow-hidden">
                     <div className="h-full bg-purple rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
                   </div>
                   {progressPct === 100 && course?.hasCertificate && (
@@ -749,25 +718,25 @@ export default function CourseDetailPage() {
 
             <div className="overflow-y-auto max-h-[70vh]">
               {course.modules?.map((module, mi) => (
-                <div key={mi} className="border-b border-gray-800/60 last:border-0">
+                <div key={mi} className="border-b border-border-default last:border-0">
                   {/* Module header */}
                   <button onClick={() => toggleModule(mi)}
                     aria-expanded={expandedModules.includes(mi)}
                     aria-controls={`cd-module-${mi}`}
                     id={`cd-module-btn-${mi}`}
-                    className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-gray-800/40 transition-colors text-left">
+                    className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-hover-bg transition-colors text-left">
                     <span className="text-sm font-bold text-blue-400 uppercase tracking-wider shrink-0 w-16">Módulo {mi + 1}</span>
-                    <span className="flex-1 text-base font-medium text-white truncate">{module.title || `Módulo ${mi + 1}`}</span>
-                    <span className="text-sm text-gray-500 shrink-0">{module.videos.length} aulas</span>
+                    <span className="flex-1 text-base font-medium text-text-primary truncate">{module.title || `Módulo ${mi + 1}`}</span>
+                    <span className="text-sm text-text-muted shrink-0">{module.videos.length} aulas</span>
                     {expandedModules.includes(mi)
-                      ? <ChevronDown className="h-5 w-5 text-gray-500 shrink-0" />
-                      : <ChevronRight className="h-5 w-5 text-gray-500 shrink-0" />
+                      ? <ChevronDown className="h-5 w-5 text-text-muted shrink-0" />
+                      : <ChevronRight className="h-5 w-5 text-text-muted shrink-0" />
                     }
                   </button>
 
                   {/* Lessons */}
                   {expandedModules.includes(mi) && (
-                    <div id={`cd-module-${mi}`} role="region" aria-labelledby={`cd-module-btn-${mi}`} className="bg-gray-950/30">
+                    <div id={`cd-module-${mi}`} role="region" aria-labelledby={`cd-module-btn-${mi}`} className="bg-bg-page">
                       {module.videos.map((video, vi) => {
                         const isActive = activeLesson?.mi === mi && activeLesson?.vi === vi;
                         const lessonLocked = !hasAccess;
@@ -777,25 +746,25 @@ export default function CourseDetailPage() {
                             onClick={() => { if (!lessonLocked) setActiveLesson({ mi, vi }); }}
                             disabled={lessonLocked}
                             className={`w-full flex items-center gap-3 px-5 py-3 text-left transition-colors ${
-                              isActive ? "bg-blue-600/20 border-l-2 border-blue-500" : "hover:bg-gray-800/30 border-l-2 border-transparent"
+                              isActive ? "bg-blue-600/20 border-l-2 border-blue-500" : "hover:bg-hover-bg border-l-2 border-transparent"
                             } ${lessonLocked ? "cursor-not-allowed" : "cursor-pointer"}`}>
                             <div className={`flex h-7 w-7 shrink-0 items-center justify-center ${
                               isCompleted ? "bg-green-600"
                                 : isActive ? "bg-blue-600"
-                                : lessonLocked ? "bg-gray-800"
-                                : "bg-gray-800 group-hover:bg-gray-700"
+                                : lessonLocked ? "bg-bg-surface-2"
+                                : "bg-bg-surface-2 group-hover:bg-hover-bg"
                             }`}>
                               {isCompleted
-                                ? <CheckCircle2 className="h-4 w-4 text-white" />
+                                ? <CheckCircle2 className="h-4 w-4 text-text-primary" />
                                 : lessonLocked
-                                  ? <Lock className="h-4 w-4 text-gray-500" />
+                                  ? <Lock className="h-4 w-4 text-text-muted" />
                                   : isActive
-                                    ? <Play className="h-4 w-4 text-white ml-0.5" />
-                                    : <Circle className="h-4 w-4 text-gray-500" />
+                                    ? <Play className="h-4 w-4 text-text-primary ml-0.5" />
+                                    : <Circle className="h-4 w-4 text-text-muted" />
                               }
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className={`text-base truncate ${isCompleted ? "text-green-400" : isActive ? "text-white font-medium" : lessonLocked ? "text-gray-600" : "text-gray-300"}`}>
+                              <p className={`text-base truncate ${isCompleted ? "text-green-400" : isActive ? "text-text-primary font-medium" : lessonLocked ? "text-gray-600" : "text-text-secondary"}`}>
                                 {video.title || `Aula ${vi + 1}`}
                               </p>
                               <p className="text-sm text-gray-600 mt-0.5 flex items-center gap-1">
@@ -819,21 +788,21 @@ export default function CourseDetailPage() {
                                 ? "border-green-600 bg-green-950/10 hover:bg-green-950/20"
                                 : best && !best.passed
                                   ? "border-red-600 bg-red-950/10 hover:bg-red-950/20"
-                                  : "border-transparent hover:bg-gray-800/30"
+                                  : "border-transparent hover:bg-hover-bg"
                             }`}>
                             <div className={`flex h-7 w-7 shrink-0 items-center justify-center ${
-                              best?.passed ? "bg-green-600" : best && !best.passed ? "bg-red-600" : "bg-gray-800"
+                              best?.passed ? "bg-green-600" : best && !best.passed ? "bg-red-600" : "bg-bg-surface-2"
                             }`}>
                               {best?.passed
-                                ? <CheckCircle2 className="h-4 w-4 text-white" />
+                                ? <CheckCircle2 className="h-4 w-4 text-text-primary" />
                                 : best && !best.passed
-                                  ? <HelpCircle className="h-4 w-4 text-white" />
-                                  : <ClipboardCheck className="h-4 w-4 text-gray-500" />
+                                  ? <HelpCircle className="h-4 w-4 text-text-primary" />
+                                  : <ClipboardCheck className="h-4 w-4 text-text-muted" />
                               }
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className={`text-base truncate ${
-                                best?.passed ? "text-green-400" : best && !best.passed ? "text-red-400" : "text-gray-300"
+                                best?.passed ? "text-green-400" : best && !best.passed ? "text-red-400" : "text-text-secondary"
                               }`}>
                                 Quiz do Módulo
                               </p>
@@ -852,13 +821,13 @@ export default function CourseDetailPage() {
 
             {/* Chat do curso */}
             {hasAccess && (
-              <div className="border-t border-gray-800 p-5">
-                <h4 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">
+              <div className="border-t border-border-default p-5">
+                <h4 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-text-muted mb-3">
                   <MessageCircle className="h-3.5 w-3.5" /> Chat do Curso
                 </h4>
                 <div className="space-y-2">
                   <Link href={`/dashboard/chats/${groupChatId(course.id!)}`}
-                    className="flex items-center gap-2.5 w-full px-3 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm font-medium transition-colors">
+                    className="flex items-center gap-2.5 w-full px-3 py-2.5 bg-bg-surface-2 hover:bg-hover-bg text-text-secondary hover:text-text-primary text-sm font-medium transition-colors">
                     <MessageCircle className="h-4 w-4 text-purple-400" />
                     Grupo do curso
                   </Link>
@@ -874,7 +843,7 @@ export default function CourseDetailPage() {
                         router.push(`/dashboard/chats/${chatId}`);
                       } catch {}
                     }}
-                      className="flex items-center gap-2.5 w-full px-3 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm font-medium transition-colors text-left">
+                      className="flex items-center gap-2.5 w-full px-3 py-2.5 bg-bg-surface-2 hover:bg-hover-bg text-text-secondary hover:text-text-primary text-sm font-medium transition-colors text-left">
                       <Send className="h-4 w-4 text-green-400" />
                       Falar com o professor
                     </button>
@@ -885,25 +854,15 @@ export default function CourseDetailPage() {
 
             {/* CTA if locked */}
             {!hasAccess && (
-              <div className="p-5 border-t border-gray-800 bg-gray-900/60">
-                <p className="text-sm text-gray-400 mb-3 text-center">
-                  Requer <span className="text-white font-semibold">{requiredPlanLabel(normalizedType)}</span>
+              <div className="p-5 border-t border-border-default bg-bg-surface">
+                <p className="text-sm text-text-muted mb-3 text-center">
+                  Requer <span className="text-text-primary font-semibold">compra individual</span>
                 </p>
-                {normalizedType === "standalone" ? (
-                  <Link href={`/dashboard/finances?courseId=${course.id}`}
-                    className="flex w-full items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 font-bold transition-colors text-base">
+                <Link href={`/dashboard/finances?courseId=${course.id}`}
+                    className="flex w-full items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-text-primary py-3 font-bold transition-colors text-base">
                     <Zap className="h-5 w-5" />
                     Comprar — {course.price ? `${course.price.toLocaleString("pt-AO")} Kz` : "Grátis"}
                   </Link>
-                ) : (
-                  <Link href="/dashboard/finances"
-                    className={`flex w-full items-center justify-center gap-2 py-3 font-bold transition-colors text-base ${
-                      normalizedType === "golden" ? "bg-yellow-500 hover:bg-yellow-400 text-gray-900" : "bg-green-600 hover:bg-green-500 text-white"
-                    }`}>
-                    <Crown className="h-5 w-5" />
-                    Ativar {normalizedType === "golden" ? "Plano Golden" : "Plano Smart"}
-                  </Link>
-                )}
               </div>
             )}
           </div>

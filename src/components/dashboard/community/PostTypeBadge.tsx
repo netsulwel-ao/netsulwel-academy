@@ -10,7 +10,7 @@ const config: Record<CommunityPostType, { label: string; classes: string }> = {
 export default function PostTypeBadge({ type }: { type: CommunityPostType }) {
   const c = config[type];
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-bold border ${c.classes}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 text-sm font-bold border ${c.classes}`}>
       {c.label}
     </span>
   );

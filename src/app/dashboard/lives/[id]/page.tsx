@@ -56,20 +56,20 @@ function ViewerChat({ liveId }: { liveId: string }) {
       <div className="px-4 py-3 border-b border-gray-800 flex items-center gap-2">
         <MessageSquare className="h-4 w-4 text-purple-400" />
         <span className="text-sm font-bold text-white">Chat</span>
-        <span className="ml-auto text-xs text-gray-500 bg-gray-800 px-2 py-0.5">{messages.length}</span>
+        <span className="ml-auto text-sm text-gray-500 bg-gray-800 px-2 py-0.5">{messages.length}</span>
       </div>
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
-        {messages.length === 0 && <p className="text-xs text-gray-600 text-center py-8">Nenhuma mensagem ainda...</p>}
+        {messages.length === 0 && <p className="text-sm text-gray-600 text-center py-8">Nenhuma mensagem ainda...</p>}
         {messages.map((msg) => (
           msg.type === "system" ? (
-            <div key={msg.id} className="text-center text-xs text-gray-600 py-1 italic">{msg.text}</div>
+            <div key={msg.id} className="text-center text-sm text-gray-600 py-1 italic">{msg.text}</div>
           ) : (
-            <div key={msg.id} className="flex gap-2 items-start hover:bg-white/5 px-1 py-0.5 -mx-1 transition-colors">
-              <div className="w-6 h-6 bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shrink-0 text-[9px] font-bold text-white mt-0.5">
+            <div key={msg.id} className="flex gap-2 items-start hover:bg-white px-1 py-0.5 -mx-1 transition-colors">
+              <div className="w-6 h-6 bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shrink-0 text-[13px] font-bold text-white mt-0.5">
                 {msg.displayName?.[0]?.toUpperCase() || "?"}
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-xs font-bold text-purple-400">{msg.displayName} </span>
+                <span className="text-sm font-bold text-purple-400">{msg.displayName} </span>
                 <span className="text-sm text-gray-200 break-words">{msg.text}</span>
               </div>
             </div>
@@ -110,10 +110,10 @@ function ViewerStage() {
       />
       {/* Live badge + viewer count */}
       <div className="absolute top-3 left-3 z-20 flex items-center gap-2">
-        <div className="flex items-center gap-1.5 bg-red-600 px-2.5 py-1 text-xs font-bold text-white">
+        <div className="flex items-center gap-1.5 bg-red-600 px-2.5 py-1 text-sm font-bold text-white">
           <div className="w-1.5 h-1.5 bg-white animate-pulse" />LIVE
         </div>
-        <div className="flex items-center gap-1.5 bg-black/60 px-2.5 py-1 text-xs text-white">
+        <div className="flex items-center gap-1.5 bg-black px-2.5 py-1 text-sm text-white">
           <Eye className="h-3.5 w-3.5" /><span>{participants.length}</span>
         </div>
       </div>
@@ -203,7 +203,7 @@ function ViewerInterior({ live }: { live: LiveSession }) {
           <span className="text-sm font-bold text-white truncate max-w-[200px]">{live.title}</span>
         </div>
         <div className="flex border border-gray-700">
-          <button onClick={() => {}} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-purple-600 text-white">
+          <button onClick={() => {}} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-purple-600 text-white">
             <MessageSquare className="h-3.5 w-3.5" /> Chat
           </button>
         </div>
@@ -225,11 +225,11 @@ function ViewerInterior({ live }: { live: LiveSession }) {
               </div>
               <div className="flex-1 min-w-0">
                 <h2 className="text-sm font-bold text-white truncate">{live.title}</h2>
-                <p className="text-xs text-purple-400">{live.hostName || "Professor"}</p>
+                <p className="text-sm text-purple-400">{live.hostName || "Professor"}</p>
               </div>
               <div className="flex items-center gap-2">
                 {/* Mic status */}
-                <div className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold ${canSpeak ? "bg-green-600/20 text-green-400 border border-green-500/30" : "bg-gray-800 text-gray-500 border border-gray-700"}`}>
+                <div className={`flex items-center gap-1.5 px-2.5 py-1 text-[13px] font-bold ${canSpeak ? "bg-green-600/20 text-green-400 border border-green-500/30" : "bg-gray-800 text-gray-500 border border-gray-700"}`}>
                   {canSpeak ? <Mic className="h-3 w-3" /> : <MicOff className="h-3 w-3" />}
                   {canSpeak ? "A falar" : "Mudo"}
                 </div>

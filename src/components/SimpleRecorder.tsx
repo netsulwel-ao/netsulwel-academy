@@ -80,17 +80,17 @@ export function SimpleRecorder({
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#0e0e11] border border-white/8 rounded">
+    <div className="flex flex-col h-full bg-[#0e0e11] border border-white rounded">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-white/8 flex items-center gap-3">
+      <div className="px-4 py-3 border-b border-white flex items-center gap-3">
         <Circle className="h-3 w-3 text-red-500 animate-pulse" />
-        <span className="text-xs font-bold uppercase tracking-wider text-white/60">
+        <span className="text-sm font-bold uppercase tracking-wider text-white">
           Gravador de Aula
         </span>
       </div>
 
       {/* Status */}
-      <div className="px-4 py-3 bg-white/[2%] border-b border-white/8">
+      <div className="px-4 py-3 bg-white/[2%] border-b border-white">
         <div className="space-y-2">
           {/* Status indicator */}
           <div className="flex items-center gap-2">
@@ -102,10 +102,10 @@ export function SimpleRecorder({
                   ? "bg-green-500"
                   : uploadStatus === "error"
                   ? "bg-red-500"
-                  : "bg-white/20"
+                  : "bg-white"
               }`}
             />
-            <span className="text-xs text-white/60">
+            <span className="text-sm text-white">
               {recording.isRecording
                 ? "A gravar..."
                 : uploadStatus === "success"
@@ -118,7 +118,7 @@ export function SimpleRecorder({
 
           {/* Duration */}
           {recording.duration > 0 && (
-            <p className="text-sm font-mono text-white/80">
+            <p className="text-sm font-mono text-white">
               Duração: {formatDuration(recording.duration)}
             </p>
           )}
@@ -127,7 +127,7 @@ export function SimpleRecorder({
           {recording.error && (
             <div className="flex items-start gap-2 px-3 py-2 bg-red-500/10 border border-red-500/20 rounded">
               <AlertTriangle className="h-3.5 w-3.5 text-red-400 shrink-0 mt-0.5" />
-              <p className="text-xs text-red-300">{recording.error}</p>
+              <p className="text-sm text-red-300">{recording.error}</p>
             </div>
           )}
         </div>
@@ -135,12 +135,12 @@ export function SimpleRecorder({
 
       {/* Preview */}
       {recordedBlobRef.current && (
-        <div className="px-4 py-3 border-b border-white/8">
-          <p className="text-xs text-white/40 mb-2">Pré-visualização da gravação:</p>
+        <div className="px-4 py-3 border-b border-white">
+          <p className="text-sm text-white mb-2">Pré-visualização da gravação:</p>
           <video
             ref={videoPreviewRef}
             controls
-            className="w-full bg-black rounded border border-white/10"
+            className="w-full bg-black rounded border border-white"
             style={{ maxHeight: "200px" }}
           />
         </div>
@@ -153,7 +153,7 @@ export function SimpleRecorder({
           {!recording.isRecording ? (
             <button
               onClick={handleStart}
-              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded transition-colors"
             >
               <Circle className="h-3 w-3" />
               Iniciar Gravação
@@ -162,7 +162,7 @@ export function SimpleRecorder({
             <>
               <button
                 onClick={recording.isPaused ? recording.resumeRecording : recording.pauseRecording}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold rounded transition-colors"
               >
                 {recording.isPaused ? (
                   <>
@@ -179,7 +179,7 @@ export function SimpleRecorder({
 
               <button
                 onClick={handleStop}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-xs font-bold rounded transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold rounded transition-colors"
               >
                 ◼ Parar
               </button>
@@ -192,9 +192,9 @@ export function SimpleRecorder({
           <button
             onClick={handleUpload}
             disabled={uploading}
-            className={`w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold rounded transition-colors ${
+            className={`w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-bold rounded transition-colors ${
               uploading
-                ? "bg-white/10 text-white/40 cursor-not-allowed"
+                ? "bg-white text-white cursor-not-allowed"
                 : uploadStatus === "success"
                 ? "bg-green-600 hover:bg-green-700 text-white"
                 : uploadStatus === "error"
@@ -228,7 +228,7 @@ export function SimpleRecorder({
       </div>
 
       {/* Info */}
-      <div className="px-4 py-2 bg-white/[1%] border-t border-white/8 text-[10px] text-white/30 space-y-1">
+      <div className="px-4 py-2 bg-white/[1%] border-t border-white text-[13px] text-white space-y-1">
         <p>• Grava o vídeo + áudio localmente</p>
         <p>• Envia para armazenamento seguro</p>
         <p>• Dispõe para alunos após aula</p>

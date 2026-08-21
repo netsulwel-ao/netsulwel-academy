@@ -1,15 +1,15 @@
 export type NotificationType =
   | "payment_approved"
-  | "sale_completed"
-  | "fee_applied"
   | "live_started"
-  | "course_live_started"
   | "community_like"
   | "community_comment"
   | "certificate_ready"
-  | "institution_invitation"
   | "institution_approved"
-  | "course_published";
+  | "live_approved"
+  | "live_rejected"
+  | "recording_ready"
+  | "new_question"
+  | "question_answered";
 
 export interface AppNotification {
   id?: string;

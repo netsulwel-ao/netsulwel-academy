@@ -46,7 +46,7 @@ function formatKz(v: number) {
 // ── Badge helpers ─────────────────────────────────────────────
 function StatusBadge({ status }: { status: "published" | "draft" }) {
   return (
-    <span className={`font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 border ${
+    <span className={`font-mono text-[13px] uppercase tracking-widest px-2 py-0.5 border ${
       status === "published"
         ? "border-green/30 text-green/70 bg-green/8"
         : "border-amber-500/30 text-amber-400/70 bg-amber-500/8"
@@ -64,7 +64,7 @@ function TypeBadge({ type }: { type?: string }) {
   };
   if (!type) return null;
   return (
-    <span className={`font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 border ${map[type] ?? "border-gray-700 text-gray-600"}`}>
+    <span className={`font-mono text-[13px] uppercase tracking-widest px-2 py-0.5 border ${map[type] ?? "border-gray-700 text-gray-600"}`}>
       {type}
     </span>
   );
@@ -179,7 +179,7 @@ export default function CoursesPage() {
       {/* ── Cabeçalho ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
             // gestão de cursos
           </p>
           <h1 className="text-2xl font-bold text-gray-100">Cursos</h1>
@@ -189,7 +189,7 @@ export default function CoursesPage() {
         </div>
         <Link
           href="/admin/courses/new"
-          className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all shrink-0"
+          className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all shrink-0"
         >
           <Plus className="h-3 w-3" /> Novo curso
         </Link>
@@ -206,7 +206,7 @@ export default function CoursesPage() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Pesquisar por título ou descrição..."
-              className="w-full border border-gray-800/60 bg-gray-900/10 pl-9 pr-9 py-2.5 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors"
+              className="w-full border border-gray-800 bg-gray-900 pl-9 pr-9 py-2.5 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -218,10 +218,10 @@ export default function CoursesPage() {
           {/* Toggle filtros */}
           <button
             onClick={() => setShowFilters(v => !v)}
-            className={`flex items-center gap-1.5 border px-3 py-2.5 font-mono text-[10px] uppercase tracking-widest transition-all shrink-0 ${
+            className={`flex items-center gap-1.5 border px-3 py-2.5 font-mono text-[13px] uppercase tracking-widest transition-all shrink-0 ${
               hasFilters
                 ? "border-purple/30 bg-purple/8 text-purple/70"
-                : "border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-400"
+                : "border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-400"
             }`}
           >
             <Filter className="h-3 w-3" strokeWidth={1.5} />
@@ -232,12 +232,12 @@ export default function CoursesPage() {
 
         {/* Filtros expandidos */}
         {showFilters && (
-          <div className="flex flex-wrap items-center gap-2 border border-gray-800/40 bg-gray-900/10 px-4 py-3">
+          <div className="flex flex-wrap items-center gap-2 border border-gray-800 bg-gray-900 px-4 py-3">
             {/* Status */}
             <select
               value={filterStatus}
               onChange={e => setFilterStatus(e.target.value as typeof filterStatus)}
-              className="border border-gray-800/60 bg-gray-900 text-xs text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
+              className="border border-gray-800 bg-gray-900 text-sm text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
             >
               <option value="all">Todos os estados</option>
               <option value="published">Publicado</option>
@@ -248,7 +248,7 @@ export default function CoursesPage() {
             <select
               value={filterType}
               onChange={e => setFilterType(e.target.value as typeof filterType)}
-              className="border border-gray-800/60 bg-gray-900 text-xs text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
+              className="border border-gray-800 bg-gray-900 text-sm text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
             >
               <option value="all">Todos os tipos</option>
               <option value="standalone">Standalone</option>
@@ -260,7 +260,7 @@ export default function CoursesPage() {
             <select
               value={filterFormat}
               onChange={e => setFilterFormat(e.target.value as typeof filterFormat)}
-              className="border border-gray-800/60 bg-gray-900 text-xs text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
+              className="border border-gray-800 bg-gray-900 text-sm text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
             >
               <option value="all">Todos os formatos</option>
               <option value="recorded">Gravado</option>
@@ -270,7 +270,7 @@ export default function CoursesPage() {
             {hasFilters && (
               <button
                 onClick={clearFilters}
-                className="font-mono text-[9px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-1"
+                className="font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-1"
               >
                 <X className="h-3 w-3" /> Limpar
               </button>
@@ -296,11 +296,11 @@ export default function CoursesPage() {
 
       {/* ── Empty state ── */}
       {!loading && filtered.length === 0 && (
-        <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-20 text-center">
+        <div className="flex flex-col items-center justify-center border border-gray-800 bg-gray-900 py-20 text-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
             <BookOpen className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
           </div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">
             {hasFilters ? "// sem resultados" : "// sem cursos"}
           </p>
           <p className="text-sm text-gray-600 mb-5">
@@ -309,14 +309,14 @@ export default function CoursesPage() {
           {hasFilters ? (
             <button
               onClick={clearFilters}
-              className="font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors"
+              className="font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors"
             >
               ← Limpar filtros
             </button>
           ) : (
             <Link
               href="/admin/courses/new"
-              className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all"
+              className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all"
             >
               <Plus className="h-3 w-3" /> Criar curso
             </Link>
@@ -326,25 +326,25 @@ export default function CoursesPage() {
 
       {/* ── Tabela de cursos ── */}
       {!loading && filtered.length > 0 && (
-        <div className="border border-gray-800/60">
+        <div className="border border-gray-800">
           {/* Cabeçalho da tabela */}
-          <div className="hidden lg:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 border-b border-gray-800/40 bg-gray-900/20">
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Curso</p>
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Tipo · Formato</p>
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Aulas</p>
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Estado</p>
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Acções</p>
+          <div className="hidden lg:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 border-b border-gray-800 bg-gray-900">
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Curso</p>
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Tipo · Formato</p>
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Aulas</p>
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Estado</p>
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Acções</p>
           </div>
 
-          <div className="divide-y divide-gray-800/30">
+          <div className="divide-y divide-gray-800">
             {filtered.map(course => (
               <div
                 key={course.id}
-                className="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 items-center px-5 py-4 hover:bg-gray-900/20 transition-colors"
+                className="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 items-center px-5 py-4 hover:bg-gray-900 transition-colors"
               >
                 {/* Curso: thumb + título */}
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-12 w-16 shrink-0 overflow-hidden border border-gray-800/60 bg-gray-900">
+                  <div className="h-12 w-16 shrink-0 overflow-hidden border border-gray-800 bg-gray-900">
                     {course.thumbnail
                       ? <img src={course.thumbnail} alt={course.title} className="h-full w-full object-cover" />
                       : <div className="flex h-full w-full items-center justify-center">
@@ -354,7 +354,7 @@ export default function CoursesPage() {
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-gray-200 truncate">{course.title}</p>
-                    <p className="text-xs text-gray-600 truncate mt-0.5 line-clamp-1">
+                    <p className="text-sm text-gray-600 truncate mt-0.5 line-clamp-1">
                       {course.description || "Sem descrição"}
                     </p>
                   </div>
@@ -364,19 +364,19 @@ export default function CoursesPage() {
                 <div className="flex flex-wrap items-center gap-1.5 lg:flex-col lg:items-start">
                   <TypeBadge type={course.type} />
                   {course.format === "live" && (
-                    <span className="font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 border border-red-500/25 text-red-400/70 flex items-center gap-1">
+                    <span className="font-mono text-[13px] uppercase tracking-widest px-2 py-0.5 border border-red-500/25 text-red-400/70 flex items-center gap-1">
                       <Radio className="h-2.5 w-2.5" strokeWidth={1.5} /> live
                     </span>
                   )}
                   {course.price !== undefined && course.price > 0 && (
-                    <span className="font-mono text-[9px] text-gray-600">{formatKz(course.price)}</span>
+                    <span className="font-mono text-[13px] text-gray-600">{formatKz(course.price)}</span>
                   )}
                 </div>
 
                 {/* Aulas */}
                 <div className="hidden lg:block">
-                  <p className="font-mono text-xs text-gray-300">{course.lessonsCount ?? 0}</p>
-                  <p className="font-mono text-[9px] text-gray-700">{course.modulesCount ?? 0} módulo{(course.modulesCount ?? 0) !== 1 ? "s" : ""}</p>
+                  <p className="font-mono text-sm text-gray-300">{course.lessonsCount ?? 0}</p>
+                  <p className="font-mono text-[13px] text-gray-700">{course.modulesCount ?? 0} módulo{(course.modulesCount ?? 0) !== 1 ? "s" : ""}</p>
                 </div>
 
                 {/* Estado */}
@@ -397,7 +397,7 @@ export default function CoursesPage() {
                     onClick={() => handleToggleStatus(course)}
                     disabled={togglingId === course.id}
                     title={course.status === "published" ? "Mover para rascunho" : "Publicar"}
-                    className="flex h-8 w-8 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-300 disabled:opacity-50 transition-all"
+                    className="flex h-8 w-8 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-300 disabled:opacity-50 transition-all"
                   >
                     {togglingId === course.id
                       ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -411,7 +411,7 @@ export default function CoursesPage() {
                   <button
                     onClick={() => handleCopyLink(course.id)}
                     title="Copiar link"
-                    className="flex h-8 w-8 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all"
+                    className="flex h-8 w-8 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all"
                   >
                     {copiedId === course.id
                       ? <CheckCircle2 className="h-3.5 w-3.5 text-green/60" strokeWidth={1.5} />
@@ -434,7 +434,7 @@ export default function CoursesPage() {
                   <Link
                     href={`/admin/courses/${course.id}/edit`}
                     title="Editar curso"
-                    className="flex h-8 w-8 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-purple/30 hover:text-purple/70 transition-all"
+                    className="flex h-8 w-8 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-purple/30 hover:text-purple/70 transition-all"
                   >
                     <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
                   </Link>
@@ -457,8 +457,8 @@ export default function CoursesPage() {
           </div>
 
           {/* Footer com contagem */}
-          <div className="px-5 py-3 border-t border-gray-800/40 bg-gray-900/10">
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">
+          <div className="px-5 py-3 border-t border-gray-800 bg-gray-900">
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">
               {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
               {hasFilters && ` (filtrado de ${courses.length})`}
             </p>

@@ -121,7 +121,7 @@ export default function ProfessoresPage() {
                 {results.map((t) => (
                   <Link key={t.id} href={`/profile/${t.id}`}
                     onClick={() => { setShowDropdown(false); setSearch(""); }}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800/50 transition-colors">
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 transition-colors">
                     {t.photoURL ? (
                       <img src={t.photoURL} alt={t.name} className="h-10 w-10 rounded-full object-cover" />
                     ) : (
@@ -131,7 +131,7 @@ export default function ProfessoresPage() {
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-white truncate">{t.name}</p>
-                      <p className="text-xs text-gray-500">{t.role === "institution" ? "Instituição" : "Professor"}</p>
+                      <p className="text-sm text-gray-500">{t.role === "institution" ? "Instituição" : "Professor"}</p>
                     </div>
                   </Link>
                 ))}
@@ -151,7 +151,7 @@ export default function ProfessoresPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filtered.map((t) => (
                 <Link key={t.id} href={`/profile/${t.id}`}
-                  className="group bg-gray-900/40 border border-gray-800/60 hover:border-purple/30 p-6 transition-all duration-300 text-center">
+                  className="group bg-gray-900 border border-gray-800 hover:border-purple/30 p-6 transition-all duration-300 text-center">
                   {t.photoURL ? (
                     <img src={t.photoURL} alt={t.name} className="h-20 w-20 rounded-full object-cover mx-auto mb-4 ring-2 ring-purple-500/20 group-hover:ring-purple-500/40 transition-all" />
                   ) : (
@@ -160,7 +160,7 @@ export default function ProfessoresPage() {
                     </div>
                   )}
                   <h3 className="text-lg font-bold text-white group-hover:text-purple-300 transition-colors truncate">{t.name}</h3>
-                  <span className={`inline-block mt-1 text-xs font-bold px-2.5 py-1 border ${
+                  <span className={`inline-block mt-1 text-sm font-bold px-2.5 py-1 border ${
                     t.role === "institution" ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/25" : "bg-green-500/15 text-green-400 border-green-500/25"
                   }`}>
                     {t.role === "institution" ? "Instituição" : "Professor"}

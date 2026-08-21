@@ -136,43 +136,43 @@ export default function EditExamPage() {
         </div>
       )}
 
-      <div className="bg-gray-900/40 border border-gray-800 p-5 sm:p-6 space-y-4 mb-6">
+      <div className="bg-gray-900 border border-gray-800 p-5 sm:p-6 space-y-4 mb-6">
         <h2 className="text-base font-bold text-white uppercase tracking-wider">Informação básica</h2>
         <div>
           <label className="block text-sm text-gray-400 mb-1">Título</label>
           <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-gray-950/40 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white placeholder-gray-600 focus:outline-none transition-colors"
+            className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white placeholder-gray-600 focus:outline-none transition-colors"
             placeholder="Ex: Teste de Matemática Financeira" />
         </div>
         <div>
           <label className="block text-sm text-gray-400 mb-1">Descrição</label>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2}
-            className="w-full bg-gray-950/40 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white placeholder-gray-600 focus:outline-none transition-colors resize-none"
+            className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white placeholder-gray-600 focus:outline-none transition-colors resize-none"
             placeholder="Ex: Avaliação sobre juros compostos e amortização" />
         </div>
         <div>
           <label className="block text-sm text-gray-400 mb-1">Curso</label>
           <select value={courseId} onChange={(e) => setCourseId(e.target.value)}
-            className="w-full bg-gray-950/40 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white focus:outline-none transition-colors">
+            className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white focus:outline-none transition-colors">
             <option value="">Selecionar curso...</option>
             {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
           </select>
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm text-gray-400 mb-1">Nota mínima (%)</label>
             <input type="number" value={passingScore} onChange={(e) => setPassingScore(Number(e.target.value))} min={0} max={100}
-              className="w-full bg-gray-950/40 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white focus:outline-none transition-colors" />
+              className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white focus:outline-none transition-colors" />
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-1">Tempo limite (min)</label>
             <input type="number" value={timeLimit} onChange={(e) => setTimeLimit(Number(e.target.value))} min={0}
-              className="w-full bg-gray-950/40 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white focus:outline-none transition-colors" />
+              className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white focus:outline-none transition-colors" />
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-1">Máx. tentativas</label>
             <input type="number" value={maxAttempts} onChange={(e) => setMaxAttempts(Number(e.target.value))} min={1}
-              className="w-full bg-gray-950/40 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white focus:outline-none transition-colors" />
+              className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white focus:outline-none transition-colors" />
           </div>
         </div>
       </div>
@@ -186,7 +186,7 @@ export default function EditExamPage() {
         </div>
 
         {questions.map((q, i) => (
-          <div key={q.id} className="bg-gray-900/40 border border-gray-800 p-5">
+          <div key={q.id} className="bg-gray-900 border border-gray-800 p-5">
             <div className="flex items-center justify-between gap-3 mb-4">
               <span className="text-sm font-bold text-gray-400">Pergunta {i + 1}</span>
               {questions.length > 1 && (
@@ -198,11 +198,11 @@ export default function EditExamPage() {
 
             <div className="space-y-3">
               <input type="text" value={q.question} onChange={(e) => updateQuestion(i, "question", e.target.value)}
-                className="w-full bg-gray-950/40 border border-gray-800 focus:border-purple/50 py-2.5 px-3 text-white placeholder-gray-600 focus:outline-none transition-colors text-sm"
+                className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-2.5 px-3 text-white placeholder-gray-600 focus:outline-none transition-colors text-sm"
                 placeholder="Escreve a pergunta..." />
 
               <div className="flex items-center gap-4">
-                <label className="text-xs text-gray-400">Tipo:</label>
+                <label className="text-sm text-gray-400">Tipo:</label>
                 <select value={q.type} onChange={(e) => {
                   const type = e.target.value as Question["type"];
                   const opts = type === "true_false" ? ["Verdadeiro", "Falso"] : type === "multiple_choice" ? ["", "", "", ""] : [];
@@ -212,7 +212,7 @@ export default function EditExamPage() {
                     return next;
                   });
                 }}
-                  className="bg-gray-950/40 border border-gray-800 focus:border-purple/50 py-2 px-3 text-white text-sm focus:outline-none">
+                  className="bg-gray-950 border border-gray-800 focus:border-purple/50 py-2 px-3 text-white text-sm focus:outline-none">
                   <option value="multiple_choice">Múltipla Escolha</option>
                   <option value="true_false">Verdadeiro/Falso</option>
                   <option value="short_answer">Resposta Curta</option>
@@ -230,11 +230,11 @@ export default function EditExamPage() {
                         newOpts[oi] = e.target.value;
                         updateQuestion(i, "options", newOpts);
                       }}
-                        className="flex-1 bg-gray-950/40 border border-gray-800 focus:border-purple/50 py-2 px-3 text-white placeholder-gray-600 focus:outline-none transition-colors text-sm"
+                        className="flex-1 bg-gray-950 border border-gray-800 focus:border-purple/50 py-2 px-3 text-white placeholder-gray-600 focus:outline-none transition-colors text-sm"
                         placeholder={`Opção ${oi + 1}`} />
                     </div>
                   ))}
-                  <p className="text-xs text-gray-600 mt-1">Seleciona o círculo da opção correta.</p>
+                  <p className="text-sm text-gray-600 mt-1">Seleciona o círculo da opção correta.</p>
                 </div>
               )}
 
@@ -254,9 +254,9 @@ export default function EditExamPage() {
 
               {q.type === "short_answer" && (
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Resposta correta:</label>
+                  <label className="block text-sm text-gray-400 mb-1">Resposta correta:</label>
                   <input type="text" value={q.correctAnswer} onChange={(e) => updateQuestion(i, "correctAnswer", e.target.value)}
-                    className="w-full bg-gray-950/40 border border-gray-800 focus:border-purple/50 py-2.5 px-3 text-white placeholder-gray-600 focus:outline-none transition-colors text-sm"
+                    className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-2.5 px-3 text-white placeholder-gray-600 focus:outline-none transition-colors text-sm"
                     placeholder="Ex: 15%" />
                 </div>
               )}

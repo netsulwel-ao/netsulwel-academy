@@ -20,7 +20,7 @@ interface UseExamsReturn {
 }
 
 export function useExams(): UseExamsReturn {
-  const { user, plan, isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { canAccessCourse } = useAccess();
   const [exams, setExams] = useState<(Exam & { id: string })[]>([]);
   const [results, setResults] = useState<Record<string, ExamResult>>({});
@@ -51,13 +51,12 @@ export function useExams(): UseExamsReturn {
           });
         });
 
-        // 3. Cursos a que o aluno TEM acesso (pelo plano ou enrollment)
-        //    Inclui: standalone enrolled, smart (se plan=smart/golden), golden (se plan=golden)
+        // 3. Cursos a que o aluno TEM acesso (enrollment ou curso gratuito)
         const accessibleCourseIds = coursesSnap.docs
           .filter(d => {
             const meta = courseMetaMap.get(d.id);
             if (!meta) return false;
-            return canAccessCourse(meta.type, d.id, enrolledCourses, meta.price, meta.accessCode);
+            return canAccessCourse(d.id, enrolledCourses, meta.price, meta.accessCode);
           })
           .map(d => d.id);
 
@@ -115,7 +114,7 @@ export function useExams(): UseExamsReturn {
 
     load();
     return () => { cancelled = true; };
-  }, [user?.uid, plan, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user?.uid, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return { exams, results, loading, error };
 }

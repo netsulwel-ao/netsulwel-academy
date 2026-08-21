@@ -25,7 +25,7 @@ export default function TeacherNewLivePage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
-  const [target, setTarget] = useState<LiveTarget>("smart");
+  const [target, setTarget] = useState<LiveTarget>("free");
   const [price, setPrice] = useState("");
   const [thumbnail, setThumbnail] = useState("");
   const [uploadingThumb, setUploadingThumb] = useState(false);
@@ -89,8 +89,6 @@ export default function TeacherNewLivePage() {
   };
 
   const TARGET_OPTIONS: { value: LiveTarget; label: string; desc: string; color: string }[] = [
-    { value: "smart", label: "Smart", desc: "Plano Smart+", color: "border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 data-[active=true]:border-blue-500 data-[active=true]:bg-blue-500/15" },
-    { value: "golden", label: "Golden", desc: "Plano Golden", color: "border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 data-[active=true]:border-amber-500 data-[active=true]:bg-amber-500/15" },
     { value: "standalone", label: "Pago", desc: "Venda avulsa", color: "border-green-500/30 bg-green-500/5 hover:bg-green-500/10 data-[active=true]:border-green-500 data-[active=true]:bg-green-500/15" },
   ];
 
@@ -143,20 +141,20 @@ export default function TeacherNewLivePage() {
           <label className="flex items-center gap-2 text-sm font-medium text-gray-300"><Type className="h-4 w-4 text-gray-500" /> Título *</label>
           <input type="text" value={title} onChange={e => setTitle(e.target.value)}
             placeholder="Ex: Introdução ao React — Aula ao Vivo"
-            className="w-full bg-gray-900/60 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors" required />
+            className="w-full bg-gray-900 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors" required />
         </div>
 
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-sm font-medium text-gray-300"><AlignLeft className="h-4 w-4 text-gray-500" /> Descrição</label>
           <textarea value={description} onChange={e => setDescription(e.target.value)}
             placeholder="Descreva o que será abordado..." rows={4}
-            className="w-full bg-gray-900/60 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors resize-none" />
+            className="w-full bg-gray-900 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors resize-none" />
         </div>
 
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-sm font-medium text-gray-300"><Calendar className="h-4 w-4 text-gray-500" /> Data e Hora *</label>
           <input type="datetime-local" value={scheduledAt} onChange={e => setScheduledAt(e.target.value)}
-            className="w-full bg-gray-900/60 border border-gray-800 px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors [color-scheme:dark]" required />
+            className="w-full bg-gray-900 border border-gray-800 px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors [color-scheme:dark]" required />
         </div>
 
         <div className="space-y-2">
@@ -166,13 +164,13 @@ export default function TeacherNewLivePage() {
               <button key={opt.value} type="button" data-active={target === opt.value} onClick={() => setTarget(opt.value)}
                 className={`p-4 border text-left transition-all ${opt.color}`}>
                 <span className="text-sm font-bold text-white">{opt.label}</span>
-                <span className="block text-xs text-gray-400 mt-1">{opt.desc}</span>
+                <span className="block text-sm text-gray-400 mt-1">{opt.desc}</span>
               </button>
             ))}
           </div>
           {/* Free live info */}
           {!requestSent ? (
-            <div className="mt-3 p-4 border border-dashed border-gray-700 bg-gray-900/30">
+            <div className="mt-3 p-4 border border-dashed border-gray-700 bg-gray-900">
               <div className="flex items-start gap-3">
                 <MailQuestion className="h-5 w-5 text-gray-500 shrink-0 mt-0.5" />
                 <div className="flex-1">
@@ -202,7 +200,7 @@ export default function TeacherNewLivePage() {
             <label className="flex items-center gap-2 text-sm font-medium text-gray-300"><DollarSign className="h-4 w-4 text-gray-500" /> Preço (Kz) *</label>
             <input type="number" min="0" value={price} onChange={e => setPrice(e.target.value)}
               placeholder="Ex: 5000"
-              className="w-full bg-gray-900/60 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors" required />
+              className="w-full bg-gray-900 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors" required />
           </div>
         )}
 
@@ -212,10 +210,10 @@ export default function TeacherNewLivePage() {
             <div className="relative group">
                <img src={thumbnail} alt="Pré-visualização da thumbnail" className="w-full h-48 object-cover" />
               <button type="button" onClick={() => setThumbnail("")}
-                className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">Remover</button>
+                className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity">Remover</button>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-700 hover:border-gray-600 bg-gray-900/30 cursor-pointer transition-colors">
+            <label className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-700 hover:border-gray-600 bg-gray-900 cursor-pointer transition-colors">
               {uploadingThumb ? <Loader2 className="h-8 w-8 animate-spin text-green-400" />
                 : <><ImageIcon className="h-8 w-8 text-gray-600 mb-2" /><span className="text-sm text-gray-500">Clique para enviar uma imagem</span></>}
               <input type="file" accept="image/*" onChange={handleThumbnailUpload} className="hidden" disabled={uploadingThumb} />

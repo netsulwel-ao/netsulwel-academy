@@ -10,7 +10,7 @@ import { logger } from "@/lib/logger";
 import type { Course } from "@/types/course";
 import {
   type CatalogFilters, type SortKey,
-  DEFAULT_FILTERS, normalizeCourseType, toMs,
+  DEFAULT_FILTERS, toMs,
 } from "../_types/catalog";
 
 interface UseCoursesCatalogReturn {
@@ -142,7 +142,7 @@ export function useCoursesCatalog(): UseCoursesCatalogReturn {
   }, []);
 
   const hasActiveFilters = useMemo(
-    () => search.trim() !== "" || filters.cat !== "all" || filters.type !== "all" ||
+    () => search.trim() !== "" || filters.cat !== "all" ||
           filters.level !== "all" || filters.price !== "all" || filters.certificate !== null || sort !== "recent",
     [search, filters, sort]
   );
@@ -151,7 +151,6 @@ export function useCoursesCatalog(): UseCoursesCatalogReturn {
     const q = search.toLowerCase().trim();
     let result = courses.filter(c => {
       if (filters.cat !== "all" && c.category !== filters.cat) return false;
-      if (filters.type !== "all" && c.type !== filters.type) return false;
       if (filters.level !== "all" && c.level !== filters.level) return false;
       if (filters.price === "free" && c.price > 0) return false;
       if (filters.price === "paid" && c.price === 0) return false;
@@ -179,7 +178,7 @@ export function useCoursesCatalog(): UseCoursesCatalogReturn {
   const accessible = useMemo(
     () => filtered.filter(c =>
       ownCourseIds.has(c.id!) ||
-      canAccessCourse(normalizeCourseType(c.type), c.id!, enrolledCourses, c.price, c.accessCode)
+      canAccessCourse(c.id!, enrolledCourses, c.price, c.accessCode)
     ),
     [filtered, enrolledCourses, ownCourseIds, canAccessCourse]
   );
@@ -187,7 +186,7 @@ export function useCoursesCatalog(): UseCoursesCatalogReturn {
   const locked = useMemo(
     () => filtered.filter(c =>
       !ownCourseIds.has(c.id!) &&
-      !canAccessCourse(normalizeCourseType(c.type), c.id!, enrolledCourses, c.price, c.accessCode)
+      !canAccessCourse(c.id!, enrolledCourses, c.price, c.accessCode)
     ),
     [filtered, enrolledCourses, ownCourseIds, canAccessCourse]
   );

@@ -52,23 +52,23 @@ export default function CourseLiveStudioPage() {
         <ArrowLeft className="h-4 w-4" /> Voltar aos cursos
       </Link>
 
-      <div className="bg-gray-900/40 border border-gray-800 p-6 mb-6">
+      <div className="bg-gray-900 border border-gray-800 p-6 mb-6">
         <h1 className="text-xl font-bold text-white">{course.title}</h1>
         <p className="text-sm text-gray-400 mt-1">Estúdio de Aulas ao Vivo</p>
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold bg-purple-500/15 text-purple-400 border border-purple-500/25 mt-2">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-sm font-bold bg-purple-500/15 text-purple-400 border border-purple-500/25 mt-2">
           <Radio className="h-3.5 w-3.5" /> Ao Vivo
         </span>
       </div>
 
       <div className="space-y-3">
         {course.modules?.map((module, mi) => (
-          <div key={mi} className="bg-gray-900/40 border border-gray-800 overflow-hidden">
+          <div key={mi} className="bg-gray-900 border border-gray-800 overflow-hidden">
             <div className="px-5 py-3 bg-gray-900 border-b border-gray-800">
               <p className="text-sm font-bold text-blue-400 uppercase tracking-wider">
                 Módulo {mi + 1}{module.title ? ` — ${module.title}` : ""}
               </p>
             </div>
-            <div className="divide-y divide-gray-800/60">
+            <div className="divide-y divide-gray-800">
               {module.videos.map((video, vi) => {
                 if (!video.scheduledAt) return null;
                 const st = getLessonStatus(video.scheduledAt, video.duration);
@@ -84,10 +84,10 @@ export default function CourseLiveStudioPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-white">{video.title || `Aula ${vi + 1}`}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{new Date(video.scheduledAt).toLocaleString("pt-AO")}</p>
-                      {video.duration && <p className="text-xs text-gray-600">Duração: {video.duration} min</p>}
+                      <p className="text-sm text-gray-500 mt-0.5">{new Date(video.scheduledAt).toLocaleString("pt-AO")}</p>
+                      {video.duration && <p className="text-sm text-gray-600">Duração: {video.duration} min</p>}
                     </div>
-                    <span className={`px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${
+                    <span className={`px-2.5 py-1 text-sm font-bold uppercase tracking-wider ${
                       st.status === "live" ? "bg-green-500/15 text-green-400 border border-green-500/25" :
                       st.status === "ended" ? "bg-gray-800 text-gray-500 border border-gray-700" :
                       "bg-blue-500/15 text-blue-400 border border-blue-500/25"

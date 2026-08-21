@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { ChevronLeft, Users, MessageCircle, Loader2 } from "lucide-react";
+import { ChevronLeft, Users, MessageCircle, Loader2, BookOpen } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import ChatRoom from "@/components/chat/ChatRoom";
@@ -43,13 +43,13 @@ export default function ChatRoomPage() {
         <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
           <MessageCircle className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
         </div>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">
+        <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">
           // não encontrado
         </p>
         <p className="text-sm text-gray-600 mb-4">Conversa não encontrada.</p>
         <Link
           href="/dashboard/chats"
-          className="font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors"
+          className="font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors"
         >
           ← Voltar
         </Link>
@@ -70,18 +70,18 @@ export default function ChatRoomPage() {
     <div className="flex h-[calc(100vh-8rem)] flex-col max-w-[80rem] mx-auto">
 
       {/* ── Header da sala ── */}
-      <div className="flex items-center gap-3 border border-gray-800/60 bg-gray-900/20 px-4 py-3 shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 border border-gray-800 bg-gray-900 px-3 sm:px-4 py-3 shrink-0">
         {/* Voltar */}
         <button
           onClick={() => router.push(backHref)}
-          className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-gray-700 hover:text-gray-500 transition-colors shrink-0"
+          className="flex items-center gap-1 font-mono text-[13px] uppercase tracking-widest text-gray-700 hover:text-gray-500 transition-colors shrink-0"
           aria-label="Voltar aos chats"
         >
-          <ChevronLeft className="h-3 w-3" />
+          <ChevronLeft className="h-4 w-4" />
         </button>
 
         {/* Avatar */}
-        <div className="h-9 w-9 shrink-0 overflow-hidden border border-gray-800/60">
+        <div className="h-9 w-9 shrink-0 overflow-hidden border border-gray-800">
           {isGroup ? (
             <div className="flex h-full w-full items-center justify-center bg-gray-900">
               <Users className="h-4 w-4 text-purple/70" strokeWidth={1.5} />
@@ -94,7 +94,7 @@ export default function ChatRoomPage() {
         {/* Info */}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold text-gray-200 truncate">{title}</p>
-          <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700 mt-0.5">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mt-0.5 truncate">
             {isGroup ? `grupo · ${chat.courseTitle}` : "chat individual"}
           </p>
         </div>
@@ -102,14 +102,21 @@ export default function ChatRoomPage() {
         {/* Link para o curso */}
         <Link
           href={`/dashboard/courses/${chat.courseId}`}
-          className="shrink-0 font-mono text-[9px] uppercase tracking-widest text-gray-700 hover:text-purple/70 transition-colors"
+          className="shrink-0 font-mono text-[13px] uppercase tracking-widest text-gray-700 hover:text-purple/70 transition-colors hidden sm:inline"
         >
           ver curso →
+        </Link>
+        <Link
+          href={`/dashboard/courses/${chat.courseId}`}
+          className="shrink-0 sm:hidden text-gray-700 hover:text-purple/70 transition-colors"
+          aria-label="Ver curso"
+        >
+          <BookOpen className="h-4 w-4" strokeWidth={1.5} />
         </Link>
       </div>
 
       {/* ── Sala de mensagens ── */}
-      <div className="flex-1 overflow-hidden border border-t-0 border-gray-800/60">
+      <div className="flex-1 overflow-hidden border border-t-0 border-gray-800">
         <ChatRoom chatId={chatId} height="h-full" />
       </div>
     </div>

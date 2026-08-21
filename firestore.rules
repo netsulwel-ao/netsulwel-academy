@@ -56,10 +56,6 @@ service cloud.firestore {
       return role in ["admin", "teacher", "aluno", "institution"];
     }
 
-    function isValidPlan(plan) {
-      return plan in ["free", "smart", "golden"];
-    }
-
     function hasRequiredFields(fields) {
       return request.resource.data.keys().hasAll(fields);
     }
@@ -72,14 +68,13 @@ service cloud.firestore {
         (resource.data.role in ["teacher", "institution"]);
       
       allow create: if isOwner(uid) &&
-        hasRequiredFields(['email', 'role', 'plan']) &&
+        hasRequiredFields(['email', 'role']) &&
         isValidEmail(request.resource.data.email) &&
-        isValidRole(request.resource.data.role) &&
-        isValidPlan(request.resource.data.plan);
+        isValidRole(request.resource.data.role);
       
       allow update: if isAdmin() ||
         (isOwner(uid) && !request.resource.data.diff(resource.data).affectedKeys()
-          .hasAny(["role", "plan"])); // Usuários não podem mudar role/plan
+          .hasAny(["role"])); // Usuários não podem mudar role
       
       allow delete: if isAdmin();
 
@@ -146,7 +141,7 @@ service cloud.firestore {
 
     // ── lives ─────────────────────────────────────────────
     match /lives/{liveId} {
-      allow read: if isAuth();
+      allow read: if true;
       allow create: if isAdminOrTeacher();
       allow update: if isAdmin() ||
         (isTeacher() && resource.data.createdBy == request.auth.uid);
@@ -360,7 +355,7 @@ service cloud.firestore {
       // Actualizar lastMessage: qualquer participante
       allow update: if isAuth() && request.auth.uid in resource.data.participants &&
         request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(["lastMessage", "lastMessageAt", "lastMessageBy", "lastMessageByName", "participants", "participantNames", "participantPhotos"]);
+          .hasOnly(["lastMessage", "lastMessageAt", "lastMessageBy", "lastMessageByName", "participants", "participantNames", "participantPhotos", "unreadBy"]);
 
       allow delete: if isAdmin() ||
         (isAdminOrTeacher() && resource.data.createdBy == request.auth.uid);

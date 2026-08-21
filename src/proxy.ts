@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-function isValidUid(v?: string) {
-  return v && v.length > 10;
+function isValidUid(v?: string): boolean {
+  return typeof v === "string" && v.length >= 28 && v.length <= 128;
 }
 
 export function proxy(request: NextRequest) {
@@ -10,29 +10,24 @@ export function proxy(request: NextRequest) {
   const uid = request.cookies.get("auth-uid")?.value;
   const hasValidUid = isValidUid(uid);
 
-  const isProtected = pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
-  const isAuthPage = 
-    pathname === "/login" || 
-    pathname === "/register" || 
-    pathname.startsWith("/register/") || 
+  const isProtected =
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/dashboard");
+
+  const isAuthPage =
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname.startsWith("/register/") ||
     pathname === "/verify-email";
-  const isAccessLink = pathname.startsWith("/access/"); // NUNCA redirecionar links de acesso
-  const isStatic = pathname.startsWith("/_next") || pathname.startsWith("/favicon");
 
-  if (isStatic) return NextResponse.next();
+  const isAccessLink = pathname.startsWith("/access/");
 
-  // Links de acesso privado: SEMPRE deixar passar para a página processar
-  // A página /access/[token] trata do login e redirect internamente
-  if (isAccessLink) {
-    return NextResponse.next();
-  }
-  
-  // Páginas de auth (login/register): redirecionar para dashboard se já logado
+  if (isAccessLink) return NextResponse.next();
+
   if (isAuthPage && hasValidUid) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  // Páginas protegidas: redirecionar para login se não autenticado
   if (isProtected && !hasValidUid) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname + request.nextUrl.search);
@@ -41,7 +36,3 @@ export function proxy(request: NextRequest) {
 
   return NextResponse.next();
 }
-
-export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|.*\\.png$|.*\\.svg$).*)"],
-};

@@ -134,10 +134,7 @@ export default function SalesPage() {
           }
         } else if (sale.type === "live" && sale.itemId) {
           await updateDoc(userRef, { enrolledLives: arrayUnion(sale.itemId) });
-        } else if (sale.type === "smart" || sale.type === "golden") {
-          await updateDoc(userRef, { plan: sale.type });
         }
-
         // ── Calcular taxa para cursos/lives avulsos ──
         if ((sale.type === "standalone" || sale.type === "live") && sale.itemId) {
           let feePct = 0;
@@ -216,23 +213,6 @@ export default function SalesPage() {
           await updateDoc(userRef, { enrolledCourses: arrayRemove(sale.itemId) });
         } else if (sale.type === "live" && sale.itemId) {
           await updateDoc(userRef, { enrolledLives: arrayRemove(sale.itemId) });
-        } else if (sale.type === "smart" || sale.type === "golden") {
-          // Find the highest remaining plan from other active sales
-          const otherSales = await getDocs(
-            query(
-              collection(db, "sales"),
-              where("userId", "==", sale.userId),
-              where("status", "==", "confirmed")
-            )
-          );
-          let highestPlan: "free" | "smart" | "golden" = "free";
-          otherSales.docs.forEach((d) => {
-            if (d.id === id) return;
-            const t = d.data().type;
-            if (t === "golden") highestPlan = "golden";
-            else if (t === "smart" && highestPlan !== "golden") highestPlan = "smart";
-          });
-          await updateDoc(userRef, { plan: highestPlan });
         }
       }
 
@@ -321,7 +301,7 @@ export default function SalesPage() {
           { label: "Vendas Confirmadas", value: stats.count, icon: ShoppingCart, color: "text-purple-400", bg: "bg-purple-500/10" },
           { label: "Pendentes", value: stats.pending, icon: Clock, color: "text-amber-400", bg: "bg-amber-500/10" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="bg-gray-900/40 p-5 flex items-center justify-between backdrop-blur-xl">
+          <div key={label} className="bg-gray-900 p-5 flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-400">{label}</p>
               <p className="text-2xl font-bold text-white mt-1">{value}</p>
@@ -369,11 +349,11 @@ export default function SalesPage() {
           compact
         />
       ) : (
-        <div className="bg-gray-900/40 backdrop-blur-xl overflow-hidden">
+        <div className="bg-gray-900 overflow-hidden">
           {/* Desktop table */}
           <div className="hidden sm:block overflow-x-auto">
             <div className="min-w-[900px]">
-              <div className="grid grid-cols-[1fr_100px_100px_120px_120px_100px_70px] gap-2 px-5 py-3 border-b border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
+              <div className="grid grid-cols-[1fr_100px_100px_120px_120px_100px_70px] gap-2 px-5 py-3 border-b border-gray-800 text-sm font-bold text-gray-500 uppercase tracking-wider">
                 <span>Cliente / Item</span>
                 <span>Líquido</span>
                 <span>Taxa</span>
@@ -382,36 +362,36 @@ export default function SalesPage() {
                 <span>Status</span>
                 <span></span>
               </div>
-              <div className="divide-y divide-gray-800/60">
+              <div className="divide-y divide-gray-800">
                 {filtered.map((sale) => {
                   const sc = STATUS_CONFIG[sale.status];
                   const StatusIcon = sc.icon;
                   return (
-                    <div key={sale.id} className="grid grid-cols-[1fr_100px_100px_120px_120px_100px_70px] gap-2 px-5 py-4 items-center hover:bg-gray-800/30 transition-colors">
+                    <div key={sale.id} className="grid grid-cols-[1fr_100px_100px_120px_120px_100px_70px] gap-2 px-5 py-4 items-center hover:bg-gray-800 transition-colors">
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-white truncate">{sale.userName}</p>
-                        <p className="text-xs text-gray-500 truncate">{sale.userEmail}</p>
-                        {sale.itemTitle && <p className="text-xs text-gray-600 truncate mt-0.5">{sale.itemTitle}</p>}
-                        <p className="text-xs text-gray-700 mt-0.5">{formatDate(sale.createdAt)}</p>
+                        <p className="text-sm text-gray-500 truncate">{sale.userEmail}</p>
+                        {sale.itemTitle && <p className="text-sm text-gray-600 truncate mt-0.5">{sale.itemTitle}</p>}
+                        <p className="text-sm text-gray-700 mt-0.5">{formatDate(sale.createdAt)}</p>
                       </div>
                       <div>
                         <p className="text-sm font-bold text-green-400">{formatKz(sale.netAmount ?? sale.amount)}</p>
-                        {sale.sellerName && <p className="text-[10px] text-gray-600 truncate">{sale.sellerName}</p>}
+                        {sale.sellerName && <p className="text-[13px] text-gray-600 truncate">{sale.sellerName}</p>}
                       </div>
-                      <span className="text-xs text-gray-400">{sale.fee ? formatKz(sale.fee) : "—"}</span>
-                      <span className="text-xs text-gray-400">{TYPE_LABELS[sale.type]}</span>
+                      <span className="text-sm text-gray-400">{sale.fee ? formatKz(sale.fee) : "—"}</span>
+                      <span className="text-sm text-gray-400">{TYPE_LABELS[sale.type]}</span>
                       <span className="text-sm font-bold text-white">{formatKz(sale.amount)}</span>
                       <div className="relative">
                         {isAdmin ? (
                           <select value={sale.status}
                             onChange={(e) => updateStatus(sale.id!, e.target.value as Sale["status"])}
-                            className={`w-full text-xs font-bold px-2 py-1.5 border appearance-none cursor-pointer focus:outline-none ${sc.bg} ${sc.color}`}>
+                            className={`w-full text-sm font-bold px-2 py-1.5 border appearance-none cursor-pointer focus:outline-none ${sc.bg} ${sc.color}`}>
                             <option value="pending">Pendente</option>
                             <option value="confirmed">Confirmado</option>
                             <option value="cancelled">Cancelado</option>
                           </select>
                         ) : (
-                          <span className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-1.5 border ${sc.bg} ${sc.color}`}>
+                          <span className={`inline-flex items-center gap-1 text-sm font-bold px-2 py-1.5 border ${sc.bg} ${sc.color}`}>
                             <StatusIcon className="h-3 w-3" />{sc.label}
                           </span>
                         )}
@@ -433,22 +413,22 @@ export default function SalesPage() {
                   );
                 })}
               </div>
-              <div className="px-5 py-3 border-t border-gray-800 text-xs text-gray-500">
+              <div className="px-5 py-3 border-t border-gray-800 text-sm text-gray-500">
                 {filtered.length} de {sales.length} vendas
               </div>
             </div>
           </div>
           {/* Mobile cards */}
-          <div className="sm:hidden divide-y divide-gray-800/60">
+          <div className="sm:hidden divide-y divide-gray-800">
             {filtered.map((sale) => {
               const sc = STATUS_CONFIG[sale.status];
               const StatusIcon = sc.icon;
               return (
-                <div key={sale.id} className="px-4 py-4 space-y-2 hover:bg-gray-800/30 transition-colors">
+                <div key={sale.id} className="px-4 py-4 space-y-2 hover:bg-gray-800 transition-colors">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-white truncate">{sale.userName}</p>
-                      <p className="text-xs text-gray-500 truncate">{sale.userEmail}</p>
+                      <p className="text-sm text-gray-500 truncate">{sale.userEmail}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {sale.receiptUrl && (
@@ -464,8 +444,8 @@ export default function SalesPage() {
                       )}
                     </div>
                   </div>
-                  {sale.itemTitle && <p className="text-xs text-gray-400 truncate">{sale.itemTitle}</p>}
-                  <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
+                  {sale.itemTitle && <p className="text-sm text-gray-400 truncate">{sale.itemTitle}</p>}
+                  <div className="flex items-center gap-3 text-sm text-gray-500 flex-wrap">
                     <span className="font-bold text-white text-sm">{formatKz(sale.amount)}</span>
                     <span>·</span>
                     <span>{TYPE_LABELS[sale.type]}</span>
@@ -478,13 +458,13 @@ export default function SalesPage() {
                     {isAdmin ? (
                       <select value={sale.status}
                         onChange={(e) => updateStatus(sale.id!, e.target.value as Sale["status"])}
-                        className={`shrink-0 text-xs font-bold px-2 py-1 border appearance-none cursor-pointer focus:outline-none ${sc.bg} ${sc.color}`}>
+                        className={`shrink-0 text-sm font-bold px-2 py-1 border appearance-none cursor-pointer focus:outline-none ${sc.bg} ${sc.color}`}>
                         <option value="pending">Pendente</option>
                         <option value="confirmed">Confirmado</option>
                         <option value="cancelled">Cancelado</option>
                       </select>
                     ) : (
-                      <span className={`shrink-0 inline-flex items-center gap-1 text-xs font-bold px-2 py-1 border ${sc.bg} ${sc.color}`}>
+                      <span className={`shrink-0 inline-flex items-center gap-1 text-sm font-bold px-2 py-1 border ${sc.bg} ${sc.color}`}>
                         <StatusIcon className="h-3 w-3" />{sc.label}
                       </span>
                     )}
@@ -492,7 +472,7 @@ export default function SalesPage() {
                 </div>
               );
             })}
-            <div className="px-4 py-3 text-xs text-gray-500">
+            <div className="px-4 py-3 text-sm text-gray-500">
               {filtered.length} de {sales.length} vendas
             </div>
           </div>

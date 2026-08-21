@@ -90,7 +90,7 @@ export default function ModuleQuizPage() {
 
   if (!quiz) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center text-gray-600">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center text-text-muted">
         <BookOpen className="h-12 w-12 mb-4 opacity-40" />
         <p className="text-sm font-medium">Nenhum quiz disponível para este módulo</p>
         <Link href={`/dashboard/courses/${courseId}`} className="mt-4 text-sm text-purple hover:text-purple-light">
@@ -116,15 +116,15 @@ export default function ModuleQuizPage() {
           <h1 className={`text-3xl font-bold ${lastResult.passed ? "text-green-400" : "text-red-400"}`}>
             {lastResult.passed ? "Aprovado!" : "Não Aprovado"}
           </h1>
-          <p className="text-5xl font-bold text-white mt-4">{lastResult.score}%</p>
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-5xl font-bold text-text-primary mt-4">{lastResult.score}%</p>
+          <p className="text-sm text-text-muted mt-2">
             Tentativa {lastResult.attempt} de {quiz.maxAttempts} · Nota mínima: {quiz.passingScore}%
           </p>
         </div>
 
         {/* Review */}
-        <div className="bg-gray-900/40 border border-gray-800 p-6 mb-6">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Revisão das Respostas</h3>
+        <div className="bg-bg-surface border border-border-default p-6 mb-6">
+          <h3 className="text-sm font-bold text-text-muted uppercase tracking-wider mb-4">Revisão das Respostas</h3>
           <div className="space-y-4">
             {quiz.questions.map((q, qi) => {
               const userAnswer = lastResult!.answers[q.id];
@@ -140,14 +140,14 @@ export default function ModuleQuizPage() {
                       : <XCircle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
                     }
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-white mb-2">{q.question}</p>
+                      <p className="text-sm font-medium text-text-primary mb-2">{q.question}</p>
                       <div className="space-y-1">
                         {q.options.map((opt, oi) => {
                           const isUserChoice = oi === userAnswer;
                           let className = "text-sm px-3 py-1.5 border ";
                           if (correct && isUserChoice) className += "border-green-700 bg-green-950/20 text-green-300";
                           else if (isUserChoice && !correct) className += "border-red-700 bg-red-950/20 text-red-300";
-                          else className += "border-gray-800 text-gray-500";
+                          else className += "border-border-default text-text-muted";
                           return <div key={oi} className={className}>{opt}</div>;
                         })}
                       </div>
@@ -162,12 +162,12 @@ export default function ModuleQuizPage() {
         <div className="flex items-center justify-center gap-3">
           {!lastResult.passed && canRetry && (
             <button onClick={() => { setShowResult(false); setLastResult(null); }}
-              className="flex items-center gap-2 px-6 py-3 bg-purple hover:bg-purple-light text-white font-bold transition-colors">
+              className="flex items-center gap-2 px-6 py-3 bg-purple hover:bg-purple-light text-text-primary font-bold transition-colors">
               <RotateCcw className="h-4 w-4" /> Tentar novamente
             </button>
           )}
           <Link href={`/dashboard/courses/${courseId}`}
-            className="flex items-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium transition-colors">
+            className="flex items-center gap-2 px-6 py-3 bg-bg-surface-2 hover:bg-hover-bg text-text-secondary font-medium transition-colors">
             <ArrowLeft className="h-4 w-4" /> Voltar ao curso
           </Link>
         </div>
@@ -181,19 +181,19 @@ export default function ModuleQuizPage() {
       {/* Header */}
       <div className="mb-6">
         <Link href={`/dashboard/courses/${courseId}`}
-          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-3">
+          className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-text-primary transition-colors mb-3">
           <ArrowLeft className="h-4 w-4" /> Voltar ao curso
         </Link>
-        <h1 className="text-2xl font-bold text-white">Quiz — Módulo {moduleIndex + 1}</h1>
-        <p className="text-sm text-gray-400 mt-1">
+        <h1 className="text-2xl font-bold text-text-primary">Quiz — Módulo {moduleIndex + 1}</h1>
+        <p className="text-sm text-text-muted mt-1">
           {quiz.questions.length} perguntas · Nota mínima: {quiz.passingScore}% · {quiz.maxAttempts} tentativas
         </p>
       </div>
 
       {/* Previous attempts */}
       {moduleResults.length > 0 && (
-        <div className="bg-gray-900/40 border border-gray-800 p-4 mb-6">
-          <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Tentativas anteriores</h3>
+        <div className="bg-bg-surface border border-border-default p-4 mb-6">
+          <h3 className="text-sm font-bold text-text-muted uppercase tracking-wider mb-2">Tentativas anteriores</h3>
           <div className="flex items-center gap-4">
             {moduleResults.map((r, i) => (
               <div key={r.id} className={`px-3 py-1.5 text-sm font-bold ${
@@ -203,7 +203,7 @@ export default function ModuleQuizPage() {
               </div>
             ))}
             {bestResult && (
-              <span className="text-sm text-gray-500 ml-auto">
+              <span className="text-sm text-text-muted ml-auto">
                 Melhor: {bestResult.score}% {bestResult.passed ? "(aprovado)" : ""}
               </span>
             )}

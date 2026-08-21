@@ -1,7 +1,7 @@
 type LogLevel = "debug" | "info" | "warn" | "error";
 
 interface LogContext {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const isDevelopment = process.env.NODE_ENV === "development";
@@ -37,11 +37,11 @@ export const logger = {
     console.warn(log.formatted, context || "");
   },
 
-  error: (message: string, error?: any, context?: LogContext) => {
+  error: (message: string, error?: unknown, context?: LogContext) => {
     // FirebaseError (and many native errors) have non-enumerable properties,
     // so spreading produces {}. Normalise to a plain object first.
     const normalizedError = error instanceof Error
-      ? { message: error.message, name: error.name, code: (error as any).code, stack: error.stack }
+      ? { message: error.message, name: error.name, code: (error as unknown as Record<string, unknown>).code, stack: error.stack }
       : error;
     const log = formatLog("error", message, { ...context, error: normalizedError });
     console.error(log.formatted, normalizedError ?? context ?? "");

@@ -156,7 +156,7 @@ export default function TeacherStudentsPage() {
 
       {/* Cabeçalho */}
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-green/60 mb-2">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green/60 mb-2">
           // alunos
         </p>
         <h1 className="text-2xl font-bold text-gray-100">Alunos</h1>
@@ -185,7 +185,7 @@ export default function TeacherStudentsPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Pesquisar por nome ou email..."
-            className="w-full border border-gray-800 bg-gray-900/60 py-2.5 pl-9 pr-8 text-sm text-gray-200 placeholder-gray-700 focus:border-green/40 focus:outline-none transition-colors"
+            className="w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-8 text-sm text-gray-200 placeholder-gray-700 focus:border-green/40 focus:outline-none transition-colors"
           />
           {search && (
             <button type="button" onClick={() => setSearch("")}
@@ -206,17 +206,17 @@ export default function TeacherStudentsPage() {
 
       {/* Empty state */}
       {!loading && students.length === 0 && !error && (
-        <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-20 text-center">
+        <div className="flex flex-col items-center justify-center border border-gray-800 bg-gray-900 py-20 text-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
             <Users className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
           </div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">// sem alunos</p>
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">// sem alunos</p>
           <p className="text-sm text-gray-600 mb-5">
             Ainda não tens alunos inscritos nos teus cursos.
           </p>
           <Link
             href="/dashboard/teacher/courses"
-            className="flex items-center gap-1.5 border border-gray-800 bg-gray-900/60 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:border-gray-700 hover:text-gray-400 transition-colors"
+            className="flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:border-gray-700 hover:text-gray-400 transition-colors"
           >
             <BookOpen className="h-3 w-3" strokeWidth={1.5} /> Ver cursos
           </Link>
@@ -225,8 +225,8 @@ export default function TeacherStudentsPage() {
 
       {/* Sem resultados de pesquisa */}
       {!loading && students.length > 0 && filtered.length === 0 && (
-        <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-12 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">// sem resultados</p>
+        <div className="flex flex-col items-center justify-center border border-gray-800 bg-gray-900 py-12 text-center">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">// sem resultados</p>
           <p className="text-sm text-gray-600">
             Nenhum aluno com &ldquo;{search}&rdquo;.
           </p>
@@ -235,21 +235,21 @@ export default function TeacherStudentsPage() {
 
       {/* Lista */}
       {!loading && filtered.length > 0 && (
-        <div className="border border-gray-800/60 divide-y divide-gray-800/40">
+        <div className="border border-gray-800 divide-y divide-gray-800">
           {filtered.map(student => (
             <div
               key={student.uid}
-              className="flex items-center gap-4 px-5 py-4 hover:bg-gray-900/20 transition-colors"
+              className="flex items-center gap-4 px-5 py-4 hover:bg-gray-900 transition-colors"
             >
               {/* Avatar com Identicon */}
-              <div className="h-10 w-10 shrink-0 overflow-hidden border border-gray-800/60">
+              <div className="h-10 w-10 shrink-0 overflow-hidden border border-gray-800">
                 <Avatar uid={student.uid} photoURL={student.photoURL} name={student.name} size={40} />
               </div>
 
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-gray-200 truncate">{student.name}</p>
-                <p className="text-xs text-gray-600 truncate">{student.email || "Sem email"}</p>
+                <p className="text-sm text-gray-600 truncate">{student.email || "Sem email"}</p>
 
                 {/* Cursos inscritos */}
                 {student.courses.length > 0 && (
@@ -257,13 +257,13 @@ export default function TeacherStudentsPage() {
                     {student.courses.slice(0, 3).map((c, i) => (
                       <span
                         key={i}
-                        className="font-mono text-[9px] uppercase tracking-widest border border-gray-800/60 bg-gray-900/60 px-2 py-0.5 text-gray-600"
+                        className="font-mono text-[13px] uppercase tracking-widest border border-gray-800 bg-gray-900 px-2 py-0.5 text-gray-600"
                       >
                         {c}
                       </span>
                     ))}
                     {student.courses.length > 3 && (
-                      <span className="font-mono text-[9px] text-gray-700">
+                      <span className="font-mono text-[13px] text-gray-700">
                         +{student.courses.length - 3}
                       </span>
                     )}
@@ -274,7 +274,7 @@ export default function TeacherStudentsPage() {
               {/* Acções */}
               <Link
                 href={`/dashboard/professores/${student.uid}`}
-                className="flex h-8 w-8 shrink-0 items-center justify-center border border-gray-800 bg-gray-900/60 text-gray-600 hover:border-gray-700 hover:text-gray-400 transition-all"
+                className="flex h-8 w-8 shrink-0 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-400 transition-all"
                 title="Ver perfil"
                 aria-label={`Ver perfil de ${student.name}`}
               >

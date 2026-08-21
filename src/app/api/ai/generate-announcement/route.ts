@@ -21,9 +21,8 @@ export async function POST(req: NextRequest) {
 
     const targetLabels: Record<string, string> = {
       all: "todos os alunos",
-      free: "alunos no plano gratuito",
-      smart: "alunos no Plano Smart",
-      golden: "alunos no Plano Golden",
+      free: "alunos gratuitos",
+      standalone: "alunos com acesso pago",
     };
 
     const prompt = `És um especialista em marketing para plataformas de educação online. Trabalhas para a Netsulwel Academy, uma plataforma angolana de cursos de tecnologia, finanças e investimentos.
@@ -59,7 +58,7 @@ Regras:
         Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: "llama-3.1-8b-instant",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.8,
         max_tokens: 600,

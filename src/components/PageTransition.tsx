@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { useTransition } from "@/contexts/TransitionContext";
 
 interface PageTransitionProps {
@@ -22,18 +23,34 @@ interface PageTransitionProps {
   type?: "default" | "auth" | "dashboard";
 }
 
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+const variants: Record<"default" | "auth" | "dashboard", Variants> = {
+  default: {
+    hidden: { opacity: 0, y: 12, scale: 0.99 },
+    visible: { opacity: 1, y: 0, scale: 1 },
+  },
+  auth: {
+    hidden: { opacity: 0, y: 16, filter: "blur(10px)" },
+    visible: { opacity: 1, y: 0, filter: "blur(0px)" },
+  },
+  dashboard: {
+    hidden: { opacity: 0, scale: 0.985 },
+    visible: { opacity: 1, scale: 1 },
+  },
+};
+
+const durations: Record<"default" | "auth" | "dashboard", number> = {
+  default: 0.45,
+  auth: 0.55,
+  dashboard: 0.35,
+};
+
 /**
  * PageTransition Wrapper
- * 
- * Wraps page content with entrance/exit animations and manages transitions.
- * Combines fade + scale effects for a premium feel.
- * 
- * Usage:
- * ```tsx
- * <PageTransition type="auth">
- *   <YourPageContent />
- * </PageTransition>
- * ```
+ *
+ * Wraps page content with premium Framer Motion entrance animations and
+ * manages the transition lifecycle (signals the overlay to reveal).
  */
 export function PageTransition({
   children,
@@ -42,6 +59,7 @@ export function PageTransition({
   type = "default",
 }: PageTransitionProps) {
   const { endTransition, setPreserveScroll } = useTransition();
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     setPreserveScroll(preserveScroll);
@@ -51,26 +69,24 @@ export function PageTransition({
     // End transition when page mounts (new page is ready)
     const timer = setTimeout(() => {
       endTransition();
-    }, exitDelay + 100); // Small buffer for safety
+    }, exitDelay + 80);
 
     return () => clearTimeout(timer);
   }, [endTransition, exitDelay]);
 
-  const getAnimationClass = () => {
-    switch (type) {
-      case "auth":
-        return "animate-page-enter-auth";
-      case "dashboard":
-        return "animate-page-enter-dashboard";
-      case "default":
-      default:
-        return "animate-page-enter";
-    }
-  };
+  if (reduceMotion) {
+    return <div className="w-full">{children}</div>;
+  }
 
   return (
-    <div className={`w-full ${getAnimationClass()}`}>
+    <motion.div
+      className="w-full"
+      variants={variants[type]}
+      initial="hidden"
+      animate="visible"
+      transition={{ duration: durations[type], ease: EASE }}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }

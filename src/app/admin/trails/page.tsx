@@ -34,7 +34,7 @@ function TypeBadge({ type }: { type?: string }) {
   const label: Record<string, string> = { standalone: "standalone", smart: "smart", golden: "golden" };
   const t = type ?? "standalone";
   return (
-    <span className={`font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 border ${map[t] ?? "border-gray-700 text-gray-600"}`}>
+    <span className={`font-mono text-[13px] uppercase tracking-widest px-2 py-0.5 border ${map[t] ?? "border-gray-700 text-gray-600"}`}>
       {label[t] ?? t}
     </span>
   );
@@ -42,7 +42,7 @@ function TypeBadge({ type }: { type?: string }) {
 
 function StatusBadge({ status }: { status: "published" | "draft" }) {
   return (
-    <span className={`font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 border ${
+    <span className={`font-mono text-[13px] uppercase tracking-widest px-2 py-0.5 border ${
       status === "published"
         ? "border-green/30 text-green/70 bg-green/8"
         : "border-amber-500/30 text-amber-400/70 bg-amber-500/8"
@@ -149,7 +149,7 @@ export default function TrailsPage() {
       {/* ── Cabeçalho ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
             // gestão de trilhas
           </p>
           <h1 className="text-2xl font-bold text-gray-100">Trilhas</h1>
@@ -159,7 +159,7 @@ export default function TrailsPage() {
         </div>
         <Link
           href="/admin/trails/new"
-          className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all shrink-0"
+          className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all shrink-0"
         >
           <Plus className="h-3 w-3" /> Nova trilha
         </Link>
@@ -175,7 +175,7 @@ export default function TrailsPage() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Pesquisar trilhas..."
-              className="w-full border border-gray-800/60 bg-gray-900/10 pl-9 pr-9 py-2.5 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors"
+              className="w-full border border-gray-800 bg-gray-900 pl-9 pr-9 py-2.5 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -185,10 +185,10 @@ export default function TrailsPage() {
           </div>
           <button
             onClick={() => setShowFilters(v => !v)}
-            className={`flex items-center gap-1.5 border px-3 py-2.5 font-mono text-[10px] uppercase tracking-widest transition-all shrink-0 ${
+            className={`flex items-center gap-1.5 border px-3 py-2.5 font-mono text-[13px] uppercase tracking-widest transition-all shrink-0 ${
               hasFilters
                 ? "border-purple/30 bg-purple/8 text-purple/70"
-                : "border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-400"
+                : "border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-400"
             }`}
           >
             <Filter className="h-3 w-3" strokeWidth={1.5} />
@@ -198,11 +198,11 @@ export default function TrailsPage() {
         </div>
 
         {showFilters && (
-          <div className="flex flex-wrap items-center gap-2 border border-gray-800/40 bg-gray-900/10 px-4 py-3">
+          <div className="flex flex-wrap items-center gap-2 border border-gray-800 bg-gray-900 px-4 py-3">
             <select
               value={filterStatus}
               onChange={e => setFilterStatus(e.target.value as typeof filterStatus)}
-              className="border border-gray-800/60 bg-gray-900 text-xs text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
+              className="border border-gray-800 bg-gray-900 text-sm text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
             >
               <option value="all">Todos os estados</option>
               <option value="published">Publicada</option>
@@ -211,7 +211,7 @@ export default function TrailsPage() {
             <select
               value={filterType}
               onChange={e => setFilterType(e.target.value as typeof filterType)}
-              className="border border-gray-800/60 bg-gray-900 text-xs text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
+              className="border border-gray-800 bg-gray-900 text-sm text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
             >
               <option value="all">Todos os tipos</option>
               <option value="standalone">Standalone</option>
@@ -221,7 +221,7 @@ export default function TrailsPage() {
             {hasFilters && (
               <button
                 onClick={clearFilters}
-                className="font-mono text-[9px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-1"
+                className="font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-1"
               >
                 <X className="h-3 w-3" /> Limpar
               </button>
@@ -247,24 +247,24 @@ export default function TrailsPage() {
 
       {/* ── Empty state ── */}
       {!loading && filtered.length === 0 && (
-        <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-20 text-center">
+        <div className="flex flex-col items-center justify-center border border-gray-800 bg-gray-900 py-20 text-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
             <Layers className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
           </div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">
             {hasFilters ? "// sem resultados" : "// sem trilhas"}
           </p>
           <p className="text-sm text-gray-600 mb-5">
             {hasFilters ? "Nenhuma trilha corresponde aos filtros." : "Agrupa cursos em sequências de aprendizagem."}
           </p>
           {hasFilters ? (
-            <button onClick={clearFilters} className="font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+            <button onClick={clearFilters} className="font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
               ← Limpar filtros
             </button>
           ) : (
             <Link
               href="/admin/trails/new"
-              className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all"
+              className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all"
             >
               <Plus className="h-3 w-3" /> Criar trilha
             </Link>
@@ -274,25 +274,25 @@ export default function TrailsPage() {
 
       {/* ── Tabela ── */}
       {!loading && filtered.length > 0 && (
-        <div className="border border-gray-800/60">
+        <div className="border border-gray-800">
           {/* Cabeçalho */}
-          <div className="hidden lg:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 border-b border-gray-800/40 bg-gray-900/20">
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Trilha</p>
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Tipo</p>
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Conteúdo</p>
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Estado</p>
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Acções</p>
+          <div className="hidden lg:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 border-b border-gray-800 bg-gray-900">
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Trilha</p>
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Tipo</p>
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Conteúdo</p>
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Estado</p>
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Acções</p>
           </div>
 
-          <div className="divide-y divide-gray-800/30">
+          <div className="divide-y divide-gray-800">
             {filtered.map(trail => (
               <div
                 key={trail.id}
-                className="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 items-center px-5 py-4 hover:bg-gray-900/20 transition-colors"
+                className="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 items-center px-5 py-4 hover:bg-gray-900 transition-colors"
               >
                 {/* Thumbnail + título */}
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-12 w-16 shrink-0 overflow-hidden border border-gray-800/60 bg-gray-900">
+                  <div className="h-12 w-16 shrink-0 overflow-hidden border border-gray-800 bg-gray-900">
                     {trail.thumbnail
                       ? <img src={trail.thumbnail} alt={trail.title} className="h-full w-full object-cover" />
                       : <div className="flex h-full w-full items-center justify-center">
@@ -302,7 +302,7 @@ export default function TrailsPage() {
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-gray-200 truncate">{trail.title}</p>
-                    <p className="text-xs text-gray-600 truncate mt-0.5 line-clamp-1">
+                    <p className="text-sm text-gray-600 truncate mt-0.5 line-clamp-1">
                       {trail.description || "Sem descrição"}
                     </p>
                   </div>
@@ -314,7 +314,7 @@ export default function TrailsPage() {
                 </div>
 
                 {/* Conteúdo */}
-                <div className="hidden lg:flex items-center gap-3 font-mono text-xs text-gray-500">
+                <div className="hidden lg:flex items-center gap-3 font-mono text-sm text-gray-500">
                   <span className="flex items-center gap-1">
                     <BookOpen className="h-3 w-3" strokeWidth={1.5} />
                     {trail.coursesCount ?? 0}
@@ -343,7 +343,7 @@ export default function TrailsPage() {
                     onClick={() => handleToggleStatus(trail)}
                     disabled={togglingId === trail.id}
                     title={trail.status === "published" ? "Mover para rascunho" : "Publicar"}
-                    className="flex h-8 w-8 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-300 disabled:opacity-50 transition-all"
+                    className="flex h-8 w-8 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-300 disabled:opacity-50 transition-all"
                   >
                     {togglingId === trail.id
                       ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -357,7 +357,7 @@ export default function TrailsPage() {
                   <Link
                     href={`/admin/trails/${trail.id}/edit`}
                     title="Editar trilha"
-                    className="flex h-8 w-8 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-purple/30 hover:text-purple/70 transition-all"
+                    className="flex h-8 w-8 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-purple/30 hover:text-purple/70 transition-all"
                   >
                     <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
                   </Link>
@@ -379,8 +379,8 @@ export default function TrailsPage() {
             ))}
           </div>
 
-          <div className="px-5 py-3 border-t border-gray-800/40 bg-gray-900/10">
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">
+          <div className="px-5 py-3 border-t border-gray-800 bg-gray-900">
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">
               {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
               {hasFilters && ` (filtrado de ${trails.length})`}
             </p>

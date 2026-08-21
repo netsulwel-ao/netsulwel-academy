@@ -35,8 +35,8 @@ export function Stage({ hostName }: { hostName: string }) {
         ? <VideoTrack trackRef={cameraTrack} className="w-[85%] h-[85%] object-cover" />
         : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-            <VideoOff className="h-12 w-12 text-white/10" />
-            <span className="text-sm text-white/20">Câmara desligada</span>
+            <VideoOff className="h-12 w-12 text-white" />
+            <span className="text-sm text-white">Câmara desligada</span>
           </div>
         )
       }
@@ -45,7 +45,7 @@ export function Stage({ hostName }: { hostName: string }) {
       <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
       <div className="absolute bottom-3 left-3 flex items-center gap-2">
         <span className="text-sm font-semibold text-white drop-shadow-sm">{hostName}</span>
-        <span className="text-[10px] font-medium text-white/50 uppercase tracking-wider">Professor</span>
+        <span className="text-[13px] font-medium text-white uppercase tracking-wider">Professor</span>
       </div>
     </div>
   );

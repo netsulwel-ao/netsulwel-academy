@@ -160,7 +160,7 @@ export default function DashboardSettingsPage() {
 
       {/* Cabeçalho */}
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gray-600 mb-2">// definições</p>
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-gray-600 mb-2">// definições</p>
         <h1 className="text-2xl font-bold text-gray-100">Definições da conta</h1>
         <p className="mt-1 text-sm text-gray-600">Perfil, preferências e segurança.</p>
       </div>
@@ -182,9 +182,9 @@ export default function DashboardSettingsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* ── EDITAR PERFIL ── */}
-        <div className="border border-gray-800/60 bg-gray-900/20 p-6 space-y-5">
+        <div className="border border-gray-800 bg-gray-900 p-6 space-y-5">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-1">// perfil</p>
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-1">// perfil</p>
             <h2 className="text-base font-bold text-gray-200 flex items-center gap-2">
               <User className="h-4 w-4 text-purple/70" strokeWidth={1.5} /> Editar perfil
             </h2>
@@ -192,13 +192,13 @@ export default function DashboardSettingsPage() {
 
           {/* Foto */}
           <div>
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700 mb-2">foto de perfil</p>
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">foto de perfil</p>
             <div className="flex items-center gap-4">
               <div className="h-14 w-14 shrink-0 overflow-hidden border border-gray-800">
                 <Avatar uid={user?.uid ?? ""} photoURL={photoURL} name={displayName} size={56} />
               </div>
               <button type="button" onClick={() => photoInputRef.current?.click()}
-                className="flex items-center gap-1.5 border border-gray-800 bg-gray-900/60 px-3 py-2 text-xs text-gray-500 hover:border-gray-700 hover:text-gray-300 transition-all">
+                className="flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-3 py-2 text-sm text-gray-500 hover:border-gray-700 hover:text-gray-300 transition-all">
                 <Camera className="h-3.5 w-3.5" strokeWidth={1.5} /> Alterar foto
               </button>
               <input ref={photoInputRef} type="file" accept="image/*" className="hidden"
@@ -221,9 +221,9 @@ export default function DashboardSettingsPage() {
 
           {/* Banner */}
           <div>
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700 mb-2">banner / capa</p>
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">banner / capa</p>
             <div className="flex items-center gap-4">
-              <div className="h-14 w-24 shrink-0 overflow-hidden border border-gray-800/60 bg-gray-900">
+              <div className="h-14 w-24 shrink-0 overflow-hidden border border-gray-800 bg-gray-900">
                 {bannerURL
                   ? <img src={bannerURL} alt="Banner" className="h-full w-full object-cover" />
                   : <div className="flex h-full w-full items-center justify-center"><Camera className="h-4 w-4 text-gray-700" strokeWidth={1} /></div>
@@ -231,13 +231,13 @@ export default function DashboardSettingsPage() {
               </div>
               <div className="flex flex-col gap-1">
                 <button type="button" onClick={() => bannerInputRef.current?.click()}
-                  className="flex items-center gap-1.5 border border-gray-800 bg-gray-900/60 px-3 py-1.5 text-xs text-gray-500 hover:border-gray-700 hover:text-gray-300 transition-all">
+                  className="flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-3 py-1.5 text-sm text-gray-500 hover:border-gray-700 hover:text-gray-300 transition-all">
                   <Camera className="h-3 w-3" strokeWidth={1.5} />
                   {bannerURL ? "Alterar" : "Adicionar"}
                 </button>
                 {bannerURL && (
                   <button type="button" onClick={() => setBannerURL("")}
-                    className="text-xs text-gray-700 hover:text-red-400/70 transition-colors">Remover</button>
+                    className="text-sm text-gray-700 hover:text-red-400/70 transition-colors">Remover</button>
                 )}
               </div>
               <input ref={bannerInputRef} type="file" accept="image/*" className="hidden"
@@ -254,31 +254,31 @@ export default function DashboardSettingsPage() {
 
           {/* Nome */}
           <div className="space-y-1.5">
-            <label htmlFor="displayName" className="font-mono text-[9px] uppercase tracking-widest text-gray-700">nome</label>
+            <label htmlFor="displayName" className="font-mono text-[13px] uppercase tracking-widest text-gray-700">nome</label>
             <input id="displayName" type="text" value={displayName} onChange={e => setDisplayName(e.target.value)}
               placeholder="O teu nome"
-              className="w-full border border-gray-800 bg-gray-900/60 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none transition-colors" />
+              className="w-full border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none transition-colors" />
           </div>
 
           {/* Bio */}
           <div className="space-y-1.5">
-            <label htmlFor="bio" className="font-mono text-[9px] uppercase tracking-widest text-gray-700">biografia</label>
+            <label htmlFor="bio" className="font-mono text-[13px] uppercase tracking-widest text-gray-700">biografia</label>
             <textarea id="bio" value={bio} onChange={e => setBio(e.target.value)} rows={3}
               placeholder="Fala sobre ti..."
-              className="w-full border border-gray-800 bg-gray-900/60 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none transition-colors resize-none" />
+              className="w-full border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none transition-colors resize-none" />
           </div>
 
           {/* Vídeo */}
           <div className="space-y-1.5">
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">vídeo de apresentação</p>
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">vídeo de apresentação</p>
             <div className="flex items-center gap-2">
               <button type="button" onClick={() => promoVideoInputRef.current?.click()}
-                className="flex items-center gap-1.5 border border-gray-800 bg-gray-900/60 px-3 py-2 text-xs text-gray-500 hover:border-gray-700 hover:text-gray-300 transition-all shrink-0">
+                className="flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-3 py-2 text-sm text-gray-500 hover:border-gray-700 hover:text-gray-300 transition-all shrink-0">
                 <Play className="h-3 w-3" strokeWidth={1.5} /> Upload
               </button>
               <input type="url" value={promoVideoUrl} onChange={e => setPromoVideoUrl(e.target.value)}
                 placeholder="https://youtube.com/watch?v=..."
-                className="flex-1 border border-gray-800 bg-gray-900/60 px-3 py-2 text-xs text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none transition-colors" />
+                className="flex-1 border border-gray-800 bg-gray-900 px-3 py-2 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none transition-colors" />
               <input ref={promoVideoInputRef} type="file" accept="video/*" className="hidden"
                 onChange={async e => {
                   const file = e.target.files?.[0];
@@ -296,7 +296,7 @@ export default function DashboardSettingsPage() {
                 }} />
             </div>
             {promoVideoUrl && (
-              <div className="mt-2 aspect-video max-w-xs overflow-hidden border border-gray-800/60 bg-gray-950">
+              <div className="mt-2 aspect-video max-w-xs overflow-hidden border border-gray-800 bg-gray-950">
                 <VideoPlayer source={buildVideoSource(promoVideoUrl)} />
               </div>
             )}
@@ -304,9 +304,9 @@ export default function DashboardSettingsPage() {
 
           {/* Email (read-only) */}
           <div className="space-y-1.5">
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">email</p>
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">email</p>
             <input type="text" value={user?.email ?? ""} disabled
-              className="w-full border border-gray-800/40 bg-gray-900/30 px-3 py-2.5 text-sm text-gray-700 cursor-not-allowed" />
+              className="w-full border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-700 cursor-not-allowed" />
           </div>
 
           {/* Guardar */}
@@ -323,9 +323,9 @@ export default function DashboardSettingsPage() {
         <div className="space-y-5">
 
           {/* Info da conta */}
-          <div className="border border-gray-800/60 bg-gray-900/20 p-6">
+          <div className="border border-gray-800 bg-gray-900 p-6">
             <div className="mb-4">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-1">// conta</p>
+              <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-1">// conta</p>
               <h2 className="text-base font-bold text-gray-200 flex items-center gap-2">
                 <Shield className="h-4 w-4 text-green/70" strokeWidth={1.5} /> Informações
               </h2>
@@ -336,9 +336,9 @@ export default function DashboardSettingsPage() {
                 { label: "UID",   value: user?.uid ?? "" },
                 { label: "Email verificado", value: user?.emailVerified ? "sim" : "não" },
               ].map(({ label, value }) => (
-                <div key={label} className="flex items-center justify-between border-b border-gray-800/40 pb-2.5 last:border-0 last:pb-0">
-                  <span className="font-mono text-[9px] uppercase tracking-widest text-gray-700">{label}</span>
-                  <span className="font-mono text-[10px] text-gray-500 truncate max-w-[200px]">{value}</span>
+                <div key={label} className="flex items-center justify-between border-b border-gray-800 pb-2.5 last:border-0 last:pb-0">
+                  <span className="font-mono text-[13px] uppercase tracking-widest text-gray-700">{label}</span>
+                  <span className="font-mono text-[13px] text-gray-500 truncate max-w-[200px]">{value}</span>
                 </div>
               ))}
             </div>
@@ -348,7 +348,7 @@ export default function DashboardSettingsPage() {
           <div className="border border-red-500/20">
             <div className="flex items-center gap-2 border-b border-red-500/15 bg-red-500/5 px-5 py-3">
               <AlertTriangle className="h-3.5 w-3.5 text-red-400/60 shrink-0" strokeWidth={1.5} />
-              <p className="font-mono text-[9px] uppercase tracking-widest text-red-400/60">// zona de perigo</p>
+              <p className="font-mono text-[13px] uppercase tracking-widest text-red-400/60">// zona de perigo</p>
             </div>
 
             <div className="p-5 space-y-5">
@@ -356,28 +356,28 @@ export default function DashboardSettingsPage() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-sm font-semibold text-gray-300">Terminar sessão</p>
-                  <p className="text-xs text-gray-600 mt-0.5">Sai da conta neste dispositivo.</p>
+                  <p className="text-sm text-gray-600 mt-0.5">Sai da conta neste dispositivo.</p>
                 </div>
                 <button type="button"
-                  onClick={async () => { await logout(); window.location.href = "/login"; }}
-                  className="flex items-center gap-1.5 border border-gray-800 bg-gray-900/60 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:border-gray-700 hover:text-gray-400 transition-all shrink-0">
+                  onClick={async () => { await logout(); }}
+                  className="flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-3 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:border-gray-700 hover:text-gray-400 transition-all shrink-0">
                   <LogOut className="h-3 w-3" strokeWidth={1.5} /> Sair
                 </button>
               </div>
 
-              <div className="border-t border-gray-800/40" />
+              <div className="border-t border-gray-800" />
 
               {/* Eliminar conta */}
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-sm font-semibold text-red-400/80">Eliminar conta</p>
-                  <p className="text-xs text-gray-600 mt-0.5">
+                  <p className="text-sm text-gray-600 mt-0.5">
                     Remove permanentemente a conta e todos os dados. Irreversível.
                   </p>
                 </div>
                 <button type="button"
                   onClick={() => { setShowDelete(true); setDeleteErr(""); setDeletePass(""); }}
-                  className="flex items-center gap-1.5 border border-red-500/25 bg-red-500/8 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-red-400/70 hover:bg-red-500/15 transition-all shrink-0">
+                  className="flex items-center gap-1.5 border border-red-500/25 bg-red-500/8 px-3 py-2 font-mono text-[13px] uppercase tracking-widest text-red-400/70 hover:bg-red-500/15 transition-all shrink-0">
                   <Trash2 className="h-3 w-3" strokeWidth={1.5} /> Eliminar
                 </button>
               </div>
@@ -385,21 +385,21 @@ export default function DashboardSettingsPage() {
               {/* Confirmação inline */}
               {showDelete && (
                 <div className="border border-red-500/20 bg-red-500/5 p-4 space-y-3">
-                  <p className="text-xs text-red-400/80 leading-relaxed">
+                  <p className="text-sm text-red-400/80 leading-relaxed">
                     <strong className="text-red-400">Atenção:</strong> esta acção é permanente e não pode ser desfeita.
                     Todos os dados serão eliminados.
                   </p>
                   <input type="password" value={deletePass} onChange={e => setDeletePass(e.target.value)}
                     placeholder="Confirma a tua palavra-passe"
-                    className="w-full border border-red-500/25 bg-gray-900/60 px-3 py-2 text-sm text-gray-300 placeholder-gray-700 focus:border-red-500/40 focus:outline-none transition-colors" />
-                  {deleteErr && <p className="text-xs text-red-400/80">{deleteErr}</p>}
+                    className="w-full border border-red-500/25 bg-gray-900 px-3 py-2 text-sm text-gray-300 placeholder-gray-700 focus:border-red-500/40 focus:outline-none transition-colors" />
+                  {deleteErr && <p className="text-sm text-red-400/80">{deleteErr}</p>}
                   <div className="flex gap-2">
                     <button type="button" onClick={() => setShowDelete(false)}
-                      className="flex-1 border border-gray-800 bg-gray-900/60 py-2 font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+                      className="flex-1 border border-gray-800 bg-gray-900 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
                       Cancelar
                     </button>
                     <button type="button" onClick={handleDelete} disabled={deleting || !deletePass}
-                      className="flex flex-1 items-center justify-center gap-1.5 border border-red-500/30 bg-red-500/15 py-2 font-mono text-[10px] uppercase tracking-widest text-red-400/80 hover:bg-red-500/25 disabled:opacity-50 transition-all">
+                      className="flex flex-1 items-center justify-center gap-1.5 border border-red-500/30 bg-red-500/15 py-2 font-mono text-[13px] uppercase tracking-widest text-red-400/80 hover:bg-red-500/25 disabled:opacity-50 transition-all">
                       {deleting
                         ? <Loader2 className="h-3 w-3 animate-spin" />
                         : <><Trash2 className="h-3 w-3" /> Confirmar</>

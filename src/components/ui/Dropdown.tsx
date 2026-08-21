@@ -51,7 +51,7 @@ export function Dropdown({
       {/* Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-900/50 px-4 py-2 text-sm text-gray-300 transition-colors hover:bg-gray-800"
+        className="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-900 px-4 py-2 text-sm text-gray-300 transition-colors hover:bg-gray-800"
       >
         {trigger}
         <ChevronDown
@@ -66,8 +66,8 @@ export function Dropdown({
         <div
           className={`
             absolute top-full z-50 mt-2 w-48 rounded-lg
-            border border-gray-700 bg-gradient-to-br from-white/10 to-white/5
-            backdrop-blur-xl shadow-xl
+            border border-gray-700 bg-gray-900
+            shadow-xl
             animate-in fade-in slide-in-from-top-2 duration-200
             ${align === "right" ? "right-0" : "left-0"}
           `}
@@ -90,7 +90,7 @@ export function Dropdown({
                       ${
                         item.disabled
                           ? "opacity-50 cursor-not-allowed"
-                          : "hover:bg-gray-700/50 text-gray-300"
+                          : "hover:bg-gray-700 text-gray-300"
                       }
                     `}
                   >

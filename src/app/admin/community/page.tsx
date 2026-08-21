@@ -66,7 +66,7 @@ export default function AdminCommunityPage() {
           { label: "Comentários", value: posts.reduce((a, p) => a + (p.commentsCount || 0), 0), icon: MessageCircle, color: "blue" },
           { label: "Gostos", value: posts.reduce((a, p) => a + (p.likesCount || 0), 0), icon: Heart, color: "red" },
         ].map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="bg-gray-900/40 backdrop-blur-xl p-5 flex items-center justify-between">
+          <div key={label} className="bg-gray-900 p-5 flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-400">{label}</p>
               <p className="text-3xl font-bold text-white mt-1">
@@ -114,26 +114,26 @@ export default function AdminCommunityPage() {
           compact
         />
       ) : (
-        <div className="bg-gray-900/40 backdrop-blur-xl overflow-hidden">
+        <div className="bg-gray-900 overflow-hidden">
           {/* Desktop table */}
           <div className="hidden sm:block overflow-x-auto">
             <div className="min-w-[600px]">
-              <div className="flex items-center px-5 py-3 border-b border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
+              <div className="flex items-center px-5 py-3 border-b border-gray-800 text-sm font-bold text-gray-500 uppercase tracking-wider">
                 <span className="flex-[2]">Publicação</span>
                 <span className="flex-1">Tipo</span>
                 <span className="flex-1">Gostos</span>
                 <span className="flex-1">Comentários</span>
                 <span className="w-16"></span>
               </div>
-              <div className="divide-y divide-gray-800/60">
+              <div className="divide-y divide-gray-800">
                 {filtered.map((post) => (
-                  <div key={post.id} className="flex items-center px-5 py-4 hover:bg-gray-800/30 transition-colors group">
+                  <div key={post.id} className="flex items-center px-5 py-4 hover:bg-gray-800 transition-colors group">
                     <div className="flex-[2] min-w-0 pr-2">
                       <p className="text-sm font-medium text-white truncate">{post.title}</p>
-                      <p className="text-xs text-gray-500 truncate mt-0.5">{post.authorName} &middot; {post.authorId.substring(0, 8)}...</p>
+                      <p className="text-sm text-gray-500 truncate mt-0.5">{post.authorName} &middot; {post.authorId.substring(0, 8)}...</p>
                     </div>
                     <span className="flex-1 px-1">
-                      <span className={`inline-flex items-center px-2 py-0.5 text-xs font-bold ${
+                      <span className={`inline-flex items-center px-2 py-0.5 text-sm font-bold ${
                         post.type === "duvida" ? "text-amber-400 bg-amber-500/10" :
                         post.type === "projeto" ? "text-green-400 bg-green-500/10" :
                         post.type === "discussao" ? "text-blue-400 bg-blue-500/10" :
@@ -163,21 +163,21 @@ export default function AdminCommunityPage() {
                   </div>
                 ))}
               </div>
-              <div className="px-5 py-3 border-t border-gray-800 text-xs text-gray-500">
+              <div className="px-5 py-3 border-t border-gray-800 text-sm text-gray-500">
                 {filtered.length} de {posts.length} publicações
               </div>
             </div>
           </div>
           {/* Mobile cards */}
-          <div className="sm:hidden divide-y divide-gray-800/60">
+          <div className="sm:hidden divide-y divide-gray-800">
             {filtered.map((post) => (
-              <div key={post.id} className="px-4 py-4 space-y-2 hover:bg-gray-800/30 transition-colors">
+              <div key={post.id} className="px-4 py-4 space-y-2 hover:bg-gray-800 transition-colors">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-white truncate">{post.title}</p>
-                    <p className="text-xs text-gray-500 truncate">{post.authorName}</p>
+                    <p className="text-sm text-gray-500 truncate">{post.authorName}</p>
                   </div>
-                  <span className={`shrink-0 inline-flex items-center px-2 py-0.5 text-xs font-bold ${
+                  <span className={`shrink-0 inline-flex items-center px-2 py-0.5 text-sm font-bold ${
                     post.type === "duvida" ? "text-amber-400 bg-amber-500/10" :
                     post.type === "projeto" ? "text-green-400 bg-green-500/10" :
                     post.type === "discussao" ? "text-blue-400 bg-blue-500/10" :
@@ -186,23 +186,23 @@ export default function AdminCommunityPage() {
                     {post.type}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-gray-500">
+                <div className="flex items-center gap-3 text-sm text-gray-500">
                   <span className="flex items-center gap-1"><Heart className="h-3 w-3 text-gray-600" />{post.likesCount || 0}</span>
                   <span className="flex items-center gap-1"><MessageCircle className="h-3 w-3 text-gray-600" />{post.commentsCount || 0}</span>
                 </div>
                 <div className="flex items-center gap-2 pt-1">
                   <Link href={`/dashboard/community/${post.id}`} target="_blank"
-                    className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300">
+                    className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300">
                     <ExternalLink className="h-3 w-3" /> Ver
                   </Link>
                   <button onClick={() => setConfirmDeleteId(post.id)} disabled={deleting === post.id}
-                    className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 disabled:opacity-30">
+                    className="flex items-center gap-1 text-sm text-red-400 hover:text-red-300 disabled:opacity-30">
                     {deleting === post.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />} Apagar
                   </button>
                 </div>
               </div>
             ))}
-            <div className="px-4 py-3 text-xs text-gray-500">
+            <div className="px-4 py-3 text-sm text-gray-500">
               {filtered.length} de {posts.length} publicações
             </div>
           </div>
@@ -211,7 +211,7 @@ export default function AdminCommunityPage() {
       
       {/* Modal de confirmação de apagar */}
       {confirmDeleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950">
           <div className="bg-gray-900 border border-gray-800 p-8 max-w-sm w-full mx-4 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3 mb-4">
               <div className="flex h-10 w-10 items-center justify-center bg-red-500/10">

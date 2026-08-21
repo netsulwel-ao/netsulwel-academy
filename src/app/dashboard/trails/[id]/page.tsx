@@ -9,7 +9,7 @@ import {
 import { useTrailDetail } from "../_hooks/useTrailDetail";
 import { TrailCourseList } from "../_components/TrailCourseList";
 import { TrailLiveList, TrailScheduleList } from "../_components/TrailLiveList";
-import { TYPE_BADGE, LEVEL_LABEL, CAT_LABEL, trailRequiredPlanLabel } from "../_types/trails";
+import { TYPE_BADGE, LEVEL_LABEL, CAT_LABEL } from "../_types/trails";
 
 export default function TrailDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -37,7 +37,7 @@ export default function TrailDetailPage() {
       {/* ── Breadcrumb ── */}
       <Link
         href="/dashboard/trails"
-        className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-gray-700 hover:text-gray-500 transition-colors"
+        className="inline-flex items-center gap-1.5 font-mono text-[13px] uppercase tracking-widest text-gray-700 hover:text-gray-500 transition-colors"
       >
         <ChevronLeft className="h-3 w-3" /> Trilhas
       </Link>
@@ -49,20 +49,20 @@ export default function TrailDetailPage() {
         <div className="space-y-4">
           {/* Badges */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className={`font-mono text-[9px] uppercase tracking-widest border px-2.5 py-1 ${badge.color}`}>
+            <span className={`font-mono text-[13px] uppercase tracking-widest border px-2.5 py-1 ${badge.color}`}>
               {badge.label}
             </span>
-            <span className="font-mono text-[9px] uppercase tracking-widest border border-gray-800/60 bg-gray-900/40 px-2.5 py-1 text-gray-600">
+            <span className="font-mono text-[13px] uppercase tracking-widest border border-gray-800 bg-gray-900 px-2.5 py-1 text-gray-600">
               {LEVEL_LABEL[trail.level] ?? trail.level}
             </span>
-            <span className="font-mono text-[9px] uppercase tracking-widest border border-gray-800/60 bg-gray-900/40 px-2.5 py-1 text-gray-600">
+            <span className="font-mono text-[13px] uppercase tracking-widest border border-gray-800 bg-gray-900 px-2.5 py-1 text-gray-600">
               {CAT_LABEL[trail.category] ?? trail.category}
             </span>
           </div>
 
           {/* Título */}
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+            <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
               // trilha
             </p>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-100 leading-tight">
@@ -76,7 +76,7 @@ export default function TrailDetailPage() {
           </div>
 
           {/* Meta stats */}
-          <div className="flex flex-wrap items-center gap-4 font-mono text-[11px] text-gray-700 pt-1">
+          <div className="flex flex-wrap items-center gap-4 font-mono text-[13px] text-gray-700 pt-1">
             <span className="flex items-center gap-1.5">
               <BookOpen className="h-3.5 w-3.5" strokeWidth={1.5} />
               {trail.coursesCount ?? 0} cursos
@@ -91,7 +91,7 @@ export default function TrailDetailPage() {
 
         {/* Direita — thumbnail */}
         <div className="order-first lg:order-last">
-          <div className="relative aspect-video overflow-hidden border border-gray-800/60 bg-gray-900">
+          <div className="relative aspect-video overflow-hidden border border-gray-800 bg-gray-900">
             {trail.thumbnail ? (
               <img
                 src={trail.thumbnail}
@@ -109,33 +109,26 @@ export default function TrailDetailPage() {
 
       {/* ── ACESSO BLOQUEADO ── */}
       {!hasTrailAccess && (
-        <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-14 text-center px-4">
+        <div className="flex flex-col items-center justify-center border border-gray-800 bg-gray-900 py-14 text-center px-4">
           <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
             <Lock className="h-5 w-5 text-gray-600" strokeWidth={1.5} />
           </div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-3">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-3">
             // acesso restrito
           </p>
           <h2 className="text-lg font-bold text-gray-300 mb-2">Trilha bloqueada</h2>
           <p className="text-sm text-gray-600 max-w-sm mb-6">
             Esta trilha requer{" "}
             <span className="font-semibold text-gray-400">
-              {trailRequiredPlanLabel(trail.type) || "compra individual"}
+              compra individual
             </span>{" "}
             para aceder ao conteúdo completo.
           </p>
           <Link
             href="/dashboard/finances"
-            className={`flex items-center gap-2 px-5 py-2.5 text-sm font-bold transition-colors ${
-              trail.type === "golden"
-                ? "bg-yellow-500/80 hover:bg-yellow-400 text-gray-950"
-                : "bg-green hover:bg-green-light text-gray-950"
-            }`}
+            className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold transition-colors bg-green hover:bg-green-light text-gray-950"
           >
-            {trail.type === "golden"
-              ? <><Crown className="h-4 w-4" /> Ativar Golden</>
-              : <><Zap className="h-4 w-4" /> Ativar Smart</>
-            }
+            <Zap className="h-4 w-4" /> Comprar acesso
           </Link>
         </div>
       )}
@@ -147,18 +140,18 @@ export default function TrailDetailPage() {
           <TrailCourseList courses={courses} enrolledCourses={enrolledCourses} />
 
           {/* Lives referenciadas */}
-          <TrailLiveList lives={lives} />
+          <TrailLiveList lives={lives} enrolledLives={[]} />
 
           {/* Sessões próprias da trilha */}
           <TrailScheduleList sessions={trail.liveSessions ?? []} />
 
           {/* Trilha vazia */}
           {isEmpty && (
-            <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-16 text-center">
+            <div className="flex flex-col items-center justify-center border border-gray-800 bg-gray-900 py-16 text-center">
               <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
                 <Sparkles className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
               </div>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">
+              <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">
                 // em construção
               </p>
               <p className="text-sm text-gray-600">

@@ -11,13 +11,10 @@ import {
   setAuthCookie,
   clearAuthCookie,
   UserProfile,
-  parseProfile,
   isAdminOrTeacher,
 } from "@/lib/authService";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { logger } from "@/lib/logger";
-import { Spinner } from "@/components/ui/Spinner";
+import { usePageTransition } from "@/hooks/usePageTransition";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -29,7 +26,6 @@ interface ProfileState extends UserProfile {
 
 const DEFAULT_PROFILE: ProfileState = {
   role: "aluno",
-  plan: "free",
   profileLoaded: false,
 };
 
@@ -37,6 +33,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<ProfileState>(DEFAULT_PROFILE);
   const [loading, setLoading] = useState(true);
+  const navigate = usePageTransition();
+  const isLoggingOut = React.useRef(false);
 
   // Handle auth state changes
   useEffect(() => {
@@ -45,12 +43,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const unsubscribe = subscribeToAuthState(
       (currentUser) => {
         if (currentUser) {
+          isLoggingOut.current = false;
           setUser(currentUser);
-          setAuthCookie(currentUser.uid);
+          setAuthCookie(currentUser.uid).catch(() => {});
           logger.info("User authenticated", { uid: currentUser.uid });
         } else {
           setUser(null);
-          clearAuthCookie();
+          clearAuthCookie().catch(() => {});
           setProfile(DEFAULT_PROFILE);
           setLoading(false);
           logger.info("User logged out");
@@ -103,6 +102,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setProfile((prev) => ({ ...prev, ...newProfile }));
       },
       (error) => {
+        if (isLoggingOut.current) return;
         logger.error("Profile update subscription error", error, {
           uid: user.uid,
         });
@@ -118,14 +118,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Logout handler
   const logout = useCallback(async () => {
     try {
+      isLoggingOut.current = true;
       await logoutUser();
       setUser(null);
       setProfile(DEFAULT_PROFILE);
+      navigate("/login");
     } catch (error) {
+      isLoggingOut.current = false;
       logger.error("Logout failed", error);
       throw error;
     }
-  }, []);
+  }, [navigate]);
 
   // Refresh user profile
   const refreshUser = useCallback(async () => {
@@ -152,7 +155,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     loading,
     profileLoaded: profile.profileLoaded,
     role: profile.role,
-    plan: profile.plan,
     isAdmin,
     isTeacher,
     isInstitution,
@@ -163,19 +165,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     refreshUser,
   };
 
-  // Show loading spinner only on protected routes
-  const isLoading = loading || (!!user && !profile.profileLoaded);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-950">
-        <div className="text-center space-y-4">
-          <Spinner size="lg" color="primary" />
-          <p className="text-gray-400 text-sm">Carregando perfil...</p>
-        </div>
-      </div>
-    );
-  }
+  // Sempre renderiza children — rotas públicas (landing, login, etc.)
+  // não precisam de esperar auth. Rotas protegidas (dashboard, admin)
+  // verificam loading/profileLoaded por conta própria.
 
   return (
     <AuthContext.Provider value={ctx}>

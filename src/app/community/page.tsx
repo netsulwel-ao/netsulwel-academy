@@ -82,7 +82,7 @@ export default function CommunityPage() {
               className={`px-4 py-2 text-sm font-bold transition-colors whitespace-nowrap ${
                 filter === f.value
                   ? "bg-purple text-white"
-                  : "bg-gray-900/40 text-gray-400 border border-gray-800 hover:border-gray-700 hover:text-white"
+                  : "bg-gray-900 text-gray-400 border border-gray-800 hover:border-gray-700 hover:text-white"
               }`}
             >
               {f.label}
@@ -97,7 +97,7 @@ export default function CommunityPage() {
               <Loader2 className="h-8 w-8 animate-spin text-purple" />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="p-12 bg-gray-900/40 border border-gray-800 text-center">
+            <div className="p-12 bg-gray-900 border border-gray-800 text-center">
               <Users className="h-12 w-12 text-gray-600 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-white mb-2">
                 {filter === "todas" ? "Nenhuma publicação ainda" : "Nenhuma publicação com este filtro"}

@@ -12,7 +12,7 @@ export default function CertificatesPage() {
 
       {/* ── Cabeçalho ── */}
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber-400/60 mb-2">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-amber-400/60 mb-2">
           // certificados
         </p>
         <h1 className="text-2xl font-bold text-gray-100">Os meus certificados</h1>
@@ -25,7 +25,7 @@ export default function CertificatesPage() {
       {institutionName && !loading && (
         <div className="flex items-center gap-3 border border-amber-500/15 bg-amber-500/5 px-4 py-3">
           <Building2 className="h-4 w-4 text-amber-400/60 shrink-0" strokeWidth={1.5} />
-          <p className="text-xs text-gray-500">
+          <p className="text-sm text-gray-500">
             Certificados emitidos por{" "}
             <span className="font-semibold text-amber-400/80">{institutionName}</span>
           </p>
@@ -49,11 +49,11 @@ export default function CertificatesPage() {
 
       {/* ── Empty state ── */}
       {!loading && certs.length === 0 && !error && (
-        <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-20 text-center">
+        <div className="flex flex-col items-center justify-center border border-gray-800 bg-gray-900 py-20 text-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
             <Award className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
           </div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">
             // sem certificados
           </p>
           <p className="text-sm text-gray-600 max-w-xs mb-6">
@@ -61,7 +61,7 @@ export default function CertificatesPage() {
           </p>
           <Link
             href="/dashboard/courses"
-            className="flex items-center gap-1.5 border border-gray-800 bg-gray-900/60 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:border-gray-700 hover:text-gray-400 transition-colors"
+            className="flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:border-gray-700 hover:text-gray-400 transition-colors"
           >
             <BookOpen className="h-3 w-3" strokeWidth={1.5} />
             Explorar cursos
@@ -84,7 +84,7 @@ export default function CertificatesPage() {
               <Link
                 key={cert.id}
                 href={`/dashboard/certificates/${cert.id}`}
-                className={`group flex items-center gap-4 border border-gray-800/60 bg-gray-900/20 hover:border-amber-500/20 hover:bg-gray-900/40 transition-all ${
+                className={`group flex items-center gap-4 border border-gray-800 bg-gray-900 hover:border-amber-500/20 hover:bg-gray-900 transition-all ${
                   isFirst ? "p-5 sm:p-6" : "p-4"
                 }`}
               >
@@ -98,7 +98,7 @@ export default function CertificatesPage() {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   {isFirst && (
-                    <p className="font-mono text-[9px] uppercase tracking-widest text-amber-400/50 mb-1">
+                    <p className="font-mono text-[13px] uppercase tracking-widest text-amber-400/50 mb-1">
                       mais recente
                     </p>
                   )}
@@ -107,7 +107,7 @@ export default function CertificatesPage() {
                   }`}>
                     {cert.courseTitle}
                   </p>
-                  <div className="mt-0.5 flex flex-wrap items-center gap-2 font-mono text-[10px] text-gray-700">
+                  <div className="mt-0.5 flex flex-wrap items-center gap-2 font-mono text-[13px] text-gray-700">
                     {dateStr && <span>{dateStr}</span>}
                     {cert.hours > 0 && (
                       <>

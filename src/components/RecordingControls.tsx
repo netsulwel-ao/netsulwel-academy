@@ -115,8 +115,8 @@ export function RecordingControls({ live, isHost, onStatusChange }: RecordingCon
     return null;
   }
 
-  const btnBase = "flex flex-col items-center justify-center gap-0.5 sm:gap-1 h-12 sm:h-14 w-12 sm:w-fit sm:min-w-[64px] sm:px-1 px-0 transition-colors select-none text-white/70 hover:text-white hover:bg-white/8";
-  const btnText = "hidden sm:inline text-[10px] sm:text-[10px] font-medium tracking-wide leading-none";
+  const btnBase = "flex flex-col items-center justify-center gap-0.5 sm:gap-1 h-12 sm:h-14 w-12 sm:w-fit sm:min-w-[64px] sm:px-1 px-0 transition-colors select-none text-white hover:text-white hover:bg-white";
+  const btnText = "hidden sm:inline text-[13px] sm:text-[13px] font-medium tracking-wide leading-none";
 
   return (
     <>
@@ -126,7 +126,7 @@ export function RecordingControls({ live, isHost, onStatusChange }: RecordingCon
         className={`${btnBase} ${
           isRecording
             ? "text-red-400 bg-red-500/20 hover:bg-red-500/30"
-            : "text-white/70 hover:text-white hover:bg-white/8"
+            : "text-white hover:text-white hover:bg-white"
         } disabled:opacity-50 disabled:cursor-not-allowed`}
         aria-label={isRecording ? "Parar gravação" : "Iniciar gravação"}
         title={isRecording ? "Parar gravação" : "Iniciar gravação"}
@@ -143,19 +143,19 @@ export function RecordingControls({ live, isHost, onStatusChange }: RecordingCon
       </button>
 
       {error && (
-        <div className="fixed bottom-4 right-4 bg-red-900 text-red-100 px-3 py-2 rounded text-xs max-w-xs">
+        <div className="fixed bottom-4 right-4 bg-red-900 text-red-100 px-3 py-2 rounded text-sm max-w-xs">
           {error}
         </div>
       )}
 
       {live.recordingStatus === "processing" && (
-        <div className="fixed bottom-4 right-4 bg-blue-900 text-blue-100 px-3 py-2 rounded text-xs max-w-xs animate-pulse">
+        <div className="fixed bottom-4 right-4 bg-blue-900 text-blue-100 px-3 py-2 rounded text-sm max-w-xs animate-pulse">
           Processando gravação...
         </div>
       )}
 
       {live.recordingStatus === "ready" && live.recordingUrl && (
-        <div className="fixed bottom-4 right-4 bg-green-900 text-green-100 px-3 py-2 rounded text-xs max-w-xs">
+        <div className="fixed bottom-4 right-4 bg-green-900 text-green-100 px-3 py-2 rounded text-sm max-w-xs">
           ✓ Gravação pronta para visualização
         </div>
       )}

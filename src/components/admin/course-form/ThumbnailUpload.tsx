@@ -15,7 +15,7 @@ export function ThumbnailUpload({ preview, uploaded, uploading, onChange }: Prop
 
   return (
     <div>
-      <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600 mb-2">
+      <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-gray-600 mb-2">
         // capa do curso
       </p>
       <div
@@ -29,16 +29,16 @@ export function ThumbnailUpload({ preview, uploaded, uploading, onChange }: Prop
             inputRef.current?.click();
           }
         }}
-        className="relative w-full aspect-video border border-gray-800/60 bg-gray-900/20 cursor-pointer overflow-hidden group hover:border-purple/30 transition-colors"
+        className="relative w-full aspect-video border border-gray-800 bg-gray-900 cursor-pointer overflow-hidden group hover:border-purple/30 transition-colors"
       >
         {preview ? (
           <>
             <img src={preview} alt="preview" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gray-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <div className="absolute inset-0 bg-gray-950 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <ImagePlus className="h-7 w-7 text-white" strokeWidth={1.5} />
             </div>
             {uploading && (
-              <div className="absolute inset-0 bg-gray-950/70 flex items-center justify-center">
+              <div className="absolute inset-0 bg-gray-950 flex items-center justify-center">
                 <Loader2 className="h-6 w-6 animate-spin text-purple" />
               </div>
             )}
@@ -46,7 +46,7 @@ export function ThumbnailUpload({ preview, uploaded, uploading, onChange }: Prop
         ) : (
           <div className="flex flex-col items-center justify-center h-full gap-2 text-gray-700 group-hover:text-gray-500 transition-colors">
             <ImagePlus className="h-8 w-8" strokeWidth={1} />
-            <span className="font-mono text-[9px] uppercase tracking-widest">Clique para carregar</span>
+            <span className="font-mono text-[13px] uppercase tracking-widest">Clique para carregar</span>
             <span className="font-mono text-[8px] text-gray-700">PNG, JPG, WEBP</span>
           </div>
         )}
@@ -64,12 +64,12 @@ export function ThumbnailUpload({ preview, uploaded, uploading, onChange }: Prop
       />
 
       {uploading && (
-        <p className="mt-1.5 font-mono text-[9px] text-purple/60 flex items-center gap-1">
+        <p className="mt-1.5 font-mono text-[13px] text-purple/60 flex items-center gap-1">
           <Loader2 className="h-2.5 w-2.5 animate-spin" /> A enviar...
         </p>
       )}
       {uploaded && !uploading && (
-        <p className="mt-1.5 font-mono text-[9px] text-green/60 flex items-center gap-1">
+        <p className="mt-1.5 font-mono text-[13px] text-green/60 flex items-center gap-1">
           <CheckCircle2 className="h-2.5 w-2.5" /> Upload concluído
         </p>
       )}

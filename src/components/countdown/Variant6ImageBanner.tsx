@@ -31,190 +31,61 @@ export default function Variant6ImageBanner({
   ];
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        height: "100px",
-        width: "100%",
-        background: "#0d0d0d",
-        padding: "0 24px",
-      }}
-    >
-      {/* ZONA ESQUERDA — imagem com fade */}
-      <div
-        style={{
-          position: "relative",
-          width: "220px",
-          height: "100px",
-          flexShrink: 0,
-          overflow: "hidden",
-        }}
-      >
-        <img
-          src={imageUrl || PLACEHOLDER}
-          alt=""
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "linear-gradient(to right, transparent, #0d0d0d)",
-          }}
-        />
-      </div>
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full bg-[#0d0d0d] gap-3 sm:gap-0 px-4 sm:px-6 py-4 sm:h-[100px]">
 
-      {/* ZONA CENTRAL — tudo numa linha só horizontal */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          gap: "16px",
-          flex: 1,
-          justifyContent: "center",
-        }}
-      >
-        {/* Badge */}
-        {badgeLabel && (
-          <span
-            style={{
-              background: "#a020f0",
-              color: "#fff",
-              fontSize: "13px",
-              fontWeight: 700,
-              padding: "6px 16px",
-              borderRadius: "999px",
-              lineHeight: 1,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {badgeLabel}
+      <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 flex-1 min-w-0">
+
+        <div className="hidden sm:block relative w-44 lg:w-56 h-full flex-shrink-0 overflow-hidden">
+          <img src={imageUrl || PLACEHOLDER} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#0d0d0d]" />
+        </div>
+
+        <div className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-2 sm:gap-4 flex-1 min-w-0">
+
+          {badgeLabel && (
+            <span className="bg-[#a020f0] text-white text-[11px] sm:text-[13px] font-bold px-3 sm:px-4 py-1.5 rounded-full whitespace-nowrap">
+              {badgeLabel}
+            </span>
+          )}
+
+          <span className="text-white text-sm sm:text-lg font-bold whitespace-nowrap truncate">
+            {label || "Oferta Especial"}
           </span>
-        )}
 
-        {/* Título */}
-        <span
-          style={{
-            color: "#fff",
-            fontSize: "18px",
-            fontWeight: 700,
-            whiteSpace: "nowrap",
-          }}
-        >
-          {label || "Oferta Especial"}
-        </span>
+          <span className="hidden sm:inline text-white/20 text-xl font-light">|</span>
+          <span className="hidden sm:inline text-white/50 text-sm whitespace-nowrap">Termina em</span>
 
-        {/* Separador vertical */}
-        <span
-          style={{
-            color: "rgba(255,255,255,0.2)",
-            fontSize: "24px",
-            fontWeight: 100,
-          }}
-        >
-          |
-        </span>
-
-        {/* Termina em + countdown */}
-        <span
-          style={{
-            color: "#9ca3af",
-            fontSize: "14px",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Termina em
-        </span>
-
-        {units.flatMap((u, i) => [
-          <div
-            key={u.label}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "56px",
-              height: "56px",
-              background: "#a020f0",
-              borderRadius: "8px",
-              flexShrink: 0,
-            }}
-          >
-            <span
-              style={{
-                fontSize: "22px",
-                fontWeight: 700,
-                color: "#fff",
-                lineHeight: 1,
-                fontVariantNumeric: "tabular-nums",
-              }}
-            >
-              {String(u.value).padStart(2, "0")}
-            </span>
-            <span
-              style={{
-                fontSize: "10px",
-                color: "rgba(255,255,255,0.6)",
-                lineHeight: 1,
-                marginTop: "2px",
-              }}
-            >
-              {u.label}
-            </span>
-          </div>,
-          ...(i < units.length - 1
-            ? [
-                <span
-                  key={`sep-${u.label}`}
-                  style={{
-                    color: "#4b5563",
-                    fontSize: "18px",
-                    fontWeight: 700,
-                  }}
-                >
-                  :
-                </span>,
-              ]
-            : []),
-        ])}
+          <div className="flex items-center gap-1 sm:gap-2">
+            {units.flatMap((u, i) => [
+              <div
+                key={u.label}
+                className="flex flex-col items-center justify-center w-11 h-12 sm:w-14 sm:h-14 bg-[#a020f0] rounded-lg flex-shrink-0"
+              >
+                <span className="text-lg sm:text-xl font-bold text-white leading-none tabular-nums">
+                  {String(u.value).padStart(2, "0")}
+                </span>
+                <span className="text-[8px] sm:text-[10px] text-white/60 leading-none mt-0.5">
+                  {u.label}
+                </span>
+              </div>,
+              i < units.length - 1 ? (
+                <span key={`sep-${u.label}`} className="text-white/30 text-sm sm:text-lg font-bold">:</span>
+              ) : null,
+            ])}
+          </div>
+        </div>
       </div>
 
-      {/* ZONA DIREITA — botão CTA */}
       {ctaUrl ? (
         <Link
           href={ctaUrl}
-          style={{
-            background: "#a020f0",
-            color: "#fff",
-            padding: "12px 28px",
-            fontSize: "16px",
-            fontWeight: 700,
-            borderRadius: "8px",
-            textDecoration: "none",
-            flexShrink: 0,
-          }}
+          className="bg-[#a020f0] hover:bg-[#b830f8] text-white px-5 py-2.5 text-sm font-bold rounded-lg whitespace-nowrap flex-shrink-0 text-center transition-colors"
         >
-          {ctaLabel || "VER"}
+          {ctaLabel || "VER OFERTA"}
         </Link>
       ) : (
-        <button
-          style={{
-            background: "#a020f0",
-            color: "#fff",
-            padding: "12px 28px",
-            fontSize: "16px",
-            fontWeight: 700,
-            borderRadius: "8px",
-            border: "none",
-            cursor: "pointer",
-            flexShrink: 0,
-          }}
-        >
-          {ctaLabel || "VER"}
+        <button className="bg-[#a020f0] hover:bg-[#b830f8] text-white px-5 py-2.5 text-sm font-bold rounded-lg whitespace-nowrap flex-shrink-0 text-center transition-colors">
+          {ctaLabel || "VER OFERTA"}
         </button>
       )}
     </div>

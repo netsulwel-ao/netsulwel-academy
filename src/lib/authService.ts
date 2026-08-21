@@ -4,11 +4,9 @@ import { auth, db } from "@/lib/firebase";
 import { logger } from "@/lib/logger";
 
 export type UserRole = "aluno" | "teacher" | "admin" | "institution";
-export type UserPlan = "free" | "smart" | "golden";
 
 export interface UserProfile {
   role: UserRole;
-  plan: UserPlan;
   institutionId?: string;
   institutionRole?: "admin" | "teacher" | "student";
 }
@@ -26,17 +24,10 @@ export function parseProfile(data: Record<string, unknown>): UserProfile {
           ? "institution"
           : "aluno";
 
-  const plan: UserPlan =
-    data.plan === "smart"
-      ? "smart"
-      : data.plan === "golden"
-        ? "golden"
-        : "free";
-
   const institutionId = data.institutionId as string | undefined;
   const institutionRole = data.institutionRole as "admin" | "teacher" | "student" | undefined;
 
-  return { role, plan, institutionId, institutionRole };
+  return { role, institutionId, institutionRole };
 }
 
 /**
@@ -65,7 +56,7 @@ export async function loadUserProfile(uid: string): Promise<UserProfile | null> 
 export function subscribeToUserProfile(
   uid: string,
   onUpdate: (profile: UserProfile) => void,
-  onError?: (error: any) => void
+  onError?: (error: Error) => void
 ) {
   try {
     const unsub = onSnapshot(
@@ -94,7 +85,7 @@ export function subscribeToUserProfile(
  */
 export function subscribeToAuthState(
   onAuthStateChanged: (user: User | null) => void,
-  onError?: (error: any) => void
+  onError?: (error: Error) => void
 ) {
   try {
     const unsub = onIdTokenChanged(auth, onAuthStateChanged, (error) => {
@@ -115,8 +106,7 @@ export function subscribeToAuthState(
 export async function logoutUser(): Promise<void> {
   try {
     await firebaseSignOut(auth);
-    // Clear auth cookie
-    document.cookie = "auth-uid=;path=/;max-age=0";
+    await clearAuthCookie();
     logger.info("User logged out successfully");
   } catch (error) {
     logger.error("Failed to logout", error);
@@ -125,22 +115,30 @@ export async function logoutUser(): Promise<void> {
 }
 
 /**
- * Set auth cookie
+ * Set auth cookie via API route (HttpOnly, Secure)
  */
-export function setAuthCookie(uid: string): void {
+export async function setAuthCookie(uid: string): Promise<void> {
   try {
-    document.cookie = `auth-uid=${uid};path=/;max-age=86400;SameSite=Lax`;
+    await fetch("/api/auth/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uid, action: "set" }),
+    });
   } catch (error) {
     logger.error("Failed to set auth cookie", error, { uid });
   }
 }
 
 /**
- * Clear auth cookie
+ * Clear auth cookie via API route
  */
-export function clearAuthCookie(): void {
+export async function clearAuthCookie(): Promise<void> {
   try {
-    document.cookie = "auth-uid=;path=/;max-age=0";
+    await fetch("/api/auth/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "clear" }),
+    });
   } catch (error) {
     logger.error("Failed to clear auth cookie", error);
   }
@@ -173,14 +171,4 @@ export function formatRole(role: UserRole): string {
   return roleMap[role];
 }
 
-/**
- * Format plan for display
- */
-export function formatPlan(plan: UserPlan): string {
-  const planMap: Record<UserPlan, string> = {
-    free: "Gratuito",
-    smart: "Smart",
-    golden: "Golden",
-  };
-  return planMap[plan];
-}
+

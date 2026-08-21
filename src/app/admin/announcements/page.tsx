@@ -320,7 +320,7 @@ export default function AnnouncementsPage() {
               return (
                 <div key={type} className={`flex items-center gap-4 p-4 border ${c.bg}`}>
                   <Icon className={`h-6 w-6 shrink-0 ${c.color}`}/>
-                  <div><p className="text-xs text-gray-500">{c.label}</p><p className="text-2xl font-bold text-white">{count}</p></div>
+                  <div><p className="text-sm text-gray-500">{c.label}</p><p className="text-2xl font-bold text-white">{count}</p></div>
                 </div>
               );
             })}
@@ -328,10 +328,10 @@ export default function AnnouncementsPage() {
 
           {/* Status filter */}
           <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Filtrar:</span>
+            <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">Filtrar:</span>
             {(["all","pending","approved"] as const).map(s => (
               <button key={s} onClick={() => setAnnStatusFilter(s)}
-                className={`px-3 py-1.5 text-xs font-medium border transition-colors ${annStatusFilter===s?"bg-blue-500/20 text-blue-400 border-blue-500/30":"bg-gray-900/40 text-gray-500 border-gray-800 hover:text-gray-300"}`}>
+                className={`px-3 py-1.5 text-sm font-medium border transition-colors ${annStatusFilter===s?"bg-blue-500/20 text-blue-400 border-blue-500/30":"bg-gray-900 text-gray-500 border-gray-800 hover:text-gray-300"}`}>
                 {s === "all" ? "Todas" : s === "pending" ? "Pendentes" : "Aprovados"}
               </button>
             ))}
@@ -354,23 +354,23 @@ export default function AnnouncementsPage() {
                 const c=TYPE_CONFIG[a.type]; const Icon=c.icon;
                 const isPending = a.status === "pending";
                 return (
-                  <div key={a.id} className={`flex items-center gap-4 p-5 border bg-gray-900/40 transition-all ${a.active?"border-gray-800":"border-gray-800/40 opacity-60"}`}>
+                  <div key={a.id} className={`flex items-center gap-4 p-5 border bg-gray-900 transition-all ${a.active?"border-gray-800":"border-gray-800 opacity-60"}`}>
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center border ${c.bg}`}><Icon className={`h-5 w-5 ${c.color}`}/></div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-xs font-bold uppercase tracking-wider ${c.color}`}>{c.label}</span>
+                        <span className={`text-sm font-bold uppercase tracking-wider ${c.color}`}>{c.label}</span>
                         {isPending && (
-                          <span className="text-xs text-amber-400 border border-amber-500/30 bg-amber-500/10 px-2 py-0.5">Pendente</span>
+                          <span className="text-sm text-amber-400 border border-amber-500/30 bg-amber-500/10 px-2 py-0.5">Pendente</span>
                         )}
                         {a.status === "approved" && (
-                          <span className="text-xs text-green-400 border border-green-500/30 bg-green-500/10 px-2 py-0.5">Aprovado</span>
+                          <span className="text-sm text-green-400 border border-green-500/30 bg-green-500/10 px-2 py-0.5">Aprovado</span>
                         )}
                         {a.status === "rejected" && (
-                          <span className="text-xs text-red-400 border border-red-500/30 bg-red-500/10 px-2 py-0.5">Rejeitado</span>
+                          <span className="text-sm text-red-400 border border-red-500/30 bg-red-500/10 px-2 py-0.5">Rejeitado</span>
                         )}
-                        <span className="text-xs text-gray-500 border border-gray-700 px-2 py-0.5">{TARGET_LABELS[a.target]}</span>
-                        {a.showOnce&&<span className="text-xs text-gray-500 border border-gray-700 px-2 py-0.5">1x por user</span>}
-                        {(a.benefits??[]).length>0&&<span className="text-xs text-gray-500 border border-gray-700 px-2 py-0.5">{a.benefits!.length} benefícios</span>}
+                        <span className="text-sm text-gray-500 border border-gray-700 px-2 py-0.5">{TARGET_LABELS[a.target]}</span>
+                        {a.showOnce&&<span className="text-sm text-gray-500 border border-gray-700 px-2 py-0.5">1x por user</span>}
+                        {(a.benefits??[]).length>0&&<span className="text-sm text-gray-500 border border-gray-700 px-2 py-0.5">{a.benefits!.length} benefícios</span>}
                       </div>
                       <p className="text-white font-semibold mt-1 truncate">{a.title}</p>
                       <p className="text-gray-400 text-sm truncate">{a.body}</p>
@@ -378,10 +378,10 @@ export default function AnnouncementsPage() {
                     <div className="flex items-center gap-1 sm:gap-2 shrink-0 flex-wrap justify-end">
                       {isAdmin && isPending && (
                         <>
-                          <button onClick={() => approveAnn(a.id!)} className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/30 hover:bg-green-500/20 transition-colors">
+                          <button onClick={() => approveAnn(a.id!)} className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-sm font-medium bg-green-500/10 text-green-400 border border-green-500/30 hover:bg-green-500/20 transition-colors">
                             <CheckCircle2 className="h-3.5 w-3.5"/> <span className="hidden sm:inline">Aprovar</span>
                           </button>
-                          <button onClick={() => rejectAnn(a.id!)} className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-colors">
+                          <button onClick={() => rejectAnn(a.id!)} className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-sm font-medium bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-colors">
                             <X className="h-3.5 w-3.5"/> <span className="hidden sm:inline">Rejeitar</span>
                           </button>
                         </>
@@ -407,7 +407,7 @@ export default function AnnouncementsPage() {
       {/* -- COUNTDOWNS TAB -- */}
       {tab==="countdowns" && (
         <>
-          <div className="bg-gray-900/40 border border-gray-800 p-5 flex items-start gap-4">
+          <div className="bg-gray-900 border border-gray-800 p-5 flex items-start gap-4">
             <Timer className="h-6 w-6 text-blue-400 shrink-0 mt-0.5"/>
             <div>
               <p className="text-white font-semibold">Como funciona</p>
@@ -429,22 +429,22 @@ export default function AnnouncementsPage() {
               {countdowns.map(b=>{
                 const expired = new Date(b.endsAt) < new Date();
                 return (
-                  <div key={b.id} className={`flex items-center gap-4 p-5 border bg-gray-900/40 transition-all ${b.active&&!expired?"border-gray-800":"border-gray-800/40 opacity-60"}`}>
+                  <div key={b.id} className={`flex items-center gap-4 p-5 border bg-gray-900 transition-all ${b.active&&!expired?"border-gray-800":"border-gray-800 opacity-60"}`}>
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-gray-800 border border-gray-700">
                       <Clock className="h-5 w-5 text-gray-300"/>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 border ${
+                        <span className={`text-sm font-bold uppercase tracking-wider px-2 py-0.5 border ${
                           b.color==="red"?"bg-red-500/10 text-red-400 border-red-500/30":
                           b.color==="yellow"?"bg-yellow-500/10 text-yellow-400 border-yellow-500/30":
                           b.color==="green"?"bg-green-500/10 text-green-400 border-green-500/30":
                           b.color==="purple"?"bg-purple-500/10 text-purple-400 border-purple-500/30":
                           "bg-blue-500/10 text-blue-400 border-blue-500/30"
                         }`}>{b.color}</span>
-                        <span className="text-xs text-gray-500 border border-gray-700 px-2 py-0.5">V{b.variant ?? 1}</span>
-                        <span className="text-xs text-gray-500 border border-gray-700 px-2 py-0.5">{TARGET_LABELS[b.target]}</span>
-                        {expired&&<span className="text-xs text-red-400 border border-red-500/30 px-2 py-0.5">Expirado</span>}
+                        <span className="text-sm text-gray-500 border border-gray-700 px-2 py-0.5">V{b.variant ?? 1}</span>
+                        <span className="text-sm text-gray-500 border border-gray-700 px-2 py-0.5">{TARGET_LABELS[b.target]}</span>
+                        {expired&&<span className="text-sm text-red-400 border border-red-500/30 px-2 py-0.5">Expirado</span>}
                       </div>
                       <p className="text-white font-semibold mt-1">{b.label}</p>
                       <p className="text-gray-400 text-sm">Termina: {new Date(b.endsAt).toLocaleString("pt-AO")}</p>
@@ -467,7 +467,7 @@ export default function AnnouncementsPage() {
       {/* -- ANNOUNCEMENT MODAL -- */}
       {annModalOpen && (
         <>
-          <div className="fixed inset-0 z-40 bg-gray-950/80 backdrop-blur-sm" onClick={()=>setAnnModalOpen(false)}/>
+          <div className="fixed inset-0 z-40 bg-gray-950" onClick={()=>setAnnModalOpen(false)}/>
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="bg-gray-900 border border-gray-800 w-full max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl">
               <div className="flex items-center justify-between px-6 py-5 border-b border-gray-800 sticky top-0 bg-gray-900 z-10">
@@ -479,13 +479,13 @@ export default function AnnouncementsPage() {
 
                 {/* Tipo */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Tipo</label>
+                  <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Tipo</label>
                   <div className="grid grid-cols-2 gap-2">
                     {(Object.entries(TYPE_CONFIG) as [AnnouncementType, typeof TYPE_CONFIG[AnnouncementType]][]).map(([type,c])=>{
                       const Icon=c.icon;
                       return (
                         <button key={type} type="button" onClick={()=>setAnnForm(f=>({...f,type}))}
-                          className={`flex items-center gap-3 px-4 py-3 border text-left transition-all ${annForm.type===type?`${c.bg}`:"border-gray-800 bg-gray-950/50 hover:border-gray-700"}`}>
+                          className={`flex items-center gap-3 px-4 py-3 border text-left transition-all ${annForm.type===type?`${c.bg}`:"border-gray-800 bg-gray-950 hover:border-gray-700"}`}>
                           <Icon className={`h-5 w-5 shrink-0 ${annForm.type===type?c.color:"text-gray-600"}`}/>
                           <span className={`text-sm font-medium ${annForm.type===type?c.color:"text-gray-400"}`}>{c.label}</span>
                         </button>
@@ -502,7 +502,7 @@ export default function AnnouncementsPage() {
 
                 {/* Título */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Título *</label>
+                  <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Título *</label>
                   <input type="text" value={annForm.title} onChange={e=>setAnnForm(f=>({...f,title:e.target.value}))}
                     placeholder="Ex: ?? Aula ao Vivo começa em 10 minutos!"
                     className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
@@ -510,7 +510,7 @@ export default function AnnouncementsPage() {
 
                 {/* Corpo */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Mensagem *</label>
+                  <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Mensagem *</label>
                   <textarea rows={3} value={annForm.body} onChange={e=>setAnnForm(f=>({...f,body:e.target.value}))}
                     placeholder="Descreve o anúncio..."
                     className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all resize-none"/>
@@ -518,7 +518,7 @@ export default function AnnouncementsPage() {
 
                 {/* Badge */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Badge (opcional)</label>
+                  <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Badge (opcional)</label>
                   <input type="text" value={annForm.badgeLabel??""} onChange={e=>setAnnForm(f=>({...f,badgeLabel:e.target.value}))}
                     placeholder="Ex: Oferta por 24h ? Poupa 40%"
                     className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
@@ -526,42 +526,42 @@ export default function AnnouncementsPage() {
 
                 {/* Imagem */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Imagem (opcional)</label>
+                  <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Imagem (opcional)</label>
                   <div onClick={()=>!imageUploading&&imageInputRef.current?.click()}
                     className="relative w-full h-40 border border-dashed border-gray-700 hover:border-blue-500/50 cursor-pointer overflow-hidden bg-gray-950 group transition-colors">
                     {imagePreview?(
                       <>
                         <img src={imagePreview} alt="preview" className="w-full h-full object-cover"/>
-                        <div className="absolute inset-0 bg-gray-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer" onClick={()=>imageInputRef.current?.click()}>
+                        <div className="absolute inset-0 bg-gray-950 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer" onClick={()=>imageInputRef.current?.click()}>
                           <ImagePlus className="h-8 w-8 text-white"/>
                         </div>
                         <button type="button" onClick={e=>{e.stopPropagation();setImagePreview("");setAnnForm(f=>({...f,imageUrl:""}));}}
                           aria-label="Remover imagem"
-                          className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center bg-gray-900/80 border border-gray-700 text-gray-300 hover:text-white z-10">
+                          className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center bg-gray-900 border border-gray-700 text-gray-300 hover:text-white z-10">
                           <X className="h-3.5 w-3.5"/>
                         </button>
                       </>
                     ):(
                       <div className="flex flex-col items-center justify-center h-full gap-2 text-gray-500 group-hover:text-blue-400 transition-colors">
-                        <ImagePlus className="h-10 w-10"/><span className="text-sm font-medium">Clique para carregar</span><span className="text-xs">PNG, JPG, WEBP</span>
+                        <ImagePlus className="h-10 w-10"/><span className="text-sm font-medium">Clique para carregar</span><span className="text-sm">PNG, JPG, WEBP</span>
                       </div>
                     )}
-                    {imageUploading&&<div className="absolute inset-0 bg-gray-950/70 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-purple"/></div>}
+                    {imageUploading&&<div className="absolute inset-0 bg-gray-950 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-purple"/></div>}
                   </div>
                   <input ref={imageInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleImageChange}/>
-                  {annForm.imageUrl&&!imageUploading&&<p className="mt-2 text-xs text-green-400 flex items-center gap-1"><CheckCircle2 className="h-3 w-3"/>Upload concluído</p>}
+                  {annForm.imageUrl&&!imageUploading&&<p className="mt-2 text-sm text-green-400 flex items-center gap-1"><CheckCircle2 className="h-3 w-3"/>Upload concluído</p>}
                 </div>
 
                 {/* CTA */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Botão</label>
+                    <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Botão</label>
                     <input type="text" value={annForm.ctaLabel??""} onChange={e=>setAnnForm(f=>({...f,ctaLabel:e.target.value}))}
                       placeholder="Ex: Entrar na Aula"
                       className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">URL do Botão</label>
+                    <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">URL do Botão</label>
                     <input type="text" value={annForm.ctaUrl??""} onChange={e=>setAnnForm(f=>({...f,ctaUrl:e.target.value}))}
                       placeholder="/dashboard/courses ou https://..."
                       className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
@@ -571,14 +571,14 @@ export default function AnnouncementsPage() {
                 {/* Target + Expira??o */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Mostrar para</label>
+                    <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Mostrar para</label>
                     <select value={annForm.target} onChange={e=>setAnnForm(f=>({...f,target:e.target.value as AnnouncementTarget}))}
                       className="w-full bg-gray-950 border border-gray-800 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer">
                       {(Object.entries(TARGET_LABELS) as [AnnouncementTarget,string][]).map(([v,l])=><option key={v} value={v}>{l}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Expira em</label>
+                    <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Expira em</label>
                     <input type="date" value={annForm.expiresAt??""} onChange={e=>setAnnForm(f=>({...f,expiresAt:e.target.value}))}
                       className="w-full bg-gray-950 border border-gray-800 py-2.5 px-3 text-white text-sm focus:outline-none transition-all"/>
                   </div>
@@ -588,11 +588,11 @@ export default function AnnouncementsPage() {
                 <div className="flex flex-col gap-3">
                   {[{key:"active",label:"Anúncio ativo",desc:"Vis?vel para os alunos agora"},{key:"showOnce",label:"Mostrar apenas uma vez",desc:"Cada aluno vê só na primeira sess?o"}].map(({key,label,desc})=>(
                     <button key={key} type="button" onClick={()=>setAnnForm(f=>({...f,[key]:!f[key as keyof typeof f]}))}
-                      className={`flex items-center gap-4 px-4 py-3 border text-left transition-all ${(annForm[key as keyof typeof annForm] as boolean)?"border-blue-500/40 bg-blue-500/10":"border-gray-800 bg-gray-950/50 hover:border-gray-700"}`}>
+                      className={`flex items-center gap-4 px-4 py-3 border text-left transition-all ${(annForm[key as keyof typeof annForm] as boolean)?"border-blue-500/40 bg-blue-500/10":"border-gray-800 bg-gray-950 hover:border-gray-700"}`}>
                       <div className={`h-5 w-9 rounded-full transition-colors relative shrink-0 ${(annForm[key as keyof typeof annForm] as boolean)?"bg-blue-500":"bg-gray-700"}`}>
                         <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${(annForm[key as keyof typeof annForm] as boolean)?"translate-x-4":"translate-x-0.5"}`}/>
                       </div>
-                      <div><p className="text-sm font-medium text-white">{label}</p><p className="text-xs text-gray-500">{desc}</p></div>
+                      <div><p className="text-sm font-medium text-white">{label}</p><p className="text-sm text-gray-500">{desc}</p></div>
                     </button>
                   ))}
                 </div>
@@ -600,16 +600,16 @@ export default function AnnouncementsPage() {
                 {/* Benefits com icon picker */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Benefícios / Features</label>
+                    <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider">Benefícios / Features</label>
                     <button type="button" onClick={()=>setAnnForm(f=>({...f,benefits:[...(f.benefits??[]),{icon:"CheckCircle2",title:"",desc:""}]}))}
-                      className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors">
+                      className="flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors">
                       <Plus className="h-3.5 w-3.5"/>Adicionar
                     </button>
                   </div>
-                  {(annForm.benefits??[]).length===0&&<p className="text-xs text-gray-600 italic">Nenhum benefício ainda.</p>}
+                  {(annForm.benefits??[]).length===0&&<p className="text-sm text-gray-600 italic">Nenhum benefício ainda.</p>}
                   <div className="space-y-2">
                     {(annForm.benefits??[]).map((b,i)=>(
-                      <div key={i} className="flex items-start gap-2 bg-gray-950/60 border border-gray-800 p-3">
+                      <div key={i} className="flex items-start gap-2 bg-gray-950 border border-gray-800 p-3">
                         {/* Icon picker button */}
                         <div className="relative shrink-0">
                           <button type="button" onClick={()=>setIconPickerIdx(iconPickerIdx===i?null:i)}
@@ -627,7 +627,7 @@ export default function AnnouncementsPage() {
                             className="w-full bg-gray-900 border border-gray-800 py-1.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none"/>
                           <input type="text" value={b.desc??""} placeholder="Descri??o curta (opcional)"
                             onChange={e=>{const arr=[...(annForm.benefits??[])];arr[i]={...arr[i],desc:e.target.value};setAnnForm(f=>({...f,benefits:arr}));}}
-                            className="w-full bg-gray-900 border border-gray-800 py-1.5 px-3 text-gray-400 placeholder-gray-600 text-xs focus:outline-none"/>
+                            className="w-full bg-gray-900 border border-gray-800 py-1.5 px-3 text-gray-400 placeholder-gray-600 text-sm focus:outline-none"/>
                         </div>
                         <button type="button" onClick={()=>setAnnForm(f=>({...f,benefits:(f.benefits??[]).filter((_,j)=>j!==i)}))}
                           aria-label="Remover benefício"
@@ -645,7 +645,7 @@ export default function AnnouncementsPage() {
                 </button>
                 {previewOpen&&(
                   <div className="border border-gray-700 bg-gray-950 p-4">
-                    <p className="text-xs text-gray-500 mb-3 uppercase tracking-wider font-bold">Pr?-visualiza??o</p>
+                    <p className="text-sm text-gray-500 mb-3 uppercase tracking-wider font-bold">Pr?-visualiza??o</p>
                     <AnnouncementModal announcement={{...annForm,id:"preview"}} onClose={()=>{}} preview/>
                   </div>
                 )}
@@ -666,7 +666,7 @@ export default function AnnouncementsPage() {
       {/* -- COUNTDOWN SIDEPANEL -- */}
       {cdModalOpen&&(
         <>
-          <div className="fixed inset-0 z-40 bg-gray-950/80 backdrop-blur-sm" onClick={()=>setCdModalOpen(false)}/>
+          <div className="fixed inset-0 z-40 bg-gray-950" onClick={()=>setCdModalOpen(false)}/>
           <div className="fixed inset-y-0 right-0 z-50 w-full max-w-lg shadow-2xl translate-x-0 transition-transform">
             <div className="h-full bg-gray-900 border-l border-gray-800 flex flex-col">
               {/* Header */}
@@ -681,14 +681,14 @@ export default function AnnouncementsPage() {
                   {cdError&&<div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400"><AlertCircle className="h-4 w-4 shrink-0"/>{cdError}</div>}
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Banner *</label>
+                    <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Banner *</label>
                     <input type="text" value={cdForm.label} onChange={e=>setCdForm(f=>({...f,label:e.target.value}))}
                       placeholder="Ex: Promoção termina em ? Aula ao vivo começa em"
                       className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Data e Hora de Fim *</label>
+                    <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Data e Hora de Fim *</label>
                     <input type="datetime-local" value={cdForm.endsAt} onChange={e=>setCdForm(f=>({...f,endsAt:e.target.value}))}
                       className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none transition-all"/>
                   </div>
@@ -696,32 +696,32 @@ export default function AnnouncementsPage() {
                   {/* Imagem (variante 6) */}
                   {cdForm.variant === 6 && (
                     <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Imagem do Banner</label>
+                      <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Imagem do Banner</label>
                       <div onClick={()=>!cdImageUploading&&cdImageInputRef.current?.click()}
                         className="relative w-full h-36 border border-dashed border-gray-700 hover:border-blue-500/50 cursor-pointer overflow-hidden bg-gray-950 group transition-colors">
                         {cdImagePreview?(
                           <>
                             <img src={cdImagePreview} alt="preview" className="w-full h-full object-cover"/>
-                            <div className="absolute inset-0 bg-gray-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer" onClick={()=>cdImageInputRef.current?.click()}>
+                            <div className="absolute inset-0 bg-gray-950 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer" onClick={()=>cdImageInputRef.current?.click()}>
                               <ImagePlus className="h-8 w-8 text-white"/>
                             </div>
                             <button type="button" onClick={e=>{e.stopPropagation();setCdImagePreview("");setCdForm(f=>({...f,imageUrl:""}));}}
                               aria-label="Remover imagem"
-                              className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center bg-gray-900/80 border border-gray-700 text-gray-300 hover:text-white z-10">
+                              className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center bg-gray-900 border border-gray-700 text-gray-300 hover:text-white z-10">
                               <X className="h-3.5 w-3.5"/>
                             </button>
                           </>
                         ):(
                           <div className="flex flex-col items-center justify-center h-full gap-2 text-gray-500 group-hover:text-blue-400 transition-colors">
-                            <ImagePlus className="h-10 w-10"/><span className="text-sm font-medium">Clique para carregar</span><span className="text-xs">PNG, JPG, WEBP</span>
+                            <ImagePlus className="h-10 w-10"/><span className="text-sm font-medium">Clique para carregar</span><span className="text-sm">PNG, JPG, WEBP</span>
                           </div>
                         )}
-                        {cdImageUploading&&<div className="absolute inset-0 bg-gray-950/70 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-purple"/></div>}
+                        {cdImageUploading&&<div className="absolute inset-0 bg-gray-950 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-purple"/></div>}
                       </div>
                       <input ref={cdImageInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleCdImageChange}/>
-                      {cdForm.imageUrl&&!cdImageUploading&&<p className="mt-2 text-xs text-green-400 flex items-center gap-1"><CheckCircle2 className="h-3 w-3"/>Upload concluído</p>}
+                      {cdForm.imageUrl&&!cdImageUploading&&<p className="mt-2 text-sm text-green-400 flex items-center gap-1"><CheckCircle2 className="h-3 w-3"/>Upload concluído</p>}
                       <div className="mt-3">
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Badge</label>
+                        <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Badge</label>
                         <input type="text" value={cdForm.badgeLabel ?? ""} onChange={e => setCdForm(f => ({ ...f, badgeLabel: e.target.value }))}
                           placeholder="Ex: 82% OFF ? Promoção ? Limitado"
                           className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
@@ -731,13 +731,13 @@ export default function AnnouncementsPage() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Botão</label>
+                      <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Botão</label>
                       <input type="text" value={cdForm.ctaLabel??""} onChange={e=>setCdForm(f=>({...f,ctaLabel:e.target.value}))}
                         placeholder="Ex: Ver Promoção"
                         className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">URL do Botão</label>
+                      <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">URL do Botão</label>
                       <input type="text" value={cdForm.ctaUrl??""} onChange={e=>setCdForm(f=>({...f,ctaUrl:e.target.value}))}
                         placeholder="/dashboard/finances"
                         className="w-full bg-gray-950 border border-gray-800 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
@@ -745,11 +745,11 @@ export default function AnnouncementsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Cor do Banner</label>
+                    <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Cor do Banner</label>
                     <div className="flex gap-2">
                       {COUNTDOWN_COLORS.map(color=>(
                       <button key={color} type="button" onClick={()=>setCdForm(f=>({...f,color}))}
-                        className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider border transition-all ${cdForm.color===color?"border-white/30 scale-105":"border-gray-800 opacity-60 hover:opacity-100"} ${
+                        className={`flex-1 py-2.5 text-sm font-bold uppercase tracking-wider border transition-all ${cdForm.color===color?"border-white scale-105":"border-gray-800 opacity-60 hover:opacity-100"} ${
                           color==="red"?"bg-red-600 text-white":color==="yellow"?"bg-yellow-500 text-gray-900":
                           color==="blue"?"bg-blue-600 text-white":color==="green"?"bg-green-600 text-white":"bg-purple-600 text-white"
                         }`}>{color}</button>
@@ -759,7 +759,7 @@ export default function AnnouncementsPage() {
 
                   {/* Variante */}
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Variante de Visual</label>
+                    <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Variante de Visual</label>
                     <div className="grid grid-cols-1 gap-2">
                       {([1,2,3,4,5,6] as CountdownVariant[]).map((v) => {
                         const info = VARIANT_LABELS[v];
@@ -767,14 +767,14 @@ export default function AnnouncementsPage() {
                         return (
                           <button key={v} type="button" onClick={() => setCdForm(f=>({...f, variant: v}))}
                             className={`flex items-center gap-3 px-4 py-3 border text-left transition-all ${
-                              isSelected ? "border-blue-500/40 bg-blue-500/10" : "border-gray-800 bg-gray-950/50 hover:border-gray-700"
+                              isSelected ? "border-blue-500/40 bg-blue-500/10" : "border-gray-800 bg-gray-950 hover:border-gray-700"
                             }`}>
-                            <div className={`flex h-8 w-8 shrink-0 items-center justify-center text-xs font-bold rounded-full ${
+                            <div className={`flex h-8 w-8 shrink-0 items-center justify-center text-sm font-bold rounded-full ${
                               isSelected ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400"
                             }`}>{v}</div>
                             <div>
                               <p className={`text-sm font-medium ${isSelected ? "text-white" : "text-gray-400"}`}>{info.name}</p>
-                              <p className="text-xs text-gray-500 mt-0.5">{info.desc}</p>
+                              <p className="text-sm text-gray-500 mt-0.5">{info.desc}</p>
                             </div>
                           </button>
                         );
@@ -785,7 +785,7 @@ export default function AnnouncementsPage() {
                   {/* Target + Ativo */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Mostrar para</label>
+                      <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Mostrar para</label>
                       <select value={cdForm.target} onChange={e=>setCdForm(f=>({...f,target:e.target.value as AnnouncementTarget}))}
                         className="w-full bg-gray-950 border border-gray-800 py-2.5 px-3 text-white text-sm focus:outline-none appearance-none cursor-pointer">
                         {(Object.entries(TARGET_LABELS) as [AnnouncementTarget,string][]).map(([v,l])=><option key={v} value={v}>{l}</option>)}
@@ -793,7 +793,7 @@ export default function AnnouncementsPage() {
                     </div>
                     <div className="flex items-end">
                       <button type="button" onClick={()=>setCdForm(f=>({...f,active:!f.active}))}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 border transition-all ${cdForm.active?"border-blue-500/40 bg-blue-500/10":"border-gray-800 bg-gray-950/50"}`}>
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 border transition-all ${cdForm.active?"border-blue-500/40 bg-blue-500/10":"border-gray-800 bg-gray-950"}`}>
                         <div className={`h-5 w-9 rounded-full transition-colors relative shrink-0 ${cdForm.active?"bg-blue-500":"bg-gray-700"}`}>
                           <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${cdForm.active?"translate-x-4":"translate-x-0.5"}`}/>
                         </div>

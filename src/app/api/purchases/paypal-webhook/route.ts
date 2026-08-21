@@ -137,8 +137,6 @@ export async function POST(req: NextRequest) {
       await userRef.update({
         enrolledLives: admin.firestore.FieldValue.arrayUnion(sale.itemId),
       });
-    } else if (sale.type === "smart" || sale.type === "golden") {
-      await userRef.update({ plan: sale.type });
     }
 
     console.log("[PayPal Webhook] Sale confirmed via webhook:", saleDoc.id);

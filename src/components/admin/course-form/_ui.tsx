@@ -10,7 +10,7 @@ export function FieldLabel({
   required?: boolean;
 }) {
   return (
-    <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600 mb-2">
+    <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-gray-600 mb-2">
       {children}
       {required && <span className="text-red-400/80 ml-1">*</span>}
     </p>

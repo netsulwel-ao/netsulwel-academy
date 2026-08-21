@@ -33,13 +33,13 @@ export default function MaterialsList({ materials }: { materials: CourseMaterial
           const isLink = mat.type === "link";
           return (
             <a key={i} href={mat.url} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-3 px-4 py-3 bg-gray-900/60 border border-gray-800 hover:border-blue-500/40 hover:bg-gray-900 transition-all group">
+              className="flex items-center gap-3 px-4 py-3 bg-gray-900 border border-gray-800 hover:border-blue-500/40 hover:bg-gray-900 transition-all group">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-blue-500/10 text-blue-400 group-hover:bg-blue-500/20 transition-colors">
                 <Icon className="h-4 w-4" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">{mat.title || mat.filename || "Material"}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{LABEL_MAP[mat.type]}{mat.filename ? ` — ${mat.filename}` : ""}</p>
+                <p className="text-sm text-gray-500 mt-0.5">{LABEL_MAP[mat.type]}{mat.filename ? ` — ${mat.filename}` : ""}</p>
               </div>
               {isLink ? (
                 <ExternalLink className="h-4 w-4 text-gray-500 shrink-0 group-hover:text-blue-400 transition-colors" />

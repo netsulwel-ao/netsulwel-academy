@@ -4,9 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import {
-  Save, Loader2, CheckCircle2, AlertCircle, Plus, X,
+  Save, Loader2, AlertCircle,
   CreditCard, Share2, Mail, Phone, MapPin, Globe,
-  Crown, Zap, Percent, Link2, MessageCircle,
+  Percent, Link2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { logger } from "@/lib/logger";
@@ -14,10 +14,6 @@ import type { PlatformSettings } from "@/types/settings";
 
 // ── Constants ─────────────────────────────────────────────────
 const DEFAULT_SETTINGS: PlatformSettings = {
-  plans: {
-    smart:  { price: 0, label: "Plano Smart",  description: "", features: [] },
-    golden: { price: 0, label: "Plano Golden", description: "", features: [] },
-  },
   paymentMethods: {
     bankTransfer: { enabled: false, bankName: "", iban: "", accountHolder: "", reference: "" },
     multicaixa:   { enabled: false, entity: "", reference: "" },
@@ -30,10 +26,9 @@ const DEFAULT_SETTINGS: PlatformSettings = {
   fees:    { defaultCourseFee: 0, defaultVideoFee: 0 },
 };
 
-type TabId = "plans" | "payments" | "fees" | "socials" | "contact" | "meta";
+type TabId = "payments" | "fees" | "socials" | "contact" | "meta";
 
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
-  { id: "plans",    label: "Planos",      icon: Crown      },
   { id: "payments", label: "Pagamentos",  icon: CreditCard },
   { id: "fees",     label: "Taxas",       icon: Percent    },
   { id: "socials",  label: "Sociais",     icon: Share2     },
@@ -43,7 +38,7 @@ const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
 
 // ── Shared input classes ──────────────────────────────────────
 const inputCls =
-  "w-full border border-gray-800/60 bg-gray-900/40 py-2.5 px-3 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors";
+  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors";
 
 // ── Toggle (sharp, no rounded-full) ──────────────────────────
 function Toggle({ value, onChange, label }: { value: boolean; onChange: (v: boolean) => void; label: string }) {
@@ -62,13 +57,13 @@ function Toggle({ value, onChange, label }: { value: boolean; onChange: (v: bool
 
 // ── Field label ───────────────────────────────────────────────
 function FL({ children }: { children: React.ReactNode }) {
-  return <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-600 mb-2">{children}</p>;
+  return <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-gray-600 mb-2">{children}</p>;
 }
 
 // ── Section card ──────────────────────────────────────────────
 function Card({ children, accent }: { children: React.ReactNode; accent?: string }) {
   return (
-    <div className={`border bg-gray-900/10 p-5 space-y-4 ${accent ?? "border-gray-800/60"}`}>
+    <div className={`border bg-gray-900 p-5 space-y-4 ${accent ?? "border-gray-800"}`}>
       {children}
     </div>
   );
@@ -80,7 +75,7 @@ export default function SettingsPage() {
   const [loading,  setLoading]  = useState(true);
   const [saving,   setSaving]   = useState(false);
   const [error,    setError]    = useState("");
-  const [tab,      setTab]      = useState<TabId>("plans");
+  const [tab,      setTab]      = useState<TabId>("payments");
 
   // ── Load ─────────────────────────────────────────────────
   useEffect(() => {
@@ -108,24 +103,10 @@ export default function SettingsPage() {
     });
   }, []);
 
-  // ── Plan features ─────────────────────────────────────────
-  const addFeature = (plan: "smart" | "golden") =>
-    setSettings(p => ({ ...p, plans: { ...p.plans, [plan]: { ...p.plans[plan], features: [...p.plans[plan].features, ""] } } }));
-
-  const updateFeature = (plan: "smart" | "golden", i: number, v: string) =>
-    setSettings(p => {
-      const features = [...p.plans[plan].features]; features[i] = v;
-      return { ...p, plans: { ...p.plans, [plan]: { ...p.plans[plan], features } } };
-    });
-
-  const removeFeature = (plan: "smart" | "golden", i: number) =>
-    setSettings(p => ({ ...p, plans: { ...p.plans, [plan]: { ...p.plans[plan], features: p.plans[plan].features.filter((_, j) => j !== i) } } }));
-
   // ── Save ─────────────────────────────────────────────────
   const handleSave = async () => {
     setSaving(true); setError("");
     try {
-      // Trim all string values before saving
       const clean = JSON.parse(JSON.stringify(settings, (_, v) =>
         typeof v === "string" ? v.trim() : v
       )) as PlatformSettings;
@@ -152,15 +133,15 @@ export default function SettingsPage() {
       {/* ── Cabeçalho ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
             // configurações
           </p>
           <h1 className="text-2xl font-bold text-gray-100">Configurações</h1>
-          <p className="mt-1 text-sm text-gray-600">Planos, pagamentos, redes sociais, contacto e SEO.</p>
+          <p className="mt-1 text-sm text-gray-600">Pagamentos, taxas, redes sociais, contacto e SEO.</p>
         </div>
         <button
           onClick={handleSave} disabled={saving}
-          className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-5 py-2.5 font-mono text-[10px] uppercase tracking-widest text-purple/80 hover:bg-purple/15 disabled:opacity-40 transition-all shrink-0"
+          className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-5 py-2.5 font-mono text-[13px] uppercase tracking-widest text-purple/80 hover:bg-purple/15 disabled:opacity-40 transition-all shrink-0"
         >
           {saving
             ? <Loader2 className="h-3 w-3 animate-spin" />
@@ -179,11 +160,11 @@ export default function SettingsPage() {
       )}
 
       {/* ── Tabs ── */}
-      <div className="flex border-b border-gray-800/60 overflow-x-auto gap-0">
+      <div className="flex border-b border-gray-800 overflow-x-auto gap-0">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id} onClick={() => setTab(id)}
-            className={`flex items-center gap-2 px-4 py-3 font-mono text-[10px] uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-3 font-mono text-[13px] uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap ${
               tab === id
                 ? "border-purple text-purple/80"
                 : "border-transparent text-gray-600 hover:text-gray-400"
@@ -194,90 +175,6 @@ export default function SettingsPage() {
           </button>
         ))}
       </div>
-
-      {/* ══════════════════════════════════════════════════════ */}
-      {/* TAB: PLANOS                                           */}
-      {/* ══════════════════════════════════════════════════════ */}
-      {tab === "plans" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {(["smart", "golden"] as const).map(plan => {
-            const isGolden = plan === "golden";
-            return (
-              <Card key={plan} accent={isGolden ? "border-amber-500/20" : "border-green/20"}>
-                <div className="flex items-center gap-3 pb-4 border-b border-gray-800/40">
-                  {isGolden
-                    ? <Crown className="h-5 w-5 text-amber-400/80" strokeWidth={1.5} />
-                    : <Zap className="h-5 w-5 text-green/80" strokeWidth={1.5} />
-                  }
-                  <p className={`text-base font-bold ${isGolden ? "text-amber-400/80" : "text-green/80"}`}>
-                    {isGolden ? "Plano Golden" : "Plano Smart"}
-                  </p>
-                </div>
-
-                {/* Preço */}
-                <div>
-                  <FL>// preço mensal (Kz)</FL>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-gray-600">Kz</span>
-                    <input
-                      type="number" min="0"
-                      value={settings.plans[plan].price || ""}
-                      onChange={e => set(`plans.${plan}.price`, parseFloat(e.target.value) || 0)}
-                      placeholder="0"
-                      className={`${inputCls} pl-10`}
-                    />
-                  </div>
-                </div>
-
-                {/* Descrição */}
-                <div>
-                  <FL>// descrição</FL>
-                  <textarea
-                    rows={2} value={settings.plans[plan].description}
-                    onChange={e => set(`plans.${plan}.description`, e.target.value)}
-                    placeholder="Descreve o plano..."
-                    className={`${inputCls} resize-none`}
-                  />
-                </div>
-
-                {/* Funcionalidades */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <FL>// funcionalidades</FL>
-                    <button
-                      type="button" onClick={() => addFeature(plan)}
-                      className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors"
-                    >
-                      <Plus className="h-3 w-3" /> Adicionar
-                    </button>
-                  </div>
-                  <div className="space-y-2">
-                    {settings.plans[plan].features.map((f, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <input
-                          type="text" value={f}
-                          onChange={e => updateFeature(plan, i, e.target.value)}
-                          placeholder="Ex: Acesso a todos os cursos Smart"
-                          className={`${inputCls} flex-1`}
-                        />
-                        <button
-                          type="button" onClick={() => removeFeature(plan, i)}
-                          className="p-1.5 text-gray-700 hover:text-red-400 transition-colors shrink-0"
-                        >
-                          <X className="h-3 w-3" strokeWidth={1.5} />
-                        </button>
-                      </div>
-                    ))}
-                    {settings.plans[plan].features.length === 0 && (
-                      <p className="font-mono text-[9px] text-gray-700">Nenhuma funcionalidade definida.</p>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
-      )}
 
       {/* ══════════════════════════════════════════════════════ */}
       {/* TAB: PAGAMENTOS                                       */}
@@ -299,12 +196,12 @@ export default function SettingsPage() {
               />
             </div>
             {settings.paymentMethods.bankTransfer.enabled && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-800/40">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-800">
                 {([
                   { key: "bankName",       label: "Banco",               placeholder: "BAI, BFA, BIC..." },
                   { key: "accountHolder",  label: "Titular",             placeholder: "Nome completo" },
                   { key: "iban",           label: "IBAN / Nº de conta",  placeholder: "AO06..." },
-                  { key: "reference",      label: "Instrução",           placeholder: "Indicar nome e plano" },
+                  { key: "reference",      label: "Instrução",           placeholder: "Indicar nome e curso" },
                 ] as const).map(({ key, label, placeholder }) => (
                   <div key={key}>
                     <FL>// {label}</FL>
@@ -331,7 +228,7 @@ export default function SettingsPage() {
               />
             </div>
             {settings.paymentMethods.multicaixa.enabled && (
-              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-800/40">
+              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-800">
                 {([
                   { key: "entity",    label: "Entidade",    placeholder: "Nº da entidade" },
                   { key: "reference", label: "Referência",  placeholder: "Referência de pagamento" },
@@ -361,7 +258,7 @@ export default function SettingsPage() {
               />
             </div>
             {settings.paymentMethods.paypal.enabled && (
-              <div className="space-y-4 pt-2 border-t border-gray-800/40">
+              <div className="space-y-4 pt-2 border-t border-gray-800">
                 <div>
                   <FL>// email paypal</FL>
                   <input type="email" value={settings.paymentMethods.paypal.email}
@@ -392,7 +289,7 @@ export default function SettingsPage() {
               />
             </div>
             {settings.paymentMethods.stripe.enabled && (
-              <div className="pt-2 border-t border-gray-800/40">
+              <div className="pt-2 border-t border-gray-800">
                 <FL>// chave pública (pk_...)</FL>
                 <input type="text" value={settings.paymentMethods.stripe.publicKey}
                   onChange={e => set("paymentMethods.stripe.publicKey", e.target.value)}
@@ -409,11 +306,11 @@ export default function SettingsPage() {
       {tab === "fees" && (
         <div className="space-y-4">
           <Card>
-            <div className="flex items-center gap-3 pb-4 border-b border-gray-800/40">
+            <div className="flex items-center gap-3 pb-4 border-b border-gray-800">
               <Percent className="h-4 w-4 text-purple/70" strokeWidth={1.5} />
               <div>
                 <p className="text-sm font-semibold text-gray-200">Taxa Padrão por Curso</p>
-                <p className="font-mono text-[9px] text-gray-600 mt-0.5">Percentagem deduzida do valor bruto de cada venda.</p>
+                <p className="font-mono text-[13px] text-gray-600 mt-0.5">Percentagem deduzida do valor bruto de cada venda.</p>
               </div>
             </div>
 
@@ -426,23 +323,11 @@ export default function SettingsPage() {
                   onChange={e => set("fees.defaultCourseFee", parseFloat(e.target.value) || 0)}
                   placeholder="0" className={`${inputCls} pl-9`} />
               </div>
-              <p className="font-mono text-[9px] text-gray-700 mt-2">
+              <p className="font-mono text-[13px] text-gray-700 mt-2">
                 Ex: 10% → Kz 1.000 de venda = Kz 900 líquidos para o vendedor.
               </p>
             </div>
           </Card>
-
-          <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
-            <div>
-              <p className="text-sm font-semibold text-amber-400/80 mb-1">Atenção</p>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                Esta é a taxa padrão — aplicada quando o curso não tem uma taxa individual.
-                Taxas por curso configuram-se em <strong className="text-gray-500">Admin → Taxas</strong>.
-                As alterações afectam apenas vendas futuras.
-              </p>
-            </div>
-          </div>
         </div>
       )}
 
@@ -508,7 +393,7 @@ export default function SettingsPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <FL>// descrição do site (meta description)</FL>
-                <span className={`font-mono text-[9px] ${settings.meta.description.length > 160 ? "text-red-400/70" : "text-gray-700"}`}>
+                <span className={`font-mono text-[13px] ${settings.meta.description.length > 160 ? "text-red-400/70" : "text-gray-700"}`}>
                   {settings.meta.description.length}/160
                 </span>
               </div>
@@ -539,10 +424,10 @@ export default function SettingsPage() {
       )}
 
       {/* ── Guardar no fundo (atalho para páginas longas) ── */}
-      <div className="flex justify-end pt-4 border-t border-gray-800/40">
+      <div className="flex justify-end pt-4 border-t border-gray-800">
         <button
           onClick={handleSave} disabled={saving}
-          className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-5 py-2.5 font-mono text-[10px] uppercase tracking-widest text-purple/80 hover:bg-purple/15 disabled:opacity-40 transition-all"
+          className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-5 py-2.5 font-mono text-[13px] uppercase tracking-widest text-purple/80 hover:bg-purple/15 disabled:opacity-40 transition-all"
         >
           {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
           {saving ? "A guardar..." : "Guardar tudo"}

@@ -1,10 +1,10 @@
 "use client";
 
 import { Search, X, SlidersHorizontal } from "lucide-react";
-import type { CourseCategory, CourseLevel, CourseType } from "@/types/course";
+import type { CourseCategory, CourseLevel } from "@/types/course";
 import {
   type CatalogFilters, type SortKey,
-  SORT_OPTIONS, CAT_LABEL, TYPE_BADGE, LEVEL_LABEL, LEVELS,
+  SORT_OPTIONS, CAT_LABEL, LEVEL_LABEL, LEVELS,
 } from "../_types/catalog";
 
 // ── Chip ──────────────────────────────────────────────────────
@@ -21,10 +21,10 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
-      className={`border px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest transition-colors ${
+      className={`border px-2.5 py-1 font-mono text-[13px] tracking-wide transition-colors ${
         selected
           ? "border-purple/40 bg-purple/15 text-purple/90"
-          : "border-gray-800 bg-gray-900/60 text-gray-600 hover:border-gray-700 hover:text-gray-400"
+          : "border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-400"
       }`}
     >
       {children}
@@ -35,7 +35,7 @@ function Chip({
 // ── ActiveTag ─────────────────────────────────────────────────
 function ActiveTag({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
-    <span className="inline-flex items-center gap-1.5 border border-gray-800 bg-gray-900/60 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-gray-500">
+    <span className="inline-flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-2.5 py-1 font-mono text-[13px] tracking-wide text-gray-500">
       {label}
       <button
         type="button"
@@ -89,7 +89,7 @@ export function CourseFilters({
             value={search}
             onChange={e => onSearchChange(e.target.value)}
             placeholder="Título, descrição ou tag..."
-            className="w-full border border-gray-800 bg-gray-900/60 py-2.5 pl-9 pr-8 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none transition-colors"
+            className="w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-8 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none transition-colors"
           />
           {search && (
             <button
@@ -106,7 +106,7 @@ export function CourseFilters({
         <select
           value={sort}
           onChange={e => onSortChange(e.target.value as SortKey)}
-          className="w-full sm:w-auto appearance-none border border-gray-800 bg-gray-900/60 px-3 py-2.5 font-mono text-[11px] uppercase tracking-widest text-gray-500 focus:outline-none cursor-pointer sm:min-w-[130px]"
+          className="w-full sm:w-auto appearance-none border border-gray-800 bg-gray-900 px-3 py-2.5 font-mono text-[13px] tracking-wide text-gray-500 focus:outline-none cursor-pointer sm:min-w-[130px]"
           aria-label="Ordenação"
         >
           {SORT_OPTIONS.map(o => (
@@ -118,13 +118,13 @@ export function CourseFilters({
       </div>
 
       {/* ── Painel de filtros — scroll horizontal em mobile ── */}
-      <div className="border border-gray-800/60 bg-gray-900/20 p-3 sm:p-4">
+      <div className="border border-gray-800 bg-gray-900 p-3 sm:p-4">
         {/* Mobile: scroll horizontal por grupo */}
         <div className="flex flex-col gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-5">
 
           {/* Categoria */}
           <div className="min-w-0">
-            <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-700 mb-2">Categoria</p>
+            <p className="font-mono text-[13px] tracking-[0.15em] text-gray-700 mb-2">Categoria</p>
             <div className="flex flex-wrap gap-1.5">
               <Chip selected={filters.cat === "all"} onClick={() => onFilterChange("cat", "all")}>Todas</Chip>
               {(Object.entries(CAT_LABEL) as [CourseCategory, string][]).map(([v, l]) => (
@@ -133,22 +133,9 @@ export function CourseFilters({
             </div>
           </div>
 
-          {/* Plano */}
-          <div className="min-w-0">
-            <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-700 mb-2">Plano</p>
-            <div className="flex flex-wrap gap-1.5">
-              <Chip selected={filters.type === "all"} onClick={() => onFilterChange("type", "all")}>Todos</Chip>
-              {(Object.keys(TYPE_BADGE) as CourseType[]).map(t => (
-                <Chip key={t} selected={filters.type === t} onClick={() => onFilterChange("type", t)}>
-                  {TYPE_BADGE[t].label}
-                </Chip>
-              ))}
-            </div>
-          </div>
-
           {/* Nível */}
           <div className="min-w-0">
-            <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-700 mb-2">Nível</p>
+            <p className="font-mono text-[13px] tracking-[0.15em] text-gray-700 mb-2">Nível</p>
             <div className="flex flex-wrap gap-1.5">
               <Chip selected={filters.level === "all"} onClick={() => onFilterChange("level", "all")}>Todos</Chip>
               {LEVELS.map(l => (
@@ -161,7 +148,7 @@ export function CourseFilters({
 
           {/* Preço */}
           <div className="min-w-0">
-            <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-700 mb-2">Preço</p>
+            <p className="font-mono text-[13px] tracking-[0.15em] text-gray-700 mb-2">Preço</p>
             <div className="flex flex-wrap gap-1.5">
               <Chip selected={filters.price === "all"}  onClick={() => onFilterChange("price", "all")}>Todos</Chip>
               <Chip selected={filters.price === "free"} onClick={() => onFilterChange("price", "free")}>Grátis</Chip>
@@ -171,7 +158,7 @@ export function CourseFilters({
 
           {/* Certificado */}
           <div className="min-w-0">
-            <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-700 mb-2">Certificado</p>
+            <p className="font-mono text-[13px] tracking-[0.15em] text-gray-700 mb-2">Certificado</p>
             <div className="flex flex-wrap gap-1.5">
               <Chip selected={filters.certificate === null}  onClick={() => onFilterChange("certificate", null)}>Todos</Chip>
               <Chip selected={filters.certificate === true}  onClick={() => onFilterChange("certificate", true)}>Com cert.</Chip>
@@ -181,8 +168,8 @@ export function CourseFilters({
         </div>
 
         {/* Rodapé do painel — contador + limpar */}
-        <div className="mt-4 flex items-center justify-between border-t border-gray-800/40 pt-3">
-          <p className="font-mono text-[10px] text-gray-700">
+        <div className="mt-4 flex items-center justify-between border-t border-gray-800 pt-3">
+          <p className="font-mono text-[13px] text-gray-700">
             {hasActiveFilters
               ? `${totalFiltered} de ${totalCourses}`
               : `${totalCourses} cursos`}
@@ -191,7 +178,7 @@ export function CourseFilters({
             <button
               type="button"
               onClick={onClearAll}
-              className="font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:text-purple/70 transition-colors"
+              className="font-mono text-[13px] tracking-wide text-gray-600 hover:text-purple/70 transition-colors"
             >
               Limpar
             </button>
@@ -204,7 +191,6 @@ export function CourseFilters({
         <div className="flex flex-wrap items-center gap-2">
           {search && <ActiveTag label={`"${search}"`} onRemove={() => onSearchChange("")} />}
           {filters.cat   !== "all"  && <ActiveTag label={CAT_LABEL[filters.cat]}            onRemove={() => onFilterChange("cat", "all")} />}
-          {filters.type  !== "all"  && <ActiveTag label={TYPE_BADGE[filters.type].label}    onRemove={() => onFilterChange("type", "all")} />}
           {filters.level !== "all"  && <ActiveTag label={LEVEL_LABEL[filters.level]}        onRemove={() => onFilterChange("level", "all")} />}
           {filters.price !== "all"  && <ActiveTag label={filters.price === "free" ? "Grátis" : "Pagos"} onRemove={() => onFilterChange("price", "all")} />}
           {filters.certificate !== null && (

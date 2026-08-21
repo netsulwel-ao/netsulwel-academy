@@ -140,10 +140,11 @@ async function notifyStudentAnswered(
   try {
     await admin
       .firestore()
+      .collection("users")
+      .doc(studentUid)
       .collection("notifications")
       .add({
-        userId: studentUid,
-        liveId,
+        uid: studentUid,
         type: "question_answered",
         title: "Sua Pergunta Foi Respondida",
         message: `Resposta: "${answer.substring(0, 100)}..."`,

@@ -4,7 +4,8 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, query, where, orderBy, limit } from "firebase/firestore";
 import { Search, GraduationCap, BookOpen, Radio, ChevronRight, X, Loader2, Users } from "lucide-react";
-import Link from "next/link";
+import { Reveal } from "./motion/Reveal";
+import { TransitionLink } from "./TransitionLink";
 
 interface TeacherProfile {
   id: string;
@@ -95,6 +96,7 @@ export function Teachers() {
     <section id="professores" className="py-16 sm:py-24">
       <div className="mx-auto max-w-6xl px-6">
         {/* Header */}
+        <Reveal>
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
           <div>
             <h2 className="text-3xl sm:text-4xl font-bold text-white">
@@ -104,11 +106,13 @@ export function Teachers() {
               Aprende com profissionais experientes em tecnologia, finanças e investimentos.
             </p>
           </div>
-          <Link href="/professores"
+          <TransitionLink href="/professores"
+            whileHover={{ x: 2 }}
             className="flex items-center gap-1.5 text-sm text-purple-400 hover:text-purple-300 font-bold transition-colors shrink-0">
             Ver todos <ChevronRight className="h-4 w-4" />
-          </Link>
+          </TransitionLink>
         </div>
+        </Reveal>
 
         {/* Search */}
         <div ref={searchRef} className="relative max-w-xl mb-10">
@@ -137,9 +141,9 @@ export function Teachers() {
                 </div>
               ) : (
                 results.map((t) => (
-                  <Link key={t.id} href={`/profile/${t.id}`}
+                  <TransitionLink key={t.id} href={`/profile/${t.id}`}
                     onClick={() => { setShowDropdown(false); setSearch(""); }}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800/50 transition-colors">
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 transition-colors">
                     {t.photoURL ? (
                        <img src={t.photoURL} alt={t.name} className="h-10 w-10 rounded-full object-cover" />
                     ) : (
@@ -149,10 +153,10 @@ export function Teachers() {
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-white truncate">{t.name}</p>
-                      <p className="text-xs text-gray-500">{t.role === "institution" ? "Instituição" : "Professor"}</p>
+                      <p className="text-sm text-gray-500">{t.role === "institution" ? "Instituição" : "Professor"}</p>
                     </div>
                     <GraduationCap className="h-4 w-4 text-gray-600 shrink-0" />
-                  </Link>
+                  </TransitionLink>
                 ))
               )}
             </div>
@@ -160,18 +164,19 @@ export function Teachers() {
         </div>
 
         {/* Teacher Cards */}
-        {loading ? (
-          <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>
-        ) : displayTeachers.length === 0 ? (
+        {loading ? null : displayTeachers.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <GraduationCap className="h-12 w-12 mx-auto mb-3 text-gray-700" />
             <p>Nenhum professor registado ainda.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {displayTeachers.map((t) => (
-              <Link key={t.id} href={`/profile/${t.id}`}
-                className="group bg-gray-900/40 border border-gray-800/60 hover:border-purple/30 p-6 transition-all duration-300 text-center">
+            {displayTeachers.map((t, i) => (
+              <Reveal key={t.id} delay={i * 0.1} y={32}>
+              <TransitionLink href={`/profile/${t.id}`}
+                whileHover={{ y: -6 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                className="group block bg-gray-900 border border-gray-800 hover:border-purple/30 p-6 transition-colors duration-300 text-center">
                 {t.photoURL ? (
                    <img src={t.photoURL} alt={t.name} className="h-20 w-20 rounded-full object-cover mx-auto mb-4 ring-2 ring-purple-500/20 group-hover:ring-purple-500/40 transition-all" />
                 ) : (
@@ -180,7 +185,7 @@ export function Teachers() {
                   </div>
                 )}
                 <h3 className="text-lg font-bold text-white group-hover:text-purple-300 transition-colors truncate">{t.name}</h3>
-                <span className={`inline-block mt-1 text-xs font-bold px-2.5 py-1 border ${
+                <span className={`inline-block mt-1 text-sm font-bold px-2.5 py-1 border ${
                   t.role === "institution" ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/25" : "bg-green-500/15 text-green-400 border-green-500/25"
                 }`}>
                   {t.role === "institution" ? "Instituição" : "Professor"}
@@ -189,7 +194,8 @@ export function Teachers() {
                   <span className="flex items-center gap-1"><BookOpen className="h-4 w-4" />{t.courseCount}</span>
                   <span className="flex items-center gap-1"><Radio className="h-4 w-4" />{t.liveCount}</span>
                 </div>
-              </Link>
+              </TransitionLink>
+              </Reveal>
             ))}
           </div>
         )}
@@ -197,10 +203,10 @@ export function Teachers() {
         {/* Ver mais (mobile) */}
         {teachers.length > 4 && (
           <div className="mt-8 text-center sm:hidden">
-            <Link href="/professores"
+            <TransitionLink href="/professores"
               className="inline-flex items-center gap-2 bg-purple hover:bg-purple-light text-white px-6 py-3 font-bold transition-colors">
               Ver todos os professores <ChevronRight className="h-4 w-4" />
-            </Link>
+            </TransitionLink>
           </div>
         )}
       </div>

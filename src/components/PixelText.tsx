@@ -10,8 +10,8 @@ type PixelTextProps = {
 };
 
 const sizeClasses: Record<PixelSize, string> = {
- sm: "text-[0.75rem] leading-relaxed sm:text-xs",
- md: "text-xs leading-relaxed sm:text-sm md:text-base",
+ sm: "text-[0.75rem] leading-relaxed sm:text-sm",
+ md: "text-sm leading-relaxed sm:text-sm md:text-base",
  lg: "text-sm leading-relaxed sm:text-base md:text-lg lg:text-xl",
  xl: "text-base leading-relaxed sm:text-lg md:text-xl lg:text-2xl",
 };

@@ -229,15 +229,15 @@ function DirectPlayer({
 
         {/* Loading spinner */}
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
-            <Loader2 className="h-8 w-8 animate-spin text-white/70" />
+          <div className="absolute inset-0 flex items-center justify-center bg-black pointer-events-none">
+            <Loader2 className="h-8 w-8 animate-spin text-white" />
           </div>
         )}
 
         {/* Play central quando pausado */}
         {!playing && !loading && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="flex h-14 w-14 items-center justify-center bg-black/60 border border-white/20">
+            <div className="flex h-14 w-14 items-center justify-center bg-black border border-white">
               <Play className="h-7 w-7 text-white ml-0.5" strokeWidth={1.5} />
             </div>
           </div>
@@ -260,9 +260,9 @@ function DirectPlayer({
             style={{ height: 20, display: "flex", alignItems: "center" }}
           >
             {/* Track */}
-            <div className="relative w-full h-1 sm:h-1.5 bg-white/20 group-hover/prog:h-2 transition-all duration-150">
+            <div className="relative w-full h-1 sm:h-1.5 bg-white group-hover/prog:h-2 transition-all duration-150">
               {/* Buffered */}
-              <div className="absolute top-0 left-0 h-full bg-white/25 transition-all" style={{ width: `${bufPct}%` }} />
+              <div className="absolute top-0 left-0 h-full bg-white transition-all" style={{ width: `${bufPct}%` }} />
               {/* Progress */}
               <div className="absolute top-0 left-0 h-full bg-purple" style={{ width: `${pct}%` }} />
               {/* Thumb */}
@@ -295,7 +295,7 @@ function DirectPlayer({
             </button>
 
             {/* Tempo */}
-            <span className="font-mono text-[10px] text-white/70 tabular-nums whitespace-nowrap select-none">
+            <span className="font-mono text-[13px] text-white tabular-nums whitespace-nowrap select-none">
               {fmt(currentTime)} / {fmt(duration)}
             </span>
 
@@ -304,7 +304,7 @@ function DirectPlayer({
               <button
                 onClick={() => { const v = videoRef.current; if (v) { v.muted = !v.muted; } }}
                 aria-label={muted || volume === 0 ? "Activar som" : "Silenciar"}
-                className="flex h-8 w-8 items-center justify-center text-white/70 hover:text-white transition-colors"
+                className="flex h-8 w-8 items-center justify-center text-white hover:text-white transition-colors"
               >
                 {muted || volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
               </button>
@@ -324,7 +324,7 @@ function DirectPlayer({
             <div className="relative hidden sm:block">
               <button
                 onClick={() => setShowSpeedMenu(v => !v)}
-                className="flex items-center gap-1 font-mono text-[10px] text-white/70 hover:text-white transition-colors h-8 px-1"
+                className="flex items-center gap-1 font-mono text-[13px] text-white hover:text-white transition-colors h-8 px-1"
                 aria-label="Velocidade"
               >
                 <Settings className="h-3.5 w-3.5" />
@@ -336,7 +336,7 @@ function DirectPlayer({
                   <div className="absolute bottom-9 right-0 z-50 border border-gray-700 bg-gray-900 py-1 min-w-[80px]">
                     {SPEEDS.map(s => (
                       <button key={s} onClick={() => { const v = videoRef.current; if (v) v.playbackRate = s; setPlaybackRate(s); setShowSpeedMenu(false); }}
-                        className={`w-full px-3 py-1.5 font-mono text-[10px] text-left transition-colors ${
+                        className={`w-full px-3 py-1.5 font-mono text-[13px] text-left transition-colors ${
                           playbackRate === s ? "text-purple bg-purple/10" : "text-gray-300 hover:bg-gray-800"
                         }`}>
                         {s}x
@@ -351,7 +351,7 @@ function DirectPlayer({
             <button
               onClick={async () => { const v = videoRef.current; if (!v) return; try { document.pictureInPictureElement ? await document.exitPictureInPicture() : await v.requestPictureInPicture(); } catch {} }}
               aria-label={pip ? "Sair de imagem em imagem" : "Imagem em imagem"}
-              className={`hidden sm:flex h-8 w-8 items-center justify-center transition-colors ${pip ? "text-purple" : "text-white/70 hover:text-white"}`}
+              className={`hidden sm:flex h-8 w-8 items-center justify-center transition-colors ${pip ? "text-purple" : "text-white hover:text-white"}`}
             >
               <PictureInPicture2 className="h-4 w-4" />
             </button>
@@ -360,7 +360,7 @@ function DirectPlayer({
             <button
               onClick={onFullscreen}
               aria-label={fullscreen ? "Sair de ecrã inteiro" : "Ecrã inteiro"}
-              className="flex h-9 w-9 items-center justify-center text-white/70 hover:text-white transition-colors shrink-0"
+              className="flex h-9 w-9 items-center justify-center text-white hover:text-white transition-colors shrink-0"
             >
               {fullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
             </button>
@@ -420,7 +420,7 @@ function LiveKitPlayer({
         <div className="w-full h-full">{source.videoTrack}</div>
       ) : (
         <div className="flex h-full items-center justify-center">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">
             // a aguardar transmissão
           </p>
         </div>
@@ -430,7 +430,7 @@ function LiveKitPlayer({
       <button
         onClick={onFullscreen}
         aria-label={fullscreen ? "Sair de ecrã inteiro" : "Ecrã inteiro"}
-        className={`absolute top-3 right-3 z-20 flex h-8 w-8 items-center justify-center bg-black/60 text-white hover:bg-black/80 transition-opacity ${
+        className={`absolute top-3 right-3 z-20 flex h-8 w-8 items-center justify-center bg-black text-white hover:bg-black transition-opacity ${
           showControls ? "opacity-100" : "opacity-0"
         }`}
       >

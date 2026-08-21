@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
+import { collection, addDoc, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
 import type { PrivateAccessLink } from "@/types/access";
 import { toast } from "sonner";
 

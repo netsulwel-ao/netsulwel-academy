@@ -42,10 +42,10 @@ function VirtualCard({
   return (
     <div className="relative w-full max-w-sm aspect-[1.586/1] select-none">
       {/* Sombra de profundidade */}
-      <div className="absolute inset-0 translate-y-3 translate-x-2 bg-gray-800/60 blur-sm" />
+      <div className="absolute inset-0 translate-y-3 translate-x-2 bg-gray-800 blur-sm" />
 
       {/* Cartão principal */}
-      <div className="relative h-full w-full overflow-hidden border border-white/10"
+      <div className="relative h-full w-full overflow-hidden border border-white"
         style={{
           background: "linear-gradient(135deg, #1a0533 0%, #2d0a5e 35%, #16213e 70%, #0f3460 100%)",
           borderRadius: "16px",
@@ -83,14 +83,14 @@ function VirtualCard({
 
             {/* Logo */}
             <div className="text-right">
-              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/50">Academia</p>
-              <p className="font-mono text-xs font-bold text-white/80 tracking-wider">NETSULWEL</p>
+              <p className="font-mono text-[13px] uppercase tracking-[0.3em] text-white">Academia</p>
+              <p className="font-mono text-sm font-bold text-white tracking-wider">NETSULWEL</p>
             </div>
           </div>
 
           {/* Número do cartão */}
           <div>
-            <p className="font-mono text-sm tracking-[0.3em] text-white/70 mb-1">
+            <p className="font-mono text-sm tracking-[0.3em] text-white mb-1">
               •••• •••• •••• {last4}
             </p>
           </div>
@@ -98,21 +98,21 @@ function VirtualCard({
           {/* Rodapé — nome e saldo */}
           <div className="flex items-end justify-between">
             <div>
-              <p className="font-mono text-[8px] uppercase tracking-widest text-white/40 mb-0.5">titular</p>
-              <p className="font-mono text-xs font-bold text-white/80 uppercase tracking-wider truncate max-w-[140px]">
+              <p className="font-mono text-[8px] uppercase tracking-widest text-white mb-0.5">titular</p>
+              <p className="font-mono text-sm font-bold text-white uppercase tracking-wider truncate max-w-[140px]">
                 {name || "Professor"}
               </p>
             </div>
             <div className="text-right">
-              <p className="font-mono text-[8px] uppercase tracking-widest text-white/40 mb-0.5">saldo líquido</p>
-              <p className="font-mono text-sm font-bold text-white/90">{fmtKz(balance)}</p>
+              <p className="font-mono text-[8px] uppercase tracking-widest text-white mb-0.5">saldo líquido</p>
+              <p className="font-mono text-sm font-bold text-white">{fmtKz(balance)}</p>
             </div>
           </div>
         </div>
 
         {/* Reflexo de luz no topo */}
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-        <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-white/10 via-transparent to-transparent" />
+        <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-white/100 via-transparent to-transparent" />
       </div>
     </div>
   );
@@ -185,7 +185,7 @@ export default function WalletPage() {
         <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
           <CreditCard className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
         </div>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">// sem acesso</p>
+        <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">// sem acesso</p>
         <p className="text-sm text-gray-600">A carteira está disponível apenas para professores e instituições.</p>
       </div>
     );
@@ -196,7 +196,7 @@ export default function WalletPage() {
 
       {/* Cabeçalho */}
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-green/60 mb-2">// carteira</p>
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green/60 mb-2">// carteira</p>
         <h1 className="text-2xl font-bold text-gray-100">Minha Carteira</h1>
         <p className="mt-1 text-sm text-gray-600">
           {sales.length} venda{sales.length !== 1 ? "s" : ""} confirmada{sales.length !== 1 ? "s" : ""}
@@ -209,7 +209,7 @@ export default function WalletPage() {
         {/* Cartão virtual */}
         <div className="flex flex-col items-center sm:items-start gap-4">
           <VirtualCard name={userName} balance={stats.balance} />
-          <p className="font-mono text-[9px] text-gray-700 uppercase tracking-widest">
+          <p className="font-mono text-[13px] text-gray-700 uppercase tracking-widest">
             cartão virtual · netsulwel academy
           </p>
         </div>
@@ -239,14 +239,14 @@ export default function WalletPage() {
               accent: "text-red-400/60",
             },
           ].map(({ icon: Icon, label, value, sub, accent }) => (
-            <div key={label} className="flex items-center gap-4 border border-gray-800/60 bg-gray-900/20 p-4">
+            <div key={label} className="flex items-center gap-4 border border-gray-800 bg-gray-900 p-4">
               <div className={`flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800 bg-gray-900`}>
                 <Icon className={`h-4 w-4 ${accent}`} strokeWidth={1.5} />
               </div>
               <div className="min-w-0">
-                <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">{label}</p>
+                <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">{label}</p>
                 <p className="font-mono text-lg font-bold text-gray-200">{value}</p>
-                <p className="font-mono text-[9px] text-gray-700">{sub}</p>
+                <p className="font-mono text-[13px] text-gray-700">{sub}</p>
               </div>
             </div>
           ))}
@@ -255,27 +255,27 @@ export default function WalletPage() {
 
       {/* ── Histórico ── */}
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-3">
+        <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-3">
           // histórico · {sales.length}
         </p>
 
         {sales.length === 0 ? (
-          <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-16 text-center">
+          <div className="flex flex-col items-center justify-center border border-gray-800 bg-gray-900 py-16 text-center">
             <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
               <Calendar className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
             </div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">// sem vendas</p>
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">// sem vendas</p>
             <p className="text-sm text-gray-600">Ainda não tens vendas confirmadas.</p>
           </div>
         ) : (
-          <div className="border border-gray-800/60 divide-y divide-gray-800/40">
+          <div className="border border-gray-800 divide-y divide-gray-800">
             {sales.map(sale => (
-              <div key={sale.id} className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-gray-900/20 transition-colors">
+              <div key={sale.id} className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-gray-900 transition-colors">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-gray-200 truncate">
                     {sale.itemTitle ?? sale.type}
                   </p>
-                  <div className="flex flex-wrap items-center gap-2 mt-0.5 font-mono text-[9px] text-gray-700">
+                  <div className="flex flex-wrap items-center gap-2 mt-0.5 font-mono text-[13px] text-gray-700">
                     <span>{sale.userName ?? "Aluno"}</span>
                     <span>·</span>
                     <span>{fmtDate(sale.createdAt)}</span>
@@ -286,7 +286,7 @@ export default function WalletPage() {
                     +{fmtKz(sale.netAmount ?? sale.amount)}
                   </p>
                   {(sale.fee ?? 0) > 0 && (
-                    <p className="font-mono text-[9px] text-gray-700">
+                    <p className="font-mono text-[13px] text-gray-700">
                       taxa: {fmtKz(sale.fee ?? 0)}
                     </p>
                   )}

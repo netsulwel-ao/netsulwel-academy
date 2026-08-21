@@ -218,7 +218,7 @@ export default function TeacherChatsPage() {
       {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
             // chats do professor
           </p>
           <h1 className="text-2xl font-bold text-gray-100">Chats</h1>
@@ -228,7 +228,7 @@ export default function TeacherChatsPage() {
         </div>
         <Link
           href="/dashboard/chats"
-          className="flex items-center gap-1.5 border border-gray-800 bg-gray-900/60 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:border-gray-700 hover:text-gray-400 transition-all shrink-0"
+          className="flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:border-gray-700 hover:text-gray-400 transition-all shrink-0"
         >
           Ver todas as mensagens <ChevronRight className="h-3 w-3" />
         </Link>
@@ -251,17 +251,17 @@ export default function TeacherChatsPage() {
 
       {/* Sem cursos */}
       {!loading && courses.length === 0 && !error && (
-        <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-20 text-center">
+        <div className="flex flex-col items-center justify-center border border-gray-800 bg-gray-900 py-20 text-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
             <BookOpen className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
           </div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">
             // sem cursos
           </p>
           <p className="text-sm text-gray-600 mb-5">Cria um curso primeiro para depois criar um chat de grupo.</p>
           <Link
             href="/dashboard/teacher/courses/new"
-            className="flex items-center gap-1.5 border border-green/25 bg-green/8 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-green/70 hover:bg-green/15 transition-all"
+            className="flex items-center gap-1.5 border border-green/25 bg-green/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-green/70 hover:bg-green/15 transition-all"
           >
             <Plus className="h-3 w-3" /> Criar curso
           </Link>
@@ -271,20 +271,20 @@ export default function TeacherChatsPage() {
       {/* Lista de cursos com acção de chat */}
       {!loading && courses.length > 0 && (
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-3">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-3">
             // cursos · {courses.length}
           </p>
-          <div className="border border-gray-800/60 divide-y divide-gray-800/40">
+          <div className="border border-gray-800 divide-y divide-gray-800">
             {courses.map(course => {
               const hasChat = coursesWithChat.has(course.id!);
               const existingChat = chats.find(c => c.type === "group" && c.courseId === course.id);
               const isCreating = creatingFor === course.id;
 
               return (
-                <div key={course.id} className="flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-4 hover:bg-gray-900/20 transition-colors">
+                <div key={course.id} className="flex flex-col gap-4 px-5 py-4 hover:bg-gray-900 transition-colors">
                   {/* Thumbnail + info */}
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="h-12 w-16 shrink-0 overflow-hidden border border-gray-800/60 bg-gray-900">
+                    <div className="h-12 w-16 shrink-0 overflow-hidden border border-gray-800 bg-gray-900">
                       {course.thumbnail
                         ? <img src={course.thumbnail} alt={course.title} className="h-full w-full object-cover" />
                         : <div className="flex h-full w-full items-center justify-center"><BookOpen className="h-4 w-4 text-gray-800" strokeWidth={1} /></div>
@@ -292,7 +292,7 @@ export default function TeacherChatsPage() {
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-gray-200 truncate">{course.title}</p>
-                      <div className="flex items-center gap-2 mt-0.5 font-mono text-[9px] text-gray-700">
+                      <div className="flex items-center gap-2 mt-0.5 font-mono text-[13px] text-gray-700">
                         <span>{course.lessonsCount ?? 0} aulas</span>
                         <span>·</span>
                         <span className={`${course.status === "published" ? "text-green/60" : "text-gray-700"}`}>
@@ -303,7 +303,7 @@ export default function TeacherChatsPage() {
                   </div>
 
                   {/* Acção */}
-                  <div className="shrink-0 flex items-center gap-2">
+                  <div className="shrink-0 flex flex-wrap items-center gap-2">
                     {hasChat && existingChat ? (
                       <>
                         <button
@@ -311,7 +311,7 @@ export default function TeacherChatsPage() {
                           onClick={() => handleSyncParticipants(course)}
                           disabled={syncingFor === course.id}
                           title="Sincronizar alunos inscritos no chat"
-                          className="flex items-center gap-1.5 border border-gray-700/40 bg-gray-900/40 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:border-gray-600 hover:text-gray-400 disabled:opacity-50 transition-all"
+                          className="flex items-center gap-1.5 border border-gray-700 bg-gray-900 px-3 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:border-gray-600 hover:text-gray-400 disabled:opacity-50 transition-all"
                         >
                           {syncingFor === course.id
                             ? <Loader2 className="h-3 w-3 animate-spin" />
@@ -321,7 +321,7 @@ export default function TeacherChatsPage() {
                         </button>
                         <Link
                           href={`/dashboard/chats/${existingChat.id}`}
-                          className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all"
+                          className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all"
                         >
                           <MessageSquare className="h-3 w-3" strokeWidth={1.5} /> Abrir chat
                         </Link>
@@ -331,7 +331,7 @@ export default function TeacherChatsPage() {
                         type="button"
                         onClick={() => handleCreateGroupChat(course)}
                         disabled={isCreating}
-                        className="flex items-center gap-1.5 border border-green/25 bg-green/8 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-green/70 hover:bg-green/15 disabled:opacity-50 transition-all"
+                        className="flex items-center gap-1.5 border border-green/25 bg-green/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-green/70 hover:bg-green/15 disabled:opacity-50 transition-all"
                       >
                         {isCreating
                           ? <Loader2 className="h-3 w-3 animate-spin" />
@@ -347,12 +347,12 @@ export default function TeacherChatsPage() {
           </div>
 
           {/* Nota explicativa */}
-          <div className="mt-4 flex items-start gap-2.5 border border-gray-800/40 bg-gray-900/10 px-4 py-3">
+          <div className="mt-4 flex items-start gap-2.5 border border-gray-800 bg-gray-900 px-4 py-3">
             <Users className="mt-0.5 h-4 w-4 shrink-0 text-gray-700" strokeWidth={1.5} />
-            <p className="text-xs text-gray-600 leading-relaxed">
+            <p className="text-sm text-gray-600 leading-relaxed">
               Ao criar um chat de grupo, todos os alunos actualmente inscritos no curso são adicionados automaticamente.
               Novos alunos que se inscrevam após a criação do chat são adicionados automaticamente no momento da compra.
-              Usa <strong className="text-gray-500 font-mono text-[10px]">Sync alunos</strong> para forçar uma sincronização manual.
+              Usa <strong className="text-gray-500 font-mono text-[13px]">Sync alunos</strong> para forçar uma sincronização manual.
             </p>
           </div>
         </div>
@@ -361,10 +361,10 @@ export default function TeacherChatsPage() {
       {/* Chats individuais existentes */}
       {!loading && chats.filter(c => c.type === "individual").length > 0 && (
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-3">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-3">
             // chats individuais · {chats.filter(c => c.type === "individual").length}
           </p>
-          <div className="border border-gray-800/60 divide-y divide-gray-800/40">
+          <div className="border border-gray-800 divide-y divide-gray-800">
             {chats
               .filter(c => c.type === "individual")
               .map(chat => {
@@ -374,15 +374,15 @@ export default function TeacherChatsPage() {
                   <Link
                     key={chat.id}
                     href={`/dashboard/chats/${chat.id}`}
-                    className="group flex items-center gap-3 px-5 py-4 hover:bg-gray-900/20 transition-colors"
+                    className="group flex items-center gap-3 px-5 py-4 hover:bg-gray-900 transition-colors"
                   >
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-200 group-hover:text-white truncate transition-colors">
                         {otherName}
                       </p>
-                      <p className="font-mono text-[9px] text-gray-700 mt-0.5">{chat.courseTitle}</p>
+                      <p className="font-mono text-[13px] text-gray-700 mt-0.5">{chat.courseTitle}</p>
                       {chat.lastMessage && (
-                        <p className="text-xs text-gray-600 mt-0.5 truncate">{chat.lastMessage}</p>
+                        <p className="text-sm text-gray-600 mt-0.5 truncate">{chat.lastMessage}</p>
                       )}
                     </div>
                     <ChevronRight className="h-4 w-4 text-gray-700 group-hover:text-gray-500 transition-colors shrink-0" />

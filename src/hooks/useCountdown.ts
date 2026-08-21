@@ -23,10 +23,9 @@ export function useCountdown(targetDate: string | Date): CountdownTime {
     };
   };
 
-  const [time, setTime] = useState<CountdownTime>(calc);
+  const [time, setTime] = useState<CountdownTime>(() => calc());
 
   useEffect(() => {
-    setTime(calc());
     const id = setInterval(() => setTime(calc()), 1000);
     return () => clearInterval(id);
   }, [targetDate]);

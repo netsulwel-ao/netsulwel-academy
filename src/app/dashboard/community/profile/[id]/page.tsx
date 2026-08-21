@@ -16,25 +16,18 @@ interface ProfileData {
   name: string;
   email: string;
   photoURL?: string;
-  plan?: "free" | "smart" | "golden";
   createdAt?: Date;
 }
 
-const PLAN_LABELS: Record<string, { label: string; color: string }> = {
-  free: { label: "Free", color: "text-gray-400 bg-gray-800" },
-  smart: { label: "Smart", color: "text-blue-400 bg-blue-500/10" },
-  golden: { label: "Golden", color: "text-amber-400 bg-amber-500/10" },
-};
-
 export default function CommunityProfilePage() {
-  const { user, plan, isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   const params = useParams();
   const userId = params?.id as string;
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const canAccess = isAdmin || plan === "smart" || plan === "golden";
+  const canAccess = !!user || isAdmin;
 
   useEffect(() => {
     if (!userId) return;
@@ -47,7 +40,6 @@ export default function CommunityProfilePage() {
             name: data.name || "Utilizador",
             email: data.email || "",
             photoURL: data.photoURL || "",
-            plan: data.plan || "free",
             createdAt: data.createdAt?.toDate?.() || data.createdAt,
           });
         }
@@ -74,13 +66,13 @@ export default function CommunityProfilePage() {
   if (!canAccess) {
     return (
       <div className="max-w-2xl mx-auto mt-20 animate-in fade-in duration-500">
-        <div className="bg-gray-900/40 border border-gray-800 p-10 text-center">
+        <div className="bg-gray-900 border border-gray-800 p-10 text-center">
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple to-purple-dark flex items-center justify-center mb-6">
             <Lock className="h-8 w-8 text-white" />
           </div>
           <h2 className="text-3xl font-bold text-white mb-3">Conteúdo exclusivo</h2>
           <p className="text-gray-400 max-w-md mx-auto mb-8">
-            A comunidade é um benefício exclusivo para alunos dos planos <strong className="text-blue-400">Smart</strong> e <strong className="text-amber-400">Golden</strong>.
+            A comunidade é acessível para todos os alunos registados na plataforma.
           </p>
           <Link
             href="/dashboard/finances"
@@ -113,7 +105,6 @@ export default function CommunityProfilePage() {
     );
   }
 
-  const planInfo = PLAN_LABELS[profile.plan || "free"];
   const memberSince = profile.createdAt
     ? new Date(profile.createdAt).toLocaleDateString("pt-PT", { month: "long", year: "numeric" })
     : "—";
@@ -130,15 +121,14 @@ export default function CommunityProfilePage() {
       </Link>
 
       {/* Profile Card */}
-      <div className="bg-gray-900/40 border border-gray-800 p-6 sm:p-8">
+      <div className="bg-gray-900 border border-gray-800 p-6 sm:p-8">
         <div className="flex items-start gap-5">
-          <div className="h-20 w-20 shrink-0 overflow-hidden border border-gray-800/60">
+          <div className="h-20 w-20 shrink-0 overflow-hidden border border-gray-800">
             <Avatar uid={userId} photoURL={profile.photoURL} name={profile.name} size={80} className="h-full w-full" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl font-bold text-white">{profile.name}</h1>
-              <span className={`text-xs font-bold px-2 py-0.5 ${planInfo.color}`}>{planInfo.label}</span>
             </div>
             <p className="text-sm text-gray-500 mt-1">{profile.email}</p>
             <div className="flex items-center gap-4 mt-3 text-sm text-gray-400">

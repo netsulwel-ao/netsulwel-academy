@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -94,12 +94,12 @@ export default function StudioPage({ redirectAfterEnd = "/admin/lives" }: Props)
     }
   }, [id, router, user, redirectAfterEnd]);
 
-  // ── Loading / error ──────────────────────────────────────────
+  // -- Loading / error ------------------------------------------
   if (loading && !joined) return (
     <div className="flex items-center justify-center min-h-screen bg-[#0a0a0c]">
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-7 w-7 animate-spin text-white/30" />
-        <p className="text-sm text-white/30">A preparar o estudio...</p>
+        <Loader2 className="h-7 w-7 animate-spin text-white" />
+        <p className="text-sm text-white">A preparar o estudio...</p>
       </div>
     </div>
   );
@@ -109,7 +109,7 @@ export default function StudioPage({ redirectAfterEnd = "/admin/lives" }: Props)
       <div className="text-center space-y-4 max-w-xs">
         <AlertTriangle className="h-10 w-10 text-red-400 mx-auto" />
         <p className="text-base font-bold text-white">{error}</p>
-        <button onClick={() => router.push(redirectAfterEnd)} className="text-sm text-white/30 hover:text-white/60 transition-colors">
+        <button onClick={() => router.push(redirectAfterEnd)} className="text-sm text-white hover:text-white transition-colors">
           Voltar
         </button>
       </div>
@@ -120,7 +120,7 @@ export default function StudioPage({ redirectAfterEnd = "/admin/lives" }: Props)
 
   if (!token) return (
     <div className="flex items-center justify-center min-h-screen bg-[#0a0a0c]">
-      <Loader2 className="h-7 w-7 animate-spin text-white/30" />
+      <Loader2 className="h-7 w-7 animate-spin text-white" />
     </div>
   );
 

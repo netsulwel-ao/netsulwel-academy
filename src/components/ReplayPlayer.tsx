@@ -89,12 +89,12 @@ export function ReplayPlayer({ live, isStudent }: ReplayPlayerProps) {
   };
 
   return (
-    <div className="bg-[#1a1a1e] border border-white/8 rounded-lg overflow-hidden">
+    <div className="bg-[#1a1a1e] border border-white rounded-lg overflow-hidden">
       {/* Collapsed view */}
       {!isExpanded && (
         <button
           onClick={() => setIsExpanded(true)}
-          className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+          className="w-full p-4 flex items-center justify-between hover:bg-white transition-colors"
         >
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded flex items-center justify-center">
@@ -102,12 +102,12 @@ export function ReplayPlayer({ live, isStudent }: ReplayPlayerProps) {
             </div>
             <div className="text-left">
               <h3 className="text-sm font-semibold text-white">Gravação Disponível</h3>
-              <p className="text-xs text-white/50">
+              <p className="text-sm text-white">
                 {formatTime(duration)}
               </p>
             </div>
           </div>
-          <ChevronDown size={20} className="text-white/50" />
+          <ChevronDown size={20} className="text-white" />
         </button>
       )}
 
@@ -131,7 +131,7 @@ export function ReplayPlayer({ live, isStudent }: ReplayPlayerProps) {
             <div className="flex items-center gap-2">
               <button
                 onClick={handlePlayPause}
-                className="p-2 hover:bg-white/10 rounded transition-colors"
+                className="p-2 hover:bg-white rounded transition-colors"
                 title={isPlaying ? "Pausar" : "Reproduzir"}
               >
                 {isPlaying ? (
@@ -149,7 +149,7 @@ export function ReplayPlayer({ live, isStudent }: ReplayPlayerProps) {
                   max={duration || 0}
                   value={currentTime}
                   onChange={handleSeek}
-                  className="flex-1 h-1 bg-white/10 rounded cursor-pointer appearance-none"
+                  className="flex-1 h-1 bg-white rounded cursor-pointer appearance-none"
                   style={{
                     background: `linear-gradient(to right, rgb(59, 130, 246) 0%, rgb(59, 130, 246) ${
                       duration ? (currentTime / duration) * 100 : 0
@@ -161,7 +161,7 @@ export function ReplayPlayer({ live, isStudent }: ReplayPlayerProps) {
               </div>
 
               {/* Time display */}
-              <span className="text-xs text-white/50 min-w-fit">
+              <span className="text-sm text-white min-w-fit">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </span>
             </div>
@@ -179,7 +179,7 @@ export function ReplayPlayer({ live, isStudent }: ReplayPlayerProps) {
           {/* Close button */}
           <button
             onClick={() => setIsExpanded(false)}
-            className="w-full py-2 text-white/50 hover:text-white text-xs font-medium transition-colors"
+            className="w-full py-2 text-white hover:text-white text-sm font-medium transition-colors"
           >
             Fechar
           </button>

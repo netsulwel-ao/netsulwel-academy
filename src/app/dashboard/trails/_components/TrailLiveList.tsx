@@ -11,32 +11,32 @@ import { fmtDate, fmtDateShort } from "../_types/trails";
 
 interface TrailLiveListProps {
   lives: LiveSession[];
+  enrolledLives: string[];
 }
 
-export function TrailLiveList({ lives }: TrailLiveListProps) {
-  const { plan, isAdmin } = useAuth();
+export function TrailLiveList({ lives, enrolledLives }: TrailLiveListProps) {
+  const { isAdmin } = useAuth();
 
   if (lives.length === 0) return null;
 
   return (
     <section>
       <div className="mb-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-red-400/60 mb-1">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-red-400/60 mb-1">
           // aulas ao vivo
         </p>
         <h2 className="text-base font-bold text-gray-200">
           Sessões ao vivo
-          <span className="ml-2 font-mono text-xs text-gray-700">({lives.length})</span>
+          <span className="ml-2 font-mono text-sm text-gray-700">({lives.length})</span>
         </h2>
       </div>
 
-      <div className="divide-y divide-gray-800/40 border border-gray-800/60">
+      <div className="divide-y divide-gray-800 border border-gray-800">
         {lives.map((live, idx) => {
           const hasAccess =
             isAdmin ||
             live.target === "free" ||
-            (live.target === "smart" && (plan === "smart" || plan === "golden")) ||
-            (live.target === "golden" && plan === "golden");
+            enrolledLives.includes(live.id ?? "");
 
           const isLive      = live.status === "live";
           const isScheduled = live.status === "scheduled";
@@ -45,15 +45,15 @@ export function TrailLiveList({ lives }: TrailLiveListProps) {
           return (
             <div
               key={live.id}
-              className="flex items-center gap-3 sm:gap-4 px-4 py-3.5 bg-gray-900/10 hover:bg-gray-900/30 transition-colors"
+              className="flex items-center gap-3 sm:gap-4 px-4 py-3.5 bg-gray-900 hover:bg-gray-900 transition-colors"
             >
               {/* Número */}
-              <span className="w-6 shrink-0 text-center font-mono text-[10px] text-gray-700">
+              <span className="w-6 shrink-0 text-center font-mono text-[13px] text-gray-700">
                 {String(idx + 1).padStart(2, "0")}
               </span>
 
               {/* Thumbnail */}
-              <div className="h-12 w-16 sm:w-20 shrink-0 overflow-hidden bg-gray-900 border border-gray-800/60 relative">
+              <div className="h-12 w-16 sm:w-20 shrink-0 overflow-hidden bg-gray-900 border border-gray-800 relative">
                 {live.thumbnail ? (
                   <img src={live.thumbnail} alt={live.title} className="h-full w-full object-cover" />
                 ) : (
@@ -62,7 +62,7 @@ export function TrailLiveList({ lives }: TrailLiveListProps) {
                   </div>
                 )}
                 {isLive && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-950/60">
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-950">
                     <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                   </div>
                 )}
@@ -71,7 +71,7 @@ export function TrailLiveList({ lives }: TrailLiveListProps) {
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-gray-300 truncate">{live.title}</p>
-                <div className="mt-0.5 font-mono text-[10px] text-gray-700">
+                <div className="mt-0.5 font-mono text-[13px] text-gray-700">
                   {isLive ? (
                     <span className="flex items-center gap-1 text-red-400/80">
                       <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />
@@ -96,22 +96,22 @@ export function TrailLiveList({ lives }: TrailLiveListProps) {
                 {isLive && hasAccess ? (
                   <Link
                     href={`/dashboard/lives/${live.id}`}
-                    className="flex items-center gap-1.5 bg-red-600 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-white hover:bg-red-500 transition-colors"
+                    className="flex items-center gap-1.5 bg-red-600 px-3 py-2 font-mono text-[13px] uppercase tracking-widest text-white hover:bg-red-500 transition-colors"
                   >
                     <Play className="h-3 w-3" strokeWidth={1.5} />
                     <span className="hidden sm:inline">Entrar</span>
                   </Link>
                 ) : isLive && !hasAccess ? (
-                  <span className="flex items-center gap-1.5 border border-gray-800/40 bg-gray-900/30 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-gray-700">
+                  <span className="flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-3 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-700">
                     <Lock className="h-3 w-3" strokeWidth={1.5} />
-                    <span className="hidden sm:inline">{live.target === "golden" ? "Golden" : "Smart"}</span>
+                    <span className="hidden sm:inline">{live.target === "standalone" ? "Pago" : "Grátis"}</span>
                   </span>
                 ) : isScheduled ? (
-                  <span className="border border-gray-800/40 bg-gray-900/30 px-3 py-2 font-mono text-[10px] text-gray-700">
+                  <span className="border border-gray-800 bg-gray-900 px-3 py-2 font-mono text-[13px] text-gray-700">
                     {fmtDateShort(live.scheduledAt)}
                   </span>
                 ) : (
-                  <span className="font-mono text-[10px] text-gray-700 px-3 py-2">
+                  <span className="font-mono text-[13px] text-gray-700 px-3 py-2">
                     Encerrada
                   </span>
                 )}
@@ -143,16 +143,16 @@ export function TrailScheduleList({ sessions }: TrailScheduleListProps) {
   return (
     <section>
       <div className="mb-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber-400/60 mb-1">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-amber-400/60 mb-1">
           // cronograma
         </p>
         <h2 className="text-base font-bold text-gray-200">
           Sessões agendadas
-          <span className="ml-2 font-mono text-xs text-gray-700">({sessions.length})</span>
+          <span className="ml-2 font-mono text-sm text-gray-700">({sessions.length})</span>
         </h2>
       </div>
 
-      <div className="divide-y divide-gray-800/40 border border-gray-800/60">
+      <div className="divide-y divide-gray-800 border border-gray-800">
         {sessions.map((sess, idx) => {
           const isPast = new Date(sess.scheduledAt) < new Date();
           const targetColor = TARGET_BADGE[sess.target ?? "standalone"] ?? TARGET_BADGE.standalone;
@@ -160,17 +160,17 @@ export function TrailScheduleList({ sessions }: TrailScheduleListProps) {
           return (
             <div
               key={idx}
-              className={`flex items-center gap-3 sm:gap-4 px-4 py-3.5 bg-gray-900/10 transition-colors ${
-                isPast ? "opacity-50" : "hover:bg-gray-900/30"
+              className={`flex items-center gap-3 sm:gap-4 px-4 py-3.5 bg-gray-900 transition-colors ${
+                isPast ? "opacity-50" : "hover:bg-gray-900"
               }`}
             >
               {/* Número */}
-              <span className="w-6 shrink-0 text-center font-mono text-[10px] text-gray-700">
+              <span className="w-6 shrink-0 text-center font-mono text-[13px] text-gray-700">
                 {String(idx + 1).padStart(2, "0")}
               </span>
 
               {/* Thumbnail */}
-              <div className="h-12 w-16 sm:w-20 shrink-0 overflow-hidden bg-gray-900 border border-gray-800/60">
+              <div className="h-12 w-16 sm:w-20 shrink-0 overflow-hidden bg-gray-900 border border-gray-800">
                 {sess.thumbnail ? (
                   <img src={sess.thumbnail} alt={sess.title} className="h-full w-full object-cover" />
                 ) : (
@@ -184,23 +184,23 @@ export function TrailScheduleList({ sessions }: TrailScheduleListProps) {
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-sm font-semibold text-gray-300 truncate">{sess.title}</p>
-                  <span className={`font-mono text-[9px] uppercase tracking-widest border px-1.5 py-0.5 ${targetColor}`}>
+                  <span className={`font-mono text-[13px] uppercase tracking-widest border px-1.5 py-0.5 ${targetColor}`}>
                     {sess.target ?? "standalone"}
                     {sess.target === "standalone" && sess.price > 0
                       ? ` · ${sess.price.toLocaleString("pt-AO")} Kz`
                       : ""}
                   </span>
                 </div>
-                <div className="mt-0.5 flex items-center gap-1 font-mono text-[10px] text-gray-700">
+                <div className="mt-0.5 flex items-center gap-1 font-mono text-[13px] text-gray-700">
                   <Calendar className="h-3 w-3" strokeWidth={1.5} />
                   {fmtDate(sess.scheduledAt)}
                 </div>
               </div>
 
               {/* Estado */}
-              <span className={`shrink-0 font-mono text-[9px] uppercase tracking-widest border px-2 py-1 ${
+              <span className={`shrink-0 font-mono text-[13px] uppercase tracking-widest border px-2 py-1 ${
                 isPast
-                  ? "border-gray-800/40 text-gray-700"
+                  ? "border-gray-800 text-gray-700"
                   : "border-green/20 bg-green/5 text-green/70"
               }`}>
                 {isPast ? "Realizada" : "Agendada"}

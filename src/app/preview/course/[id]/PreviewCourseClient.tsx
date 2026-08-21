@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Play, Lock, Award, BookOpen, Clock, Share2,
-  CheckCircle2, ChevronDown, ChevronRight, Crown, Zap, LogIn,
+  CheckCircle2, ChevronDown, ChevronRight, Zap, LogIn,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -15,8 +15,6 @@ const LEVEL_LABEL: Record<string, string> = {
 };
 
 const TYPE_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  golden:     { label: "Plano Golden", color: "text-yellow-400", icon: Crown },
-  smart:      { label: "Plano Smart",  color: "text-green-400",  icon: Zap },
   standalone: { label: "Compra Avulsa", color: "text-blue-400",  icon: Play },
 };
 
@@ -37,7 +35,7 @@ export default function PreviewCourseClient({ course }: { course: CoursePreview 
   const [expandedModules, setExpandedModules] = useState<number[]>([0]);
 
   const hasAccess = !loading && user
-    ? canAccessCourse(course.type as "golden" | "smart" | "standalone", course.id, [], course.price, course.accessCode)
+    ? canAccessCourse(course.id, [], course.price, course.accessCode)
     : false;
 
   const handleWatch = () => {
@@ -70,7 +68,7 @@ export default function PreviewCourseClient({ course }: { course: CoursePreview 
     <div className="min-h-screen bg-gray-950 text-white">
 
       {/* ── Navbar mínima ── */}
-      <nav className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-gray-950/90 backdrop-blur-xl border-b border-gray-800">
+      <nav className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-gray-950 border-b border-gray-800">
         <Link href="/" className="flex items-center gap-3">
           <img src="/Logo-Academy-White.svg" alt="Netsulwel Academy" className="h-10 w-auto" />
           <span className="text-lg font-bold text-white hidden sm:block">Netsulwel Academy</span>
@@ -104,20 +102,16 @@ export default function PreviewCourseClient({ course }: { course: CoursePreview 
           <div className="flex-1 space-y-6">
             {/* Badges */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wider border ${
-                course.type === "golden" ? "bg-yellow-500/15 border-yellow-500/30 text-yellow-400"
-                : course.type === "smart" ? "bg-green-500/15 border-green-500/30 text-green-400"
-                : "bg-blue-500/15 border-blue-500/30 text-blue-400"
-              }`}>
+              <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-blue-500/15 border-blue-500/30 text-blue-400">
                 <TypeIcon className="h-3.5 w-3.5" />
                 {typeConf.label}
               </span>
               {course.hasCertificate && (
-                <span className="flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/30 text-amber-400">
+                <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/30 text-amber-400">
                   <Award className="h-3.5 w-3.5" /> Certificado
                 </span>
               )}
-              <span className="px-3 py-1 text-xs font-medium text-gray-400 border border-gray-700">
+              <span className="px-3 py-1 text-sm font-medium text-gray-400 border border-gray-700">
                 {LEVEL_LABEL[course.level] ?? course.level}
               </span>
             </div>
@@ -136,7 +130,7 @@ export default function PreviewCourseClient({ course }: { course: CoursePreview 
             {course.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {course.tags.map((t) => (
-                  <span key={t} className="px-3 py-1 bg-gray-800 text-gray-400 text-xs">{t}</span>
+                  <span key={t} className="px-3 py-1 bg-gray-800 text-gray-400 text-sm">{t}</span>
                 ))}
               </div>
             )}
@@ -164,17 +158,17 @@ export default function PreviewCourseClient({ course }: { course: CoursePreview 
                 aria-expanded={expandedModules.includes(mi)}
                 aria-controls={`prev-module-${mi}`}
                 id={`prev-module-btn-${mi}`}
-                className="w-full flex items-center gap-4 px-5 py-4 bg-gray-900/60 hover:bg-gray-900 transition-colors text-left">
-                <span className="text-xs font-bold text-blue-400 uppercase tracking-wider shrink-0 w-20">Módulo {mi + 1}</span>
+                className="w-full flex items-center gap-4 px-5 py-4 bg-gray-900 hover:bg-gray-900 transition-colors text-left">
+                <span className="text-sm font-bold text-blue-400 uppercase tracking-wider shrink-0 w-20">Módulo {mi + 1}</span>
                 <span className="flex-1 text-sm font-medium text-white">{module.title || `Módulo ${mi + 1}`}</span>
-                <span className="text-xs text-gray-500 shrink-0">{module.videos.length} aulas</span>
+                <span className="text-sm text-gray-500 shrink-0">{module.videos.length} aulas</span>
                 {expandedModules.includes(mi)
                   ? <ChevronDown className="h-4 w-4 text-gray-500 shrink-0" />
                   : <ChevronRight className="h-4 w-4 text-gray-500 shrink-0" />
                 }
               </button>
               {expandedModules.includes(mi) && (
-                <div id={`prev-module-${mi}`} role="region" aria-labelledby={`prev-module-btn-${mi}`} className="bg-gray-950/40 divide-y divide-gray-800/50">
+                <div id={`prev-module-${mi}`} role="region" aria-labelledby={`prev-module-btn-${mi}`} className="bg-gray-950 divide-y divide-gray-800">
                   {module.videos.map((video, vi) => (
                     <div key={vi} className="flex items-center gap-4 px-5 py-3">
                       <div className="flex h-7 w-7 shrink-0 items-center justify-center bg-gray-800">
@@ -182,7 +176,7 @@ export default function PreviewCourseClient({ course }: { course: CoursePreview 
                       </div>
                       <span className="flex-1 text-sm text-gray-400">{video.title || `Aula ${vi + 1}`}</span>
                       {video.duration && (
-                        <span className="text-xs text-gray-600 flex items-center gap-1 shrink-0">
+                        <span className="text-sm text-gray-600 flex items-center gap-1 shrink-0">
                           <Clock className="h-3 w-3" />{video.duration}
                         </span>
                       )}
@@ -215,8 +209,8 @@ function CTABox({ course, hasAccess, user, loading, onWatch }: {
       {course.thumbnail && (
         <div className="relative aspect-video overflow-hidden">
           <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gray-950/40 flex items-center justify-center">
-            <div className="flex h-14 w-14 items-center justify-center bg-white/10 border border-white/20 backdrop-blur-sm">
+          <div className="absolute inset-0 bg-gray-950 flex items-center justify-center">
+            <div className="flex h-14 w-14 items-center justify-center bg-white border border-white">
               <Lock className="h-6 w-6 text-white" />
             </div>
           </div>
@@ -230,7 +224,7 @@ function CTABox({ course, hasAccess, user, loading, onWatch }: {
             <p className="text-3xl font-bold text-white">
               {course.price > 0 ? `${course.price.toLocaleString("pt-AO")} Kz` : "Gratuito"}
             </p>
-            <p className="text-xs text-gray-500 mt-1">Acesso vitalício</p>
+            <p className="text-sm text-gray-500 mt-1">Acesso vitalício</p>
           </div>
         ) : (
           <div className={`flex items-center gap-2 ${typeConf.color}`}>
@@ -244,11 +238,7 @@ function CTABox({ course, hasAccess, user, loading, onWatch }: {
           className={`w-full flex items-center justify-center gap-2 py-4 font-bold text-sm transition-colors ${
             hasAccess
               ? "bg-green-600 hover:bg-green-500 text-white"
-              : course.type === "golden"
-                ? "bg-yellow-500 hover:bg-yellow-400 text-gray-900"
-                : course.type === "smart"
-                  ? "bg-green-600 hover:bg-green-500 text-white"
-                  : "bg-blue-600 hover:bg-blue-700 text-white"
+              : "bg-blue-600 hover:bg-blue-700 text-white"
           } disabled:opacity-60`}>
           {loading ? (
             <span className="animate-pulse">A verificar...</span>
@@ -256,10 +246,8 @@ function CTABox({ course, hasAccess, user, loading, onWatch }: {
             <><LogIn className="h-4 w-4" /> Entrar para Assistir</>
           ) : hasAccess ? (
             <><Play className="h-4 w-4" /> Assistir Agora</>
-          ) : course.type === "standalone" ? (
-            <><Zap className="h-4 w-4" /> Comprar Curso</>
           ) : (
-            <><Crown className="h-4 w-4" /> Ativar {course.type === "golden" ? "Plano Golden" : "Plano Smart"}</>
+            <><Zap className="h-4 w-4" /> Comprar Curso</>
           )}
         </button>
 

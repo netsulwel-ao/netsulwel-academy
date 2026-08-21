@@ -218,17 +218,17 @@ export default function CourseForm({
     <div className="flex flex-col h-full animate-in fade-in duration-300">
 
       {/* ── Top bar ── */}
-      <div className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-gray-800/60 bg-gray-950/90 backdrop-blur-xl px-6 py-4 shrink-0">
+      <div className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-gray-800 bg-gray-950 px-6 py-4 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           <Link
             href={backHref}
             aria-label="Voltar"
-            className="flex h-8 w-8 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all shrink-0"
+            className="flex h-8 w-8 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all shrink-0"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div className="min-w-0">
-            <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-700">
+            <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-gray-700">
               {mode === "create" ? "// criar curso" : "// editar curso"}
             </p>
             <p className="text-sm font-semibold text-gray-200 truncate">
@@ -242,7 +242,7 @@ export default function CourseForm({
             type="button"
             onClick={() => handleSave("draft")}
             disabled={saving || thumbUploading || anyUploading}
-            className="flex items-center gap-1.5 border border-gray-800/60 bg-gray-900/10 px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-gray-500 hover:border-gray-700 hover:text-gray-300 disabled:opacity-40 transition-all"
+            className="flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-500 hover:border-gray-700 hover:text-gray-300 disabled:opacity-40 transition-all"
           >
             {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
             Rascunho
@@ -251,7 +251,7 @@ export default function CourseForm({
             type="button"
             onClick={() => handleSave("published")}
             disabled={saving || thumbUploading || anyUploading}
-            className="flex items-center gap-1.5 border border-purple/30 bg-purple/10 px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-purple/80 hover:bg-purple/20 disabled:opacity-40 transition-all"
+            className="flex items-center gap-1.5 border border-purple/30 bg-purple/10 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-purple/80 hover:bg-purple/20 disabled:opacity-40 transition-all"
           >
             {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
             {mode === "edit" ? "Actualizar" : "Publicar"}
@@ -288,7 +288,6 @@ export default function CourseForm({
           title={title} setTitle={setTitle}
           description={description} setDescription={setDescription}
           generatingDesc={generatingDesc} onGenerateDesc={handleGenerateDesc}
-          courseType={courseType} setCourseType={setCourseType}
           format={format} setFormat={setFormat}
           price={price} setPrice={setPrice}
           accessCode={accessCode} setAccessCode={setAccessCode}

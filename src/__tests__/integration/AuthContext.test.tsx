@@ -32,6 +32,7 @@ vi.mock("@/lib/firebase", () => ({ auth: {}, db: {} }));
 
 // Import após mocks
 const { AuthProvider } = await import("@/contexts/AuthProvider");
+const { TransitionProvider } = await import("@/contexts/TransitionContext");
 const { useAuth } = await import("@/hooks/useAuth");
 
 // Componente helper para ler o contexto
@@ -50,9 +51,11 @@ function AuthConsumer() {
 
 function renderWithAuth() {
   return render(
-    <AuthProvider>
-      <AuthConsumer />
-    </AuthProvider>
+    <TransitionProvider>
+      <AuthProvider>
+        <AuthConsumer />
+      </AuthProvider>
+    </TransitionProvider>
   );
 }
 
@@ -61,14 +64,14 @@ describe("AuthProvider", () => {
     vi.clearAllMocks();
   });
 
-  it("exibe loading spinner enquanto carrega (sem auth state)", () => {
+  it("renderiza consumer imediatamente mesmo sem auth state (sem spinner global)", () => {
     // Nunca chama o callback → loading permanece true
     mockOnIdTokenChanged.mockImplementation(() => () => {});
 
     renderWithAuth();
 
-    // O spinner é renderizado, o consumer não aparece
-    expect(screen.queryByTestId("role")).not.toBeInTheDocument();
+    // AuthProvider já não mostra spinner global — o consumer renderiza imediatamente
+    expect(screen.getByTestId("role")).toBeInTheDocument();
   });
 
   it("carrega perfil de teacher corretamente", async () => {

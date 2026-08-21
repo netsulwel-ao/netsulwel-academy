@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 
@@ -66,7 +66,7 @@ export function AuthForm({
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="text-xs text-gray-400 hover:text-gray-300"
+            className="text-sm text-gray-400 hover:text-gray-300"
           >
             {showPassword ? "Esconder" : "Mostrar"} palavra-passe
           </button>

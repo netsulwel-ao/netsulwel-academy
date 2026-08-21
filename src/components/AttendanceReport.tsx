@@ -133,7 +133,7 @@ export function AttendanceReport({ liveId, liveTitle, isTeacher }: AttendanceRep
   };
 
   return (
-    <div className="bg-[#1a1a1e] border border-white/8 rounded-lg overflow-hidden">
+    <div className="bg-[#1a1a1e] border border-white rounded-lg overflow-hidden">
       {/* Header / Collapsed View */}
       <button
         onClick={handleLoadReport}
@@ -141,7 +141,7 @@ export function AttendanceReport({ liveId, liveTitle, isTeacher }: AttendanceRep
         aria-controls="attendance-panel"
         id="attendance-toggle"
         disabled={loading}
-        className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors disabled:opacity-50"
+        className="w-full p-4 flex items-center justify-between hover:bg-white transition-colors disabled:opacity-50"
       >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-700 rounded flex items-center justify-center">
@@ -153,16 +153,16 @@ export function AttendanceReport({ liveId, liveTitle, isTeacher }: AttendanceRep
           </div>
           <div className="text-left">
             <h3 className="text-sm font-semibold text-white">Relatório de Presença</h3>
-            <p className="text-xs text-white/50">
+            <p className="text-sm text-white">
               {attendees.length > 0 ? `${attendees.length} participantes` : "Clique para carregar"}
             </p>
           </div>
         </div>
         {loading ? (
-          <Loader2 size={20} className="text-white/50 animate-spin" />
+          <Loader2 size={20} className="text-white animate-spin" />
         ) : (
           <svg
-            className={`w-5 h-5 text-white/50 transition-transform ${
+            className={`w-5 h-5 text-white transition-transform ${
               expanded ? "rotate-180" : ""
             }`}
             fill="none"
@@ -181,9 +181,9 @@ export function AttendanceReport({ liveId, liveTitle, isTeacher }: AttendanceRep
 
       {/* Expanded View */}
       {expanded && (
-        <div id="attendance-panel" role="region" aria-labelledby="attendance-toggle" className="border-t border-white/8 p-4 space-y-4">
+        <div id="attendance-panel" role="region" aria-labelledby="attendance-toggle" className="border-t border-white p-4 space-y-4">
           {error && (
-            <div className="bg-red-900/20 border border-red-500/30 text-red-400 text-xs p-3 rounded">
+            <div className="bg-red-900/20 border border-red-500/30 text-red-400 text-sm p-3 rounded">
               {error}
             </div>
           )}
@@ -191,9 +191,9 @@ export function AttendanceReport({ liveId, liveTitle, isTeacher }: AttendanceRep
           {/* Attendees Table */}
           {attendees.length > 0 && (
             <div className="overflow-x-auto">
-              <table className="w-full text-xs text-white/80">
+              <table className="w-full text-sm text-white">
                 <caption className="sr-only">Relatório de presença</caption>
-                <thead className="text-white/50 border-b border-white/8">
+                <thead className="text-white border-b border-white">
                   <tr>
                     <th scope="col" className="text-left py-2 px-2">Nome</th>
                     <th scope="col" className="text-left py-2 px-2">Entrou em</th>
@@ -202,8 +202,8 @@ export function AttendanceReport({ liveId, liveTitle, isTeacher }: AttendanceRep
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {attendees.map((attendee, idx) => (
-                    <tr key={idx} className="hover:bg-white/5">
-                      <td className="py-2 px-2 text-white/90">{attendee.name}</td>
+                    <tr key={idx} className="hover:bg-white">
+                      <td className="py-2 px-2 text-white">{attendee.name}</td>
                       <td className="py-2 px-2">
                         {new Date(attendee.joinedAt).toLocaleTimeString("pt-PT")}
                       </td>
@@ -219,14 +219,14 @@ export function AttendanceReport({ liveId, liveTitle, isTeacher }: AttendanceRep
 
           {/* Summary */}
           {attendees.length > 0 && (
-            <div className="bg-white/5 p-3 rounded border border-white/8">
-              <div className="grid grid-cols-2 gap-4 text-xs">
+            <div className="bg-white p-3 rounded border border-white">
+              <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-white/50">Total de Participantes</p>
+                  <p className="text-white">Total de Participantes</p>
                   <p className="text-lg font-bold text-white">{attendees.length}</p>
                 </div>
                 <div>
-                  <p className="text-white/50">Tempo Médio</p>
+                  <p className="text-white">Tempo Médio</p>
                   <p className="text-lg font-bold text-white">
                     {Math.round(
                       attendees.reduce((sum, a) => sum + a.durationMinutes, 0) /
@@ -244,7 +244,7 @@ export function AttendanceReport({ liveId, liveTitle, isTeacher }: AttendanceRep
             <button
               onClick={handleDownloadCSV}
               disabled={loading || attendees.length === 0}
-              className="flex items-center justify-center gap-2 py-2 px-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-medium rounded transition-colors"
+              className="flex items-center justify-center gap-2 py-2 px-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded transition-colors"
             >
               <Download size={14} />
               CSV
@@ -252,7 +252,7 @@ export function AttendanceReport({ liveId, liveTitle, isTeacher }: AttendanceRep
             <button
               onClick={handleDownloadJSON}
               disabled={loading || attendees.length === 0}
-              className="flex items-center justify-center gap-2 py-2 px-3 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-xs font-medium rounded transition-colors"
+              className="flex items-center justify-center gap-2 py-2 px-3 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-sm font-medium rounded transition-colors"
             >
               <FileJson size={14} />
               JSON
@@ -262,7 +262,7 @@ export function AttendanceReport({ liveId, liveTitle, isTeacher }: AttendanceRep
           {/* Close Button */}
           <button
             onClick={() => setExpanded(false)}
-            className="w-full py-2 text-white/50 hover:text-white text-xs font-medium transition-colors"
+            className="w-full py-2 text-white hover:text-white text-sm font-medium transition-colors"
           >
             Fechar
           </button>

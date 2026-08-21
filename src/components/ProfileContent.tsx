@@ -159,24 +159,24 @@ export function ProfileContent({ profile, courses, lives, courseHref, coverClass
         <div className="flex-1 min-w-0 pb-1">
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl sm:text-3xl font-bold text-white truncate" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.6)" }}>{profile.name}</h1>
-            <span className={`text-xs font-bold px-2.5 py-1 border ${roleInfo.color}`}>{roleInfo.label}</span>
+            <span className={`text-sm font-bold px-2.5 py-1 border ${roleInfo.color}`}>{roleInfo.label}</span>
           </div>
         </div>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-        <div className="bg-gray-900/40 border border-gray-800/60 p-5 text-center rounded-xl">
+        <div className="bg-gray-900 border border-gray-800 p-5 text-center rounded-xl">
           <BookOpen className="h-8 w-8 text-purple-400 mx-auto mb-2" />
           <p className="text-2xl font-bold text-white">{courses.length}</p>
           <p className="text-sm text-gray-500">{courses.length === 1 ? "Curso" : "Cursos"}</p>
         </div>
-        <div className="bg-gray-900/40 border border-gray-800/60 p-5 text-center rounded-xl">
+        <div className="bg-gray-900 border border-gray-800 p-5 text-center rounded-xl">
           <Radio className="h-8 w-8 text-red-400 mx-auto mb-2" />
           <p className="text-2xl font-bold text-white">{lives.length}</p>
           <p className="text-sm text-gray-500">{lives.length === 1 ? "Live" : "Lives"}</p>
         </div>
-        <div className="bg-gray-900/40 border border-gray-800/60 p-5 text-center rounded-xl">
+        <div className="bg-gray-900 border border-gray-800 p-5 text-center rounded-xl">
           <Users className="h-8 w-8 text-blue-400 mx-auto mb-2" />
           <p className="text-2xl font-bold text-white">{totalStudents}</p>
           <p className="text-sm text-gray-500">Alunos</p>
@@ -185,7 +185,7 @@ export function ProfileContent({ profile, courses, lives, courseHref, coverClass
 
       {/* Bio */}
       {profile.bio && (
-        <div className="mt-8 bg-gray-900/30 border border-gray-800/60 p-6 rounded-xl">
+        <div className="mt-8 bg-gray-900 border border-gray-800 p-6 rounded-xl">
           <h2 className="text-lg font-bold text-white mb-3">Sobre</h2>
           <p className="text-gray-400 leading-relaxed whitespace-pre-line">{profile.bio}</p>
         </div>
@@ -195,7 +195,7 @@ export function ProfileContent({ profile, courses, lives, courseHref, coverClass
       {profile.promoVideoUrl && (() => {
         const youtubeId = profile.promoVideoUrl ? getYoutubeId(profile.promoVideoUrl) : null;
         return (
-          <div className="mt-8 bg-gray-900/30 border border-gray-800/60 p-6 rounded-xl">
+          <div className="mt-8 bg-gray-900 border border-gray-800 p-6 rounded-xl">
             <h2 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
               <Play className="h-5 w-5 text-red-400" />
               Vídeo de Apresentação
@@ -216,22 +216,17 @@ export function ProfileContent({ profile, courses, lives, courseHref, coverClass
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
               {courses.filter(c => c.id).map((course) => (
                 <Link key={course.id} href={courseHref(course.id!)}
-                  className="group flex flex-col bg-gray-900/40 backdrop-blur-xl overflow-hidden transition-all hover:bg-gray-900/60 rounded-xl">
-                  <div className="relative h-36 sm:h-44 bg-gray-800 overflow-hidden">
+                  className="group flex flex-col bg-gray-900 overflow-hidden transition-all hover:bg-gray-900 rounded-xl">
+                   <div className="relative h-36 sm:h-44 bg-gray-800">
                     {course.thumbnail ? (
-                      <img src={course.thumbnail} alt={course.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <img src={course.thumbnail} alt={course.title} className="h-full w-full object-cover" />
                     ) : (
                       <div className="flex h-full items-center justify-center bg-gradient-to-br from-blue-900/40 to-gray-900">
                         <BookOpen className="h-12 w-12 text-blue-500/40" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gray-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <div className="flex h-12 w-12 items-center justify-center bg-blue-600 rounded-full shadow-lg">
-                        <Play className="h-5 w-5 text-white ml-0.5" />
-                      </div>
-                    </div>
                     {course.price ? (
-                      <span className="absolute top-3 right-3 px-2 py-1 text-sm font-bold bg-gray-900/80 text-white border border-gray-700">
+                      <span className="absolute top-3 right-3 px-2 py-1 text-sm font-bold bg-gray-900 text-white border border-gray-700">
                         {course.price.toLocaleString("pt-AO")} Kz
                       </span>
                     ) : (
@@ -243,7 +238,7 @@ export function ProfileContent({ profile, courses, lives, courseHref, coverClass
                   <div className="flex-1 p-4 sm:p-5">
                     <h3 className="font-bold text-white text-base sm:text-lg leading-snug line-clamp-2">{course.title}</h3>
                     <p className="mt-2 text-sm text-gray-400 line-clamp-2">{course.description}</p>
-                    <div className="mt-3 flex items-center gap-3 text-xs text-gray-500">
+                    <div className="mt-3 flex items-center gap-3 text-sm text-gray-500">
                       <span><BookOpen className="h-3.5 w-3.5 inline mr-1" />{course.modulesCount ?? 0} módulos</span>
                       <span><Play className="h-3.5 w-3.5 inline mr-1" />{course.lessonsCount ?? 0} aulas</span>
                     </div>
@@ -262,7 +257,7 @@ export function ProfileContent({ profile, courses, lives, courseHref, coverClass
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {lives.filter(l => l.id).map((live) => (
-                <div key={live.id} className="bg-gray-900/40 backdrop-blur-xl overflow-hidden group hover:bg-gray-900/60 transition-all rounded-xl">
+                <div key={live.id} className="bg-gray-900 overflow-hidden group hover:bg-gray-900 transition-all rounded-xl">
                   <div className="relative h-32 overflow-hidden">
                     {live.thumbnail ? (
                       <img src={live.thumbnail} alt={live.title} className="w-full h-full object-cover" />
@@ -272,17 +267,17 @@ export function ProfileContent({ profile, courses, lives, courseHref, coverClass
                       </div>
                     )}
                     {live.status === "live" && (
-                      <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 bg-red-600 text-white text-xs font-bold">
+                      <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 bg-red-600 text-white text-sm font-bold">
                         <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />AO VIVO
                       </div>
                     )}
                     {live.status === "ended" && (
-                      <div className="absolute top-3 left-3 px-2 py-1 bg-gray-800 text-gray-400 text-xs font-bold">Encerrada</div>
+                      <div className="absolute top-3 left-3 px-2 py-1 bg-gray-800 text-gray-400 text-sm font-bold">Encerrada</div>
                     )}
                   </div>
                   <div className="p-4">
                     <h3 className="text-sm font-bold text-white truncate">{live.title}</h3>
-                    <p className="text-xs text-gray-500 mt-1">{formatDate(live.scheduledAt)}</p>
+                    <p className="text-sm text-gray-500 mt-1">{formatDate(live.scheduledAt)}</p>
                   </div>
                 </div>
               ))}
@@ -300,7 +295,7 @@ export function ProfileContent({ profile, courses, lives, courseHref, coverClass
       </div>
 
       {photoPreviewUrl && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black p-4"
           onClick={() => setPhotoPreviewUrl(null)}>
           <div className="relative max-w-lg w-full max-h-[80vh]" onClick={(e) => e.stopPropagation()}>
             <button type="button" onClick={() => setPhotoPreviewUrl(null)}

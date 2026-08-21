@@ -26,11 +26,11 @@ const ROLE_MAP: Record<string, { cls: string; label: string }> = {
 };
 function RoleBadge({ role }: { role: string }) {
   const { cls, label } = ROLE_MAP[role] ?? ROLE_MAP.aluno;
-  return <span className={`font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 border ${cls}`}>{label}</span>;
+  return <span className={`font-mono text-[13px] uppercase tracking-widest px-2 py-0.5 border ${cls}`}>{label}</span>;
 }
 
 const inputCls =
-  "w-full border border-gray-800/60 bg-gray-900/40 py-2.5 px-3 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors";
+  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors";
 
 export default function InstitutionMembersPage() {
   const { institutionId } = useAuth();
@@ -113,21 +113,21 @@ export default function InstitutionMembersPage() {
   if (loading) {
     return (
       <div className="space-y-6 animate-in fade-in duration-300">
-        <div className="h-8 w-48 bg-gray-800/40 animate-pulse" />
+        <div className="h-8 w-48 bg-gray-800 animate-pulse" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {[0, 1].map(i => <div key={i} className="h-32 bg-gray-800/40 animate-pulse" />)}
+          {[0, 1].map(i => <div key={i} className="h-32 bg-gray-800 animate-pulse" />)}
         </div>
-        <div className="h-80 bg-gray-800/40 animate-pulse" />
+        <div className="h-80 bg-gray-800 animate-pulse" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-[80rem] space-y-8 animate-in fade-in duration-300">
+    <div className="max-w-[80rem] mx-auto space-y-8 animate-in fade-in duration-300">
 
       {/* ── Cabeçalho ── */}
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">// membros</p>
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">// membros</p>
         <h1 className="text-2xl font-bold text-gray-100">Membros</h1>
         <p className="mt-1 text-sm text-gray-600">
           {members.length} membro{members.length !== 1 ? "s" : ""} ·{" "}
@@ -140,21 +140,21 @@ export default function InstitutionMembersPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
         {/* Alunos */}
-        <div className="border border-gray-800/60 bg-gray-900/10 p-5">
+        <div className="border border-gray-800 bg-gray-900 p-5">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-8 w-8 items-center justify-center border border-blue-500/25 bg-blue-500/8">
               <UserPlus className="h-4 w-4 text-blue-400/70" strokeWidth={1.5} />
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-200">Link para Alunos</p>
-              <p className="font-mono text-[9px] text-gray-700">Partilha com alunos para se registarem · 30 dias</p>
+              <p className="font-mono text-[13px] text-gray-700">Partilha com alunos para se registarem · 30 dias</p>
             </div>
           </div>
           {!studentLink ? (
             <button
               onClick={() => generateLink("student")}
               disabled={!!generatingRole}
-              className="flex items-center gap-1.5 border border-blue-500/25 bg-blue-500/8 px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-blue-400/80 hover:bg-blue-500/15 disabled:opacity-40 transition-all"
+              className="flex items-center gap-1.5 border border-blue-500/25 bg-blue-500/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-blue-400/80 hover:bg-blue-500/15 disabled:opacity-40 transition-all"
             >
               {generatingRole === "student" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Link2 className="h-3 w-3" />}
               {generatingRole === "student" ? "A gerar..." : "Gerar link"}
@@ -162,15 +162,15 @@ export default function InstitutionMembersPage() {
           ) : (
             <div className="space-y-2">
               <div className="flex gap-2">
-                <input type="text" value={studentLink} readOnly className={`${inputCls} flex-1 font-mono text-xs`} />
-                <button onClick={() => copyLink(studentLink, "student")} className="flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all">
+                <input type="text" value={studentLink} readOnly className={`${inputCls} flex-1 font-mono text-sm`} />
+                <button onClick={() => copyLink(studentLink, "student")} className="flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all">
                   {copiedRole === "student" ? <CheckCheck className="h-3.5 w-3.5 text-green/60" /> : <Copy className="h-3.5 w-3.5" strokeWidth={1.5} />}
                 </button>
-                <button onClick={() => setStudentLink("")} className="flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-700 hover:text-gray-400 transition-all" title="Limpar">
+                <button onClick={() => setStudentLink("")} className="flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800 bg-gray-900 text-gray-700 hover:text-gray-400 transition-all" title="Limpar">
                   <X className="h-3.5 w-3.5" strokeWidth={1.5} />
                 </button>
               </div>
-              <button onClick={() => generateLink("student")} disabled={!!generatingRole} className="font-mono text-[9px] text-gray-600 hover:text-gray-400 transition-colors disabled:opacity-40">
+              <button onClick={() => generateLink("student")} disabled={!!generatingRole} className="font-mono text-[13px] text-gray-600 hover:text-gray-400 transition-colors disabled:opacity-40">
                 Gerar novo link →
               </button>
             </div>
@@ -178,21 +178,21 @@ export default function InstitutionMembersPage() {
         </div>
 
         {/* Professores */}
-        <div className="border border-gray-800/60 bg-gray-900/10 p-5">
+        <div className="border border-gray-800 bg-gray-900 p-5">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-8 w-8 items-center justify-center border border-green/25 bg-green/8">
               <GraduationCap className="h-4 w-4 text-green/70" strokeWidth={1.5} />
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-200">Link para Professores</p>
-              <p className="font-mono text-[9px] text-gray-700">Partilha com professores para se associarem · 30 dias</p>
+              <p className="font-mono text-[13px] text-gray-700">Partilha com professores para se associarem · 30 dias</p>
             </div>
           </div>
           {!teacherLink ? (
             <button
               onClick={() => generateLink("teacher")}
               disabled={!!generatingRole}
-              className="flex items-center gap-1.5 border border-green/25 bg-green/8 px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-green/80 hover:bg-green/15 disabled:opacity-40 transition-all"
+              className="flex items-center gap-1.5 border border-green/25 bg-green/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-green/80 hover:bg-green/15 disabled:opacity-40 transition-all"
             >
               {generatingRole === "teacher" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Link2 className="h-3 w-3" />}
               {generatingRole === "teacher" ? "A gerar..." : "Gerar link"}
@@ -200,15 +200,15 @@ export default function InstitutionMembersPage() {
           ) : (
             <div className="space-y-2">
               <div className="flex gap-2">
-                <input type="text" value={teacherLink} readOnly className={`${inputCls} flex-1 font-mono text-xs`} />
-                <button onClick={() => copyLink(teacherLink, "teacher")} className="flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all">
+                <input type="text" value={teacherLink} readOnly className={`${inputCls} flex-1 font-mono text-sm`} />
+                <button onClick={() => copyLink(teacherLink, "teacher")} className="flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all">
                   {copiedRole === "teacher" ? <CheckCheck className="h-3.5 w-3.5 text-green/60" /> : <Copy className="h-3.5 w-3.5" strokeWidth={1.5} />}
                 </button>
-                <button onClick={() => setTeacherLink("")} className="flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-700 hover:text-gray-400 transition-all" title="Limpar">
+                <button onClick={() => setTeacherLink("")} className="flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800 bg-gray-900 text-gray-700 hover:text-gray-400 transition-all" title="Limpar">
                   <X className="h-3.5 w-3.5" strokeWidth={1.5} />
                 </button>
               </div>
-              <button onClick={() => generateLink("teacher")} disabled={!!generatingRole} className="font-mono text-[9px] text-gray-600 hover:text-gray-400 transition-colors disabled:opacity-40">
+              <button onClick={() => generateLink("teacher")} disabled={!!generatingRole} className="font-mono text-[13px] text-gray-600 hover:text-gray-400 transition-colors disabled:opacity-40">
                 Gerar novo link →
               </button>
             </div>
@@ -217,28 +217,28 @@ export default function InstitutionMembersPage() {
       </div>
 
       {/* ── Lista ── */}
-      <div className="border border-gray-800/60">
+      <div className="border border-gray-800">
         {/* Pesquisa */}
-        <div className="flex flex-wrap items-center gap-3 px-5 py-3.5 border-b border-gray-800/40 bg-gray-900/20">
+        <div className="flex flex-wrap items-center gap-3 px-5 py-3.5 border-b border-gray-800 bg-gray-900">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-700" strokeWidth={1.5} />
             <input
               type="text" value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Pesquisar membro..."
-              className="w-full border border-gray-800/60 bg-gray-900/40 pl-9 pr-3 py-2 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors"
+              className="w-full border border-gray-800 bg-gray-900 pl-9 pr-3 py-2 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors"
             />
           </div>
-          <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">
             {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
           </p>
         </div>
 
         {/* Cabeçalho */}
-        <div className="hidden lg:grid grid-cols-[2fr_2fr_1fr_1fr] gap-4 px-5 py-3 border-b border-gray-800/40 bg-gray-900/10">
-          <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Membro</p>
-          <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Email</p>
-          <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Cargo</p>
-          <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">Desde</p>
+        <div className="hidden lg:grid grid-cols-[2fr_2fr_1fr_1fr] gap-4 px-5 py-3 border-b border-gray-800 bg-gray-900">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Membro</p>
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Email</p>
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Cargo</p>
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">Desde</p>
         </div>
 
         {filtered.length === 0 ? (
@@ -246,7 +246,7 @@ export default function InstitutionMembersPage() {
             <div className="mb-3 flex h-10 w-10 items-center justify-center border border-gray-800 bg-gray-900">
               <Users className="h-4 w-4 text-gray-700" strokeWidth={1.5} />
             </div>
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">
               {search ? "// sem resultados" : "// sem membros"}
             </p>
             <p className="text-sm text-gray-600 mt-1">
@@ -254,22 +254,22 @@ export default function InstitutionMembersPage() {
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-800/30">
+          <div className="divide-y divide-gray-800">
             {filtered.map(member => (
-              <div key={member.id} className="grid grid-cols-1 lg:grid-cols-[2fr_2fr_1fr_1fr] gap-3 items-center px-5 py-3.5 hover:bg-gray-900/20 transition-colors">
+              <div key={member.id} className="grid grid-cols-1 lg:grid-cols-[2fr_2fr_1fr_1fr] gap-3 items-center px-5 py-3.5 hover:bg-gray-900 transition-colors">
                 {/* Nome */}
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center border border-gray-800/60 bg-gray-900 text-xs font-semibold text-gray-500">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center border border-gray-800 bg-gray-900 text-sm font-semibold text-gray-500">
                     {member.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm text-gray-200 truncate">{member.name}</p>
-                    <p className="font-mono text-[9px] text-gray-700 truncate lg:hidden">{member.email}</p>
+                    <p className="font-mono text-[13px] text-gray-700 truncate lg:hidden">{member.email}</p>
                   </div>
                 </div>
 
                 {/* Email */}
-                <p className="hidden lg:block font-mono text-xs text-gray-500 truncate">{member.email}</p>
+                <p className="hidden lg:block font-mono text-sm text-gray-500 truncate">{member.email}</p>
 
                 {/* Cargo */}
                 <div className="flex items-center gap-2">
@@ -277,7 +277,7 @@ export default function InstitutionMembersPage() {
                 </div>
 
                 {/* Data */}
-                <p className="hidden lg:flex items-center gap-1 font-mono text-xs text-gray-700">
+                <p className="hidden lg:flex items-center gap-1 font-mono text-sm text-gray-700">
                   <Calendar className="h-3 w-3" strokeWidth={1.5} />
                   {member.createdAt.toLocaleDateString("pt-PT")}
                 </p>
@@ -286,8 +286,8 @@ export default function InstitutionMembersPage() {
           </div>
         )}
 
-        <div className="px-5 py-3 border-t border-gray-800/40 bg-gray-900/10">
-          <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">
+        <div className="px-5 py-3 border-t border-gray-800 bg-gray-900">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">
             {members.length} membro{members.length !== 1 ? "s" : ""} no total
           </p>
         </div>

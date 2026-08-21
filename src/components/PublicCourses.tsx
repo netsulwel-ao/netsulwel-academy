@@ -7,8 +7,9 @@ import {
   Code2, Wallet, TrendingUp, Layers, Award,
   ChevronLeft, ChevronRight, BookOpen, Play, Lock,
 } from "lucide-react";
-import Link from "next/link";
 import type { Course, CourseCategory } from "@/types/course";
+import { Reveal } from "./motion/Reveal";
+import { TransitionLink } from "./TransitionLink";
 
 const CATEGORY_CONFIG: Record<CourseCategory, {
   label: string;
@@ -25,10 +26,8 @@ const CATEGORY_CONFIG: Record<CourseCategory, {
 const CAT_ORDER: CourseCategory[] = ["tech", "finance", "investments", "other"];
 
 function getTierTag(course: Course): { label: string; color: string } {
-  if (course.type === "golden") return { label: "Golden", color: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30" };
-  if (course.type === "smart")  return { label: "Smart",  color: "bg-green-500/20 text-green-300 border-green-500/30" };
   if (course.price === 0)       return { label: "Grátis", color: "bg-blue-500/20 text-blue-300 border-blue-500/30" };
-  return { label: "Avulso", color: "bg-gray-500/20 text-gray-300 border-gray-500/30" };
+  return { label: "Avulso", color: "bg-gray-500 text-gray-300 border-gray-500" };
 }
 
 export function PublicCourses() {
@@ -70,19 +69,25 @@ export function PublicCourses() {
   return (
     <section id="cursos" className="py-20 md:py-28">
       {/* Section header — alinhado ao max-w-6xl */}
+      <Reveal>
       <div className="mx-auto max-w-6xl px-6 mb-12">
         <h2 className="text-3xl font-bold text-white md:text-4xl">Cursos em destaque</h2>
         <p className="mt-3 max-w-xl text-gray-400">
           Formações completas em tecnologia, finanças e investimentos.
         </p>
       </div>
+      </Reveal>
 
       {/* Category rows */}
       <div className="space-y-14">
-        {CAT_ORDER.map((cat) => {
+        {CAT_ORDER.map((cat, i) => {
           const courses = grouped.get(cat) ?? [];
           if (courses.length === 0) return null;
-          return <CarouselRow key={cat} catKey={cat} courses={courses} />;
+          return (
+            <Reveal key={cat} delay={i * 0.08}>
+              <CarouselRow catKey={cat} courses={courses} />
+            </Reveal>
+          );
         })}
       </div>
     </section>
@@ -109,11 +114,11 @@ function CarouselRow({ catKey, courses }: { catKey: CourseCategory; courses: Cou
       {/* Row header */}
       <div className="mx-auto max-w-6xl px-6 mb-5">
         <div className="flex items-center gap-3">
-          <div className={`flex h-7 w-7 items-center justify-center border border-white/10 bg-white/5 ${config.accent}`}>
+          <div className={`flex h-7 w-7 items-center justify-center border border-white bg-white ${config.accent}`}>
             <CatIcon className="h-4 w-4" />
           </div>
           <h3 className="text-base font-bold text-white">{config.label}</h3>
-          <span className="text-xs text-gray-600">{courses.length} {courses.length === 1 ? "curso" : "cursos"}</span>
+          <span className="text-sm text-gray-600">{courses.length} {courses.length === 1 ? "curso" : "cursos"}</span>
         </div>
       </div>
 
@@ -150,11 +155,11 @@ function CarouselRow({ catKey, courses }: { catKey: CourseCategory; courses: Cou
 
           {/* Nav buttons */}
           <button onClick={() => scroll("left")} aria-label="Anterior"
-            className="absolute left-1 sm:left-3 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border border-white/10 bg-gray-950/90 text-white transition-opacity hover:bg-gray-900 backdrop-blur-sm md:opacity-0 md:group-hover/row:opacity-100">
+            className="absolute left-1 sm:left-3 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border border-white bg-gray-950 text-white transition-opacity hover:bg-gray-900 md:opacity-0 md:group-hover/row:opacity-100">
             <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
           <button onClick={() => scroll("right")} aria-label="Seguinte"
-            className="absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border border-white/10 bg-gray-950/90 text-white transition-opacity hover:bg-gray-900 backdrop-blur-sm md:opacity-0 md:group-hover/row:opacity-100">
+            className="absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center border border-white bg-gray-950 text-white transition-opacity hover:bg-gray-900 md:opacity-0 md:group-hover/row:opacity-100">
             <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
@@ -171,18 +176,20 @@ function CourseCard({ course, catKey }: { course: Course; catKey: CourseCategory
   const isLocked = course.type !== "standalone" || course.price > 0;
 
   return (
-    <Link
+    <TransitionLink
       href={`/register?redirect=/dashboard/courses/${course.id}`}
-      className="group/card relative w-[260px] shrink-0 flex flex-col bg-gray-900/60 border border-white/5 overflow-hidden hover:border-white/15 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+      whileHover={{ y: -4 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className="group/card relative w-[260px] shrink-0 flex flex-col bg-gray-900 border border-white overflow-hidden hover:border-white transition-colors duration-300 hover:shadow-2xl hover:shadow-purple-500/10"
       data-card
     >
       {/* Thumbnail */}
-      <div className="relative h-[148px] overflow-hidden bg-gray-800 shrink-0">
+      <div className="relative h-[148px] bg-gray-800 shrink-0">
         {course.thumbnail ? (
           <img
             src={course.thumbnail}
             alt={course.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
+            className="w-full h-full object-cover"
           />
         ) : (
           <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900`}>
@@ -190,23 +197,13 @@ function CourseCard({ course, catKey }: { course: Course; catKey: CourseCategory
           </div>
         )}
 
-        {/* Dark overlay on hover with play icon */}
-        <div className="absolute inset-0 bg-gray-950/50 opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center">
-          <div className="flex h-12 w-12 items-center justify-center bg-white/10 border border-white/20 backdrop-blur-sm">
-            {isLocked
-              ? <Lock className="h-5 w-5 text-white" />
-              : <Play className="h-5 w-5 text-white ml-0.5" />
-            }
-          </div>
-        </div>
-
         {/* Top badges */}
         <div className="absolute top-2.5 left-2.5 flex gap-1.5">
-          <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${tag.color}`}>
+          <span className={`px-2 py-0.5 text-[13px] font-bold uppercase tracking-wider border ${tag.color}`}>
             {tag.label}
           </span>
           {course.hasCertificate && (
-            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border bg-amber-500/20 text-amber-300 border-amber-500/30 flex items-center gap-1">
+            <span className="px-2 py-0.5 text-[13px] font-bold uppercase tracking-wider border bg-amber-500/20 text-amber-300 border-amber-500/30 flex items-center gap-1">
               <Award className="h-2.5 w-2.5" /> Cert.
             </span>
           )}
@@ -215,7 +212,7 @@ function CourseCard({ course, catKey }: { course: Course; catKey: CourseCategory
         {/* Price badge */}
         {course.type === "standalone" && course.price > 0 && (
           <div className="absolute top-2.5 right-2.5">
-            <span className="px-2 py-0.5 text-[10px] font-bold bg-gray-950/80 text-white border border-white/10 backdrop-blur-sm">
+            <span className="px-2 py-0.5 text-[13px] font-bold bg-gray-950 text-white border border-white">
               {course.price.toLocaleString("pt-AO")} Kz
             </span>
           </div>
@@ -226,21 +223,21 @@ function CourseCard({ course, catKey }: { course: Course; catKey: CourseCategory
       <div className="flex flex-col flex-1 p-4">
         <h4 className="text-sm font-bold text-white line-clamp-2 leading-snug">{course.title}</h4>
         {course.description && (
-          <p className="mt-1.5 text-xs text-gray-500 line-clamp-2 leading-relaxed">{course.description}</p>
+          <p className="mt-1.5 text-sm text-gray-500 line-clamp-2 leading-relaxed">{course.description}</p>
         )}
 
-        <div className="mt-auto pt-3 flex items-center justify-between border-t border-white/5">
-          <div className="flex items-center gap-2 text-[11px] text-gray-600">
+        <div className="mt-auto pt-3 flex items-center justify-between border-t border-white">
+          <div className="flex items-center gap-2 text-[13px] text-gray-600">
             <BookOpen className="h-3 w-3" />
             <span>{course.modulesCount ?? 0} módulos</span>
             <span>·</span>
             <span>{course.lessonsCount ?? 0} aulas</span>
           </div>
-          <span className={`text-[10px] font-medium capitalize ${config.accent}`}>
+          <span className={`text-[13px] font-medium capitalize ${config.accent}`}>
             {course.level === "beginner" ? "Iniciante" : course.level === "intermediate" ? "Intermédio" : "Avançado"}
           </span>
         </div>
       </div>
-    </Link>
+    </TransitionLink>
   );
 }

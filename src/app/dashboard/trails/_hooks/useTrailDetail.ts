@@ -8,11 +8,9 @@ import {
   collection, query, where,
 } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAccess } from "@/hooks/useAccess";
 import { logger } from "@/lib/logger";
 import type { Trail, Course } from "@/types/course";
 import type { LiveSession } from "@/types/live";
-import { trailAccessByPlan } from "../_types/trails";
 
 interface UseTrailDetailReturn {
   trail: Trail | null;
@@ -25,8 +23,7 @@ interface UseTrailDetailReturn {
 
 export function useTrailDetail(id: string): UseTrailDetailReturn {
   const router = useRouter();
-  const { user, plan, isAdmin } = useAuth();
-  const { canAccessCourse } = useAccess();
+  const { user } = useAuth();
 
   const [trail, setTrail] = useState<Trail | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -97,7 +94,7 @@ export function useTrailDetail(id: string): UseTrailDetailReturn {
     return () => { cancelled = true; };
   }, [id, user?.uid]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const hasTrailAccess = trail ? trailAccessByPlan(trail.type, plan, isAdmin) : false;
+  const hasTrailAccess = true;
 
   return { trail, courses, lives, enrolledCourses, loading, hasTrailAccess };
 }

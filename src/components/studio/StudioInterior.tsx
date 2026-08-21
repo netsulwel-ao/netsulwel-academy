@@ -12,7 +12,6 @@ import { PalavraPanel }                   from "./PalavraPanel";
 import { AlunosPanel }                    from "./AlunosPanel";
 import { ChatPanel }                      from "./ChatPanel";
 import { ControlsBar }                    from "./ControlsBar";
-import { RecordingControls }              from "@/components/RecordingControls";
 import { QAPanel }                        from "@/components/QAPanel";
 import { AttendanceReport }               from "@/components/AttendanceReport";
 import { SimpleRecorder }                 from "@/components/SimpleRecorder";
@@ -44,32 +43,32 @@ export function StudioInterior({ live, onEnd }: Props) {
     <div className="flex flex-col h-full bg-[#0a0a0c]">
 
       {/* ── Top bar ── */}
-      <div className="h-11 min-h-[44px] bg-[#0e0e11] border-b border-white/8 flex items-center px-3 sm:px-4 gap-2 sm:gap-4">
+      <div className="h-11 min-h-[44px] bg-[#0e0e11] border-b border-white flex items-center px-3 sm:px-4 gap-2 sm:gap-4">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <Radio className="h-3.5 w-3.5 text-white/30 shrink-0" />
-          <span className="text-xs sm:text-sm font-semibold text-white/80 truncate">{live.title}</span>
+          <Radio className="h-3.5 w-3.5 text-white shrink-0" />
+          <span className="text-sm sm:text-sm font-semibold text-white truncate">{live.title}</span>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           <div className="hidden sm:flex items-center gap-1.5 bg-red-600/15 border border-red-500/20 px-2 py-0.5">
             <span className="w-1.5 h-1.5 bg-red-500 animate-pulse shrink-0" />
-            <span className="text-[11px] font-bold text-red-400 tracking-widest">AO VIVO</span>
+            <span className="text-[13px] font-bold text-red-400 tracking-widest">AO VIVO</span>
           </div>
           {live.startedAt && <ElapsedTimer since={live.startedAt} />}
         </div>
 
         <ShareButton liveId={live.id!} liveTitle={live.title} />
 
-        <div className="flex items-center gap-1.5 text-white/40 shrink-0">
+        <div className="flex items-center gap-1.5 text-white shrink-0">
           <Eye className="h-3.5 w-3.5" />
-          <span className="text-xs tabular-nums font-medium">{participants.length}</span>
+          <span className="text-sm tabular-nums font-medium">{participants.length}</span>
         </div>
 
         {/* Mobile sidebar toggle */}
         <button
           onClick={() => setSidebarOpen(v => !v)}
           aria-label={sidebarOpen ? "Fechar barra lateral" : "Abrir barra lateral"}
-          className="md:hidden flex items-center justify-center h-8 w-8 text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+          className="md:hidden flex items-center justify-center h-8 w-8 text-white hover:text-white hover:bg-white transition-colors"
         >
           <MessageSquare className={`h-4 w-4 ${sidebarOpen ? "" : "opacity-50"}`} />
         </button>
@@ -87,14 +86,14 @@ export function StudioInterior({ live, onEnd }: Props) {
 
         {/* Sidebar */}
         <div className={`
-          flex flex-col bg-[#0e0e11] border-t md:border-t-0 md:border-l border-white/8
+          flex flex-col bg-[#0e0e11] border-t md:border-t-0 md:border-l border-white
           w-full md:w-[280px] lg:w-[320px] shrink-0
           order-1 md:order-2
           transition-all duration-300 ease-out
           ${sidebarOpen ? "h-auto" : "h-0 overflow-hidden md:h-auto"}
         `}>
           {/* Tabs */}
-          <div className="flex border-b border-white/8 shrink-0" role="tablist" aria-label="Painel lateral">
+          <div className="flex border-b border-white shrink-0" role="tablist" aria-label="Painel lateral">
             {TABS.map(t => (
               <button
                 key={t.id}
@@ -103,13 +102,13 @@ export function StudioInterior({ live, onEnd }: Props) {
                 aria-selected={tab === t.id}
                 aria-controls={`panel-${t.id}`}
                 id={`tab-${t.id}`}
-                className={`flex-1 h-10 flex items-center justify-center gap-1 sm:gap-1.5 text-xs font-semibold transition-colors ${
+                className={`flex-1 h-10 flex items-center justify-center gap-1 sm:gap-1.5 text-sm font-semibold transition-colors ${
                   tab === t.id
                     ? "text-white border-b-2 border-white bg-white/[3%]"
-                    : "text-white/30 hover:text-white/60"
+                    : "text-white hover:text-white"
                 }`}
               >
-                <span className="text-xs sm:text-sm">{t.icon}</span>
+                <span className="text-sm sm:text-sm">{t.icon}</span>
                 <span className="hidden sm:inline">{t.label}</span>
               </button>
             ))}

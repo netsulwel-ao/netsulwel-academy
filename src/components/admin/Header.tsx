@@ -2,10 +2,11 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import {
-  collection, query, orderBy, limit, onSnapshot,
+  collection, query, orderBy, limit, onSnapshot, where,
   doc, updateDoc, writeBatch,
 } from "firebase/firestore";
 import { Bell, Menu, CheckCheck, Radio, CreditCard, Heart, MessageCircle, Award } from "lucide-react";
@@ -13,16 +14,19 @@ import type { AppNotification } from "@/types/notification";
 
 interface HeaderProps {
   onMenuClick?: () => void;
-  theme?: "dark" | "light";
 }
 
 const NOTIF_ICONS: Record<string, React.ReactNode> = {
   payment_approved:    <CreditCard    className="h-4 w-4 text-green-400" />,
   live_started:        <Radio         className="h-4 w-4 text-purple-400" />,
-  course_live_started: <Radio         className="h-4 w-4 text-purple-400" />,
   community_like:      <Heart         className="h-4 w-4 text-red-400" />,
   community_comment:   <MessageCircle className="h-4 w-4 text-blue-400" />,
   certificate_ready:   <Award         className="h-4 w-4 text-amber-400" />,
+  live_approved:       <Radio         className="h-4 w-4 text-green-400" />,
+  live_rejected:       <Radio         className="h-4 w-4 text-red-400" />,
+  recording_ready:     <Radio         className="h-4 w-4 text-blue-400" />,
+  new_question:        <MessageCircle className="h-4 w-4 text-yellow-400" />,
+  question_answered:   <MessageCircle className="h-4 w-4 text-green-400" />,
 };
 
 function getReadBroadcasts(): Set<string> {
@@ -46,8 +50,9 @@ function markAllBroadcastsRead(ids: string[]) {
   } catch {}
 }
 
-export default function Header({ onMenuClick, theme = "dark" }: HeaderProps) {
+export default function Header({ onMenuClick }: HeaderProps) {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const router = useRouter();
   const [userNotifs, setUserNotifs] = useState<AppNotification[]>([]);
   const [broadcasts, setBroadcasts] = useState<AppNotification[]>([]);
@@ -74,10 +79,14 @@ export default function Header({ onMenuClick, theme = "dark" }: HeaderProps) {
 
   useEffect(() => {
     if (!user) return;
+    const oneDayAgo = new Date();
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+
     const q = query(
       collection(db, "broadcasts"),
+      where("createdAt", ">=", oneDayAgo),
       orderBy("createdAt", "desc"),
-      limit(20),
+      limit(10),
     );
     const unsub = onSnapshot(q, (snap) => {
       setBroadcasts(snap.docs.map((d) => ({
@@ -153,18 +162,18 @@ export default function Header({ onMenuClick, theme = "dark" }: HeaderProps) {
   };
 
   return (
-    <header className={`sticky top-0 z-30 flex h-16 items-center justify-between px-4 sm:px-8 backdrop-blur-xl ${
+    <header className={`sticky top-0 z-30 flex h-16 items-center justify-between px-4 sm:px-8 ${
       theme === "light"
-        ? "bg-white/95 border-b border-slate-200 shadow-sm"
-        : "bg-gray-950/80"
+        ? "bg-bg-surface border-b border-border-default shadow-sm"
+        : "bg-bg-page border-b border-border-default"
     }`}>
       <div className="flex flex-1 items-center gap-4">
         <button onClick={onMenuClick} aria-label="Abrir menu de navegação" className={`lg:hidden transition-colors mr-2 ${
-          theme === "light" ? "text-slate-400 hover:text-slate-800" : "text-gray-400 hover:text-white"
+          theme === "light" ? "text-text-muted hover:text-text-primary" : "text-text-muted hover:text-text-primary"
         }`}>
           <Menu className="h-6 w-6" />
         </button>
-        <span className={`px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider hidden sm:block ${
+        <span className={`px-2.5 py-0.5 text-sm font-bold uppercase tracking-wider hidden sm:block ${
           theme === "light"
             ? "bg-blue-50 text-blue-600 border border-blue-100"
             : "bg-blue-500/10 text-blue-400"
@@ -179,14 +188,14 @@ export default function Header({ onMenuClick, theme = "dark" }: HeaderProps) {
           <button
             onClick={() => setOpen(!open)}
             className={`relative transition-colors ${
-              theme === "light" ? "text-slate-400 hover:text-slate-700" : "text-gray-400 hover:text-white"
+              theme === "light" ? "text-text-muted hover:text-text-primary" : "text-text-muted hover:text-text-primary"
             }`}
             aria-label="Notificações"
           >
             <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
-              <span className={`absolute -top-1 -right-1 flex items-center justify-center h-4 min-w-[16px] px-1 text-[10px] font-bold text-white bg-purple-600 ring-2 ${
-                theme === "light" ? "ring-white" : "ring-gray-950"
+              <span className={`absolute -top-1 -right-1 flex items-center justify-center h-4 min-w-[16px] px-1 text-[13px] font-bold text-text-on-brand bg-brand-purple ring-2 ${
+                theme === "light" ? "ring-bg-surface" : "ring-bg-page"
               }`}>
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
@@ -196,16 +205,16 @@ export default function Header({ onMenuClick, theme = "dark" }: HeaderProps) {
           {open && (
             <div className={`absolute right-0 top-10 w-80 sm:w-96 shadow-2xl z-50 max-h-[70vh] flex flex-col ${
               theme === "light"
-                ? "bg-white border border-slate-200 shadow-xl"
-                : "bg-gray-900 border border-gray-800"
+                ? "bg-bg-surface border border-border-default shadow-xl"
+                : "bg-bg-surface border border-border-default"
             }`}>
               <div className={`flex items-center justify-between px-4 py-3 border-b shrink-0 ${
-                theme === "light" ? "border-slate-200" : "border-gray-800"
+                theme === "light" ? "border-border-default" : "border-border-default"
               }`}>
-                <h3 className={`text-sm font-bold ${theme === "light" ? "text-slate-800" : "text-white"}`}>
+                <h3 className={`text-sm font-bold ${theme === "light" ? "text-text-primary" : "text-text-primary"}`}>
                   Notificações
                   {unreadCount > 0 && (
-                    <span className="ml-2 px-1.5 py-0.5 text-[10px] bg-purple-600 text-white font-bold">
+                    <span className="ml-2 px-1.5 py-0.5 text-[13px] bg-brand-purple text-text-on-brand font-bold">
                       {unreadCount}
                     </span>
                   )}
@@ -213,7 +222,7 @@ export default function Header({ onMenuClick, theme = "dark" }: HeaderProps) {
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllRead}
-                    className="flex items-center gap-1 text-xs text-purple-500 hover:text-purple-700 font-medium"
+                    className="flex items-center gap-1 text-sm text-brand-purple hover:text-brand-purple-on-dark font-medium"
                   >
                     <CheckCheck className="h-3.5 w-3.5" /> Marcar todas
                   </button>
@@ -222,7 +231,7 @@ export default function Header({ onMenuClick, theme = "dark" }: HeaderProps) {
 
               <div className="overflow-y-auto flex-1">
                 {allNotifications.length === 0 ? (
-                  <div className={`px-4 py-8 text-center text-sm ${theme === "light" ? "text-slate-400" : "text-gray-500"}`}>
+                  <div className={`px-4 py-8 text-center text-sm ${theme === "light" ? "text-text-muted" : "text-text-muted"}`}>
                     Nenhuma notificação
                   </div>
                 ) : (
@@ -232,27 +241,27 @@ export default function Header({ onMenuClick, theme = "dark" }: HeaderProps) {
                       onClick={() => markRead(n)}
                       className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors border-b ${
                         theme === "light"
-                          ? `border-slate-100 hover:bg-slate-50 ${!n.read ? "bg-purple-50/50" : ""}`
-                          : `border-gray-800/40 hover:bg-gray-800/60 ${!n.read ? "bg-purple-500/5" : ""}`
+                          ? `border-border-subtle hover:bg-hover-bg ${!n.read ? "bg-brand-purple/5" : ""}`
+                          : `border-border-subtle hover:bg-hover-bg ${!n.read ? "bg-brand-purple/5" : ""}`
                       }`}
                     >
                       <div className={`flex h-8 w-8 shrink-0 items-center justify-center mt-0.5 ${
-                        theme === "light" ? "bg-slate-100" : "bg-gray-800"
+                        theme === "light" ? "bg-bg-surface-2" : "bg-bg-surface-2"
                       }`}>
-                        {NOTIF_ICONS[n.type] || <Bell className={`h-4 w-4 ${theme === "light" ? "text-slate-400" : "text-gray-400"}`} />}
+                        {NOTIF_ICONS[n.type] || <Bell className={`h-4 w-4 ${theme === "light" ? "text-text-muted" : "text-text-muted"}`} />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm ${
                           !n.read
-                            ? theme === "light" ? "text-slate-900 font-semibold" : "text-white font-semibold"
-                            : theme === "light" ? "text-slate-600" : "text-gray-300"
+                            ? theme === "light" ? "text-text-primary font-semibold" : "text-text-primary font-semibold"
+                            : theme === "light" ? "text-text-secondary" : "text-text-secondary"
                         }`}>{n.title}</p>
-                        <p className={`text-xs mt-0.5 line-clamp-2 ${
-                          theme === "light" ? "text-slate-400" : "text-gray-500"
+                        <p className={`text-sm mt-0.5 line-clamp-2 ${
+                          theme === "light" ? "text-text-muted" : "text-text-muted"
                         }`}>{n.message}</p>
                       </div>
                       {!n.read && (
-                        <div className="h-2 w-2 rounded-full bg-purple-500 shrink-0 mt-2" />
+                        <div className="h-2 w-2 rounded-full bg-brand-purple shrink-0 mt-2" />
                       )}
                     </button>
                   ))
@@ -262,12 +271,12 @@ export default function Header({ onMenuClick, theme = "dark" }: HeaderProps) {
           )}
         </div>
 
-        <div className={`h-7 w-px ${theme === "light" ? "bg-slate-200" : "bg-gray-800"}`}></div>
+        <div className={`h-7 w-px ${theme === "light" ? "bg-border-default" : "bg-border-default"}`}></div>
 
         <div className="flex items-center gap-3">
           <div className="hidden text-right sm:block">
-            <p className={`text-sm font-semibold ${theme === "light" ? "text-slate-800" : "text-white"}`}>{user?.displayName || "Administrador"}</p>
-            <p className={`text-xs font-medium ${theme === "light" ? "text-blue-600" : "text-blue-400"}`}>Admin</p>
+            <p className={`text-sm font-semibold ${theme === "light" ? "text-text-primary" : "text-text-primary"}`}>{user?.displayName || "Administrador"}</p>
+            <p className={`text-sm font-medium ${theme === "light" ? "text-blue-600" : "text-blue-400"}`}>Admin</p>
           </div>
           <div className="flex h-9 w-9 items-center justify-center bg-gradient-to-br from-blue-500 to-blue-700 text-white text-sm font-bold shadow-md">
             {user?.photoURL ? (

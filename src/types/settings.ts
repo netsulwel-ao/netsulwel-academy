@@ -1,8 +1,4 @@
-﻿export interface PlatformSettings {
-  plans: {
-    smart: { price: number; label: string; description: string; features: string[] };
-    golden: { price: number; label: string; description: string; features: string[] };
-  };
+export interface PlatformSettings {
   paymentMethods: {
     bankTransfer: { enabled: boolean; bankName: string; iban: string; accountHolder: string; reference: string };
     multicaixa: { enabled: boolean; entity: string; reference: string };
@@ -46,7 +42,7 @@ export interface Sale {
   userId: string;
   userName: string;
   userEmail: string;
-  type: "standalone" | "smart" | "golden" | "live";
+  type: "standalone" | "live";
   itemId?: string;
   itemTitle?: string;
   amount: number;

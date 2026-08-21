@@ -40,6 +40,7 @@
     "eslint-config-next": "16.2.6",
     "firebase": "^12.13.0",
     "firebase-admin": "^13.10.0",
+    "framer-motion": "^13.0.0",
     "jimp": "^1.6.1",
     "livekit-client": "^2.19.0",
     "livekit-server-sdk": "^2.15.3",

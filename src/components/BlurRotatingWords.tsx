@@ -18,10 +18,6 @@ const GAP_MS = 50;
 
 type Phase = "icon-in" | "word-in" | "stable" | "exiting" | "gap";
 
-type BlurRotatingWordsProps = {
- className?: string;
-};
-
 function WordBlock({
  text,
  Icon,
@@ -75,7 +71,7 @@ function WordBlock({
  );
 }
 
-export function BlurRotatingWords({ className = "" }: BlurRotatingWordsProps) {
+export function BlurRotatingWords() {
  const [index, setIndex] = useState(0);
  const [phase, setPhase] = useState<Phase>("icon-in");
 
@@ -110,10 +106,10 @@ export function BlurRotatingWords({ className = "" }: BlurRotatingWordsProps) {
 
  return (
  <span
- className={`relative block w-full px-2 ${className}`}
+ className="relative block w-full h-full"
  aria-live="polite"
  >
- <span className="flex min-h-[3rem] w-full items-center justify-center sm:min-h-[3.5rem] md:min-h-[4rem]">
+ <span className="flex h-full w-full items-center justify-center">
  {phase !== "gap" && (
  <WordBlock
  key={index}

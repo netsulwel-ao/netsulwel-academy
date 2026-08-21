@@ -153,25 +153,23 @@ async function notifyRecordingReady(admin: any, liveId: string) {
     });
 
     // Create notification for each student
-    const notifications = Array.from(studentIds).map((studentId) => ({
-      userId: studentId,
-      liveId,
-      type: "recording_ready",
-      title: "Gravação Pronta",
-      message: "A gravação da aula está pronta para visualização.",
-      createdAt: new Date().toISOString(),
-      read: false,
-    }));
-
-    if (notifications.length > 0) {
-      // Store notifications in batch
+    if (studentIds.size > 0) {
       const batch = admin.firestore().batch();
-      notifications.forEach((notification) => {
+      studentIds.forEach((studentId) => {
         const ref = admin
           .firestore()
+          .collection("users")
+          .doc(studentId)
           .collection("notifications")
           .doc();
-        batch.set(ref, notification);
+        batch.set(ref, {
+          uid: studentId,
+          type: "recording_ready",
+          title: "Gravação Pronta",
+          message: "A gravação da aula está pronta para visualização.",
+          read: false,
+          createdAt: new Date().toISOString(),
+        });
       });
       await batch.commit();
     }

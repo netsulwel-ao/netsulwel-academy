@@ -8,10 +8,10 @@ import {
   ArrowRight, ArrowLeft, Users, BookOpen, Globe,
 } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, deleteDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { AuthCarousel } from "@/components/AuthCarousel";
+
 
 const PERKS = [
   { icon: Users,    label: "Gerencie alunos",     sub: "Acompanhe progresso em tempo real" },
@@ -57,8 +57,10 @@ export default function InstitutionRegisterPage() {
       return;
     }
     setLoading(true);
+    let createdUser: any = null;
     try {
       const cred = await createUserWithEmailAndPassword(auth, adminEmail, adminPassword);
+      createdUser = cred.user;
       await updateProfile(cred.user, { displayName: adminName });
       await setDoc(doc(db, "users", cred.user.uid), {
         email: adminEmail,
@@ -84,6 +86,14 @@ export default function InstitutionRegisterPage() {
       await sendEmailVerification(cred.user);
       router.push("/verify-email");
     } catch (err: unknown) {
+      if (createdUser) {
+        try {
+          await deleteDoc(doc(db, "users", createdUser.uid));
+          await createdUser.delete();
+        } catch {
+          // cleanup best-effort
+        }
+      }
       const code = (err as { code?: string })?.code ?? "";
       const messages: Record<string, string> = {
         "auth/email-already-in-use": "Este email já está registado. Tente fazer login.",
@@ -101,14 +111,11 @@ export default function InstitutionRegisterPage() {
   };
 
   // Classe base para inputs
-  const inputBase = "block w-full border border-gray-800 bg-gray-900/60 py-2.5 pl-9 pr-3 text-sm text-gray-100 placeholder-gray-700 focus:border-blue-500/50 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors";
+  const inputBase = "block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 placeholder-gray-700 focus:border-blue-500/50 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors";
 
   return (
     <main className="flex min-h-screen bg-gray-950">
-      {/* Carousel — lado esquerdo */}
-      <AuthCarousel />
-
-      {/* Form — lado direito */}
+      {/* Form */}
       <div className="relative flex flex-1 flex-col overflow-y-auto">
         <div className="pointer-events-none absolute inset-0 grid-bg opacity-[0.06]" />
         <div className="pointer-events-none absolute top-0 right-0 h-[400px] w-[400px] bg-blue-500/5 blur-[120px]" />
@@ -132,7 +139,7 @@ export default function InstitutionRegisterPage() {
             <div className="mb-6 flex items-center gap-0">
               {[1, 2].map((s) => (
                 <div key={s} className="flex items-center">
-                  <div className={`flex h-6 w-6 items-center justify-center text-[11px] font-bold transition-all ${
+                  <div className={`flex h-6 w-6 items-center justify-center text-[13px] font-bold transition-all ${
                     s <= step ? "bg-blue-600 text-white" : "border border-gray-700 text-gray-600"
                   }`}>
                     {s < step ? "✓" : s}
@@ -142,14 +149,14 @@ export default function InstitutionRegisterPage() {
                   )}
                 </div>
               ))}
-              <span className="ml-4 text-xs text-gray-600 font-mono">
+              <span className="ml-4 text-sm text-gray-600 font-mono">
                 {step === 1 ? "conta admin" : "dados instituição"}
               </span>
             </div>
 
             {/* Eyebrow */}
             <div className="mb-5">
-              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-blue-500/70 mb-2">
+              <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-blue-500/70 mb-2">
                 // registo de instituição
               </p>
               <h1 className="text-2xl font-bold text-gray-100">
@@ -166,11 +173,11 @@ export default function InstitutionRegisterPage() {
             {step === 1 && (
               <div className="mb-5 space-y-2">
                 {PERKS.map(({ icon: Icon, label, sub }) => (
-                  <div key={label} className="flex items-center gap-3 py-2 border-b border-gray-800/60 last:border-b-0">
+                  <div key={label} className="flex items-center gap-3 py-2 border-b border-gray-800 last:border-b-0">
                     <Icon className="h-3.5 w-3.5 text-blue-500/60 shrink-0" strokeWidth={1.5} />
                     <div>
-                      <span className="text-xs font-medium text-gray-300">{label}</span>
-                      <span className="text-xs text-gray-600 ml-2">{sub}</span>
+                      <span className="text-sm font-medium text-gray-300">{label}</span>
+                      <span className="text-sm text-gray-600 ml-2">{sub}</span>
                     </div>
                   </div>
                 ))}
@@ -189,7 +196,7 @@ export default function InstitutionRegisterPage() {
             {step === 1 && (
               <form onSubmit={handleStep1} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="adminName" className="text-xs font-medium uppercase tracking-wider text-gray-500">Nome</label>
+                  <label htmlFor="adminName" className="text-sm font-medium uppercase tracking-wider text-gray-500">Nome</label>
                   <div className="relative">
                     <User className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
                     <input id="adminName" type="text" required autoComplete="name"
@@ -199,7 +206,7 @@ export default function InstitutionRegisterPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="adminEmail" className="text-xs font-medium uppercase tracking-wider text-gray-500">Email</label>
+                  <label htmlFor="adminEmail" className="text-sm font-medium uppercase tracking-wider text-gray-500">Email</label>
                   <div className="relative">
                     <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
                     <input id="adminEmail" type="email" required autoComplete="email"
@@ -209,7 +216,7 @@ export default function InstitutionRegisterPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="adminPassword" className="text-xs font-medium uppercase tracking-wider text-gray-500">Palavra-passe</label>
+                  <label htmlFor="adminPassword" className="text-sm font-medium uppercase tracking-wider text-gray-500">Palavra-passe</label>
                   <div className="relative">
                     <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
                     <input id="adminPassword" type={showPassword ? "text" : "password"} required
@@ -234,7 +241,7 @@ export default function InstitutionRegisterPage() {
             {step === 2 && (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="instName" className="text-xs font-medium uppercase tracking-wider text-gray-500">Nome da instituição</label>
+                  <label htmlFor="instName" className="text-sm font-medium uppercase tracking-wider text-gray-500">Nome da instituição</label>
                   <div className="relative">
                     <Building2 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
                     <input id="instName" type="text" required disabled={loading}
@@ -245,7 +252,7 @@ export default function InstitutionRegisterPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="instEmail" className="text-xs font-medium uppercase tracking-wider text-gray-500">Email da instituição</label>
+                  <label htmlFor="instEmail" className="text-sm font-medium uppercase tracking-wider text-gray-500">Email da instituição</label>
                   <div className="relative">
                     <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
                     <input id="instEmail" type="email" required disabled={loading}
@@ -256,7 +263,7 @@ export default function InstitutionRegisterPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="instPhone" className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <label htmlFor="instPhone" className="text-sm font-medium uppercase tracking-wider text-gray-500">
                     Telefone <span className="text-gray-700 normal-case tracking-normal">(opcional)</span>
                   </label>
                   <div className="relative">
@@ -269,7 +276,7 @@ export default function InstitutionRegisterPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="instAddress" className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <label htmlFor="instAddress" className="text-sm font-medium uppercase tracking-wider text-gray-500">
                     Morada <span className="text-gray-700 normal-case tracking-normal">(opcional)</span>
                   </label>
                   <div className="relative">
@@ -283,8 +290,8 @@ export default function InstitutionRegisterPage() {
 
                 {/* Aviso aprovação */}
                 <div className="flex items-start gap-2.5 border border-amber-500/20 bg-amber-500/5 px-3 py-2.5">
-                  <span className="text-amber-400/80 text-xs mt-0.5">⚠</span>
-                  <p className="text-xs text-amber-400/70 leading-relaxed">
+                  <span className="text-amber-400/80 text-sm mt-0.5">⚠</span>
+                  <p className="text-sm text-amber-400/70 leading-relaxed">
                     Após o registo, a instituição ficará em <strong className="text-amber-400/90">avaliação</strong> até ser aprovada.
                   </p>
                 </div>
@@ -306,14 +313,14 @@ export default function InstitutionRegisterPage() {
             )}
 
             {/* Rodapé */}
-            <div className="mt-8 space-y-3 border-t border-gray-800/60 pt-6">
-              <p className="text-center text-xs text-gray-600">
+            <div className="mt-8 space-y-3 border-t border-gray-800 pt-6">
+              <p className="text-center text-sm text-gray-600">
                 Já tem conta?{" "}
                 <Link href="/login" className="text-blue-500/80 hover:text-blue-400 font-semibold transition-colors">
                   Entrar agora
                 </Link>
               </p>
-              <div className="flex items-center justify-center gap-4 text-xs text-gray-700">
+              <div className="flex items-center justify-center gap-4 text-sm text-gray-700">
                 <Link href="/register" className="hover:text-gray-500 transition-colors">Sou aluno</Link>
                 <span>·</span>
                 <Link href="/register/teacher" className="hover:text-gray-500 transition-colors">Sou professor</Link>

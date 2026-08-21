@@ -49,15 +49,15 @@ export function ModulesPanel({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gray-700 mb-1">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-gray-700 mb-1">
             // módulos e aulas
           </p>
-          <p className="text-xs text-gray-600">Organiza o conteúdo em módulos e faz upload dos vídeos</p>
+          <p className="text-sm text-gray-600">Organiza o conteúdo em módulos e faz upload dos vídeos</p>
         </div>
         <button
           type="button"
           onClick={addModule}
-          className="flex items-center gap-1.5 border border-gray-800/60 bg-gray-900/10 px-3 py-2 font-mono text-[9px] uppercase tracking-widest text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all"
+          className="flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-3 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all"
         >
           <Plus className="h-3 w-3" /> Módulo
         </button>
@@ -65,12 +65,12 @@ export function ModulesPanel({
 
       <div className="space-y-4">
         {modules.map((module, mi) => (
-          <div key={mi} className="border border-gray-800/60 overflow-hidden">
+          <div key={mi} className="border border-gray-800 overflow-hidden">
 
             {/* Cabeçalho do módulo */}
-            <div className="flex items-center gap-3 px-4 py-3 bg-gray-900/30 border-b border-gray-800/40">
+            <div className="flex items-center gap-3 px-4 py-3 bg-gray-900 border-b border-gray-800">
               <GripVertical className="h-4 w-4 text-gray-700 shrink-0" />
-              <span className="font-mono text-[9px] uppercase tracking-widest text-gray-600 shrink-0">
+              <span className="font-mono text-[13px] uppercase tracking-widest text-gray-600 shrink-0">
                 {String(mi + 1).padStart(2, "0")}
               </span>
               <input
@@ -93,15 +93,15 @@ export function ModulesPanel({
             </div>
 
             {/* Aulas */}
-            <div className="p-4 space-y-3 bg-gray-900/10">
+            <div className="p-4 space-y-3 bg-gray-900">
               {module.videos.map((video, vi) => (
-                <div key={vi} className="border border-gray-800/40 bg-gray-900/20 p-3 space-y-2.5">
+                <div key={vi} className="border border-gray-800 bg-gray-900 p-3 space-y-2.5">
 
                   {format === "live" ? (
                     // ── Live lesson ────────────────────────────────────
                     <>
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-mono text-[9px] text-gray-700 w-5 shrink-0 text-right">{vi + 1}.</span>
+                        <span className="font-mono text-[13px] text-gray-700 w-5 shrink-0 text-right">{vi + 1}.</span>
                         <input
                           type="text"
                           value={video.title}
@@ -154,7 +154,7 @@ export function ModulesPanel({
                     // ── Recorded lesson ────────────────────────────────
                     <>
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-mono text-[9px] text-gray-700 w-5 shrink-0 text-right">{vi + 1}.</span>
+                        <span className="font-mono text-[13px] text-gray-700 w-5 shrink-0 text-right">{vi + 1}.</span>
                         <input
                           type="text"
                           value={video.title}
@@ -183,17 +183,17 @@ export function ModulesPanel({
 
                       {/* Upload / Link toggle */}
                       <div className="flex items-start gap-2 pl-7">
-                        <div className="flex shrink-0 border border-gray-800/60 overflow-hidden">
+                        <div className="flex shrink-0 border border-gray-800 overflow-hidden">
                           {(["upload", "link"] as const).map((m) => (
                             <button
                               key={m}
                               type="button"
                               onClick={() => { if (mode(mi, vi) !== m) toggleMode(mi, vi); }}
                               aria-pressed={mode(mi, vi) === m}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-[9px] uppercase tracking-widest transition-colors ${
+                              className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-[13px] uppercase tracking-widest transition-colors ${
                                 mode(mi, vi) === m
                                   ? "bg-purple text-white"
-                                  : "bg-gray-900/30 text-gray-600 hover:text-gray-300"
+                                  : "bg-gray-900 text-gray-600 hover:text-gray-300"
                               }`}
                             >
                               {m === "upload" ? <UploadCloud className="h-3 w-3" /> : <LinkIcon className="h-3 w-3" />}
@@ -208,20 +208,20 @@ export function ModulesPanel({
                               <button
                                 type="button"
                                 onClick={() => videoRefs.current[key(mi, vi)]?.click()}
-                                className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-700 bg-gray-900/20 py-2 font-mono text-[9px] uppercase tracking-widest text-gray-700 hover:border-purple/30 hover:text-gray-500 transition-colors"
+                                className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-700 bg-gray-900 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-700 hover:border-purple/30 hover:text-gray-500 transition-colors"
                               >
                                 <UploadCloud className="h-3.5 w-3.5" /> Selecionar vídeo
                               </button>
                             )}
                             {video.uploading && (
                               <div className="space-y-1">
-                                <div className="flex justify-between font-mono text-[9px] text-gray-600">
+                                <div className="flex justify-between font-mono text-[13px] text-gray-600">
                                   <span className="flex items-center gap-1">
                                     <Loader2 className="h-2.5 w-2.5 animate-spin" /> A enviar...
                                   </span>
                                   <span>{video.uploadProgress ?? 0}%</span>
                                 </div>
-                                <div className="w-full bg-gray-800/60 h-1">
+                                <div className="w-full bg-gray-800 h-1">
                                   <div
                                     className="bg-purple h-1 transition-all duration-200"
                                     role="progressbar"
@@ -237,7 +237,7 @@ export function ModulesPanel({
                               <div className="flex items-center gap-2">
                                 <div className="flex-1 flex items-center gap-2 border border-green/20 bg-green/5 px-3 py-1.5">
                                   <CheckCircle2 className="h-3 w-3 text-green/60 shrink-0" strokeWidth={1.5} />
-                                  <span className="font-mono text-[9px] text-green/60 truncate">
+                                  <span className="font-mono text-[13px] text-green/60 truncate">
                                     {video.url.split("/").pop()}
                                   </span>
                                 </div>
@@ -252,7 +252,7 @@ export function ModulesPanel({
                               </div>
                             )}
                             {video.uploadError && (
-                              <p className="font-mono text-[9px] text-red-400/80 flex items-center gap-1">
+                              <p className="font-mono text-[13px] text-red-400/80 flex items-center gap-1">
                                 <AlertCircle className="h-3 w-3" strokeWidth={1.5} />
                                 {video.uploadError}
                               </p>
@@ -300,7 +300,7 @@ export function ModulesPanel({
               <button
                 type="button"
                 onClick={() => addVideo(mi)}
-                className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-gray-700 hover:text-gray-400 transition-colors ml-7 mt-1"
+                className="flex items-center gap-1.5 font-mono text-[13px] uppercase tracking-widest text-gray-700 hover:text-gray-400 transition-colors ml-7 mt-1"
               >
                 <Plus className="h-3 w-3" /> Adicionar aula
               </button>

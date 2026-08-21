@@ -1,13 +1,12 @@
 import { createContext } from "react";
 import { User } from "firebase/auth";
-import { UserRole, UserPlan } from "@/lib/authService";
+import { UserRole } from "@/lib/authService";
 
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
   profileLoaded: boolean;
   role: UserRole;
-  plan: UserPlan;
   isAdmin: boolean;
   isTeacher: boolean;
   isInstitution: boolean;
@@ -23,7 +22,6 @@ export const AuthContext = createContext<AuthContextType>({
   loading: true,
   profileLoaded: false,
   role: "aluno",
-  plan: "free",
   isAdmin: false,
   isTeacher: false,
   isInstitution: false,
@@ -37,4 +35,4 @@ export const AuthContext = createContext<AuthContextType>({
 export { useAuth, useIsAuthenticated, useHasRole, useIsAdminOrTeacher, useIsAdmin, useUserInfo, useLogout } from "@/hooks/useAuth";
 
 // Re-export types from authService
-export type { UserRole, UserPlan, UserProfile } from "@/lib/authService";
+export type { UserRole, UserProfile } from "@/lib/authService";

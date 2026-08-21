@@ -105,7 +105,7 @@ export default function EditTrailPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center">
         <AlertCircle className="h-8 w-8 text-red-400/70" strokeWidth={1.5} />
-        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700">// erro</p>
+        <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">// erro</p>
         <p className="text-sm text-gray-600">{fetchError}</p>
       </div>
     );
@@ -117,7 +117,7 @@ export default function EditTrailPage() {
         <div className="flex h-16 w-16 items-center justify-center border border-green/25 bg-green/8">
           <CheckCircle2 className="h-7 w-7 text-green/70" strokeWidth={1.5} />
         </div>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-600">// trilha actualizada</p>
+        <p className="font-mono text-[13px] uppercase tracking-widest text-gray-600">// trilha actualizada</p>
         <p className="text-sm text-gray-600">A redirecionar...</p>
       </div>
     );

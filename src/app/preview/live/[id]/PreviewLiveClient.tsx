@@ -7,14 +7,13 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import {
   Radio, Calendar, Users, Share2, CheckCircle2,
-  Lock, LogIn, Crown, Zap, Play, Clock, ShoppingCart,
+  Lock, LogIn, Play, Clock, ShoppingCart,
 } from "lucide-react";
 import Link from "next/link";
 
 const TARGET_LABELS: Record<string, string> = {
   all: "Gratuito — todos os alunos",
-  smart: "Plano Smart ou Golden",
-  golden: "Exclusivo Plano Golden",
+  free: "Gratuito",
   standalone: "Aula Avulsa",
 };
 
@@ -45,7 +44,7 @@ interface LivePreview {
 }
 
 export default function PreviewLiveClient({ live }: { live: LivePreview }) {
-  const { user, plan, loading } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [enrolledLives, setEnrolledLives] = useState<string[]>([]);
@@ -61,9 +60,8 @@ export default function PreviewLiveClient({ live }: { live: LivePreview }) {
 
   const hasAccess = !loading && user && (
     live.target === "all" ||
-    (live.target === "standalone" && enrolledLives.includes(live.id)) ||
-    (live.target === "smart" && (plan === "smart" || plan === "golden")) ||
-    (live.target === "golden" && plan === "golden")
+    live.target === "free" ||
+    (live.target === "standalone" && enrolledLives.includes(live.id))
   );
 
   const handleWatch = () => {
@@ -94,7 +92,7 @@ export default function PreviewLiveClient({ live }: { live: LivePreview }) {
     <div className="min-h-screen bg-gray-950 text-white">
 
       {/* Navbar */}
-      <nav className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-gray-950/90 backdrop-blur-xl border-b border-gray-800">
+      <nav className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-gray-950 border-b border-gray-800">
         <Link href="/" className="flex items-center gap-3">
           <img src="/Logo-Academy-White.svg" alt="Netsulwel Academy" className="h-10 w-auto" />
           <span className="text-lg font-bold text-white hidden sm:block">Netsulwel Academy</span>
@@ -144,7 +142,7 @@ export default function PreviewLiveClient({ live }: { live: LivePreview }) {
                   Encerrada
                 </div>
               )}
-              <span className="text-xs text-gray-500 border border-gray-700 px-3 py-1">
+              <span className="text-sm text-gray-500 border border-gray-700 px-3 py-1">
                 {TARGET_LABELS[live.target] ?? "Todos os alunos"}
               </span>
             </div>
@@ -177,8 +175,8 @@ export default function PreviewLiveClient({ live }: { live: LivePreview }) {
 
             {/* Countdown */}
             {isScheduled && !time.expired && (
-              <div className="bg-gray-900/60 border border-gray-800 p-5 inline-flex flex-col gap-3">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+              <div className="bg-gray-900 border border-gray-800 p-5 inline-flex flex-col gap-3">
+                <p className="text-sm font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
                   <Clock className="h-3.5 w-3.5" /> Começa em
                 </p>
                 <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
@@ -186,7 +184,7 @@ export default function PreviewLiveClient({ live }: { live: LivePreview }) {
                     <>
                       <div className="text-center">
                         <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums">{String(time.d).padStart(2, "0")}</p>
-                        <p className="text-[10px] sm:text-xs text-gray-500 mt-1">dias</p>
+                        <p className="text-[13px] sm:text-sm text-gray-500 mt-1">dias</p>
                       </div>
                       <span className="text-xl sm:text-2xl text-gray-600 font-bold">:</span>
                     </>
@@ -195,7 +193,7 @@ export default function PreviewLiveClient({ live }: { live: LivePreview }) {
                     <div key={l} className="flex items-center gap-2 sm:gap-3">
                       <div className="text-center">
                         <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums">{String(v).padStart(2, "0")}</p>
-                        <p className="text-[10px] sm:text-xs text-gray-500 mt-1">{l}</p>
+                        <p className="text-[13px] sm:text-sm text-gray-500 mt-1">{l}</p>
                       </div>
                       {i < arr.length - 1 && <span className="text-xl sm:text-2xl text-gray-600 font-bold">:</span>}
                     </div>
@@ -232,7 +230,7 @@ function LiveCTABox({ live, hasAccess, user, loading, onWatch }: {
         <div className="relative aspect-video overflow-hidden">
           <img src={live.thumbnail} alt={live.title} className="w-full h-full object-cover" />
           {isLive && (
-            <div className="absolute inset-0 bg-gray-950/40 flex items-center justify-center">
+            <div className="absolute inset-0 bg-gray-950 flex items-center justify-center">
               <div className="flex items-center gap-2 bg-red-600 px-4 py-2 text-sm font-bold text-white">
                 <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
                 AO VIVO
@@ -240,8 +238,8 @@ function LiveCTABox({ live, hasAccess, user, loading, onWatch }: {
             </div>
           )}
           {!isLive && (
-            <div className="absolute inset-0 bg-gray-950/50 flex items-center justify-center">
-              <Lock className="h-8 w-8 text-white/50" />
+            <div className="absolute inset-0 bg-gray-950 flex items-center justify-center">
+              <Lock className="h-8 w-8 text-white" />
             </div>
           )}
         </div>
@@ -256,8 +254,6 @@ function LiveCTABox({ live, hasAccess, user, loading, onWatch }: {
               className={`w-full flex items-center justify-center gap-2 py-4 font-bold text-sm transition-colors disabled:opacity-60 ${
                 isLive && hasAccess ? "bg-red-600 hover:bg-red-500 text-white animate-pulse"
                 : hasAccess ? "bg-green-600 hover:bg-green-500 text-white"
-                : live.target === "golden" ? "bg-yellow-500 hover:bg-yellow-400 text-gray-900"
-                : live.target === "smart" ? "bg-green-600 hover:bg-green-500 text-white"
                 : live.target === "standalone" ? "bg-green-600 hover:bg-green-700 text-white"
                 : "bg-blue-600 hover:bg-blue-700 text-white"
               }`}>
@@ -265,8 +261,6 @@ function LiveCTABox({ live, hasAccess, user, loading, onWatch }: {
               : !user ? <><LogIn className="h-4 w-4" /> Entrar para Assistir</>
               : hasAccess && isLive ? <><Radio className="h-4 w-4" /> Entrar na Aula Agora</>
               : hasAccess ? <><Play className="h-4 w-4" /> Entrar quando começar</>
-              : live.target === "golden" ? <><Crown className="h-4 w-4" /> Ativar Plano Golden</>
-              : live.target === "smart" ? <><Zap className="h-4 w-4" /> Ativar Plano Smart</>
               : live.target === "standalone" ? <><ShoppingCart className="h-4 w-4" /> Comprar — {(live.price ?? 0).toLocaleString("pt-AO")} Kz</>
               : <><LogIn className="h-4 w-4" /> Entrar para Assistir</>}
             </button>

@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { auth, db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { collection, getDocs, getDoc, doc, updateDoc, query, orderBy, serverTimestamp, where } from "firebase/firestore";
-import { Calendar, Loader2, ChevronDown, ChevronRight, Plus, Trash2, ImagePlus, Save, AlertCircle, CheckCircle2, X, Layers, Radio, Crown, Zap, Coins } from "lucide-react";
+import { Calendar, Loader2, ChevronDown, ChevronRight, Plus, Trash2, ImagePlus, Save, AlertCircle, CheckCircle2, X, Radio, Crown, Zap, Coins } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import type { Trail, TrailLiveSession } from "@/types/course";
 
@@ -185,9 +185,9 @@ export default function SchedulesPage() {
       {trails.length === 0 && (
         <EmptyState
           icon={Calendar}
-          title="Nenhuma trilha encontrada"
-          description="Cria trilhas primeiro para definires o cronograma de aulas ao vivo."
-          action={{ label: "Criar trilha", href: "/admin/trails/new", icon: Layers }}
+          title="Nenhum cronograma encontrado"
+          description="Cria aulas ao vivo para definires o cronograma."
+          action={{ label: "Criar aula ao vivo", href: "/admin/lives/new", icon: Radio }}
         />
       )}
 
@@ -198,13 +198,13 @@ export default function SchedulesPage() {
           const hasChanges = JSON.stringify(sessions) !== JSON.stringify(trail.liveSessions || []);
 
           return (
-            <div key={trail.id} className="bg-gray-900/40 border border-gray-800 overflow-hidden">
+            <div key={trail.id} className="bg-gray-900 border border-gray-800 overflow-hidden">
               {/* Header — nome do cronograma (título da trilha) */}
               <button onClick={() => toggleExpand(trail.id!)}
                 aria-expanded={expanded.has(trail.id!)}
                 aria-controls={`sched-${trail.id}`}
                 id={`sched-btn-${trail.id}`}
-                className="w-full flex items-center gap-4 px-6 py-5 hover:bg-gray-800/40 transition-colors text-left">
+                className="w-full flex items-center gap-4 px-6 py-5 hover:bg-gray-800 transition-colors text-left">
                 <div className={`p-1.5 border transition-colors ${isOpen ? "border-orange-500/50 bg-orange-500/10" : "border-gray-700"}`}>
                   {isOpen ? <ChevronDown className="h-5 w-5 text-orange-400" /> : <ChevronRight className="h-5 w-5 text-gray-500" />}
                 </div>
@@ -220,14 +220,14 @@ export default function SchedulesPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-base font-bold text-white truncate">{trail.title}</p>
-                    <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-2">
+                    <p className="text-sm text-gray-500 mt-0.5 flex items-center gap-2">
                       <span>{sessions.length} aula{sessions.length !== 1 ? "s" : ""} no cronograma</span>
                       {sessions.filter((s) => s.target === "standalone").length > 0 && (
                         <span className="text-purple-400">· {sessions.filter((s) => s.target === "standalone").length} paga{sessions.filter((s) => s.target === "standalone").length !== 1 ? "s" : ""}</span>
                       )}
                     </p>
                   </div>
-                  <span className={`text-xs font-medium px-2.5 py-1 shrink-0 ${
+                  <span className={`text-sm font-medium px-2.5 py-1 shrink-0 ${
                     trail.status === "published"
                       ? "bg-green-500/10 text-green-400 border border-green-500/20"
                       : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
@@ -246,7 +246,7 @@ export default function SchedulesPage() {
                       <div className="flex flex-col items-center justify-center py-10 text-center">
                         <Radio className="h-10 w-10 text-gray-700 mb-3" />
                         <p className="text-sm text-gray-500">Nenhuma aula no cronograma</p>
-                        <p className="text-xs text-gray-600 mt-1">Adiciona a primeira aula ao vivo abaixo</p>
+                        <p className="text-sm text-gray-600 mt-1">Adiciona a primeira aula ao vivo abaixo</p>
                       </div>
                     )}
 
@@ -254,15 +254,15 @@ export default function SchedulesPage() {
                       <div key={idx}
                         className="bg-gray-900 border border-gray-800 hover:border-gray-700 transition-colors overflow-hidden">
                         {/* Cabeçalho da aula */}
-                        <div className="flex items-center gap-3 px-4 py-2.5 bg-gray-950/50 border-b border-gray-800">
+                        <div className="flex items-center gap-3 px-4 py-2.5 bg-gray-950 border-b border-gray-800">
                           <div className="flex items-center gap-1">
                             <button onClick={() => moveSession(trail.id!, idx, -1)} disabled={idx === 0}
-                              className="p-0.5 text-gray-600 hover:text-white disabled:opacity-20 transition-colors"><span className="text-xs leading-none">▲</span></button>
-                            <span className="text-xs font-bold text-orange-400 min-w-[1.2rem] text-center">{idx + 1}</span>
+                              className="p-0.5 text-gray-600 hover:text-white disabled:opacity-20 transition-colors"><span className="text-sm leading-none">▲</span></button>
+                            <span className="text-sm font-bold text-orange-400 min-w-[1.2rem] text-center">{idx + 1}</span>
                             <button onClick={() => moveSession(trail.id!, idx, 1)} disabled={idx === sessions.length - 1}
-                              className="p-0.5 text-gray-600 hover:text-white disabled:opacity-20 transition-colors"><span className="text-xs leading-none">▼</span></button>
+                              className="p-0.5 text-gray-600 hover:text-white disabled:opacity-20 transition-colors"><span className="text-sm leading-none">▼</span></button>
                           </div>
-                          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Aula {idx + 1}</span>
+                          <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">Aula {idx + 1}</span>
                           <div className="flex-1" />
                           <button onClick={() => removeSession(trail.id!, idx)}
                             className="p-1 text-gray-600 hover:text-red-400 transition-colors">
@@ -282,7 +282,7 @@ export default function SchedulesPage() {
                                 ) : (
                                   <div className="flex flex-col items-center justify-center h-full gap-1 text-gray-500 group-hover:text-orange-400">
                                     <ImagePlus className="h-6 w-6" />
-                                    <span className="text-[10px] font-medium">Capa</span>
+                                    <span className="text-[13px] font-medium">Capa</span>
                                   </div>
                                 )}
                               </div>
@@ -318,7 +318,7 @@ export default function SchedulesPage() {
 
                           {/* Plano / Preço */}
                           <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Plano de Acesso</label>
+                            <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Plano de Acesso</label>
                             <div className="flex flex-wrap gap-2">
                               {TARGET_OPTIONS.map((opt) => {
                                 const Icon = opt.icon;
@@ -326,7 +326,7 @@ export default function SchedulesPage() {
                                 return (
                                   <button key={opt.value} type="button"
                                     onClick={() => updateSession(trail.id!, idx, "target", opt.value)}
-                                    className={`flex items-center gap-1.5 px-3 py-2 border text-xs font-bold transition-all ${
+                                    className={`flex items-center gap-1.5 px-3 py-2 border text-sm font-bold transition-all ${
                                       selected
                                         ? opt.color
                                         : "border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600"
@@ -344,7 +344,7 @@ export default function SchedulesPage() {
                                   onChange={(e) => updateSession(trail.id!, idx, "price", Number(e.target.value) || 0)}
                                   placeholder="Preço (Kz)"
                                   className="w-40 bg-gray-800 border border-gray-700 focus:border-purple-500/50 py-1.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
-                                <span className="text-xs text-gray-500">Kz</span>
+                                <span className="text-sm text-gray-500">Kz</span>
                               </div>
                             )}
                           </div>

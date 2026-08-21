@@ -51,15 +51,15 @@ export function PalavraPanel({ liveId }: Props) {
         <>
           <SectionLabel count={queue.length}>A pedir palavra</SectionLabel>
           {queue.map((h, idx) => (
-            <div key={h.uid} className="flex items-center gap-3 px-4 py-3 border-b border-white/5 hover:bg-white/[2%] transition-colors group">
-              <span className="text-[11px] font-bold text-white/20 w-4 shrink-0 tabular-nums">
+            <div key={h.uid} className="flex items-center gap-3 px-4 py-3 border-b border-white hover:bg-white/[2%] transition-colors group">
+              <span className="text-[13px] font-bold text-white w-4 shrink-0 tabular-nums">
                 {String(idx + 1).padStart(2, "0")}
               </span>
               <Avatar name={h.name} />
-              <span className="text-sm text-white/70 truncate flex-1">{h.name}</span>
+              <span className="text-sm text-white truncate flex-1">{h.name}</span>
               <button
                 onClick={() => grant(h.uid)}
-                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-white text-black text-[11px] font-bold hover:bg-white/90 transition-colors"
+                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-white text-black text-[13px] font-bold hover:bg-white transition-colors"
               >
                 <Mic className="h-3 w-3" /> Dar palavra
               </button>
@@ -67,7 +67,7 @@ export function PalavraPanel({ liveId }: Props) {
           ))}
         </>
       ) : (
-        <div className="border-b border-white/5">
+        <div className="border-b border-white">
           <SectionLabel>A pedir palavra</SectionLabel>
           <EmptyState icon={<Hand />} text="Quando um aluno pedir a palavra aparece aqui por ordem de chegada" />
         </div>
@@ -78,13 +78,13 @@ export function PalavraPanel({ liveId }: Props) {
       {speakerList.length === 0
         ? <EmptyState icon={<Volume2 />} text="Nenhum aluno com microfone ativo" />
         : speakerList.map(uid => (
-          <div key={uid} className="flex items-center gap-3 px-4 py-3 border-b border-white/5 border-l-2 border-l-green-500 hover:bg-white/[2%] transition-colors group">
+          <div key={uid} className="flex items-center gap-3 px-4 py-3 border-b border-white border-l-2 border-l-green-500 hover:bg-white/[2%] transition-colors group">
             <Avatar name={uid} />
-            <span className="text-sm text-white/80 truncate flex-1">{uid}</span>
+            <span className="text-sm text-white truncate flex-1">{uid}</span>
             <Waveform />
             <button
               onClick={() => revoke(uid)}
-              className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 bg-red-500/15 text-red-400 hover:bg-red-500/25 text-[11px] font-bold transition-colors opacity-0 group-hover:opacity-100"
+              className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 bg-red-500/15 text-red-400 hover:bg-red-500/25 text-[13px] font-bold transition-colors opacity-0 group-hover:opacity-100"
             >
               <MicOff className="h-3 w-3" /> Silenciar
             </button>

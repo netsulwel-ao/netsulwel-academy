@@ -1,30 +1,28 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import {
   parseProfile,
   hasRole,
   isAdminOrTeacher,
   formatRole,
-  formatPlan,
   type UserRole,
-  type UserPlan,
 } from "@/lib/authService";
 
 describe("authService", () => {
   describe("parseProfile", () => {
     it("should parse admin role", () => {
-      const data = { role: "admin", plan: "golden" };
+      const data = { role: "admin" };
       const result = parseProfile(data);
       expect(result.role).toBe("admin");
     });
 
     it("should parse teacher role", () => {
-      const data = { role: "teacher", plan: "smart" };
+      const data = { role: "teacher" };
       const result = parseProfile(data);
       expect(result.role).toBe("teacher");
     });
 
     it("should parse institution role", () => {
-      const data = { role: "institution", plan: "golden" };
+      const data = { role: "institution" };
       const result = parseProfile(data);
       expect(result.role).toBe("institution");
     });
@@ -35,28 +33,9 @@ describe("authService", () => {
       expect(result.role).toBe("aluno");
     });
 
-    it("should parse smart plan", () => {
-      const data = { plan: "smart" };
-      const result = parseProfile(data);
-      expect(result.plan).toBe("smart");
-    });
-
-    it("should parse golden plan", () => {
-      const data = { plan: "golden" };
-      const result = parseProfile(data);
-      expect(result.plan).toBe("golden");
-    });
-
-    it("should default to free plan", () => {
-      const data = { plan: "unknown" };
-      const result = parseProfile(data);
-      expect(result.plan).toBe("free");
-    });
-
     it("should include institutionId and institutionRole", () => {
       const data = {
         role: "teacher",
-        plan: "smart",
         institutionId: "inst-123",
         institutionRole: "admin",
       };
@@ -116,20 +95,6 @@ describe("authService", () => {
 
     it("should format institution role", () => {
       expect(formatRole("institution")).toBe("Instituição");
-    });
-  });
-
-  describe("formatPlan", () => {
-    it("should format free plan", () => {
-      expect(formatPlan("free")).toBe("Gratuito");
-    });
-
-    it("should format smart plan", () => {
-      expect(formatPlan("smart")).toBe("Smart");
-    });
-
-    it("should format golden plan", () => {
-      expect(formatPlan("golden")).toBe("Golden");
     });
   });
 });

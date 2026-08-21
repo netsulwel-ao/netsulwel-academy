@@ -74,7 +74,7 @@ export default function EditCoursePage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center">
         <AlertCircle className="h-8 w-8 text-red-400/70" strokeWidth={1.5} />
-        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700">// erro</p>
+        <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">// erro</p>
         <p className="text-sm text-gray-600">{fetchError}</p>
       </div>
     );
@@ -86,7 +86,7 @@ export default function EditCoursePage() {
         <div className="flex h-16 w-16 items-center justify-center border border-green/25 bg-green/8">
           <CheckCircle2 className="h-7 w-7 text-green/70" strokeWidth={1.5} />
         </div>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-600">// curso actualizado</p>
+        <p className="font-mono text-[13px] uppercase tracking-widest text-gray-600">// curso actualizado</p>
         <p className="text-sm text-gray-600">A redirecionar...</p>
       </div>
     );
@@ -99,7 +99,7 @@ export default function EditCoursePage() {
         <div className="px-6 pt-4 shrink-0">
           <Link
             href={`/admin/courses/${id}/live-studio`}
-            className="inline-flex items-center gap-1.5 border border-red-500/25 bg-red-500/5 px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-red-400/70 hover:bg-red-500/15 transition-all"
+            className="inline-flex items-center gap-1.5 border border-red-500/25 bg-red-500/5 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-red-400/70 hover:bg-red-500/15 transition-all"
           >
             <Radio className="h-3 w-3" strokeWidth={1.5} /> Estúdio ao vivo
           </Link>

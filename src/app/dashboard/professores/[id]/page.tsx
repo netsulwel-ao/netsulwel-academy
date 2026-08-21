@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ChevronLeft, Loader2, GraduationCap,
-  BookOpen, Radio, Users, Play, X,
+  BookOpen, Radio, Users, X,
 } from "lucide-react";
 import { useState } from "react";
 import { useProfile } from "@/components/ProfileContent";
@@ -30,27 +30,22 @@ function ProfileCourseCard({ course, href }: { course: Course; href: string }) {
   return (
     <Link
       href={href}
-      className="group flex flex-col border border-gray-800/60 bg-gray-900/20 overflow-hidden hover:border-gray-700 hover:bg-gray-900/40 transition-all"
+      className="group flex flex-col border border-gray-800 bg-gray-900 overflow-hidden hover:border-gray-700 hover:bg-gray-900 transition-all"
     >
-      <div className="relative aspect-video overflow-hidden bg-gray-900 shrink-0">
+      <div className="relative aspect-video bg-gray-900 shrink-0">
         {course.thumbnail ? (
           <img src={course.thumbnail} alt={course.title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
             <BookOpen className="h-8 w-8 text-gray-800" strokeWidth={1} />
           </div>
         )}
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-950/40 opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="flex h-10 w-10 items-center justify-center border border-gray-700 bg-gray-950/80">
-            <Play className="h-4 w-4 text-white ml-0.5" strokeWidth={1.5} />
-          </div>
-        </div>
         <div className="absolute right-2.5 top-2.5">
-          <span className={`font-mono text-[9px] font-bold border px-2 py-0.5 ${
+          <span className={`font-mono text-[13px] font-bold border px-2 py-0.5 ${
             (course.price ?? 0) === 0
-              ? "border-green/25 bg-gray-950/90 text-green/80"
-              : "border-gray-700/80 bg-gray-950/90 text-gray-400"
+              ? "border-green/25 bg-gray-950 text-green/80"
+              : "border-gray-700 bg-gray-950 text-gray-400"
           }`}>
             {(course.price ?? 0) === 0 ? "Grátis" : `${course.price!.toLocaleString("pt-AO")} Kz`}
           </span>
@@ -60,7 +55,7 @@ function ProfileCourseCard({ course, href }: { course: Course; href: string }) {
         <h3 className="text-sm font-bold text-gray-200 line-clamp-2 leading-snug group-hover:text-white transition-colors">
           {course.title}
         </h3>
-        <div className="mt-2 flex items-center gap-2 font-mono text-[10px] text-gray-700">
+        <div className="mt-2 flex items-center gap-2 font-mono text-[13px] text-gray-700">
           <span>{course.modulesCount ?? 0} mód.</span>
           <span>·</span>
           <span>{course.lessonsCount ?? 0} aulas</span>
@@ -73,8 +68,8 @@ function ProfileCourseCard({ course, href }: { course: Course; href: string }) {
 // ── Card de live (inline) ──────────────────────────────────────
 function ProfileLiveCard({ live }: { live: LiveSession }) {
   return (
-    <div className="flex items-center gap-3 border border-gray-800/60 bg-gray-900/20 p-3">
-      <div className="relative h-14 w-20 shrink-0 overflow-hidden bg-gray-900 border border-gray-800/60">
+    <div className="flex items-center gap-3 border border-gray-800 bg-gray-900 p-3">
+      <div className="relative h-14 w-20 shrink-0 overflow-hidden bg-gray-900 border border-gray-800">
         {live.thumbnail ? (
           <img src={live.thumbnail} alt={live.title} className="h-full w-full object-cover" />
         ) : (
@@ -83,14 +78,14 @@ function ProfileLiveCard({ live }: { live: LiveSession }) {
           </div>
         )}
         {live.status === "live" && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-950/60">
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-950">
             <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
           </div>
         )}
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-gray-300 truncate">{live.title}</p>
-        <div className="mt-0.5 flex items-center gap-2 font-mono text-[10px] text-gray-700">
+        <div className="mt-0.5 flex items-center gap-2 font-mono text-[13px] text-gray-700">
           {live.status === "live" && (
             <span className="text-red-400/80 flex items-center gap-1">
               <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />
@@ -126,11 +121,11 @@ export default function DashboardProfilePage() {
         <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900 mx-auto">
           <GraduationCap className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
         </div>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-3">// não encontrado</p>
+        <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-3">// não encontrado</p>
         <p className="text-sm text-gray-600 mb-6">Utilizador não encontrado.</p>
         <button
           onClick={() => router.push("/dashboard/professores")}
-          className="font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors"
+          className="font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors"
         >
           ← Voltar
         </button>
@@ -147,13 +142,13 @@ export default function DashboardProfilePage() {
       {/* ── Breadcrumb ── */}
       <button
         onClick={() => router.push("/dashboard/professores")}
-        className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-gray-700 hover:text-gray-500 transition-colors"
+        className="flex items-center gap-1 font-mono text-[13px] uppercase tracking-widest text-gray-700 hover:text-gray-500 transition-colors"
       >
         <ChevronLeft className="h-3 w-3" /> Professores
       </button>
 
       {/* ── Hero — layout limpo sem sobreposição frágil ── */}
-      <div className="border border-gray-800/60 overflow-hidden">
+      <div className="border border-gray-800 overflow-hidden">
         {/* Banner */}
         <div className="relative h-28 sm:h-40 bg-gray-900">
           {profile.bannerURL ? (
@@ -172,7 +167,7 @@ export default function DashboardProfilePage() {
         </div>
 
         {/* Barra de perfil */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 bg-gray-900/40 border-t border-gray-800/60 px-5 sm:px-8 py-5">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 bg-gray-900 border-t border-gray-800 px-5 sm:px-8 py-5">
           {/* Avatar */}
           <button
             type="button"
@@ -194,29 +189,29 @@ export default function DashboardProfilePage() {
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-lg sm:text-xl font-bold text-gray-100">{profile.name}</h1>
-              <span className={`font-mono text-[9px] uppercase tracking-widest border px-2 py-0.5 ${roleBadge.color}`}>
+              <span className={`font-mono text-[13px] uppercase tracking-widest border px-2 py-0.5 ${roleBadge.color}`}>
                 {roleBadge.label}
               </span>
             </div>
             {profile.bio && (
-              <p className="mt-1 text-xs text-gray-600 line-clamp-2 max-w-xl">{profile.bio}</p>
+              <p className="mt-1 text-sm text-gray-600 line-clamp-2 max-w-xl">{profile.bio}</p>
             )}
           </div>
         </div>
       </div>
 
       {/* ── Stats ── */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
           { icon: BookOpen, label: "Cursos",  value: courses.length, color: "text-purple/70" },
           { icon: Radio,    label: "Ao vivo", value: lives.length,   color: "text-red-400/70" },
           { icon: Users,    label: "Alcance", value: totalViews,     color: "text-blue-400/70" },
         ].map(({ icon: Icon, label, value, color }) => (
-          <div key={label} className="border border-gray-800/60 bg-gray-900/20 px-4 py-4 flex items-center gap-3">
+          <div key={label} className="border border-gray-800 bg-gray-900 px-4 py-4 flex items-center gap-3">
             <Icon className={`h-5 w-5 shrink-0 ${color}`} strokeWidth={1.5} />
             <div>
               <p className="font-mono text-base font-bold text-gray-200">{value}</p>
-              <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">{label}</p>
+              <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">{label}</p>
             </div>
           </div>
         ))}
@@ -224,8 +219,8 @@ export default function DashboardProfilePage() {
 
       {/* ── Bio completa (se longa) — só se não aparecer truncada no header ── */}
       {profile.bio && profile.bio.length > 120 && (
-        <div className="border border-gray-800/60 bg-gray-900/20 p-5">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-3">// sobre</p>
+        <div className="border border-gray-800 bg-gray-900 p-5">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-3">// sobre</p>
           <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line">{profile.bio}</p>
         </div>
       )}
@@ -234,10 +229,10 @@ export default function DashboardProfilePage() {
       {courses.length > 0 && (
         <section>
           <div className="mb-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-1">// cursos</p>
+            <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-1">// cursos</p>
             <h2 className="text-base font-bold text-gray-200">
               Cursos publicados
-              <span className="ml-2 font-mono text-xs text-gray-700">({courses.length})</span>
+              <span className="ml-2 font-mono text-sm text-gray-700">({courses.length})</span>
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -256,10 +251,10 @@ export default function DashboardProfilePage() {
       {lives.length > 0 && (
         <section>
           <div className="mb-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-red-400/60 mb-1">// ao vivo</p>
+            <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-red-400/60 mb-1">// ao vivo</p>
             <h2 className="text-base font-bold text-gray-200">
               Aulas ao vivo
-              <span className="ml-2 font-mono text-xs text-gray-700">({lives.length})</span>
+              <span className="ml-2 font-mono text-sm text-gray-700">({lives.length})</span>
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -272,11 +267,11 @@ export default function DashboardProfilePage() {
 
       {/* ── Empty ── */}
       {courses.length === 0 && lives.length === 0 && (
-        <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-16 text-center">
+        <div className="flex flex-col items-center justify-center border border-gray-800 bg-gray-900 py-16 text-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
             <GraduationCap className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
           </div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">// sem conteúdo</p>
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">// sem conteúdo</p>
           <p className="text-sm text-gray-600">Este utilizador ainda não publicou conteúdo.</p>
         </div>
       )}
@@ -284,7 +279,7 @@ export default function DashboardProfilePage() {
       {/* ── Preview da foto ── */}
       {photoPreview && profile.photoURL && (
         <div
-          className="fixed inset-0 z-[110] flex items-center justify-center bg-gray-950/90 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-gray-950 p-4"
           onClick={() => setPhotoPreview(false)}
         >
           <button

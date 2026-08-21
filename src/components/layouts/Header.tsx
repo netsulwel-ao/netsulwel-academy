@@ -7,10 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
-  { label: "Trilhas", href: "#trilhas" },
   { label: "Cursos", href: "#cursos" },
   { label: "Professores", href: "/professores" },
-  { label: "Comunidade", href: "/community" },
   { label: "Planos", href: "#planos" },
   { label: "FAQ", href: "#faq" },
 ];
@@ -20,7 +18,7 @@ export function Header() {
   const { user, logout } = useAuth();
 
   return (
-    <header className="fixed top-0 z-50 w-full border-b border-gray-800/60 bg-gray-900/40 backdrop-blur-xl">
+    <header className="fixed top-0 z-50 w-full border-b border-gray-800 bg-gray-900">
       <div className="mx-auto flex min-h-[5rem] max-w-6xl items-center justify-between px-6 py-2 sm:min-h-[6rem]">
         <Link href="/" className="flex items-center gap-2 sm:gap-3">
           <img src="/Logo-Academy-White.svg" alt="Netsulwel Academy" className="h-8 w-auto sm:h-10 lg:h-12" />
@@ -76,7 +74,7 @@ export function Header() {
       </div>
 
       {open && (
-        <div className="border-t border-gray-800 bg-gray-900/40 px-6 py-4 backdrop-blur-xl md:hidden">
+        <div className="border-t border-gray-800 bg-gray-900 px-6 py-4 md:hidden">
           <nav className="flex flex-col gap-4" aria-label="Menu de navegação móvel">
             {navLinks.map((link) => (
               <a

@@ -23,17 +23,17 @@ export default function CertificatePage() {
 
   if (error || !cert) {
     return (
-      <div className="max-w-[56rem] mx-auto py-20 text-center">
+      <div className="max-w-[56rem] mx-auto py-20 text-center px-4">
         <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900 mx-auto">
           <Award className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
         </div>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-3">
+        <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-3">
           // certificado indisponível
         </p>
         <p className="text-sm text-gray-600 mb-6">
           {error || "Não foi possível carregar o certificado."}
         </p>
-        <Link href="/dashboard/certificates" className="font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+        <Link href="/dashboard/certificates" className="font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
           ← Voltar aos certificados
         </Link>
       </div>
@@ -49,19 +49,20 @@ export default function CertificatePage() {
     <div className="max-w-[960px] mx-auto space-y-6 animate-in fade-in duration-300">
 
       {/* ── Toolbar ── */}
-      <div className="flex items-center justify-between gap-4 print:hidden">
+      <div className="flex items-center justify-between gap-3 print:hidden">
         <button
           onClick={() => router.push("/dashboard/certificates")}
-          className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-gray-700 hover:text-gray-500 transition-colors"
+          className="flex items-center gap-1 font-mono text-[13px] uppercase tracking-widest text-gray-700 hover:text-gray-500 transition-colors shrink-0"
         >
-          <ChevronLeft className="h-3 w-3" /> Certificados
+          <ChevronLeft className="h-3 w-3" /> <span className="hidden sm:inline">Certificados</span>
         </button>
         <button
           onClick={() => window.print()}
-          className="flex items-center gap-2 border border-gray-800 bg-gray-900/60 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-gray-500 hover:border-purple-500/30 hover:text-purple-400/70 transition-all"
+          className="flex items-center gap-2 border border-gray-800 bg-gray-900 px-3 sm:px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-500 hover:border-purple-500/30 hover:text-purple-400/70 transition-all shrink-0"
         >
           <Printer className="h-3.5 w-3.5" strokeWidth={1.5} />
-          Imprimir / Guardar PDF
+          <span className="hidden sm:inline">Imprimir / Guardar PDF</span>
+          <span className="sm:hidden">PDF</span>
         </button>
       </div>
 
@@ -125,7 +126,7 @@ export default function CertificatePage() {
 
             {/* Date */}
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: "#7c3aed" }}>
+              <p className="text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: "#7c3aed" }}>
                 DATA: {dateFormatted}
               </p>
             </div>
@@ -142,7 +143,7 @@ export default function CertificatePage() {
               </h1>
 
               {/* Subtitle */}
-              <p className="text-sm" style={{ color: "#555", fontWeight: 500 }}>
+              <p className="text-sm" style={{ color: "#ffffff", fontWeight: 500 }}>
                 Netsulwel Academy certifica que
               </p>
 
@@ -161,7 +162,7 @@ export default function CertificatePage() {
 
               {/* Course completion info */}
               <div className="space-y-1.5" style={{ maxWidth: "85%" }}>
-                <p className="text-sm" style={{ color: "#555", fontWeight: 500 }}>
+                <p className="text-sm" style={{ color: "#ffffff", fontWeight: 500 }}>
                   concluiu com êxito o curso
                 </p>
                 <p className="font-bold" style={{
@@ -170,13 +171,13 @@ export default function CertificatePage() {
                 }}>
                   {cert.courseTitle}
                 </p>
-                <p className="text-sm leading-relaxed" style={{ color: "#444" }}>
+                <p className="text-sm leading-relaxed" style={{ color: "#ffffff" }}>
                   oferecido por <strong style={{ color: "#1a1a2e" }}>Netsulwel Academy</strong>
                 </p>
               </div>
 
               {/* Description */}
-              <p className="text-xs leading-relaxed mt-2" style={{ color: "#666", maxWidth: "90%" }}>
+              <p className="text-sm leading-relaxed mt-2" style={{ color: "#ffffff", maxWidth: "90%" }}>
                 Este certificado reconhece a conclusão de{" "}
                 {cert.hours > 0 && <>{cert.hours} horas de </>}
                 formação abrangente{course?.modulesCount ? `, composta por ${course.modulesCount} módulos` : ""},
@@ -194,8 +195,8 @@ export default function CertificatePage() {
                   <path d="M55 18 C58 12, 62 20, 65 15 S70 10, 75 16" stroke="#1a1a2e" strokeWidth="1" fill="none" strokeLinecap="round" />
                 </svg>
                 <div className="w-24 h-px mb-1.5" style={{ backgroundColor: "#ccc" }} />
-                <p className="text-[11px] font-bold" style={{ color: "#1a1a2e" }}>Netsulwel Academy</p>
-                <p className="text-[9px]" style={{ color: "#888" }}>Direção</p>
+                <p className="text-[13px] font-bold" style={{ color: "#1a1a2e" }}>Netsulwel Academy</p>
+                <p className="text-[13px]" style={{ color: "#ffffff" }}>Direção</p>
               </div>
 
               {/* Signature 2 */}
@@ -205,8 +206,8 @@ export default function CertificatePage() {
                   <path d="M58 16 C62 22, 66 12, 72 18" stroke="#1a1a2e" strokeWidth="1" fill="none" strokeLinecap="round" />
                 </svg>
                 <div className="w-24 h-px mb-1.5" style={{ backgroundColor: "#ccc" }} />
-                <p className="text-[11px] font-bold" style={{ color: "#1a1a2e" }}>Formador</p>
-                <p className="text-[9px]" style={{ color: "#888" }}>Responsável do Curso</p>
+                <p className="text-[13px] font-bold" style={{ color: "#1a1a2e" }}>Formador</p>
+                <p className="text-[13px]" style={{ color: "#ffffff" }}>Responsável do Curso</p>
               </div>
             </div>
           </div>
@@ -322,7 +323,7 @@ export default function CertificatePage() {
               />
               <div>
                 <p className="text-sm font-bold text-white tracking-wide leading-none">NETSULWEL</p>
-                <p className="text-[10px] font-medium tracking-[0.25em] uppercase leading-none mt-0.5" style={{ color: "#a855f7" }}>
+                <p className="text-[13px] font-medium tracking-[0.25em] uppercase leading-none mt-0.5" style={{ color: "#a855f7" }}>
                   Academy
                 </p>
               </div>
@@ -332,10 +333,10 @@ export default function CertificatePage() {
 
         {/* ── Certificate ID watermark ── */}
         <div className="absolute bottom-[3%] left-[5%]">
-          <p className="font-mono text-[7px] uppercase tracking-widest" style={{ color: "#bbb" }}>
+          <p className="font-mono text-[7px] uppercase tracking-widest" style={{ color: "#ffffff" }}>
             ID: {cert.certificateId}
           </p>
-          <p className="font-mono text-[7px]" style={{ color: "#ccc" }}>
+          <p className="font-mono text-[7px]" style={{ color: "#ffffff" }}>
             netsulwel.tech/verificar
           </p>
         </div>
@@ -343,18 +344,18 @@ export default function CertificatePage() {
         {/* ── Stats on right panel bottom ── */}
         <div className="absolute bottom-[8%] right-[3%] flex flex-col items-end gap-1">
           {cert.hours > 0 && (
-            <span className="flex items-center gap-1.5 text-[10px]" style={{ color: "#a78bfa" }}>
+            <span className="flex items-center gap-1.5 text-[13px]" style={{ color: "#a78bfa" }}>
               <Clock className="h-3 w-3" strokeWidth={1.5} />
               {cert.hours}h de conteúdo
             </span>
           )}
           {course?.modulesCount && (
-            <span className="flex items-center gap-1.5 text-[10px]" style={{ color: "#a78bfa" }}>
+            <span className="flex items-center gap-1.5 text-[13px]" style={{ color: "#a78bfa" }}>
               <BookOpen className="h-3 w-3" strokeWidth={1.5} />
               {course.modulesCount} módulos
             </span>
           )}
-          <span className="flex items-center gap-1.5 text-[10px]" style={{ color: "#86efac" }}>
+          <span className="flex items-center gap-1.5 text-[13px]" style={{ color: "#86efac" }}>
             <CheckCircle2 className="h-3 w-3" strokeWidth={1.5} />
             Aprovado
           </span>
@@ -381,9 +382,9 @@ export default function CertificatePage() {
       `}</style>
 
       {/* ── Nota ── */}
-      <div className="flex items-start gap-3 border border-gray-800/60 bg-gray-900/10 px-4 py-3 print:hidden">
+      <div className="flex items-start gap-3 border border-gray-800 bg-gray-900 px-4 py-3 print:hidden">
         <Share2 className="h-4 w-4 text-gray-700 shrink-0 mt-0.5" strokeWidth={1.5} />
-        <p className="text-xs text-gray-600 leading-relaxed">
+        <p className="text-sm text-gray-600 leading-relaxed">
           Usa <span className="text-gray-400 font-medium">Imprimir / Guardar PDF</span> para exportar em A4 horizontal.
           O certificado pode ser verificado pelo ID em{" "}
           <span className="text-gray-400">netsulwel.tech/verificar</span>.

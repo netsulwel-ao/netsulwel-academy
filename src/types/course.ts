@@ -1,4 +1,4 @@
-export type CourseType = "standalone" | "smart" | "golden";
+export type CourseType = "standalone";
 export type CourseLevel = "beginner" | "intermediate" | "advanced";
 export type CourseCategory = "tech" | "finance" | "investments" | "other";
 export type CourseStatus = "draft" | "published";

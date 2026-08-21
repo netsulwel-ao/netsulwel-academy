@@ -21,7 +21,7 @@ export function ExamCard({ exam, result, allResults }: ExamCardProps) {
     : `/dashboard/exams/${exam.id}`;
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-start gap-4 border border-gray-800/60 bg-gray-900/20 p-4 sm:p-5 hover:bg-gray-900/30 transition-colors">
+    <div className="flex flex-col sm:flex-row sm:items-start gap-4 border border-gray-800 bg-gray-900 p-4 sm:p-5 hover:bg-gray-900 transition-colors">
 
       {/* Ícone de estado */}
       <div className={`flex h-10 w-10 shrink-0 items-center justify-center border ${
@@ -43,11 +43,11 @@ export function ExamCard({ exam, result, allResults }: ExamCardProps) {
       <div className="flex-1 min-w-0">
         <h3 className="text-sm font-bold text-gray-200 leading-snug">{exam.title}</h3>
         {exam.description && (
-          <p className="mt-0.5 text-xs text-gray-600 line-clamp-2">{exam.description}</p>
+          <p className="mt-0.5 text-sm text-gray-600 line-clamp-2">{exam.description}</p>
         )}
 
         {/* Meta */}
-        <div className="mt-2 flex flex-wrap items-center gap-3 font-mono text-[10px] text-gray-700">
+        <div className="mt-2 flex flex-wrap items-center gap-3 font-mono text-[13px] text-gray-700">
           <span>{exam.questions.length} perguntas</span>
           <span>·</span>
           <span>mín. {exam.passingScore}%</span>
@@ -66,7 +66,7 @@ export function ExamCard({ exam, result, allResults }: ExamCardProps) {
 
         {/* Score da última tentativa */}
         {result && (
-          <div className={`mt-2 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest border px-2 py-0.5 ${
+          <div className={`mt-2 inline-flex items-center gap-1.5 font-mono text-[13px] uppercase tracking-widest border px-2 py-0.5 ${
             result.passed
               ? "border-green/25 bg-green/8 text-green/70"
               : "border-red-500/25 bg-red-500/8 text-red-400/70"
@@ -80,9 +80,9 @@ export function ExamCard({ exam, result, allResults }: ExamCardProps) {
       {/* Acção */}
       <Link
         href={href}
-        className={`flex items-center gap-1.5 self-start shrink-0 border px-4 py-2 font-mono text-[10px] uppercase tracking-widest transition-all ${
+        className={`flex items-center gap-1.5 self-start shrink-0 border px-4 py-2 font-mono text-[13px] uppercase tracking-widest transition-all ${
           !canRetry && hasResult
-            ? "border-gray-800/40 text-gray-700 cursor-not-allowed pointer-events-none"
+            ? "border-gray-800 text-gray-700 cursor-not-allowed pointer-events-none"
             : hasResult
             ? "border-amber-500/25 bg-amber-500/8 text-amber-400/80 hover:bg-amber-500/15"
             : "border-purple/30 bg-purple/8 text-purple/80 hover:bg-purple/15"

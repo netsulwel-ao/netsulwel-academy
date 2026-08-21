@@ -13,6 +13,7 @@ export interface CourseChat {
   participants: string[];
   participantNames: Record<string, string>;
   participantPhotos: Record<string, string>;
+  unreadBy?: Record<string, number>;
   otherRole?: "teacher" | "student";
 }
 

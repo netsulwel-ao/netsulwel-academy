@@ -73,25 +73,21 @@ function CountdownDisplay({ scheduledAt }: { scheduledAt: string }) {
 }
 
 /* ─── Target Access Check ─────────────────────────────── */
-function canAccess(plan: string, target: string, isAdmin: boolean, enrolledLives: string[] = []): boolean {
+function canAccess(target: string, isAdmin: boolean, enrolledLives: string[] = [], liveId?: string): boolean {
   if (isAdmin) return true;
-  if (target === "free") return true;
-  if (target === "smart") return plan === "smart" || plan === "golden";
-  if (target === "golden") return plan === "golden";
-  if (target === "standalone") return true; // access handled by view logic
+  if (target === "free" || target === "all") return true;
+  if (target === "standalone" && liveId) return enrolledLives.includes(liveId);
   return false;
 }
 
 const TARGET_LABELS: Record<string, { label: string; color: string }> = {
   free: { label: "Gratuito", color: "text-green-400 bg-green-500/10" },
-  smart: { label: "Smart", color: "text-blue-400 bg-blue-500/10" },
-  golden: { label: "Golden", color: "text-amber-400 bg-amber-500/10" },
   standalone: { label: "Pago", color: "text-green-400 bg-green-500/10" },
 };
 
 /* ─── Main Page ────────────────────────────────────────── */
 export default function DashboardLivesPage() {
-  const { plan, isAdmin, user } = useAuth();
+  const { isAdmin, user } = useAuth();
   const router = useRouter();
   const [lives, setLives] = useState<LiveSession[]>([]);
   const [loading, setLoading] = useState(true);
@@ -185,15 +181,13 @@ export default function DashboardLivesPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {liveSessions.map((live) => {
-              const hasAccess = canAccess(plan, live.target, isAdmin) && (
-                live.target !== "standalone" || enrolledLives.includes(live.id!)
-              );
+              const hasAccess = canAccess(live.target, isAdmin, enrolledLives, live.id!);
               const target = TARGET_LABELS[live.target];
 
               return (
                 <div
                   key={live.id}
-                  className="bg-gray-900/40 backdrop-blur-xl overflow-hidden group border border-red-500/20 hover:border-red-500/40 transition-all"
+                  className="bg-gray-900 overflow-hidden group border border-red-500/20 hover:border-red-500/40 transition-all"
                 >
                   <div className="relative h-44 overflow-hidden">
                     {live.thumbnail ? (
@@ -212,7 +206,7 @@ export default function DashboardLivesPage() {
                       <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                       AO VIVO
                     </div>
-                    <div className={`absolute top-3 right-3 px-2 py-1 text-sm font-bold ${target.color} backdrop-blur-md`}>
+                    <div className={`absolute top-3 right-3 px-2 py-1 text-sm font-bold ${target.color}`}>
                       {target.label}
                     </div>
                   </div>
@@ -246,7 +240,7 @@ export default function DashboardLivesPage() {
                       ) : (
                         <div className="flex items-center justify-center gap-2 w-full bg-gray-800 text-gray-500 py-3 text-base">
                           <Lock className="h-5 w-5" />
-                          Requer Plano {live.target === "golden" ? "Golden" : "Smart"}
+                          Requer compra individual
                         </div>
                       )
                     )}
@@ -267,15 +261,13 @@ export default function DashboardLivesPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {scheduledSessions.map((live) => {
-              const hasAccess = canAccess(plan, live.target, isAdmin) && (
-                live.target !== "standalone" || enrolledLives.includes(live.id!)
-              );
+              const hasAccess = canAccess(live.target, isAdmin, enrolledLives, live.id!);
               const target = TARGET_LABELS[live.target];
 
               return (
                 <div
                   key={live.id}
-                  className="bg-gray-900/40 backdrop-blur-xl overflow-hidden group hover:bg-gray-900/60 transition-all"
+                  className="bg-gray-900 overflow-hidden group hover:bg-gray-900 transition-all"
                 >
                   <div className="relative h-36 overflow-hidden">
                     {live.thumbnail ? (
@@ -289,11 +281,11 @@ export default function DashboardLivesPage() {
                         <Radio className="h-10 w-10 text-gray-700" />
                       </div>
                     )}
-                    <div className={`absolute top-3 right-3 px-2 py-1 text-sm font-bold ${target.color} backdrop-blur-md`}>
+                    <div className={`absolute top-3 right-3 px-2 py-1 text-sm font-bold ${target.color}`}>
                       {target.label}
                     </div>
                     {!hasAccess && live.target !== "standalone" && (
-                      <div className="absolute inset-0 bg-gray-950/60 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-gray-950 flex items-center justify-center">
                         <Lock className="h-10 w-10 text-gray-500" />
                       </div>
                     )}
@@ -303,7 +295,7 @@ export default function DashboardLivesPage() {
                     <h3 className="text-base font-bold text-white truncate">{live.title}</h3>
                     {live.createdBy && creatorNames[live.createdBy] && (
                       <Link href={`/profile/${live.createdBy}`}
-                        className="text-xs text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1">
+                        className="text-sm text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1">
                         <GraduationCap className="h-3 w-3" />
                         {creatorNames[live.createdBy]}
                       </Link>
@@ -352,7 +344,7 @@ export default function DashboardLivesPage() {
             {endedSessions.map((live) => (
               <div
                 key={live.id}
-                className="bg-gray-900/30 backdrop-blur-xl overflow-hidden opacity-70"
+                className="bg-gray-900 overflow-hidden opacity-70"
               >
                 <div className="relative h-28 overflow-hidden">
                   {live.thumbnail ? (

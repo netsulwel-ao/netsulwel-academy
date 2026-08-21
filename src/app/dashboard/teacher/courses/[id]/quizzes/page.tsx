@@ -71,7 +71,7 @@ export default function CourseQuizzesPage() {
         {modules.map((mod) => {
           const quiz = quizzes.find((q) => q.moduleIndex === mod.index);
           return (
-            <div key={mod.index} className="bg-gray-900/40 border border-gray-800 p-5">
+            <div key={mod.index} className="bg-gray-900 border border-gray-800 p-5">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center ${
@@ -119,7 +119,7 @@ export default function CourseQuizzesPage() {
         <div className="flex flex-col items-center justify-center py-20 text-center text-gray-600">
           <HelpCircle className="h-12 w-12 mb-4 opacity-40" />
           <p className="text-sm font-medium">Este curso não tem módulos</p>
-          <p className="text-xs mt-1">Adicione módulos e aulas ao curso primeiro</p>
+          <p className="text-sm mt-1">Adicione módulos e aulas ao curso primeiro</p>
         </div>
       )}
     </div>

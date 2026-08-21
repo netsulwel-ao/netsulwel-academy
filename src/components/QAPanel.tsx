@@ -165,9 +165,9 @@ export function QAPanel({ liveId, isHost, hostName }: QAPanelProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#1a1a1e] rounded-lg border border-white/8 overflow-hidden">
+    <div className="flex flex-col h-full bg-[#1a1a1e] rounded-lg border border-white overflow-hidden">
       {/* Header */}
-      <div className="p-3 sm:p-4 border-b border-white/8">
+      <div className="p-3 sm:p-4 border-b border-white">
         <h3 className="font-semibold text-white text-sm sm:text-base">
           P&R {!isHost && "ao Vivo"}
         </h3>
@@ -183,7 +183,7 @@ export function QAPanel({ liveId, isHost, hostName }: QAPanelProps) {
 
         {questions.length === 0 && !loading && (
           <div className="text-center py-8">
-            <p className="text-white/50 text-sm">
+            <p className="text-white text-sm">
               {isHost ? "Nenhuma pergunta ainda" : "Seja o primeiro a perguntar"}
             </p>
           </div>
@@ -192,11 +192,11 @@ export function QAPanel({ liveId, isHost, hostName }: QAPanelProps) {
         {questions.map((question: any) => (
           <div
             key={question.id}
-            className="bg-white/5 border border-white/8 rounded p-3 space-y-2 hover:bg-white/8 transition-colors"
+            className="bg-white border border-white rounded p-3 space-y-2 hover:bg-white transition-colors"
           >
             {/* Question */}
             <div>
-              <p className="text-xs text-white/50">
+              <p className="text-sm text-white">
                 {question.askedByName} • {new Date(question.askedAt).toLocaleTimeString("pt-PT")}
               </p>
               <p className="text-sm text-white mt-1">{question.question}</p>
@@ -207,7 +207,7 @@ export function QAPanel({ liveId, isHost, hostName }: QAPanelProps) {
               {!isHost && (
                 <button
                   onClick={() => handleUpvote(question.id, question.upvotes)}
-                  className="flex items-center gap-1 text-xs text-white/50 hover:text-white px-2 py-1 rounded hover:bg-white/5 transition-colors"
+                  className="flex items-center gap-1 text-sm text-white hover:text-white px-2 py-1 rounded hover:bg-white transition-colors"
                 >
                   <ThumbsUp size={14} />
                   {question.upvotes}
@@ -218,14 +218,14 @@ export function QAPanel({ liveId, isHost, hostName }: QAPanelProps) {
                 <>
                   <button
                     onClick={() => setAnsweringId(question.id)}
-                    className="flex items-center gap-1 text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded transition-colors"
+                    className="flex items-center gap-1 text-sm bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded transition-colors"
                   >
                     <Send size={14} />
                     Responder
                   </button>
                   <button
                     onClick={() => handleDismiss(question.id)}
-                    className="flex items-center gap-1 text-xs bg-white/10 hover:bg-white/20 text-white/70 px-2 py-1 rounded transition-colors"
+                    className="flex items-center gap-1 text-sm bg-white hover:bg-white text-white px-2 py-1 rounded transition-colors"
                     aria-label="Dispensar pergunta"
                   >
                     <Trash2 size={14} />
@@ -236,19 +236,19 @@ export function QAPanel({ liveId, isHost, hostName }: QAPanelProps) {
 
             {/* Answer input */}
             {isHost && answeringId === question.id && (
-              <div className="mt-3 p-2 bg-white/5 rounded space-y-2">
+              <div className="mt-3 p-2 bg-white rounded space-y-2">
                 <textarea
                   value={answerText}
                   onChange={(e) => setAnswerText(e.target.value)}
                   placeholder="Escrever resposta..."
-                  className="w-full bg-white/10 text-white text-sm p-2 rounded resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full bg-white text-white text-sm p-2 rounded resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
                   rows={3}
                 />
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleSubmitAnswer(question.id)}
                     disabled={submitting || !answerText.trim()}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-medium py-1 rounded transition-colors"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium py-1 rounded transition-colors"
                   >
                     Enviar Resposta
                   </button>
@@ -257,7 +257,7 @@ export function QAPanel({ liveId, isHost, hostName }: QAPanelProps) {
                       setAnsweringId(null);
                       setAnswerText("");
                     }}
-                    className="flex-1 bg-white/10 hover:bg-white/20 text-white text-xs py-1 rounded transition-colors"
+                    className="flex-1 bg-white hover:bg-white text-white text-sm py-1 rounded transition-colors"
                   >
                     Cancelar
                   </button>
@@ -267,14 +267,14 @@ export function QAPanel({ liveId, isHost, hostName }: QAPanelProps) {
 
             {/* Answers */}
             {question.answers && question.answers.length > 0 && (
-              <div className="mt-2 pt-2 border-t border-white/8 space-y-2">
+              <div className="mt-2 pt-2 border-t border-white space-y-2">
                 {question.answers.map((answer: any, idx: number) => (
-                  <div key={idx} className="bg-white/5 p-2 rounded text-xs">
-                    <div className="flex items-center gap-1 text-white/70 mb-1">
+                  <div key={idx} className="bg-white p-2 rounded text-sm">
+                    <div className="flex items-center gap-1 text-white mb-1">
                       <CheckCircle size={14} className="text-green-500" />
                       <span className="font-medium">{answer.answeredByName}</span>
                     </div>
-                    <p className="text-white/80">{answer.answer}</p>
+                    <p className="text-white">{answer.answer}</p>
                   </div>
                 ))}
               </div>
@@ -287,9 +287,9 @@ export function QAPanel({ liveId, isHost, hostName }: QAPanelProps) {
 
       {/* Question input - only for students */}
       {!isHost && (
-        <form onSubmit={handleAskQuestion} className="border-t border-white/8 p-3 sm:p-4 space-y-2">
+        <form onSubmit={handleAskQuestion} className="border-t border-white p-3 sm:p-4 space-y-2">
           {error && (
-            <div className="bg-red-900/20 border border-red-500/30 text-red-400 text-xs p-2 rounded">
+            <div className="bg-red-900/20 border border-red-500/30 text-red-400 text-sm p-2 rounded">
               {error}
             </div>
           )}
@@ -297,7 +297,7 @@ export function QAPanel({ liveId, isHost, hostName }: QAPanelProps) {
             value={newQuestion}
             onChange={(e) => setNewQuestion(e.target.value)}
             placeholder="Fazer uma pergunta..."
-            className="w-full bg-white/10 text-white text-sm p-2 rounded resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full bg-white text-white text-sm p-2 rounded resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
             rows={2}
             maxLength={1000}
           />

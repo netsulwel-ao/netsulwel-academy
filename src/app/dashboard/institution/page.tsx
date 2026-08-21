@@ -93,12 +93,12 @@ export default function InstitutionOverviewPage() {
   if (loading) {
     return (
       <div className="space-y-6 animate-in fade-in duration-300">
-        <div className="h-16 bg-gray-800/40 animate-pulse" />
+        <div className="h-16 bg-gray-800 animate-pulse" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[...Array(4)].map((_, i) => <div key={i} className="h-24 bg-gray-800/40 animate-pulse" />)}
+          {[...Array(4)].map((_, i) => <div key={i} className="h-24 bg-gray-800 animate-pulse" />)}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {[...Array(2)].map((_, i) => <div key={i} className="h-64 bg-gray-800/40 animate-pulse" />)}
+          {[...Array(2)].map((_, i) => <div key={i} className="h-64 bg-gray-800 animate-pulse" />)}
         </div>
       </div>
     );
@@ -108,11 +108,11 @@ export default function InstitutionOverviewPage() {
   if (institution?.status !== "approved") {
     return (
       <div className="max-w-md mx-auto py-20 animate-in fade-in duration-300">
-        <div className="border border-gray-800/60 bg-gray-900/20 p-10 text-center">
+        <div className="border border-gray-800 bg-gray-900 p-10 text-center">
           <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
             <Building2 className="h-5 w-5 text-gray-600" strokeWidth={1.5} />
           </div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gray-700 mb-4">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-gray-700 mb-4">
             // estado da instituição
           </p>
           {institution?.status === "pending" ? (
@@ -122,7 +122,7 @@ export default function InstitutionOverviewPage() {
                 A tua instituição está sob revisão pela equipa Netsulwel.
                 Receberás uma notificação assim que for aprovada.
               </p>
-              <div className="inline-flex items-center gap-2 border border-amber-500/20 bg-amber-500/5 px-3 py-1.5 font-mono text-xs text-amber-400/80">
+              <div className="inline-flex items-center gap-2 border border-amber-500/20 bg-amber-500/5 px-3 py-1.5 font-mono text-sm text-amber-400/80">
                 <span className="h-1.5 w-1.5 bg-amber-400/60 animate-pulse" />
                 pendente
               </div>
@@ -131,7 +131,7 @@ export default function InstitutionOverviewPage() {
             <>
               <h2 className="text-lg font-bold text-gray-200 mb-2">Instituição suspensa</h2>
               <p className="text-sm text-gray-500 mb-6">Contacta a administração para mais informações.</p>
-              <div className="inline-flex items-center gap-2 border border-red-500/20 bg-red-500/5 px-3 py-1.5 font-mono text-xs text-red-400/80">
+              <div className="inline-flex items-center gap-2 border border-red-500/20 bg-red-500/5 px-3 py-1.5 font-mono text-sm text-red-400/80">
                 suspensa
               </div>
             </>
@@ -149,35 +149,35 @@ export default function InstitutionOverviewPage() {
   ];
 
   return (
-    <div className="max-w-[80rem] space-y-8 animate-in fade-in duration-300">
+    <div className="max-w-[80rem] mx-auto space-y-8 animate-in fade-in duration-300">
 
       {/* ── Cabeçalho ── */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-gray-800/60 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-gray-800 pb-6">
         <div className="flex items-center gap-4">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center border border-gray-800 bg-gray-900">
             <Building2 className="h-5 w-5 text-blue-400/70" strokeWidth={1.5} />
           </div>
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-blue-500/60 mb-1">// instituição</p>
+            <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-blue-500/60 mb-1">// instituição</p>
             <h1 className="text-xl font-bold text-gray-100">{institution?.name}</h1>
-            <p className="text-xs text-gray-600 mt-0.5">Visão geral da tua organização</p>
+            <p className="text-sm text-gray-600 mt-0.5">Visão geral da tua organização</p>
           </div>
         </div>
         <Link
           href="/dashboard/institution/members"
-          className="flex items-center gap-1.5 border border-blue-500/25 bg-blue-500/8 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-blue-400/80 hover:bg-blue-500/15 transition-all shrink-0"
+          className="flex items-center gap-1.5 border border-blue-500/25 bg-blue-500/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-blue-400/80 hover:bg-blue-500/15 transition-all shrink-0"
         >
           <Mail className="h-3 w-3" /> Convidar membros
         </Link>
       </div>
 
       {/* ── KPIs ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-gray-800/30">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-gray-800">
         {kpis.map(({ icon: Icon, label, value, accent }) => (
-          <div key={label} className="border border-gray-800/60 bg-gray-900/10 p-5">
+          <div key={label} className="border border-gray-800 bg-gray-900 p-5">
             <div className="flex items-center gap-2 mb-3">
               <Icon className="h-4 w-4 shrink-0 text-gray-600" strokeWidth={1.5} />
-              <span className="font-mono text-[9px] uppercase tracking-widest text-gray-600">{label}</span>
+              <span className="font-mono text-[13px] uppercase tracking-widest text-gray-600">{label}</span>
             </div>
             <p className={`text-2xl font-bold tabular-nums ${accent}`}>{value}</p>
           </div>
@@ -188,10 +188,10 @@ export default function InstitutionOverviewPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         {/* Membros recentes */}
-        <div className="border border-gray-800/60">
-          <div className="flex items-center justify-between border-b border-gray-800/60 px-5 py-4">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-gray-600">// membros recentes</p>
-            <Link href="/dashboard/institution/members" className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+        <div className="border border-gray-800">
+          <div className="flex items-center justify-between border-b border-gray-800 px-5 py-4">
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-600">// membros recentes</p>
+            <Link href="/dashboard/institution/members" className="flex items-center gap-1 font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
               Ver todos <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -201,35 +201,35 @@ export default function InstitutionOverviewPage() {
                 <Users className="h-4 w-4 text-gray-700" strokeWidth={1.5} />
               </div>
               <p className="text-sm text-gray-600 mb-3">Ainda não tens membros.</p>
-              <Link href="/dashboard/institution/members" className="font-mono text-[9px] uppercase tracking-widest text-blue-400/60 hover:text-blue-400 transition-colors">
+              <Link href="/dashboard/institution/members" className="font-mono text-[13px] uppercase tracking-widest text-blue-400/60 hover:text-blue-400 transition-colors">
                 Convidar primeiro membro →
               </Link>
             </div>
           ) : (
-            <div className="divide-y divide-gray-800/40">
+            <div className="divide-y divide-gray-800">
               {members.slice(0, 5).map(member => (
                 <div key={member.id} className="flex items-center justify-between px-5 py-3.5">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-8 w-8 shrink-0 overflow-hidden border border-gray-800/60 bg-gray-900">
+                    <div className="h-8 w-8 shrink-0 overflow-hidden border border-gray-800 bg-gray-900">
                       <Avatar uid={member.id} photoURL={member.photoURL} name={member.name} size={32} />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm text-gray-300 truncate">{member.name || "Sem nome"}</p>
-                      <p className="font-mono text-[9px] text-gray-700 truncate">{member.email}</p>
+                      <p className="font-mono text-[13px] text-gray-700 truncate">{member.email}</p>
                     </div>
                   </div>
-                  <span className={`shrink-0 font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 border ${
+                  <span className={`shrink-0 font-mono text-[13px] uppercase tracking-widest px-2 py-0.5 border ${
                     member.institutionRole === "teacher" ? "border-green/20 text-green/70"
                     : member.institutionRole === "admin" ? "border-purple/20 text-purple/70"
-                    : "border-gray-700/40 text-gray-600"
+                    : "border-gray-700 text-gray-600"
                   }`}>
                     {member.institutionRole === "teacher" ? "Prof." : member.institutionRole === "admin" ? "Admin" : "Aluno"}
                   </span>
                 </div>
               ))}
               {members.length > 5 && (
-                <div className="px-5 py-3 border-t border-gray-800/40">
-                  <Link href="/dashboard/institution/members" className="font-mono text-[9px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+                <div className="px-5 py-3 border-t border-gray-800">
+                  <Link href="/dashboard/institution/members" className="font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
                     +{members.length - 5} mais →
                   </Link>
                 </div>
@@ -239,10 +239,10 @@ export default function InstitutionOverviewPage() {
         </div>
 
         {/* Vendas recentes */}
-        <div className="border border-gray-800/60">
-          <div className="flex items-center justify-between border-b border-gray-800/60 px-5 py-4">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-gray-600">// vendas recentes</p>
-            <Link href="/dashboard/wallet" className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
+        <div className="border border-gray-800">
+          <div className="flex items-center justify-between border-b border-gray-800 px-5 py-4">
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-600">// vendas recentes</p>
+            <Link href="/dashboard/wallet" className="flex items-center gap-1 font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
               Ver carteira <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -254,12 +254,12 @@ export default function InstitutionOverviewPage() {
               <p className="text-sm text-gray-600">Ainda não tens vendas.</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-800/40">
+            <div className="divide-y divide-gray-800">
               {sales.slice(0, 5).map(sale => (
                 <div key={sale.id} className="flex items-center justify-between px-5 py-3.5">
                   <div className="min-w-0">
                     <p className="text-sm text-gray-300 truncate">{sale.itemTitle ?? sale.type}</p>
-                    <p className="font-mono text-[9px] text-gray-700 mt-0.5">{sale.userName}</p>
+                    <p className="font-mono text-[13px] text-gray-700 mt-0.5">{sale.userName}</p>
                   </div>
                   <p className="ml-4 shrink-0 font-mono text-sm font-bold text-green/80">
                     {formatKz(sale.netAmount ?? sale.amount ?? 0)}

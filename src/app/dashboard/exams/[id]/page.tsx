@@ -33,12 +33,12 @@ export default function TakeExamPage() {
     <div className="max-w-[56rem] mx-auto space-y-6 animate-in fade-in duration-300">
 
       {/* ── Barra superior sticky ── */}
-      <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-10 px-4 sm:px-6 md:px-8 lg:px-10 py-3 bg-gray-950/95 backdrop-blur-sm border-b border-gray-800/60">
+      <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-10 px-4 sm:px-6 md:px-8 lg:px-10 py-3 bg-gray-950 border-b border-gray-800">
         <div className="flex items-center justify-between gap-4 max-w-[56rem] mx-auto">
           {/* Back */}
           <button
             onClick={() => router.push("/dashboard/exams")}
-            className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-gray-700 hover:text-gray-500 transition-colors"
+            className="flex items-center gap-1 font-mono text-[13px] uppercase tracking-widest text-gray-700 hover:text-gray-500 transition-colors"
           >
             <ChevronLeft className="h-3 w-3" /> Avaliações
           </button>
@@ -46,10 +46,10 @@ export default function TakeExamPage() {
           <div className="flex items-center gap-3">
             {/* Timer */}
             {timeLeft !== null && (
-              <div className={`flex items-center gap-1.5 border px-3 py-1.5 font-mono text-[11px] font-bold transition-colors ${
+              <div className={`flex items-center gap-1.5 border px-3 py-1.5 font-mono text-[13px] font-bold transition-colors ${
                 isTimeCritical(timeLeft)
                   ? "border-red-500/30 bg-red-500/8 text-red-400/80"
-                  : "border-gray-800 bg-gray-900/60 text-gray-500"
+                  : "border-gray-800 bg-gray-900 text-gray-500"
               }`}>
                 <Clock className="h-3 w-3" strokeWidth={1.5} />
                 {formatTime(timeLeft)}
@@ -57,14 +57,14 @@ export default function TakeExamPage() {
             )}
 
             {/* Progresso */}
-            <span className="font-mono text-[10px] text-gray-700">
+            <span className="font-mono text-[13px] text-gray-700">
               {answeredCount}/{exam.questions.length}
             </span>
           </div>
         </div>
 
         {/* Barra de progresso */}
-        <div className="mt-2 h-0.5 bg-gray-800/60 max-w-[56rem] mx-auto overflow-hidden">
+        <div className="mt-2 h-0.5 bg-gray-800 max-w-[56rem] mx-auto overflow-hidden">
           <div
             className="h-full bg-purple/50 transition-all duration-300"
             style={{ width: `${progress}%` }}
@@ -74,14 +74,14 @@ export default function TakeExamPage() {
 
       {/* ── Cabeçalho do exame ── */}
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
           // avaliação em curso
         </p>
         <h1 className="text-xl sm:text-2xl font-bold text-gray-100">{exam.title}</h1>
         {exam.description && (
           <p className="mt-1 text-sm text-gray-600">{exam.description}</p>
         )}
-        <div className="mt-2 flex flex-wrap items-center gap-3 font-mono text-[10px] text-gray-700">
+        <div className="mt-2 flex flex-wrap items-center gap-3 font-mono text-[13px] text-gray-700">
           <span>{exam.questions.length} perguntas</span>
           <span>·</span>
           <span>mín. {exam.passingScore}%</span>
@@ -120,9 +120,9 @@ export default function TakeExamPage() {
       </div>
 
       {/* ── Rodapé com submit ── */}
-      <div className="sticky bottom-0 -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-10 px-4 sm:px-6 md:px-8 lg:px-10 py-4 bg-gray-950/95 backdrop-blur-sm border-t border-gray-800/60">
+      <div className="sticky bottom-0 -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-10 px-4 sm:px-6 md:px-8 lg:px-10 py-4 bg-gray-950 border-t border-gray-800">
         <div className="flex items-center justify-between gap-4 max-w-[56rem] mx-auto">
-          <p className="font-mono text-[10px] text-gray-700">
+          <p className="font-mono text-[13px] text-gray-700">
             {!allAnswered
               ? `${exam.questions.length - answeredCount} pergunta${exam.questions.length - answeredCount !== 1 ? "s" : ""} por responder`
               : "todas respondidas"}

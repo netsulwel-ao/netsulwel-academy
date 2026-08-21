@@ -72,7 +72,7 @@ export function ShareButton({ liveId, liveTitle }: Props) {
         onClick={handleClick}
         disabled={loading}
         title="Partilhar aula"
-        className="flex items-center gap-1.5 px-2.5 py-1.5 bg-purple/20 hover:bg-purple/30 border border-purple/50 text-purple-200 hover:text-purple-100 text-xs font-medium transition-colors disabled:opacity-50"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 bg-purple/20 hover:bg-purple/30 border border-purple/50 text-purple-200 hover:text-purple-100 text-sm font-medium transition-colors disabled:opacity-50"
       >
         {loading
           ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /><span className="hidden sm:inline">A gerar...</span></>
@@ -85,7 +85,7 @@ export function ShareButton({ liveId, liveTitle }: Props) {
           <div className="bg-gray-900 p-2 flex gap-2 items-center">
             <input
               type="text" value={shareUrl} readOnly
-              className="flex-1 bg-transparent text-gray-200 text-xs font-mono border-0 outline-0 truncate"
+              className="flex-1 bg-transparent text-gray-200 text-sm font-mono border-0 outline-0 truncate"
             />
             <button
               onClick={copy}
@@ -94,7 +94,7 @@ export function ShareButton({ liveId, liveTitle }: Props) {
               {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
             </button>
           </div>
-          <div className="flex gap-2 text-xs">
+          <div className="flex gap-2 text-sm">
             <button onClick={copy} className="flex-1 px-2 py-1.5 bg-green-600 hover:bg-green-700 text-white flex items-center justify-center gap-1 transition-colors">
               <Copy className="h-3 w-3" /> Copiar
             </button>
@@ -102,8 +102,8 @@ export function ShareButton({ liveId, liveTitle }: Props) {
               <Share2 className="h-3 w-3" /> Enviar
             </button>
           </div>
-          <p className="text-[10px] text-gray-500 text-center">Link válido 24h · ilimitado de usos</p>
-          <button onClick={() => setShowMenu(false)} className="w-full text-[10px] text-gray-600 hover:text-gray-400 transition-colors pt-1">
+          <p className="text-[13px] text-gray-500 text-center">Link válido 24h · ilimitado de usos</p>
+          <button onClick={() => setShowMenu(false)} className="w-full text-[13px] text-gray-600 hover:text-gray-400 transition-colors pt-1">
             Fechar
           </button>
         </div>

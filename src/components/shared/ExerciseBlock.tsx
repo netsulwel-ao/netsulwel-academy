@@ -39,10 +39,10 @@ export default function ExerciseBlock({ exercises }: ExerciseBlockProps) {
           <HelpCircle className="h-4 w-4" /> Exercícios de Prática ({exercises.length})
         </h3>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-500">{answeredCount} de {exercises.length} respondidos</span>
+          <span className="text-sm text-gray-500">{answeredCount} de {exercises.length} respondidos</span>
           {answeredCount < exercises.length && (
             <button onClick={() => setShowAll(!showAll)}
-              className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
+              className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
               {showAll ? "Ocultar respostas" : "Mostrar todas"}
             </button>
           )}
@@ -54,9 +54,9 @@ export default function ExerciseBlock({ exercises }: ExerciseBlockProps) {
           const a = answers[i];
           const correct = isCorrect(i);
           return (
-            <div key={i} className="bg-gray-900/60 border border-gray-800 p-4 space-y-3">
+            <div key={i} className="bg-gray-900 border border-gray-800 p-4 space-y-3">
               <div className="flex items-start gap-3">
-                <span className="text-xs font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 shrink-0 mt-0.5">
+                <span className="text-sm font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 shrink-0 mt-0.5">
                   {i + 1}/{exercises.length}
                 </span>
                 <p className="text-sm text-white flex-1">{ex.question}</p>
@@ -159,7 +159,7 @@ export default function ExerciseBlock({ exercises }: ExerciseBlockProps) {
                   {correct ? <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" /> : <XCircle className="h-4 w-4 shrink-0 mt-0.5" />}
                   <div>
                     <p className="font-bold">{correct ? "Correto!" : "Incorreto"}</p>
-                    {ex.explanation && <p className="text-xs text-gray-400 mt-1">{ex.explanation}</p>}
+                    {ex.explanation && <p className="text-sm text-gray-400 mt-1">{ex.explanation}</p>}
                   </div>
                 </div>
               )}
@@ -170,8 +170,8 @@ export default function ExerciseBlock({ exercises }: ExerciseBlockProps) {
                   <Lightbulb className="h-4 w-4 shrink-0 mt-0.5" />
                   <div>
                     <p className="font-bold">Resposta:</p>
-                    <p className="text-xs text-gray-400">{ex.correctAnswer}</p>
-                    {ex.explanation && <p className="text-xs text-gray-500 mt-1">{ex.explanation}</p>}
+                    <p className="text-sm text-gray-400">{ex.correctAnswer}</p>
+                    {ex.explanation && <p className="text-sm text-gray-500 mt-1">{ex.explanation}</p>}
                   </div>
                 </div>
               )}

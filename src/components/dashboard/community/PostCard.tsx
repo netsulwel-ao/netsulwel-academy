@@ -75,7 +75,7 @@ export default function PostCard({ post }: { post: CommunityPost }) {
   };
 
   return (
-    <div className="group flex flex-col border border-gray-800/60 bg-gray-900/20 hover:border-gray-700 hover:bg-gray-900/30 transition-all">
+    <div className="group flex flex-col border border-gray-800 bg-gray-900 hover:border-gray-700 hover:bg-gray-900 transition-all">
       <div className="p-4 sm:p-5 space-y-4">
 
         {/* ── Header ── */}
@@ -84,14 +84,14 @@ export default function PostCard({ post }: { post: CommunityPost }) {
             href={`/dashboard/community/profile/${post.authorId}`}
             className="flex items-center gap-2.5 min-w-0 group/author"
           >
-            <div className="h-9 w-9 shrink-0 overflow-hidden border border-gray-800/60">
+            <div className="h-9 w-9 shrink-0 overflow-hidden border border-gray-800">
               <Avatar uid={post.authorId} photoURL={post.authorPhoto} name={post.authorName} size={36} />
             </div>
             <div className="min-w-0">
               <p className="text-sm font-semibold text-gray-300 group-hover/author:text-white truncate transition-colors">
                 {post.authorName}
               </p>
-              <p className="font-mono text-[9px] text-gray-700">{timeAgo(post.createdAt)}</p>
+              <p className="font-mono text-[13px] text-gray-700">{timeAgo(post.createdAt)}</p>
             </div>
           </Link>
           <PostTypeBadge type={post.type} />
@@ -124,7 +124,7 @@ export default function PostCard({ post }: { post: CommunityPost }) {
         {post.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {post.tags.map(tag => (
-              <span key={tag} className="font-mono text-[9px] uppercase tracking-widest border border-gray-800/60 bg-gray-900/60 px-2 py-0.5 text-gray-700">
+              <span key={tag} className="font-mono text-[13px] uppercase tracking-widest border border-gray-800 bg-gray-900 px-2 py-0.5 text-gray-700">
                 #{tag}
               </span>
             ))}
@@ -132,12 +132,12 @@ export default function PostCard({ post }: { post: CommunityPost }) {
         )}
 
         {/* ── Acções ── */}
-        <div className="flex items-center gap-5 pt-2 border-t border-gray-800/40">
+        <div className="flex items-center gap-5 pt-2 border-t border-gray-800">
           <button
             type="button"
             onClick={toggleLike}
             disabled={!user}
-            className={`flex items-center gap-1.5 font-mono text-[10px] transition-colors disabled:opacity-40 ${
+            className={`flex items-center gap-1.5 font-mono text-[13px] transition-colors disabled:opacity-40 ${
               liked ? "text-red-400" : "text-gray-700 hover:text-red-400"
             }`}
           >
@@ -146,7 +146,7 @@ export default function PostCard({ post }: { post: CommunityPost }) {
           </button>
           <Link
             href={`/dashboard/community/${post.id}`}
-            className="flex items-center gap-1.5 font-mono text-[10px] text-gray-700 hover:text-blue-400/80 transition-colors"
+            className="flex items-center gap-1.5 font-mono text-[13px] text-gray-700 hover:text-blue-400/80 transition-colors"
           >
             <MessageCircle className="h-3.5 w-3.5" strokeWidth={1.5} />
             {post.commentsCount ?? 0}

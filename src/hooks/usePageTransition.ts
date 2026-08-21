@@ -3,7 +3,10 @@ import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
 /**
- * Hook to handle page transitions with animation
+ * Hook to handle page transitions
+ * 
+ * Sem cortina de loading: a navegação é imediata e a página de destino
+ * faz a entrada animada com o PageTransition.
  * 
  * Usage:
  * ```tsx
@@ -13,19 +16,18 @@ import { useCallback } from "react";
  */
 export function usePageTransition() {
   const router = useRouter();
-  const { startTransition } = useTransition();
+  const { startTransition, endTransition } = useTransition();
 
   const navigate = useCallback(
-    (href: string, options?: { preserveScroll?: boolean }) => {
-      // Start the exit animation
+    (href: string) => {
+      // Guarda a posição de scroll e navega imediatamente.
       startTransition();
-      
-      // Wait for exit animation to complete before navigating
-      setTimeout(() => {
-        router.push(href);
-      }, 200); // Exit animation duration
+      router.push(href);
+      // Segurança: limpa o estado de transição mesmo se a página alvo
+      // não tiver PageTransition (a própria PageTransition também chama endTransition).
+      setTimeout(() => endTransition(), 250);
     },
-    [router, startTransition]
+    [router, startTransition, endTransition]
   );
 
   return navigate;

@@ -13,7 +13,7 @@ export default function StudentExamsPage() {
 
       {/* ── Cabeçalho ── */}
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
           // avaliações
         </p>
         <h1 className="text-2xl font-bold text-gray-100">Avaliações</h1>
@@ -39,11 +39,11 @@ export default function StudentExamsPage() {
 
       {/* ── Empty state ── */}
       {!loading && exams.length === 0 && !error && (
-        <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-20 text-center">
+        <div className="flex flex-col items-center justify-center border border-gray-800 bg-gray-900 py-20 text-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
             <FileText className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
           </div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">
             // sem avaliações
           </p>
           <p className="text-sm text-gray-600 max-w-xs mb-6">
@@ -51,7 +51,7 @@ export default function StudentExamsPage() {
           </p>
           <Link
             href="/dashboard/courses"
-            className="flex items-center gap-1.5 border border-gray-800 bg-gray-900/60 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-gray-600 hover:border-gray-700 hover:text-gray-400 transition-colors"
+            className="flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:border-gray-700 hover:text-gray-400 transition-colors"
           >
             <BookOpen className="h-3 w-3" strokeWidth={1.5} />
             Explorar cursos

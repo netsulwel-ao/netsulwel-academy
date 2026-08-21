@@ -31,7 +31,7 @@ export default function ExamResultPage() {
       {/* ── Breadcrumb ── */}
       <button
         onClick={() => router.push("/dashboard/exams")}
-        className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-gray-700 hover:text-gray-500 transition-colors"
+        className="flex items-center gap-1 font-mono text-[13px] uppercase tracking-widest text-gray-700 hover:text-gray-500 transition-colors"
       >
         <ChevronLeft className="h-3 w-3" /> Avaliações
       </button>
@@ -63,7 +63,7 @@ export default function ExamResultPage() {
 
           {/* Info */}
           <div className="flex-1 min-w-0 text-center sm:text-left">
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gray-700 mb-2">
+            <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-gray-700 mb-2">
               {passed ? "// aprovado" : "// reprovado"}
             </p>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-100 leading-snug">
@@ -71,7 +71,7 @@ export default function ExamResultPage() {
             </h1>
             <p className="mt-1 text-sm text-gray-500">{exam.title}</p>
 
-            <div className="mt-3 flex flex-wrap justify-center sm:justify-start items-center gap-3 font-mono text-[10px] text-gray-700">
+            <div className="mt-3 flex flex-wrap justify-center sm:justify-start items-center gap-3 font-mono text-[13px] text-gray-700">
               <span>{answeredCount}/{exam.questions.length} respondidas</span>
               <span>·</span>
               <span>mín. {exam.passingScore}%</span>
@@ -87,7 +87,7 @@ export default function ExamResultPage() {
             <div className="mt-5 flex flex-wrap justify-center sm:justify-start gap-3">
               <Link
                 href={`/dashboard/exams/${id}`}
-                className="flex items-center gap-1.5 border border-gray-800 bg-gray-900/60 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-gray-500 hover:border-gray-700 hover:text-gray-300 transition-all"
+                className="flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-500 hover:border-gray-700 hover:text-gray-300 transition-all"
               >
                 <RotateCcw className="h-3 w-3" strokeWidth={1.5} />
                 Repetir
@@ -95,7 +95,7 @@ export default function ExamResultPage() {
               {exam.courseId && (
                 <Link
                   href={`/dashboard/courses/${exam.courseId}`}
-                  className="flex items-center gap-1.5 border border-gray-800 bg-gray-900/60 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-gray-500 hover:border-gray-700 hover:text-gray-300 transition-all"
+                  className="flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-500 hover:border-gray-700 hover:text-gray-300 transition-all"
                 >
                   <BookOpen className="h-3 w-3" strokeWidth={1.5} />
                   Ver curso
@@ -109,7 +109,7 @@ export default function ExamResultPage() {
       {/* ── Revisão das respostas ── */}
       <div>
         <div className="mb-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gray-700 mb-1">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-gray-700 mb-1">
             // revisão
           </p>
           <h2 className="text-base font-bold text-gray-200">

@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import {
-  BookOpen, Radio, Users, GraduationCap,
+  BookOpen, Radio, GraduationCap,
   ArrowRight, X, CheckCircle2,
-  LayoutDashboard, Video, DollarSign, TrendingUp,
+  LayoutDashboard, Video, DollarSign,
   Building2, UserPlus, Settings,
 } from "lucide-react";
 import { db } from "@/lib/firebase";
@@ -34,7 +34,7 @@ const STUDENT_STEPS: OnboardingStep[] = [
     icon: BookOpen,
     tag: "// aprendizagem",
     title: "Explora os cursos",
-    desc: "No menu lateral encontras 'Meus Cursos' com todo o catálogo. Navega por trilhas estruturadas do básico ao avançado.",
+    desc: "No menu lateral encontras 'Meus Cursos' com todo o catálogo. Navega por cursos estruturados do básico ao avançado.",
     action: { label: "Ver cursos", href: "/dashboard/courses" },
   },
   {
@@ -43,13 +43,6 @@ const STUDENT_STEPS: OnboardingStep[] = [
     title: "Aulas ao vivo",
     desc: "Participa em sessões em tempo real com especialistas. Recebes notificações antes de cada aula começar.",
     action: { label: "Ver agenda", href: "/dashboard/lives" },
-  },
-  {
-    icon: Users,
-    tag: "// comunidade",
-    title: "Comunidade de alunos",
-    desc: "Tira dúvidas, partilha conquistas e conecta-te com mais de 50 mil alunos. Aprende mais rápido em grupo.",
-    action: { label: "Entrar na comunidade", href: "/dashboard/community" },
   },
 ];
 
@@ -157,7 +150,7 @@ export function OnboardingTour() {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-gray-950/80 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-gray-950 animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
       aria-labelledby="onboarding-title"
@@ -176,7 +169,7 @@ export function OnboardingTour() {
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-5 pb-0">
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60">
             {s.tag}
           </p>
           <button
@@ -208,7 +201,7 @@ export function OnboardingTour() {
             <Link
               href={s.action.href}
               onClick={() => finish(isLast)}
-              className="mb-5 flex items-center justify-between border border-gray-800 bg-gray-900/60 px-4 py-3 text-sm text-gray-400 hover:border-gray-700 hover:text-gray-200 transition-all group"
+              className="mb-5 flex items-center justify-between border border-gray-800 bg-gray-900 px-4 py-3 text-sm text-gray-400 hover:border-gray-700 hover:text-gray-200 transition-all group"
             >
               <span>{s.action.label}</span>
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -236,7 +229,7 @@ export function OnboardingTour() {
               {!isFirst && (
                 <button
                   onClick={() => setStep(s => s - 1)}
-                  className="px-3 py-2 text-xs text-gray-600 hover:text-gray-400 transition-colors"
+                  className="px-3 py-2 text-sm text-gray-600 hover:text-gray-400 transition-colors"
                 >
                   ← Anterior
                 </button>
@@ -245,7 +238,7 @@ export function OnboardingTour() {
               {isFirst && (
                 <button
                   onClick={() => finish(false)}
-                  className="px-3 py-2 text-xs text-gray-600 hover:text-gray-400 transition-colors"
+                  className="px-3 py-2 text-sm text-gray-600 hover:text-gray-400 transition-colors"
                 >
                   Saltar
                 </button>
@@ -254,14 +247,14 @@ export function OnboardingTour() {
               {!isLast ? (
                 <button
                   onClick={() => setStep(s => s + 1)}
-                  className="flex items-center gap-1.5 bg-purple px-4 py-2 text-xs font-bold text-white hover:bg-purple-light transition-colors"
+                  className="flex items-center gap-1.5 bg-purple px-4 py-2 text-sm font-bold text-white hover:bg-purple-light transition-colors"
                 >
                   Seguinte <ArrowRight className="h-3 w-3" />
                 </button>
               ) : (
                 <button
                   onClick={() => finish(true)}
-                  className="flex items-center gap-1.5 bg-purple px-4 py-2 text-xs font-bold text-white hover:bg-purple-light transition-colors"
+                  className="flex items-center gap-1.5 bg-purple px-4 py-2 text-sm font-bold text-white hover:bg-purple-light transition-colors"
                 >
                   <CheckCircle2 className="h-3 w-3" /> Começar
                 </button>
@@ -271,12 +264,12 @@ export function OnboardingTour() {
         </div>
 
         {/* Step counter no rodapé */}
-        <div className="border-t border-gray-800/60 px-6 py-3 flex items-center justify-between">
-          <p className="font-mono text-[10px] text-gray-700">
+        <div className="border-t border-gray-800 px-6 py-3 flex items-center justify-between">
+          <p className="font-mono text-[13px] text-gray-700">
             {String(step + 1).padStart(2, "0")} / {String(steps.length).padStart(2, "0")}
           </p>
           {role === "teacher" && (
-            <p className="text-[10px] text-gray-700">conta em avaliação até aprovação admin</p>
+            <p className="text-[13px] text-gray-700">conta em avaliação até aprovação admin</p>
           )}
         </div>
       </div>

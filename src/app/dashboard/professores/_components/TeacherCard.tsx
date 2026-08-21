@@ -18,12 +18,12 @@ export function TeacherCard({ teacher, featured = false }: TeacherCardProps) {
   return (
     <Link
       href={`/dashboard/professores/${teacher.id}`}
-      className={`group flex items-center gap-4 border border-gray-800/60 bg-gray-900/20 hover:border-gray-700 hover:bg-gray-900/40 transition-all ${
+      className={`group flex items-center gap-4 border border-gray-800 bg-gray-900 hover:border-gray-700 hover:bg-gray-900 transition-all ${
         featured ? "p-5 sm:p-6" : "p-4"
       }`}
     >
       {/* Avatar */}
-      <div className={`shrink-0 overflow-hidden border border-gray-800/60 bg-gray-900 group-hover:border-gray-700 transition-colors ${
+      <div className={`shrink-0 overflow-hidden border border-gray-800 bg-gray-900 group-hover:border-gray-700 transition-colors ${
         featured ? "h-14 w-14" : "h-10 w-10"
       }`}>
         <Avatar
@@ -37,7 +37,7 @@ export function TeacherCard({ teacher, featured = false }: TeacherCardProps) {
       {/* Info */}
       <div className="flex-1 min-w-0">
         {featured && (
-          <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700 mb-1">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-1">
             {isInstitution ? "// instituição" : "// professor"}
           </p>
         )}
@@ -49,18 +49,18 @@ export function TeacherCard({ teacher, featured = false }: TeacherCardProps) {
 
         {/* Role badge + stats */}
         <div className="mt-1 flex flex-wrap items-center gap-2">
-          <span className={`font-mono text-[9px] uppercase tracking-widest border px-1.5 py-0.5 ${
+          <span className={`font-mono text-[13px] uppercase tracking-widest border px-1.5 py-0.5 ${
             isInstitution
               ? "border-blue-500/25 bg-blue-500/8 text-blue-400/70"
               : "border-green/25 bg-green/8 text-green/70"
           }`}>
             {isInstitution ? "Instituição" : "Professor"}
           </span>
-          <span className="flex items-center gap-1 font-mono text-[9px] text-gray-700">
+          <span className="flex items-center gap-1 font-mono text-[13px] text-gray-700">
             <BookOpen className="h-2.5 w-2.5" strokeWidth={1.5} />
             {teacher.courseCount}
           </span>
-          <span className="flex items-center gap-1 font-mono text-[9px] text-gray-700">
+          <span className="flex items-center gap-1 font-mono text-[13px] text-gray-700">
             <Radio className="h-2.5 w-2.5" strokeWidth={1.5} />
             {teacher.liveCount}
           </span>

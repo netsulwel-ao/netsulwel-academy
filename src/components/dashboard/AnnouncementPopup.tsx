@@ -9,7 +9,7 @@ import { AnnouncementModal } from "@/components/admin/AnnouncementModal";
 import type { Announcement, AnnouncementTarget } from "@/types/announcement";
 
 export default function AnnouncementPopup() {
-  const { user, plan } = useAuth();
+  const { user } = useAuth();
   const [current, setCurrent] = useState<Announcement | null>(null);
   const [queue, setQueue] = useState<Announcement[]>([]);
   const [visible, setVisible] = useState(false);
@@ -41,11 +41,7 @@ export default function AnnouncementPopup() {
           .filter((a) => {
             if (a.expiresAt && new Date(a.expiresAt) < now) return false;
             if (a.showOnce && seenIds.includes(a.id!)) return false;
-            const targets: AnnouncementTarget[] = ["all"];
-            if (plan === "smart") targets.push("smart");
-            if (plan === "golden") targets.push("smart", "golden");
-            if (plan === "free") targets.push("free");
-            return targets.includes(a.target);
+            return true;
           })
           .sort((a, b) => {
             if (a.type === "live" && b.type !== "live") return -1;
@@ -65,7 +61,7 @@ export default function AnnouncementPopup() {
 
     fetchAnnouncements();
     return () => { cancelled = true; };
-  }, [user, plan]);
+  }, [user?.uid]);
 
   const handleClose = async () => {
     setVisible(false);
@@ -99,7 +95,7 @@ export default function AnnouncementPopup() {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-50 bg-gray-950/85 backdrop-blur-md transition-opacity duration-300 ${
+        className={`fixed inset-0 z-50 bg-gray-950 transition-opacity duration-300 ${
           visible ? "opacity-100" : "opacity-0"
         }`}
       />
@@ -119,7 +115,7 @@ export default function AnnouncementPopup() {
           <div className="flex items-center justify-between mb-3 px-1">
             {/* Indicador de fila */}
             {queue.length > 0 ? (
-              <span className="flex items-center gap-1.5 bg-purple-500/15 border border-purple-500/25 text-purple-300 text-xs font-semibold px-3 py-1.5 rounded-full">
+              <span className="flex items-center gap-1.5 bg-purple-500/15 border border-purple-500/25 text-purple-300 text-sm font-semibold px-3 py-1.5 rounded-full">
                 <span className="flex h-1.5 w-1.5 rounded-full bg-purple-400" />
                 +{queue.length} {queue.length === 1 ? "anúncio" : "anúncios"} a seguir
               </span>
@@ -131,7 +127,7 @@ export default function AnnouncementPopup() {
             <button
               onClick={handleClose}
               aria-label="Fechar anúncio"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-800/90 border border-gray-700 text-gray-400 hover:text-white hover:bg-gray-700 hover:border-gray-600 transition-all"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:bg-gray-700 hover:border-gray-600 transition-all"
             >
               <X className="h-4 w-4" />
             </button>

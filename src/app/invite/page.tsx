@@ -63,7 +63,7 @@ function InviteContent() {
   if (error) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-gray-900/60 border border-gray-800 p-8 text-center">
+        <div className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 text-center">
           <Building2 className="h-16 w-16 text-red-400 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-white mb-2">Link Inválido</h1>
           <p className="text-gray-400">{error}</p>
@@ -84,7 +84,7 @@ function InviteContent() {
   if (accepted) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="relative overflow-hidden max-w-lg w-full bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800/70 p-10 text-center shadow-2xl">
+        <div className="relative overflow-hidden max-w-lg w-full bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 p-10 text-center shadow-2xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/10 blur-3xl rounded-full" />
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 blur-3xl rounded-full" />
           <div className="relative animate-in zoom-in-95 duration-500">
@@ -106,7 +106,7 @@ function InviteContent() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-gray-900/60 border border-gray-800 p-8">
+      <div className="max-w-md w-full bg-gray-900 border border-gray-800 p-8">
         <div className="flex items-center gap-4 mb-6">
           <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center shadow-lg shadow-purple-500/20">
             <Building2 className="h-7 w-7 text-white" />

@@ -161,15 +161,15 @@ export default function AdminTeachersPage() {
         </div>
         <div className="flex gap-1 bg-gray-900 border border-gray-800 p-1">
           <button onClick={() => setFilterTab("all")}
-            className={`px-3 py-1.5 text-xs font-medium transition-colors ${filterTab === "all" ? "bg-purple text-white" : "text-gray-400 hover:text-white"}`}>
+            className={`px-3 py-1.5 text-sm font-medium transition-colors ${filterTab === "all" ? "bg-purple text-white" : "text-gray-400 hover:text-white"}`}>
             Todos ({teachers.length + pendingTeachers.length})
           </button>
           <button onClick={() => setFilterTab("approved")}
-            className={`px-3 py-1.5 text-xs font-medium transition-colors ${filterTab === "approved" ? "bg-purple text-white" : "text-gray-400 hover:text-white"}`}>
+            className={`px-3 py-1.5 text-sm font-medium transition-colors ${filterTab === "approved" ? "bg-purple text-white" : "text-gray-400 hover:text-white"}`}>
             Aprovados ({teachers.length})
           </button>
           <button onClick={() => setFilterTab("pending")}
-            className={`px-3 py-1.5 text-xs font-medium transition-colors ${filterTab === "pending" ? "bg-yellow-500 text-white" : "text-gray-400 hover:text-white"}`}>
+            className={`px-3 py-1.5 text-sm font-medium transition-colors ${filterTab === "pending" ? "bg-yellow-500 text-white" : "text-gray-400 hover:text-white"}`}>
             Pendentes ({pendingTeachers.length})
           </button>
         </div>
@@ -197,7 +197,7 @@ export default function AdminTeachersPage() {
             <table className="w-full">
               <caption className="sr-only">Lista de professores</caption>
               <thead>
-                <tr className="border-b border-gray-800 text-left text-xs uppercase tracking-wider text-gray-500">
+                <tr className="border-b border-gray-800 text-left text-sm uppercase tracking-wider text-gray-500">
                   <th scope="col" className="py-4 px-6 font-medium">Professor</th>
                   <th scope="col" className="py-4 px-6 font-medium">Email</th>
                   <th scope="col" className="py-4 px-6 font-medium">Estado</th>
@@ -219,18 +219,18 @@ export default function AdminTeachersPage() {
                           </div>
                           <div>
                             <p className="text-sm font-medium text-white">{teacher.name}</p>
-                            <p className="text-xs text-gray-500 font-mono">{teacher.id.slice(0, 12)}...</p>
+                            <p className="text-sm text-gray-500 font-mono">{teacher.id.slice(0, 12)}...</p>
                           </div>
                         </div>
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-400">{teacher.email}</td>
                       <td className="py-4 px-6">
                         {isPending ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-sm font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
                             <Clock className="h-3 w-3" /> Pendente
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-sm font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                             <Check className="h-3 w-3" /> Aprovado
                           </span>
                         )}
@@ -243,17 +243,17 @@ export default function AdminTeachersPage() {
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-2">
                           <button onClick={() => setSelectedTeacher(teacher)}
-                            className="px-3 py-1.5 text-xs font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors">
+                            className="px-3 py-1.5 text-sm font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors">
                             Detalhes
                           </button>
                           {isPending && (
                             <>
                               <button onClick={() => handleApprove(teacher)}
-                                className="px-3 py-1.5 text-xs font-medium bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors">
+                                className="px-3 py-1.5 text-sm font-medium bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors">
                                 <Check className="h-3 w-3 inline mr-1" />Aprovar
                               </button>
                               <button onClick={() => handleReject(teacher)}
-                                className="px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">
+                                className="px-3 py-1.5 text-sm font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">
                                 <X className="h-3 w-3 inline mr-1" />Rejeitar
                               </button>
                             </>
@@ -261,11 +261,11 @@ export default function AdminTeachersPage() {
                           {isAdmin && !isPending && (
                             <>
                               <button onClick={() => handleRoleChange(teacher, "admin")}
-                                className="px-3 py-1.5 text-xs font-medium bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 transition-colors">
+                                className="px-3 py-1.5 text-sm font-medium bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 transition-colors">
                                 <Shield className="h-3 w-3 inline mr-1" />Admin
                               </button>
                               <button onClick={() => handleRoleChange(teacher, "aluno")}
-                                className="px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">
+                                className="px-3 py-1.5 text-sm font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">
                                 Remover
                               </button>
                             </>
@@ -284,7 +284,7 @@ export default function AdminTeachersPage() {
       {/* Detail Drawer */}
       {selectedTeacher && (
         <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setSelectedTeacher(null)} />
+          <div className="absolute inset-0 bg-black" onClick={() => setSelectedTeacher(null)} />
           <div className="relative w-96 bg-gray-900 border-l border-gray-800 p-8 overflow-y-auto animate-in slide-in-from-right duration-300">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-lg font-bold text-white">Detalhes</h3>
@@ -299,11 +299,11 @@ export default function AdminTeachersPage() {
               </div>
               <h4 className="text-xl font-bold text-white">{selectedTeacher.name}</h4>
               {selectedTeacher.status === "pending" ? (
-                <span className="mt-1 px-3 py-1 text-xs font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
+                <span className="mt-1 px-3 py-1 text-sm font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
                   <Clock className="h-3 w-3 inline mr-1" />Pendente
                 </span>
               ) : (
-                <span className="mt-1 px-3 py-1 text-xs font-medium bg-emerald-500/10 text-emerald-400">Professor</span>
+                <span className="mt-1 px-3 py-1 text-sm font-medium bg-emerald-500/10 text-emerald-400">Professor</span>
               )}
             </div>
 

@@ -1,15 +1,18 @@
 import { ReactElement } from "react";
 import { render, RenderOptions } from "@testing-library/react";
 import { AuthProvider } from "@/contexts/AuthProvider";
+import { TransitionProvider } from "@/contexts/TransitionContext";
 
 /**
  * Custom render function that includes providers
  */
 function AllTheProviders({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
-      {children}
-    </AuthProvider>
+    <TransitionProvider>
+      <AuthProvider>
+        {children}
+      </AuthProvider>
+    </TransitionProvider>
   );
 }
 

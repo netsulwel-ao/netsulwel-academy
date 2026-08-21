@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParticipants, useLocalParticipant } from "@livekit/components-react";
+import { useParticipants } from "@livekit/components-react";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import { Users, X } from "lucide-react";
@@ -11,7 +11,6 @@ interface Props { liveId: string }
 
 export function AlunosPanel({ liveId }: Props) {
   const participants = useParticipants();
-  const { localParticipant } = useLocalParticipant();
   const [speakers, setSpeakers] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -38,13 +37,13 @@ export function AlunosPanel({ liveId }: Props) {
               <div
                 key={p.identity}
                 className={[
-                  "flex items-center gap-3 px-4 py-3 border-b border-white/5 transition-colors group",
+                  "flex items-center gap-3 px-4 py-3 border-b border-white transition-colors group",
                   isSpeaker ? "border-l-2 border-l-green-500 bg-green-500/[3%]" : "hover:bg-white/[2%]",
                 ].join(" ")}
               >
-                <span className={`w-1.5 h-1.5 shrink-0 ${isSpeaker ? "bg-green-400" : "bg-white/15"}`} />
+                <span className={`w-1.5 h-1.5 shrink-0 ${isSpeaker ? "bg-green-400" : "bg-white"}`} />
                 <Avatar name={name} size={28} />
-                <span className="text-sm text-white/70 truncate flex-1">{name}</span>
+                <span className="text-sm text-white truncate flex-1">{name}</span>
                 {isSpeaker && <Waveform />}
                 {/* Kick placeholder — todo */}
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

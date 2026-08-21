@@ -84,12 +84,12 @@ export default function AdminFeesPage() {
           placeholder="Pesquisar cursos..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-gray-900/40 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple"
+          className="w-full pl-12 pr-4 py-3 bg-gray-900 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple"
         />
       </div>
 
       {/* Courses List */}
-      <div className="bg-gray-900/40 border border-gray-800">
+      <div className="bg-gray-900 border border-gray-800">
         <div className="p-6 border-b border-gray-800">
           <h2 className="text-lg font-bold text-white">Cursos</h2>
         </div>
@@ -105,7 +105,7 @@ export default function AdminFeesPage() {
                   <h3 className="font-medium text-white truncate">{course.title}</h3>
                   <p className="text-sm text-gray-400">{course.price.toLocaleString("pt-AO")} Kz</p>
                   {course.sellerId && (
-                    <p className="text-xs text-gray-500">Vendedor: {course.sellerId}</p>
+                    <p className="text-sm text-gray-500">Vendedor: {course.sellerId}</p>
                   )}
                 </div>
                 <div className="flex items-center gap-4">

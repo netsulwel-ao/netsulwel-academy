@@ -1,13 +1,15 @@
-import Link from "next/link";
 import { ArrowRight, Rocket, CheckCircle2 } from "lucide-react";
+import { TransitionLink } from "./TransitionLink";
+import { Reveal } from "./motion/Reveal";
 
 export function CTA() {
   return (
-    <section className="py-24 border-t border-gray-800/40">
+    <section className="py-24 border-t border-gray-800">
       <div className="mx-auto max-w-6xl px-6">
 
+        <Reveal>
         {/* Layout split — texto + acção */}
-        <div className="relative overflow-hidden border border-gray-800/60 bg-gray-900/30 grid grid-cols-1 md:grid-cols-[1fr_auto] items-center gap-0">
+        <div className="relative overflow-hidden border border-gray-800 bg-gray-900 grid grid-cols-1 md:grid-cols-[1fr_auto] items-center gap-0">
 
           {/* Linha decorativa top */}
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-purple/60 via-green/30 to-transparent" />
@@ -18,7 +20,7 @@ export function CTA() {
 
           {/* Esquerda — conteúdo */}
           <div className="relative p-10 md:p-14">
-            <p className="font-mono text-xs font-bold uppercase tracking-[0.25em] text-green mb-4">
+            <p className="font-mono text-sm font-bold uppercase tracking-[0.25em] text-green mb-4">
               pronto para começar
             </p>
             <h2 className="text-3xl font-extrabold leading-tight text-gray-100 md:text-4xl">
@@ -47,23 +49,27 @@ export function CTA() {
           </div>
 
           {/* Direita — CTA grande */}
-          <div className="relative border-t border-gray-800/60 md:border-t-0 md:border-l md:border-gray-800/60 p-10 md:p-14 flex flex-col items-center justify-center gap-6 min-w-[240px]">
-            <Link
+          <div className="relative border-t border-gray-800 md:border-t-0 md:border-l md:border-gray-800 p-10 md:p-14 flex flex-col items-center justify-center gap-6 min-w-[240px]">
+            <TransitionLink
               href="/register"
-              className="group glow-purple flex items-center gap-2 bg-purple px-8 py-4 text-sm font-bold text-white transition-all hover:bg-purple-light w-full justify-center"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
+              className="group glow-purple flex items-center gap-2 bg-purple px-8 py-4 text-sm font-bold text-white transition-colors hover:bg-purple-light w-full justify-center"
             >
               <Rocket className="h-4 w-4" />
               Criar conta grátis
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </Link>
-            <Link
+            </TransitionLink>
+            <TransitionLink
               href="/login"
-              className="text-xs text-gray-600 hover:text-gray-400 transition-colors"
+              className="text-sm text-gray-600 hover:text-gray-400 transition-colors"
+              whileHover={{ y: -1 }}
             >
               Já tenho conta → Entrar
-            </Link>
+            </TransitionLink>
           </div>
         </div>
+        </Reveal>
       </div>
     </section>
   );

@@ -42,8 +42,8 @@ function StatCard({ label, value, sub, up, accent = "text-gray-200" }: {
   label: string; value: string; sub?: string; up?: boolean; accent?: string;
 }) {
   return (
-    <div className="border border-gray-800/60 bg-gray-900/10 p-5 flex flex-col gap-2">
-      <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-700">{label}</p>
+    <div className="border border-gray-800 bg-gray-900 p-5 flex flex-col gap-2">
+      <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-gray-700">{label}</p>
       <div className="flex items-end justify-between gap-2">
         <p className={`text-2xl font-bold tabular-nums leading-none ${accent}`}>{value}</p>
         {up !== undefined && (
@@ -52,7 +52,7 @@ function StatCard({ label, value, sub, up, accent = "text-gray-200" }: {
             : <Minus className="h-4 w-4 text-gray-700 mb-0.5 shrink-0" strokeWidth={1.5} />
         )}
       </div>
-      {sub && <p className="text-xs text-gray-600 leading-snug">{sub}</p>}
+      {sub && <p className="text-sm text-gray-600 leading-snug">{sub}</p>}
     </div>
   );
 }
@@ -74,11 +74,11 @@ function BarChart({ data }: { data: { key: string; label: string; value: number;
             onMouseLeave={() => setHov(null)}
           >
             <div className={`mb-1 text-center transition-opacity duration-150 ${isHov ? "opacity-100" : "opacity-0"}`}>
-              <p className="font-mono text-[9px] text-white whitespace-nowrap">{value}v</p>
+              <p className="font-mono text-[13px] text-white whitespace-nowrap">{value}v</p>
               {revenue > 0 && <p className="font-mono text-[8px] text-green/60">{formatKz(revenue)}</p>}
             </div>
             <div
-              className={`w-full transition-colors duration-150 ${value > 0 ? (isHov ? "bg-green/50" : "bg-green/25") : "bg-gray-800/30"}`}
+              className={`w-full transition-colors duration-150 ${value > 0 ? (isHov ? "bg-green/50" : "bg-green/25") : "bg-gray-800"}`}
               style={{ height: `${pct}%` }}
             />
             <p className="font-mono text-[8px] uppercase text-gray-700 mt-1">{label}</p>
@@ -92,7 +92,7 @@ function BarChart({ data }: { data: { key: string; label: string; value: number;
 // ── Revenue donut (CSS conic-gradient) ────────────────────────
 function RevenueSplit({ courseRev, liveRev }: { courseRev: number; liveRev: number }) {
   const total = courseRev + liveRev;
-  if (total === 0) return <p className="text-xs text-gray-700 py-4">Sem receita ainda.</p>;
+  if (total === 0) return <p className="text-sm text-gray-700 py-4">Sem receita ainda.</p>;
   const pct = Math.round((courseRev / total) * 100);
   return (
     <div className="flex items-center gap-6">
@@ -106,15 +106,15 @@ function RevenueSplit({ courseRev, liveRev }: { courseRev: number; liveRev: numb
       <div className="space-y-1.5">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 bg-green/55 shrink-0" />
-          <span className="text-xs text-gray-400">Cursos</span>
-          <span className="font-mono text-xs text-gray-200 ml-2">{pct}%</span>
+          <span className="text-sm text-gray-400">Cursos</span>
+          <span className="font-mono text-sm text-gray-200 ml-2">{pct}%</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 bg-red-400/45 shrink-0" />
-          <span className="text-xs text-gray-400">Lives</span>
-          <span className="font-mono text-xs text-gray-200 ml-2">{100 - pct}%</span>
+          <span className="text-sm text-gray-400">Lives</span>
+          <span className="font-mono text-sm text-gray-200 ml-2">{100 - pct}%</span>
         </div>
-        <p className="font-mono text-[9px] text-gray-700 pt-1">{formatKz(total)} total</p>
+        <p className="font-mono text-[13px] text-gray-700 pt-1">{formatKz(total)} total</p>
       </div>
     </div>
   );
@@ -222,7 +222,7 @@ export default function TeacherAnalyticsPage() {
 
       {/* ── Cabeçalho ── */}
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
           // analytics
         </p>
         <h1 className="text-2xl font-bold text-gray-100">Analytics</h1>
@@ -249,7 +249,7 @@ export default function TeacherAnalyticsPage() {
       {!loading && !error && (
         <>
           {/* ── KPIs: 5 cards em grid ── */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-px bg-gray-800/30">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-px bg-gray-800">
             <StatCard
               label="Receita líquida"
               value={formatKz(m.totalRevenue)}
@@ -284,10 +284,10 @@ export default function TeacherAnalyticsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             {/* Gráfico vendas/mês */}
-            <div className="lg:col-span-2 border border-gray-800/60 bg-gray-900/10 p-6">
+            <div className="lg:col-span-2 border border-gray-800 bg-gray-900 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-1">
+                  <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-1">
                     // vendas · últimos 6 meses
                   </p>
                   <p className="text-sm font-semibold text-gray-200">
@@ -300,26 +300,26 @@ export default function TeacherAnalyticsPage() {
             </div>
 
             {/* Divisão de receita */}
-            <div className="border border-gray-800/60 bg-gray-900/10 p-6 flex flex-col gap-6">
+            <div className="border border-gray-800 bg-gray-900 p-6 flex flex-col gap-6">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-1">
+                <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-1">
                   // receita por tipo
                 </p>
                 <p className="text-sm font-semibold text-gray-200">Distribuição</p>
               </div>
               <RevenueSplit courseRev={m.courseRevenue} liveRev={m.liveRevenue} />
-              <div className="mt-auto space-y-2 border-t border-gray-800/40 pt-4">
+              <div className="mt-auto space-y-2 border-t border-gray-800 pt-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-600 flex items-center gap-1.5">
+                  <span className="text-sm text-gray-600 flex items-center gap-1.5">
                     <BookOpen className="h-3 w-3" strokeWidth={1.5} /> Cursos
                   </span>
-                  <span className="font-mono text-xs text-gray-300">{formatKz(m.courseRevenue)}</span>
+                  <span className="font-mono text-sm text-gray-300">{formatKz(m.courseRevenue)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-600 flex items-center gap-1.5">
+                  <span className="text-sm text-gray-600 flex items-center gap-1.5">
                     <Radio className="h-3 w-3" strokeWidth={1.5} /> Lives
                   </span>
-                  <span className="font-mono text-xs text-gray-300">{formatKz(m.liveRevenue)}</span>
+                  <span className="font-mono text-sm text-gray-300">{formatKz(m.liveRevenue)}</span>
                 </div>
               </div>
             </div>
@@ -329,25 +329,25 @@ export default function TeacherAnalyticsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* Cursos */}
-            <div className="border border-gray-800/60">
-              <div className="px-5 py-4 border-b border-gray-800/40 flex items-center justify-between">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700">
+            <div className="border border-gray-800">
+              <div className="px-5 py-4 border-b border-gray-800 flex items-center justify-between">
+                <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">
                   // cursos · {courses.length}
                 </p>
                 <BookOpen className="h-3.5 w-3.5 text-gray-700" strokeWidth={1.5} />
               </div>
               {courseStats.length === 0 ? (
                 <div className="px-5 py-12 text-center">
-                  <p className="text-xs text-gray-700">Nenhum curso criado ainda.</p>
+                  <p className="text-sm text-gray-700">Nenhum curso criado ainda.</p>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-800/30">
+                <div className="divide-y divide-gray-800">
                   {courseStats.map((c, i) => (
-                    <div key={c.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-900/20 transition-colors">
-                      <span className="font-mono text-[9px] text-gray-700 w-4 shrink-0">{String(i + 1).padStart(2, "0")}</span>
+                    <div key={c.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-900 transition-colors">
+                      <span className="font-mono text-[13px] text-gray-700 w-4 shrink-0">{String(i + 1).padStart(2, "0")}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-200 truncate">{c.title}</p>
-                        <div className="flex items-center gap-2 mt-0.5 font-mono text-[9px] text-gray-700">
+                        <div className="flex items-center gap-2 mt-0.5 font-mono text-[13px] text-gray-700">
                           <span>{c.lessonsCount ?? 0} aulas</span>
                           <span>·</span>
                           <span className={c.status === "published" ? "text-green/60" : "text-gray-700"}>
@@ -356,8 +356,8 @@ export default function TeacherAnalyticsPage() {
                         </div>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="font-mono text-xs text-gray-300">{formatKz(c.revenue)}</p>
-                        <p className="font-mono text-[9px] text-gray-700">{c.saleCount}v</p>
+                        <p className="font-mono text-sm text-gray-300">{formatKz(c.revenue)}</p>
+                        <p className="font-mono text-[13px] text-gray-700">{c.saleCount}v</p>
                       </div>
                     </div>
                   ))}
@@ -366,33 +366,33 @@ export default function TeacherAnalyticsPage() {
             </div>
 
             {/* Lives */}
-            <div className="border border-gray-800/60">
-              <div className="px-5 py-4 border-b border-gray-800/40 flex items-center justify-between">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700">
+            <div className="border border-gray-800">
+              <div className="px-5 py-4 border-b border-gray-800 flex items-center justify-between">
+                <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">
                   // lives · {lives.length}
                 </p>
                 <Radio className="h-3.5 w-3.5 text-gray-700" strokeWidth={1.5} />
               </div>
               {liveStats.length === 0 ? (
                 <div className="px-5 py-12 text-center">
-                  <p className="text-xs text-gray-700">Nenhuma live criada ainda.</p>
+                  <p className="text-sm text-gray-700">Nenhuma live criada ainda.</p>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-800/30">
+                <div className="divide-y divide-gray-800">
                   {liveStats.map((l, i) => (
-                    <div key={l.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-900/20 transition-colors">
-                      <span className="font-mono text-[9px] text-gray-700 w-4 shrink-0">{String(i + 1).padStart(2, "0")}</span>
+                    <div key={l.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-900 transition-colors">
+                      <span className="font-mono text-[13px] text-gray-700 w-4 shrink-0">{String(i + 1).padStart(2, "0")}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-200 truncate">{l.title}</p>
-                        <p className="font-mono text-[9px] text-gray-700 mt-0.5">
+                        <p className="font-mono text-[13px] text-gray-700 mt-0.5">
                           {l.target === "free" ? "gratuita" : l.target === "standalone" ? "paga" : l.target}
                         </p>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="font-mono text-xs text-gray-300">
+                        <p className="font-mono text-sm text-gray-300">
                           {l.price ? formatKz(l.revenue) : <span className="text-green/60">grátis</span>}
                         </p>
-                        <p className="font-mono text-[9px] text-gray-700">{l.saleCount}v</p>
+                        <p className="font-mono text-[13px] text-gray-700">{l.saleCount}v</p>
                       </div>
                     </div>
                   ))}
@@ -403,28 +403,28 @@ export default function TeacherAnalyticsPage() {
 
           {/* ── Últimas vendas ── */}
           {recentSales.length > 0 && (
-            <div className="border border-gray-800/60">
-              <div className="px-5 py-4 border-b border-gray-800/40 flex items-center justify-between">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700">
+            <div className="border border-gray-800">
+              <div className="px-5 py-4 border-b border-gray-800 flex items-center justify-between">
+                <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">
                   // últimas vendas
                 </p>
                 <DollarSign className="h-3.5 w-3.5 text-gray-700" strokeWidth={1.5} />
               </div>
-              <div className="divide-y divide-gray-800/30">
+              <div className="divide-y divide-gray-800">
                 {recentSales.map(s => {
                   const d = toDate(s.createdAt);
                   const dateStr = d ? d.toLocaleDateString("pt-PT", { day: "2-digit", month: "short" }) : "—";
                   return (
-                    <div key={s.id} className="flex items-center gap-4 px-5 py-3 hover:bg-gray-900/20 transition-colors">
+                    <div key={s.id} className="flex items-center gap-4 px-5 py-3 hover:bg-gray-900 transition-colors">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-200 truncate">{s.userName}</p>
-                        <p className="font-mono text-[9px] text-gray-700 truncate mt-0.5">
-                          {s.itemTitle ?? (s.type === "smart" ? "Plano Smart" : s.type === "golden" ? "Plano Golden" : s.type)}
+                        <p className="font-mono text-[13px] text-gray-700 truncate mt-0.5">
+                          {s.itemTitle ?? s.type}
                         </p>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="font-mono text-xs text-green/70">{formatKz(s.netAmount ?? s.amount ?? 0)}</p>
-                        <p className="font-mono text-[9px] text-gray-700">{dateStr}</p>
+                        <p className="font-mono text-sm text-green/70">{formatKz(s.netAmount ?? s.amount ?? 0)}</p>
+                        <p className="font-mono text-[13px] text-gray-700">{dateStr}</p>
                       </div>
                     </div>
                   );
@@ -435,11 +435,11 @@ export default function TeacherAnalyticsPage() {
 
           {/* ── Empty state global ── */}
           {courses.length === 0 && lives.length === 0 && sales.length === 0 && (
-            <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-20 text-center">
+            <div className="flex flex-col items-center justify-center border border-gray-800 bg-gray-900 py-20 text-center">
               <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
                 <TrendingUp className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
               </div>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">
+              <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">
                 // sem dados ainda
               </p>
               <p className="text-sm text-gray-600">

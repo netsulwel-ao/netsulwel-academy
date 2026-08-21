@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { MessageCircle, Users, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { listenUserChats } from "@/lib/chat";
+import { listenUserChats, markChatAsRead } from "@/lib/chat";
 import { Avatar } from "@/components/ui/Avatar";
 import type { CourseChat } from "@/types/chat";
 
@@ -27,7 +27,7 @@ function fmtTime(raw: unknown): string {
 function ChatAvatar({ chat, currentUid }: { chat: CourseChat; currentUid: string }) {
   if (chat.type === "group") {
     return (
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800/60 bg-gray-900">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800 bg-gray-900">
         <Users className="h-4 w-4 text-purple/70" strokeWidth={1.5} />
       </div>
     );
@@ -38,7 +38,7 @@ function ChatAvatar({ chat, currentUid }: { chat: CourseChat; currentUid: string
   const name    = otherId ? chat.participantNames[otherId]  : "";
 
   return (
-    <div className="h-10 w-10 shrink-0 overflow-hidden border border-gray-800/60">
+    <div className="h-10 w-10 shrink-0 overflow-hidden border border-gray-800">
       <Avatar uid={otherId} photoURL={photo} name={name} size={40} />
     </div>
   );
@@ -60,6 +60,7 @@ function ChatItem({ chat, currentUid, href, onSelect }: ChatItemProps) {
     chat.lastMessageBy && chat.lastMessageBy !== currentUid && chat.lastMessageByName
       ? `${chat.lastMessageByName}: `
       : "";
+  const unread = chat.unreadBy?.[currentUid] ?? 0;
 
   const content = (
     <>
@@ -67,44 +68,58 @@ function ChatItem({ chat, currentUid, href, onSelect }: ChatItemProps) {
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm font-semibold text-gray-200 truncate">{displayName}</p>
-          <span className="shrink-0 font-mono text-[9px] text-gray-700">
+          <p className={`text-sm font-semibold truncate ${unread > 0 ? "text-white" : "text-gray-200"}`}>{displayName}</p>
+          <span className="shrink-0 font-mono text-[13px] text-gray-700">
             {fmtTime(chat.lastMessageAt)}
           </span>
         </div>
         <div className="flex items-center gap-1.5 mt-0.5">
           {chat.type === "group" && (
-            <span className="font-mono text-[9px] uppercase tracking-widest border border-purple/20 bg-purple/8 text-purple/60 px-1.5 py-px shrink-0">
+            <span className="font-mono text-[13px] uppercase tracking-widest border border-purple/20 bg-purple/8 text-purple/60 px-1.5 py-px shrink-0">
               grupo
             </span>
           )}
-          <p className="text-xs text-gray-600 truncate">
+          <p className={`text-sm truncate ${unread > 0 ? "text-gray-300 font-medium" : "text-gray-600"}`}>
             {lastMsgPrefix}{chat.lastMessage ?? "Sem mensagens ainda"}
           </p>
         </div>
         {chat.type === "group" && (
-          <p className="text-[10px] font-mono text-gray-700 mt-0.5 truncate">
+          <p className="text-[13px] font-mono text-gray-700 mt-0.5 truncate">
             {chat.courseTitle}
           </p>
         )}
       </div>
 
-      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-gray-800 group-hover:text-gray-600 transition-colors" />
+      {unread > 0 && (
+        <span className="flex items-center justify-center h-5 min-w-[20px] px-1.5 text-[11px] font-bold text-white bg-red-500 rounded-full shrink-0">
+          {unread > 99 ? "99+" : unread}
+        </span>
+      )}
+
+      {unread === 0 && (
+        <ChevronRight className="h-3.5 w-3.5 shrink-0 text-gray-800 group-hover:text-gray-600 transition-colors" />
+      )}
     </>
   );
 
-  const cls = "group flex items-center gap-3 px-4 py-3.5 border-b border-gray-800/40 hover:bg-gray-900/30 transition-colors";
+  const cls = "group flex items-center gap-3 px-4 py-3.5 border-b border-gray-800 hover:bg-gray-900 transition-colors";
+
+  const handleClick = () => {
+    if (unread > 0) {
+      markChatAsRead(href.split("/").pop() ?? "", currentUid).catch(() => {});
+    }
+  };
 
   if (onSelect) {
     return (
-      <button type="button" onClick={() => onSelect(chat.id!)} className={`w-full text-left ${cls}`}>
+      <button type="button" onClick={() => { handleClick(); onSelect(chat.id!); }} className={`w-full text-left ${cls}`}>
         {content}
       </button>
     );
   }
 
   return (
-    <Link href={href} className={cls}>
+    <Link href={href} onClick={handleClick} className={cls}>
       {content}
     </Link>
   );
@@ -143,7 +158,7 @@ export default function ChatList({ courseId, onSelect, linkPrefix = "/dashboard/
         <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
           <MessageCircle className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
         </div>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">// sem conversas</p>
+        <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">// sem conversas</p>
         <p className="text-sm text-gray-600">
           {courseId
             ? "Ainda não há conversas neste curso."
@@ -158,8 +173,8 @@ export default function ChatList({ courseId, onSelect, linkPrefix = "/dashboard/
       {/* Grupos */}
       {groups.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-800/40">
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">// grupos · {groups.length}</p>
+          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-800">
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">// grupos · {groups.length}</p>
           </div>
           {groups.map(chat => (
             <ChatItem
@@ -176,8 +191,8 @@ export default function ChatList({ courseId, onSelect, linkPrefix = "/dashboard/
       {/* Individuais */}
       {indivs.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-800/40">
-            <p className="font-mono text-[9px] uppercase tracking-widest text-gray-700">// individuais · {indivs.length}</p>
+          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-800">
+            <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">// individuais · {indivs.length}</p>
           </div>
           {indivs.map(chat => (
             <ChatItem

@@ -128,7 +128,7 @@ export default function UsersPage() {
           { label: "Alunos", value: stats.alunos, icon: UserCheck, color: "green" },
           { label: "Admins", value: stats.admins, icon: Shield, color: "purple" },
         ].map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="bg-gray-900/40 backdrop-blur-xl p-5 flex items-center justify-between">
+          <div key={label} className="bg-gray-900 p-5 flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-400">{label}</p>
               <p className="text-3xl font-bold text-white mt-1">
@@ -204,22 +204,22 @@ export default function UsersPage() {
           compact
         />
       ) : (
-        <div className="bg-gray-900/40 backdrop-blur-xl overflow-hidden">
+        <div className="bg-gray-900 overflow-hidden">
           {/* Desktop table */}
           <div className="hidden sm:block overflow-x-auto">
             <div className="min-w-[550px]">
-              <div className="flex items-center px-5 py-3 border-b border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-wider">
+              <div className="flex items-center px-5 py-3 border-b border-gray-800 text-sm font-bold text-gray-500 uppercase tracking-wider">
                 <span className="flex-[2]">Utilizador</span>
                 <span className="flex-[1.5]">Email</span>
                 <span className="flex-1">Registado</span>
                 <span className="flex-1">Role</span>
                 <span className="w-10"></span>
               </div>
-              <div className="divide-y divide-gray-800/60">
+              <div className="divide-y divide-gray-800">
                 {filtered.map((u) => (
-                  <div key={u.id} className="flex items-center px-5 py-4 hover:bg-gray-800/30 transition-colors group">
+                  <div key={u.id} className="flex items-center px-5 py-4 hover:bg-gray-800 transition-colors group">
                     <div className="flex-[2] flex items-center gap-3 min-w-0 pr-2">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 text-white text-xs font-bold overflow-hidden">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 text-white text-sm font-bold overflow-hidden">
                         {u.photoURL
                           ? <img src={u.photoURL} alt={u.name} className="h-full w-full object-cover" />
                           : getInitials(u.name, u.email)
@@ -227,7 +227,7 @@ export default function UsersPage() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-white truncate">{u.name || "—"}</p>
-                        <p className="text-xs text-gray-500 truncate">{u.id.substring(0, 12)}...</p>
+                        <p className="text-sm text-gray-500 truncate">{u.id.substring(0, 12)}...</p>
                       </div>
                     </div>
                     <div className="flex-[1.5] flex items-center gap-2 min-w-0 px-1">
@@ -239,7 +239,7 @@ export default function UsersPage() {
                       {formatDate(u.createdAt)}
                     </span>
                     <div className="flex-1 px-1">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-sm font-bold uppercase tracking-wider ${
                         u.role === "admin"
                           ? "bg-purple-500/15 text-purple-400 border border-purple-500/25"
                           : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
@@ -287,56 +287,56 @@ export default function UsersPage() {
                   </div>
                 ))}
               </div>
-              <div className="px-5 py-3 border-t border-gray-800 text-xs text-gray-500">
+              <div className="px-5 py-3 border-t border-gray-800 text-sm text-gray-500">
                 {filtered.length} de {users.length} utilizadores
               </div>
             </div>
           </div>
           {/* Mobile cards */}
-          <div className="sm:hidden divide-y divide-gray-800/60">
+          <div className="sm:hidden divide-y divide-gray-800">
             {filtered.map((u) => (
-              <div key={u.id} className="px-4 py-4 space-y-2 hover:bg-gray-800/30 transition-colors">
+              <div key={u.id} className="px-4 py-4 space-y-2 hover:bg-gray-800 transition-colors">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 text-white text-xs font-bold overflow-hidden">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 text-white text-sm font-bold overflow-hidden">
                       {u.photoURL ? <img src={u.photoURL} alt={u.name} className="h-full w-full object-cover" /> : getInitials(u.name, u.email)}
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-white truncate">{u.name || "—"}</p>
-                      <p className="text-xs text-gray-500 truncate">{u.email || "—"}</p>
+                      <p className="text-sm text-gray-500 truncate">{u.email || "—"}</p>
                     </div>
                   </div>
-                  <span className={`shrink-0 inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold uppercase ${
+                  <span className={`shrink-0 inline-flex items-center gap-1 px-2 py-0.5 text-sm font-bold uppercase ${
                     u.role === "admin" ? "bg-purple-500/15 text-purple-400" : "bg-blue-500/10 text-blue-400"
                   }`}>
                     {u.role === "admin" ? <Shield className="h-3 w-3" /> : <BookOpen className="h-3 w-3" />}
                     {u.role}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
+                <div className="flex items-center gap-2 text-sm text-gray-500">
                   <Calendar className="h-3 w-3" />
                   {formatDate(u.createdAt)}
                 </div>
                 <div className="flex items-center gap-2 pt-1">
                   <button onClick={() => setSelectedUser(u)}
-                    className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300">
+                    className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300">
                     <Users className="h-3 w-3" /> Detalhes
                   </button>
                   {u.role === "aluno" ? (
                     <button onClick={() => handleRoleChange(u, "admin")}
-                      className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300">
+                      className="flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300">
                       <Shield className="h-3 w-3" /> Admin
                     </button>
                   ) : (
                     <button onClick={() => handleRoleChange(u, "aluno")}
-                      className="flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300">
+                      className="flex items-center gap-1 text-sm text-amber-400 hover:text-amber-300">
                       <ShieldOff className="h-3 w-3" /> Remover
                     </button>
                   )}
                 </div>
               </div>
             ))}
-            <div className="px-4 py-3 text-xs text-gray-500">
+            <div className="px-4 py-3 text-sm text-gray-500">
               {filtered.length} de {users.length} utilizadores
             </div>
           </div>
@@ -346,7 +346,7 @@ export default function UsersPage() {
       {/* ── User detail drawer ── */}
       {selectedUser && (
         <>
-          <div className="fixed inset-0 z-40 bg-gray-950/70 backdrop-blur-sm" onClick={() => setSelectedUser(null)} />
+          <div className="fixed inset-0 z-40 bg-gray-950" onClick={() => setSelectedUser(null)} />
           <div className="fixed right-0 top-0 z-50 h-full w-full max-w-sm bg-gray-900 border-l border-gray-800 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
 
             {/* Drawer header */}
@@ -372,7 +372,7 @@ export default function UsersPage() {
                   <p className="text-xl font-bold text-white">{selectedUser.name || "Sem nome"}</p>
                   <p className="text-sm text-gray-400 mt-0.5">{selectedUser.email}</p>
                 </div>
-                <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wider ${
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider ${
                   selectedUser.role === "admin"
                     ? "bg-purple-500/15 text-purple-400 border border-purple-500/25"
                     : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
@@ -390,10 +390,10 @@ export default function UsersPage() {
                   { label: "Registado em", value: formatDate(selectedUser.createdAt), icon: Calendar },
                   { label: "Cursos inscritos", value: String(selectedUser.enrolledCourses?.length ?? 0), icon: BookOpen },
                 ].map(({ label, value, icon: Icon }) => (
-                  <div key={label} className="flex items-start gap-3 bg-gray-800/40 px-4 py-3">
+                  <div key={label} className="flex items-start gap-3 bg-gray-800 px-4 py-3">
                     <Icon className="h-4 w-4 text-gray-500 mt-0.5 shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-xs text-gray-500 font-medium">{label}</p>
+                      <p className="text-sm text-gray-500 font-medium">{label}</p>
                       <p className="text-sm text-white mt-0.5 break-all">{value}</p>
                     </div>
                   </div>

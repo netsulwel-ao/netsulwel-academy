@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { Save, ArrowLeft, Loader2, AlertCircle, X } from "lucide-react";
@@ -21,7 +21,7 @@ export function TrailForm({
   const [thumbnail,   setThumbnail]   = useState(initialData?.thumbnail   ?? "");
   const [thumbPreview,setThumbPreview]= useState(initialData?.thumbnail   ?? "");
   const [thumbUploading,setThumbUploading] = useState(false);
-  const [trailType,   setTrailType]   = useState<CourseType>(initialData?.type     ?? "smart");
+  const [trailType,   setTrailType]   = useState<"standalone">("standalone");
   const [level,       setLevel]       = useState<CourseLevel>(initialData?.level   ?? "beginner");
   const [category,    setCategory]    = useState<CourseCategory>(initialData?.category ?? "tech");
   const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>(initialData?.courseIds   ?? []);
@@ -34,7 +34,7 @@ export function TrailForm({
     setDescription(initialData.description ?? "");
     setThumbnail(initialData.thumbnail ?? "");
     setThumbPreview(initialData.thumbnail ?? "");
-    setTrailType(initialData.type ?? "smart");
+    setTrailType("standalone");
     setLevel(initialData.level ?? "beginner");
     setCategory(initialData.category ?? "tech");
     setSelectedCourseIds(initialData.courseIds ?? []);
@@ -117,16 +117,16 @@ export function TrailForm({
   return (
     <div className="flex flex-col h-full animate-in fade-in duration-300">
 
-      <div className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-gray-800/60 bg-gray-950/90 backdrop-blur-xl px-6 py-4 shrink-0">
+      <div className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-gray-800 bg-gray-950 px-6 py-4 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           <button
             type="button" onClick={onBack} aria-label="Voltar"
-            className="flex h-8 w-8 items-center justify-center border border-gray-800/60 bg-gray-900/10 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all shrink-0"
+            className="flex h-8 w-8 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all shrink-0"
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
           <div className="min-w-0">
-            <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-700">
+            <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-gray-700">
               {mode === "create" ? "// criar trilha" : "// editar trilha"}
             </p>
             <p className="text-sm font-semibold text-gray-200 truncate">
@@ -138,7 +138,7 @@ export function TrailForm({
           <button
             type="button" onClick={() => handleSave("draft")}
             disabled={saving || thumbUploading}
-            className="flex items-center gap-1.5 border border-gray-800/60 bg-gray-900/10 px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-gray-500 hover:border-gray-700 hover:text-gray-300 disabled:opacity-40 transition-all"
+            className="flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-500 hover:border-gray-700 hover:text-gray-300 disabled:opacity-40 transition-all"
           >
             {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
             Rascunho
@@ -146,7 +146,7 @@ export function TrailForm({
           <button
             type="button" onClick={() => handleSave("published")}
             disabled={saving || thumbUploading}
-            className="flex items-center gap-1.5 border border-purple/30 bg-purple/10 px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-purple/80 hover:bg-purple/20 disabled:opacity-40 transition-all"
+            className="flex items-center gap-1.5 border border-purple/30 bg-purple/10 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-purple/80 hover:bg-purple/20 disabled:opacity-40 transition-all"
           >
             {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
             {mode === "edit" ? "Actualizar" : "Publicar"}

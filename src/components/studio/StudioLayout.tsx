@@ -26,7 +26,7 @@ export function StudioLayout({
   return (
     <div className={`flex flex-col h-screen bg-[#0a0a0c] overflow-hidden ${className}`}>
       {/* Header - Desktop Only */}
-      <div className="hidden md:block h-11 min-h-[44px] bg-[#0e0e11] border-b border-white/8 shrink-0">
+      <div className="hidden md:block h-11 min-h-[44px] bg-[#0e0e11] border-b border-white shrink-0">
         {header}
       </div>
 
@@ -39,11 +39,11 @@ export function StudioLayout({
           }`}
         >
           {/* Mobile Header - Responsivo */}
-          <div className="md:hidden h-10 bg-[#0e0e11] border-b border-white/8 flex items-center px-3 gap-2 shrink-0">
+          <div className="md:hidden h-10 bg-[#0e0e11] border-b border-white flex items-center px-3 gap-2 shrink-0">
             {header}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="ml-auto flex items-center justify-center h-8 w-8 text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded transition-colors"
+              className="ml-auto flex items-center justify-center h-8 w-8 text-white hover:text-white bg-white hover:bg-white rounded transition-colors"
               title={sidebarOpen ? "Fechar painel" : "Abrir painel"}
             >
               {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -62,7 +62,7 @@ export function StudioLayout({
         {/* Sidebar - Responsivo */}
         <div
           className={`
-            bg-[#0e0e11] border-l border-white/8
+            bg-[#0e0e11] border-l border-white
             transition-all duration-300 ease-out shrink-0
             overflow-hidden
             ${
@@ -93,7 +93,7 @@ export function StudioLayout({
         {/* Collapse Toggle - Desktop Only */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="hidden lg:flex items-center justify-center w-6 h-6 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/60 transition-colors shrink-0 border-l border-white/8"
+          className="hidden lg:flex items-center justify-center w-6 h-6 bg-white hover:bg-white text-white hover:text-white transition-colors shrink-0 border-l border-white"
           title={collapsed ? "Expandir" : "Recolher"}
         >
           {collapsed ? "▶" : "◀"}

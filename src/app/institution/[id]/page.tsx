@@ -103,7 +103,7 @@ export default function InstitutionPublicPage() {
   if (!institution) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-gray-900/60 border border-gray-800 p-8 text-center">
+        <div className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 text-center">
           <Building2 className="h-16 w-16 text-red-400 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-white mb-2">Instituição não encontrada</h1>
           <Link href="/" className="mt-6 inline-block text-purple hover:text-purple-light font-medium">Voltar ao início</Link>
@@ -165,14 +165,14 @@ export default function InstitutionPublicPage() {
           <div className="lg:col-span-1 space-y-6">
             {/* About */}
             {institution.description && (
-              <div className="bg-gray-900/60 border border-gray-800 p-5">
+              <div className="bg-gray-900 border border-gray-800 p-5">
                 <h2 className="text-lg font-bold text-white mb-3">Sobre</h2>
                 <p className="text-sm text-gray-400 whitespace-pre-wrap">{institution.description}</p>
               </div>
             )}
 
             {/* Contact */}
-            <div className="bg-gray-900/60 border border-gray-800 p-5 space-y-3">
+            <div className="bg-gray-900 border border-gray-800 p-5 space-y-3">
               <h2 className="text-lg font-bold text-white">Contacto</h2>
               {institution.email && (
                 <a href={`mailto:${institution.email}`} className="flex items-center gap-3 text-sm text-gray-400 hover:text-purple transition-colors">
@@ -212,13 +212,13 @@ export default function InstitutionPublicPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {teachers.map(t => (
                     <Link key={t.id} href={`/profile/${t.id}`}
-                      className="flex items-center gap-3 p-4 bg-gray-900/60 border border-gray-800 hover:border-purple/30 transition-colors group">
+                      className="flex items-center gap-3 p-4 bg-gray-900 border border-gray-800 hover:border-purple/30 transition-colors group">
                       <div className="h-12 w-12 bg-gradient-to-br from-purple-500/20 to-purple-700/20 flex items-center justify-center text-purple-400 font-bold shrink-0">
                         {t.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-white group-hover:text-purple transition-colors truncate">{t.name}</p>
-                        {t.specialty && <p className="text-xs text-gray-500 truncate">{t.specialty}</p>}
+                        {t.specialty && <p className="text-sm text-gray-500 truncate">{t.specialty}</p>}
                       </div>
                     </Link>
                   ))}
@@ -239,7 +239,7 @@ export default function InstitutionPublicPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                   {courses.map(c => (
                     <Link key={c.id} href={`/s/${c.id}`}
-                      className="group bg-gray-900/60 border border-gray-800 hover:border-purple/30 transition-colors overflow-hidden">
+                      className="group bg-gray-900 border border-gray-800 hover:border-purple/30 transition-colors overflow-hidden">
                       <div className="aspect-video bg-gray-800 overflow-hidden">
                         {c.thumbnail ? (
                           <img src={c.thumbnail} alt={c.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -251,7 +251,7 @@ export default function InstitutionPublicPage() {
                       </div>
                       <div className="p-4">
                         <h3 className="text-sm font-bold text-white group-hover:text-purple transition-colors line-clamp-2">{c.title}</h3>
-                        <p className="text-xs text-gray-500 mt-1">{c.lessonsCount} aula{c.lessonsCount !== 1 ? "s" : ""}</p>
+                        <p className="text-sm text-gray-500 mt-1">{c.lessonsCount} aula{c.lessonsCount !== 1 ? "s" : ""}</p>
                       </div>
                     </Link>
                   ))}

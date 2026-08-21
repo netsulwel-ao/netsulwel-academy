@@ -9,7 +9,7 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import {
   Play, Lock, Award, BookOpen, Clock, Share2, Users,
-  CheckCircle2, ChevronDown, ChevronRight, Crown, Zap, LogIn,
+  CheckCircle2, ChevronDown, ChevronRight, LogIn,
   Sparkles, ArrowRight, GraduationCap, Loader2,
 } from "lucide-react";
 
@@ -46,8 +46,6 @@ const LEVEL_LABEL: Record<string, string> = {
 };
 
 const TYPE_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  golden:     { label: "Plano Golden", color: "text-yellow-400", icon: Crown },
-  smart:      { label: "Plano Smart",  color: "text-green-400",  icon: Zap },
   standalone: { label: "Compra Avulsa", color: "text-blue-400",  icon: Play },
 };
 
@@ -99,14 +97,13 @@ export default function SalesPageClient({ courseId }: { courseId: string }) {
   };
 
   const hasAccess = !authLoading && user && course
-    ? canAccessCourse(course.type as any, course.id, enrolledCourses, course.price, course.accessCode)
+    ? canAccessCourse(course.id, enrolledCourses, course.price, course.accessCode)
     : false;
 
   const handleCTA = () => {
     if (!user) { router.push(`/login?redirect=/s/${courseId}`); return; }
     if (hasAccess) { router.push(`/dashboard/courses/${courseId}`); return; }
-    if (course?.type === "standalone") { router.push(`/dashboard/finances?courseId=${courseId}`); return; }
-    router.push("/dashboard/finances");
+    router.push(`/dashboard/finances?courseId=${courseId}`);
   };
 
   const handleShare = async () => {
@@ -168,19 +165,19 @@ function CompactPage({ course, teacher, hasAccess, authLoading, copied, user, on
 
   return (
     <div className="min-h-screen bg-background text-white">
-      <nav className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 bg-gray-950/90 backdrop-blur-xl border-b border-gray-800">
+      <nav className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 bg-gray-950 border-b border-gray-800">
         <Link href="/" className="flex items-center gap-2 sm:gap-3">
           <img src="/Logo-Academy-White.svg" alt="Netsulwel" className="h-8 sm:h-10 w-auto" />
           <span className="text-base sm:text-lg font-bold text-white hidden sm:block">Netsulwel Academy</span>
         </Link>
         <div className="flex items-center gap-2 sm:gap-3">
           <button onClick={onShare}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white text-xs sm:text-sm transition-colors">
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white text-sm sm:text-sm transition-colors">
             {copied ? <><CheckCircle2 className="h-4 w-4 text-green-400" /> Copiado!</> : <><Share2 className="h-4 w-4" /> Partilhar</>}
           </button>
           {!user && (
             <Link href="/login"
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-purple hover:bg-purple-light text-white text-xs sm:text-sm font-bold transition-colors">
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-purple hover:bg-purple-light text-white text-sm sm:text-sm font-bold transition-colors">
               <LogIn className="h-4 w-4" /> Entrar
             </Link>
           )}
@@ -202,50 +199,43 @@ function CompactPage({ course, teacher, hasAccess, authLoading, copied, user, on
           </div>
           <div className="flex-1 min-w-0 space-y-4">
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wider border ${
-                course.type === "golden" ? "bg-yellow-500/15 border-yellow-500/30 text-yellow-400"
-                : course.type === "smart" ? "bg-green-500/15 border-green-500/30 text-green-400"
-                : "bg-blue-500/15 border-blue-500/30 text-blue-400"
-              }`}>
+              <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-blue-500/15 border-blue-500/30 text-blue-400">
                 <TypeIcon className="h-3.5 w-3.5" />
                 {typeConf.label}
               </span>
               {course.hasCertificate && (
-                <span className="flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/30 text-amber-400">
+                <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/30 text-amber-400">
                   <Award className="h-3.5 w-3.5" /> Certificado
                 </span>
               )}
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-white">{course.title}</h1>
             <p className="text-sm text-gray-400">{course.description}</p>
-            <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-gray-500">
+            <div className="flex flex-wrap items-center gap-4 text-sm sm:text-sm text-gray-500">
               <span className="flex items-center gap-1.5"><BookOpen className="h-4 w-4" />{course.modulesCount} módulo{course.modulesCount !== 1 ? "s" : ""}</span>
               <span className="flex items-center gap-1.5"><Play className="h-4 w-4" />{course.lessonsCount} aula{course.lessonsCount !== 1 ? "s" : ""}</span>
               {course.totalDuration && <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" />{course.totalDuration}</span>}
             </div>
             {teacher && (
-              <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-400">
+              <div className="flex items-center gap-2 text-sm sm:text-sm text-gray-400">
                 <GraduationCap className="h-4 w-4 text-gray-500" />
                 Por <span className="font-medium text-white">{teacher.name}</span>
               </div>
             )}
             <div className="flex items-center gap-3 pt-2">
               <button onClick={onCTA} disabled={authLoading}
-                className={`flex items-center gap-2 px-6 py-3 font-bold text-xs sm:text-sm transition-colors ${
+                className={`flex items-center gap-2 px-6 py-3 font-bold text-sm sm:text-sm transition-colors ${
                   hasAccess ? "bg-green-600 hover:bg-green-500 text-white"
-                  : course.type === "golden" ? "bg-yellow-500 hover:bg-yellow-400 text-gray-900"
-                  : course.type === "standalone" ? "bg-blue-600 hover:bg-blue-700 text-white"
-                  : "bg-green-600 hover:bg-green-500 text-white"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
                 } disabled:opacity-60`}>
                 {authLoading ? <Loader2 className="h-4 w-4 animate-spin" />
                   : !user ? <><LogIn className="h-4 w-4" /> Entrar para Comprar</>
                   : hasAccess ? <><Play className="h-4 w-4" /> Assistir Agora</>
-                  : course.type === "standalone" ? <><ArrowRight className="h-4 w-4" /> Comprar — {course.price.toLocaleString("pt-AO")} Kz</>
-                  : <><Crown className="h-4 w-4" /> Activar {typeConf.label}</>
+                  : <><ArrowRight className="h-4 w-4" /> Comprar — {course.price.toLocaleString("pt-AO")} Kz</>
                 }
               </button>
               <button onClick={onShare}
-                className="flex items-center gap-2 px-4 py-3 border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-white text-xs sm:text-sm transition-colors">
+                className="flex items-center gap-2 px-4 py-3 border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-white text-sm sm:text-sm transition-colors">
                 {copied ? <><CheckCircle2 className="h-4 w-4 text-green-400" /> Copiado!</> : <><Share2 className="h-4 w-4" /> Partilhar</>}
               </button>
             </div>
@@ -253,7 +243,7 @@ function CompactPage({ course, teacher, hasAccess, authLoading, copied, user, on
         </div>
       </div>
 
-      <footer className="border-t border-gray-800 py-6 sm:py-8 text-center text-xs sm:text-sm text-gray-500">
+      <footer className="border-t border-gray-800 py-6 sm:py-8 text-center text-sm sm:text-sm text-gray-500">
         <p>&copy; {new Date().getFullYear()} Netsulwel Academy. Todos os direitos reservados.</p>
       </footer>
     </div>
@@ -273,19 +263,19 @@ function RichPage({ course, teacher, hasAccess, authLoading, copied, user, onCTA
   return (
     <div className="min-h-screen bg-background text-white">
       {/* ── Navbar ── */}
-      <nav className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 bg-gray-950/90 backdrop-blur-xl border-b border-gray-800">
+      <nav className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 bg-gray-950 border-b border-gray-800">
         <Link href="/" className="flex items-center gap-2 sm:gap-3">
           <img src="/Logo-Academy-White.svg" alt="Netsulwel Academy" className="h-8 sm:h-10 w-auto" />
           <span className="text-base sm:text-lg font-bold text-white hidden sm:block">Netsulwel Academy</span>
         </Link>
         <div className="flex items-center gap-2 sm:gap-3">
           <button onClick={onShare}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white text-xs sm:text-sm transition-colors">
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white text-sm sm:text-sm transition-colors">
             {copied ? <><CheckCircle2 className="h-4 w-4 text-green-400" /> Copiado!</> : <><Share2 className="h-4 w-4" /> Partilhar</>}
           </button>
           {!user && (
             <Link href="/login"
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-purple hover:bg-purple-light text-white text-xs sm:text-sm font-bold transition-colors">
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-purple hover:bg-purple-light text-white text-sm sm:text-sm font-bold transition-colors">
               <LogIn className="h-4 w-4" /> Entrar
             </Link>
           )}
@@ -307,20 +297,16 @@ function RichPage({ course, teacher, hasAccess, authLoading, copied, user, onCTA
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
             <div className="flex-1 space-y-5 sm:space-y-6 w-full">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wider border ${
-                  course.type === "golden" ? "bg-yellow-500/15 border-yellow-500/30 text-yellow-400"
-                  : course.type === "smart" ? "bg-green-500/15 border-green-500/30 text-green-400"
-                  : "bg-blue-500/15 border-blue-500/30 text-blue-400"
-                }`}>
+                <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-blue-500/15 border-blue-500/30 text-blue-400">
                   <TypeIcon className="h-3.5 w-3.5" />
                   {typeConf.label}
                 </span>
                 {course.hasCertificate && (
-                  <span className="flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/30 text-amber-400">
+                  <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/30 text-amber-400">
                     <Award className="h-3.5 w-3.5" /> Certificado
                   </span>
                 )}
-                <span className="px-3 py-1 text-xs font-medium text-gray-400 border border-gray-700">
+                <span className="px-3 py-1 text-sm font-medium text-gray-400 border border-gray-700">
                   {LEVEL_LABEL[course.level] ?? course.level}
                 </span>
               </div>
@@ -329,7 +315,7 @@ function RichPage({ course, teacher, hasAccess, authLoading, copied, user, onCTA
 
               <p className="text-sm sm:text-base lg:text-lg text-gray-300 leading-relaxed max-w-2xl">{course.description}</p>
 
-              <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-400">
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm sm:text-sm text-gray-400">
                 <span className="flex items-center gap-1.5 sm:gap-2"><BookOpen className="h-4 w-4" />{course.modulesCount} módulo{course.modulesCount !== 1 ? "s" : ""}</span>
                 <span className="flex items-center gap-1.5 sm:gap-2"><Play className="h-4 w-4" />{course.lessonsCount} aula{course.lessonsCount !== 1 ? "s" : ""}</span>
                 {course.totalDuration && <span className="flex items-center gap-1.5 sm:gap-2"><Clock className="h-4 w-4" />{course.totalDuration}</span>}
@@ -339,7 +325,7 @@ function RichPage({ course, teacher, hasAccess, authLoading, copied, user, onCTA
               {course.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {course.tags.map(t => (
-                    <span key={t} className="px-3 py-1 bg-gray-800/80 text-gray-400 text-xs border border-gray-700/50">{t}</span>
+                    <span key={t} className="px-3 py-1 bg-gray-800 text-gray-400 text-sm border border-gray-700">{t}</span>
                   ))}
                 </div>
               )}
@@ -350,9 +336,9 @@ function RichPage({ course, teacher, hasAccess, authLoading, copied, user, onCTA
                     {teacher.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-xs sm:text-sm text-gray-400">Instrutor</p>
+                    <p className="text-sm sm:text-sm text-gray-400">Instrutor</p>
                     <p className="text-sm sm:text-base font-medium text-white">{teacher.name}</p>
-                    {teacher.specialty && <p className="text-xs text-gray-500">{teacher.specialty}</p>}
+                    {teacher.specialty && <p className="text-sm text-gray-500">{teacher.specialty}</p>}
                   </div>
                 </div>
               )}
@@ -381,7 +367,7 @@ function RichPage({ course, teacher, hasAccess, authLoading, copied, user, onCTA
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-white">Conteúdo do Curso</h2>
-              <p className="text-xs sm:text-sm text-gray-500">{course.modulesCount} módulos &middot; {course.lessonsCount} aulas</p>
+              <p className="text-sm sm:text-sm text-gray-500">{course.modulesCount} módulos &middot; {course.lessonsCount} aulas</p>
             </div>
           </div>
           <div className="space-y-2">
@@ -391,25 +377,25 @@ function RichPage({ course, teacher, hasAccess, authLoading, copied, user, onCTA
                   aria-expanded={expandedModules.includes(mi)}
                   aria-controls={`sp-module-${mi}`}
                   id={`sp-module-btn-${mi}`}
-                  className="w-full flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-4 bg-gray-900/60 hover:bg-gray-900/80 transition-colors text-left">
-                  <span className="text-[10px] sm:text-xs font-bold text-blue-400 uppercase tracking-wider shrink-0 w-16 sm:w-20">Mód. {mi + 1}</span>
-                  <span className="flex-1 text-xs sm:text-sm font-medium text-white truncate">{mod.title || `Módulo ${mi + 1}`}</span>
-                  <span className="text-[10px] sm:text-xs text-gray-500 shrink-0">{mod.videos.length} aula{mod.videos.length !== 1 ? "s" : ""}</span>
+                  className="w-full flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-4 bg-gray-900 hover:bg-gray-900 transition-colors text-left">
+                  <span className="text-[13px] sm:text-sm font-bold text-blue-400 uppercase tracking-wider shrink-0 w-16 sm:w-20">Mód. {mi + 1}</span>
+                  <span className="flex-1 text-sm sm:text-sm font-medium text-white truncate">{mod.title || `Módulo ${mi + 1}`}</span>
+                  <span className="text-[13px] sm:text-sm text-gray-500 shrink-0">{mod.videos.length} aula{mod.videos.length !== 1 ? "s" : ""}</span>
                   {expandedModules.includes(mi)
                     ? <ChevronDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-500 shrink-0" />
                     : <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-500 shrink-0" />
                   }
                 </button>
                 {expandedModules.includes(mi) && (
-                  <div id={`sp-module-${mi}`} role="region" aria-labelledby={`sp-module-btn-${mi}`} className="bg-gray-950/40 divide-y divide-gray-800/50">
+                  <div id={`sp-module-${mi}`} role="region" aria-labelledby={`sp-module-btn-${mi}`} className="bg-gray-950 divide-y divide-gray-800">
                     {mod.videos.map((vid, vi) => (
                       <div key={vi} className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2.5 sm:py-3">
                         <div className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center bg-gray-800 shrink-0">
                           <Lock className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-500" />
                         </div>
-                        <span className="flex-1 text-xs sm:text-sm text-gray-400 truncate">{vid.title || `Aula ${vi + 1}`}</span>
+                        <span className="flex-1 text-sm sm:text-sm text-gray-400 truncate">{vid.title || `Aula ${vi + 1}`}</span>
                         {vid.duration && (
-                          <span className="text-[10px] sm:text-xs text-gray-600 flex items-center gap-1 shrink-0">
+                          <span className="text-[13px] sm:text-sm text-gray-600 flex items-center gap-1 shrink-0">
                             <Clock className="h-3 w-3" />{vid.duration}
                           </span>
                         )}
@@ -431,14 +417,14 @@ function RichPage({ course, teacher, hasAccess, authLoading, copied, user, onCTA
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-white">Sobre o Instrutor</h2>
             </div>
-            <div className="flex items-start gap-4 sm:gap-6 p-4 sm:p-6 bg-gray-900/40 border border-gray-800">
+            <div className="flex items-start gap-4 sm:gap-6 p-4 sm:p-6 bg-gray-900 border border-gray-800">
               <div className="h-14 w-14 sm:h-16 sm:w-16 bg-gradient-to-br from-purple-500/20 to-purple-700/20 flex items-center justify-center text-purple-400 font-bold text-lg sm:text-xl shrink-0 border border-purple-500/10">
                 {teacher.name.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">
                 <h3 className="text-base sm:text-lg font-bold text-white">{teacher.name}</h3>
-                {teacher.specialty && <p className="text-xs sm:text-sm text-gray-500 mb-2">{teacher.specialty}</p>}
-                <p className="text-xs sm:text-sm text-gray-400 whitespace-pre-wrap">{teacher.bio}</p>
+                {teacher.specialty && <p className="text-sm sm:text-sm text-gray-500 mb-2">{teacher.specialty}</p>}
+                <p className="text-sm sm:text-sm text-gray-400 whitespace-pre-wrap">{teacher.bio}</p>
               </div>
             </div>
           </section>
@@ -461,7 +447,7 @@ function RichPage({ course, teacher, hasAccess, authLoading, copied, user, onCTA
               "Aulas em vídeo com explicações claras",
               "Actualizações gratuitas do curso",
             ].filter(Boolean).map((item) => (
-              <div key={item} className="flex items-start gap-3 p-4 bg-gray-900/30 border border-gray-800/60">
+              <div key={item} className="flex items-start gap-3 p-4 bg-gray-900 border border-gray-800">
                 <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0 mt-0.5" />
                 <span className="text-sm text-gray-300">{item}</span>
               </div>
@@ -473,23 +459,18 @@ function RichPage({ course, teacher, hasAccess, authLoading, copied, user, onCTA
         <section className="text-center py-8 sm:py-12 border-t border-gray-800">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3">Começa agora mesmo!</h2>
           <p className="text-sm sm:text-base text-gray-400 mb-6 max-w-lg mx-auto">
-            {course.type === "standalone"
-              ? `Adquire o curso por ${course.price.toLocaleString("pt-AO")} Kz e começa a aprender hoje.`
-              : `Este curso está disponível no ${typeConf.label}. Activa o teu plano e desbloqueia todos os conteúdos.`}
+              {`Adquire o curso por ${course.price.toLocaleString("pt-AO")} Kz e começa a aprender hoje.`}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <button onClick={onCTA} disabled={authLoading}
               className={`flex items-center gap-2 px-8 py-4 font-bold text-sm transition-colors ${
                 hasAccess ? "bg-green-600 hover:bg-green-500 text-white"
-                : course.type === "golden" ? "bg-yellow-500 hover:bg-yellow-400 text-gray-900"
-                : course.type === "standalone" ? "bg-blue-600 hover:bg-blue-700 text-white"
-                : "bg-green-600 hover:bg-green-500 text-white"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
               } disabled:opacity-60`}>
               {authLoading ? <Loader2 className="h-4 w-4 animate-spin" />
                 : !user ? <><LogIn className="h-4 w-4" /> Entrar para Comprar</>
                 : hasAccess ? <><Play className="h-4 w-4" /> Assistir Agora</>
-                : course.type === "standalone" ? <><Zap className="h-4 w-4" /> Comprar — {course.price.toLocaleString("pt-AO")} Kz</>
-                : <><Crown className="h-4 w-4" /> Activar {typeConf.label}</>
+                : <><ArrowRight className="h-4 w-4" /> Comprar — {course.price.toLocaleString("pt-AO")} Kz</>
               }
             </button>
             <button onClick={onShare}
@@ -500,7 +481,7 @@ function RichPage({ course, teacher, hasAccess, authLoading, copied, user, onCTA
         </section>
       </div>
 
-      <footer className="border-t border-gray-800 py-6 sm:py-8 text-center text-xs sm:text-sm text-gray-500">
+      <footer className="border-t border-gray-800 py-6 sm:py-8 text-center text-sm sm:text-sm text-gray-500">
         <p>&copy; {new Date().getFullYear()} Netsulwel Academy. Todos os direitos reservados.</p>
       </footer>
     </div>
@@ -539,7 +520,7 @@ function CTABox({ course, hasAccess, user, authLoading, onCTA, shareUrl }: {
           <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/20 to-transparent" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center bg-white/10 border border-white/20 backdrop-blur-sm">
+            <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center bg-white border border-white">
               <Lock className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
             </div>
           </div>
@@ -552,7 +533,7 @@ function CTABox({ course, hasAccess, user, authLoading, onCTA, shareUrl }: {
             <p className="text-2xl sm:text-3xl font-bold text-white">
               {course.price > 0 ? `${course.price.toLocaleString("pt-AO")} Kz` : "Gratuito"}
             </p>
-            <p className="text-xs text-gray-500 mt-1">Acesso vitalício</p>
+            <p className="text-sm text-gray-500 mt-1">Acesso vitalício</p>
           </div>
         ) : (
           <div className={`flex items-center justify-center sm:justify-start gap-2 ${typeConf.color}`}>
@@ -562,21 +543,18 @@ function CTABox({ course, hasAccess, user, authLoading, onCTA, shareUrl }: {
         )}
 
         <button onClick={onCTA} disabled={authLoading}
-          className={`w-full flex items-center justify-center gap-2 py-3.5 sm:py-4 font-bold text-xs sm:text-sm transition-colors ${
+          className={`w-full flex items-center justify-center gap-2 py-3.5 sm:py-4 font-bold text-sm sm:text-sm transition-colors ${
             hasAccess ? "bg-green-600 hover:bg-green-500 text-white"
-            : course.type === "golden" ? "bg-yellow-500 hover:bg-yellow-400 text-gray-900"
-            : course.type === "smart" ? "bg-green-600 hover:bg-green-500 text-white"
             : "bg-blue-600 hover:bg-blue-700 text-white"
           } disabled:opacity-60`}>
           {authLoading ? <Loader2 className="h-4 w-4 animate-spin" />
             : !user ? <><LogIn className="h-4 w-4" /> Entrar para Comprar</>
             : hasAccess ? <><Play className="h-4 w-4" /> Assistir Agora</>
-            : course.type === "standalone" ? <><ArrowRight className="h-4 w-4" /> Comprar Curso</>
-            : <><Crown className="h-4 w-4" /> Activar {typeConf.label}</>
+            : <><ArrowRight className="h-4 w-4" /> Comprar Curso</>
           }
         </button>
 
-        <ul className="space-y-2.5 text-xs sm:text-sm text-gray-400">
+        <ul className="space-y-2.5 text-sm sm:text-sm text-gray-400">
           {[
             `${course.modulesCount} módulos · ${course.lessonsCount} aulas`,
             course.hasCertificate ? "Certificado de conclusão" : null,
@@ -592,7 +570,7 @@ function CTABox({ course, hasAccess, user, authLoading, onCTA, shareUrl }: {
         </ul>
 
         <button onClick={handleShare}
-          className="w-full flex items-center justify-center gap-2 py-2.5 border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-white text-xs sm:text-sm transition-colors">
+          className="w-full flex items-center justify-center gap-2 py-2.5 border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-white text-sm sm:text-sm transition-colors">
           {copied ? <><CheckCircle2 className="h-4 w-4 text-green-400" /> Link Copiado!</> : <><Share2 className="h-4 w-4" /> Partilhar Curso</>}
         </button>
       </div>

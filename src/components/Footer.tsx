@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { Code2, Share2, Play, MessagesSquare } from "lucide-react";
+import { TransitionLink } from "./TransitionLink";
 
 const links = {
  Produto: [
- { label: "Trilhas", href: "#trilhas" },
  { label: "Planos", href: "#planos" },
- { label: "Comunidade", href: "#comunidade" },
  { label: "Blog", href: "#blog" },
  ],
  Empresa: [
@@ -33,17 +32,17 @@ export function Footer() {
  <footer className="border-t border-gray-800 py-16">
  <div className="mx-auto max-w-6xl px-6">
   <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-5 lg:gap-16">
- <div className="md:col-span-2">
-  <Link href="/" className="flex items-center gap-3 sm:gap-4 flex-wrap">
- <img src="/Logo-Academy-White.svg" alt="Academy Logo" className="h-16 w-auto sm:h-20" />
- <span className="text-3xl font-light text-gray-600 sm:text-4xl">|</span>
- <div className="flex items-center gap-2">
- <img src="/logo.svg" alt="Netsulwel Logo" className="h-8 w-auto brightness-0 invert sm:h-10" />
- <span className="text-xl font-bold text-white sm:text-2xl">
- Netsulwel
- </span>
- </div>
- </Link>
+  <div className="md:col-span-2">
+  <TransitionLink href="/" className="flex items-center gap-3 sm:gap-4 flex-wrap">
+  <img src="/Logo-Academy-White.svg" alt="Academy Logo" className="h-16 w-auto sm:h-20" />
+  <span className="text-3xl font-light text-gray-600 sm:text-4xl">|</span>
+  <div className="flex items-center gap-2">
+  <img src="/logo.svg" alt="Netsulwel Logo" className="h-8 w-auto brightness-0 invert sm:h-10" />
+  <span className="text-xl font-bold text-white sm:text-2xl">
+  Netsulwel
+  </span>
+  </div>
+  </TransitionLink>
  <p className="mt-6 text-sm leading-relaxed text-gray-300">
  Tech, finanças e investimentos — impulsionando você para o
  próximo nível.

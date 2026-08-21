@@ -44,7 +44,7 @@ export async function POST(
         institutionRole: "admin",
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       });
-      await db.collection("notifications").add({
+      await db.collection("users").doc(institutionData.adminId).collection("notifications").add({
         uid: institutionData.adminId,
         type: "institution_approved",
         title: "Instituição Aprovada",

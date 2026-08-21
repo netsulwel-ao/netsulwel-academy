@@ -218,17 +218,17 @@ export default function AdminManualPage() {
 
       {/* Ações Globais */}
       <div className="mb-10">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3 flex items-center gap-2">
+        <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-3 flex items-center gap-2">
           <Lightbulb className="w-3.5 h-3.5" />
           Dicas Gerais
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {globalActions.map((action, idx) => (
-            <div key={idx} className="flex gap-3 p-4 bg-gray-900/50 border border-gray-800 hover:border-gray-700 transition-colors">
+            <div key={idx} className="flex gap-3 p-4 bg-gray-900 border border-gray-800 hover:border-gray-700 transition-colors">
               <action.icon className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
               <div>
                 <h3 className="text-sm font-semibold text-white mb-0.5">{action.label}</h3>
-                <p className="text-xs text-gray-400 leading-relaxed">{action.text}</p>
+                <p className="text-sm text-gray-400 leading-relaxed">{action.text}</p>
               </div>
             </div>
           ))}
@@ -247,7 +247,7 @@ export default function AdminManualPage() {
           <div key={section.id} className="border border-gray-800 overflow-hidden">
             <button
               onClick={() => toggleSection(section.id)}
-              className="w-full flex items-center justify-between p-4 hover:bg-gray-900/50 transition-colors text-left"
+              className="w-full flex items-center justify-between p-4 hover:bg-gray-900 transition-colors text-left"
             >
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-600/10">
@@ -255,7 +255,7 @@ export default function AdminManualPage() {
                 </div>
                 <div>
                   <h2 className="text-sm font-semibold text-white">{section.title}</h2>
-                  <p className="text-xs text-gray-500">{section.desc}</p>
+                  <p className="text-sm text-gray-500">{section.desc}</p>
                 </div>
               </div>
               {openSections.has(section.id) ? (
@@ -267,7 +267,7 @@ export default function AdminManualPage() {
             {openSections.has(section.id) && (
               <div className="border-t border-gray-800">
                 {section.content.map((item, idx) => (
-                  <div key={idx} className="p-4 pl-4 sm:pl-[4.5rem] pr-4 border-b border-gray-800/50 last:border-b-0">
+                  <div key={idx} className="p-4 pl-4 sm:pl-[4.5rem] pr-4 border-b border-gray-800 last:border-b-0">
                     <h3 className="text-sm font-medium text-blue-300 mb-1.5 flex items-center gap-2">
                       <ArrowRight className="w-3 h-3 text-blue-500" />
                       {item.label}
@@ -283,10 +283,10 @@ export default function AdminManualPage() {
 
       {/* Footer */}
       <div className="mt-12 pt-6 border-t border-gray-800 text-center">
-        <p className="text-xs text-gray-600">
+        <p className="text-sm text-gray-600">
           Netsulwel Academy &mdash; Manual v1.0 &mdash; Atualizado em Junho 2026
         </p>
-        <p className="text-xs text-gray-700 mt-1">
+        <p className="text-sm text-gray-700 mt-1">
           Precisa de ajuda? Contacte o suporte técnico.
         </p>
       </div>

@@ -90,7 +90,7 @@ function VerifyEmailContent() {
           <img src="/Logo-Academy-White.svg" alt="Academy" className="h-9 w-auto brightness-0 invert" />
           <span className="text-base font-bold text-white">Netsulwel</span>
         </Link>
-        <Link href="/login" className="text-xs text-gray-600 hover:text-gray-400 transition-colors">
+        <Link href="/login" className="text-sm text-gray-600 hover:text-gray-400 transition-colors">
           Voltar ao login
         </Link>
       </header>
@@ -108,7 +108,7 @@ function VerifyEmailContent() {
 
         {/* Título */}
         <div className="mb-6 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-3">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-3">
             // verificação de conta
           </p>
           <h1 className="text-2xl font-bold text-gray-100">
@@ -155,7 +155,7 @@ function VerifyEmailContent() {
           <button
             onClick={handleResend}
             disabled={resending || checking || sent}
-            className="flex w-full items-center justify-center gap-2 border border-gray-800 bg-gray-900/50 py-3 text-sm font-medium text-gray-400 hover:border-gray-700 hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="flex w-full items-center justify-center gap-2 border border-gray-800 bg-gray-900 py-3 text-sm font-medium text-gray-400 hover:border-gray-700 hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {resending ? (
               <><Loader2 className="h-4 w-4 animate-spin" /> A enviar...</>
@@ -166,12 +166,12 @@ function VerifyEmailContent() {
         </div>
 
         {/* Nota */}
-        <div className="mt-8 border-t border-gray-800/60 pt-6">
-          <p className="text-xs text-gray-600 leading-relaxed text-center">
+        <div className="mt-8 border-t border-gray-800 pt-6">
+          <p className="text-sm text-gray-600 leading-relaxed text-center">
             Não recebeu? Verifique a pasta de <strong className="text-gray-500">spam</strong>.
             O email pode demorar alguns minutos.
           </p>
-          <p className="mt-3 text-center text-xs">
+          <p className="mt-3 text-center text-sm">
             <Link href="/login" className="text-gray-600 hover:text-gray-400 transition-colors">
               ← Voltar ao login
             </Link>

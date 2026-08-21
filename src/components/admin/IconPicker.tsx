@@ -69,7 +69,7 @@ interface IconPickerProps {
 export default function IconPicker({ value, onChange, onClose }: IconPickerProps) {
   return (
     <div className="absolute z-50 top-full left-0 mt-1 w-full max-w-72 bg-gray-900 border border-gray-700 shadow-2xl p-3">
-      <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Escolher ícone</p>
+      <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Escolher ícone</p>
       <div className="grid grid-cols-6 sm:grid-cols-8 gap-1 max-h-48 overflow-y-auto">
         {AVAILABLE_ICONS.map((ic) => {
           const Icon = getLucideIcon(ic.name);

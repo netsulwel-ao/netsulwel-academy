@@ -42,7 +42,7 @@ export function Modal({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black"
         onClick={onClose}
       />
 
@@ -50,7 +50,7 @@ export function Modal({
       <div
         className={`
           relative z-50 w-full ${sizes[size]} max-h-[90vh] overflow-y-auto
-          rounded-lg bg-gradient-to-br from-white/10 to-white/5
+          rounded-lg bg-gray-900
           border border-gray-700 shadow-2xl
           animate-in fade-in zoom-in-95 duration-200
         `}

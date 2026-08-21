@@ -12,7 +12,7 @@ export default function TrailsPage() {
 
       {/* ── Cabeçalho ── */}
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
           // trilhas de aprendizagem
         </p>
         <h1 className="text-2xl font-bold text-gray-100">Trilhas</h1>
@@ -38,11 +38,11 @@ export default function TrailsPage() {
 
       {/* ── Empty state ── */}
       {!loading && trails.length === 0 && !error && (
-        <div className="flex flex-col items-center justify-center border border-gray-800/60 bg-gray-900/10 py-20 text-center">
+        <div className="flex flex-col items-center justify-center border border-gray-800 bg-gray-900 py-20 text-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
             <Layers className="h-5 w-5 text-gray-700" strokeWidth={1.5} />
           </div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-700 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">
             // sem trilhas
           </p>
           <p className="text-sm text-gray-600 max-w-xs">

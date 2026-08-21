@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { collection, query, where, getDocs, doc, updateDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
-import { Search, ArrowUpDown, Loader2, GraduationCap, Mail, Calendar, BookOpen, UserCheck, Award, X, CreditCard } from "lucide-react";
+import { Search, ArrowUpDown, Loader2, GraduationCap, Mail, Calendar, BookOpen, UserCheck, X } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { toast } from "sonner";
 
@@ -13,12 +13,10 @@ interface Student {
   name: string;
   email: string;
   role: string;
-  plan?: string;
   createdAt: Date;
   enrolledCourses?: string[];
   photoURL?: string;
   teacherCourseIds?: string[];
-  accessType?: "purchase" | "plan";
 }
 
 export default function AdminStudentsPage() {
@@ -42,7 +40,6 @@ export default function AdminStudentsPage() {
           const myCourses = coursesSnap.docs.map(d => ({
             id: d.id,
             title: d.data().title as string,
-            type: d.data().type as string,
           }));
           const myCourseIds = myCourses.map(c => c.id);
           const myCourseIdSet = new Set(myCourseIds);
@@ -74,10 +71,7 @@ export default function AdminStudentsPage() {
             purchaseMap[userId].add(itemId);
           });
 
-          // 3. Cursos do teacher acessíveis por plano
-          const planCourses = myCourses.filter(c => c.type === "smart" || c.type === "golden");
-
-          // 4. Todos os alunos e filtrar os que têm acesso
+          // 3. Todos os alunos e filtrar os que têm acesso
           const allStudentsSnap = await getDocs(
             query(collection(db, "users"), where("role", "==", "aluno"))
           );
@@ -88,26 +82,16 @@ export default function AdminStudentsPage() {
             const data = d.data();
             const uid = d.id;
             const enrolledCourses: string[] = data.enrolledCourses ?? [];
-            const plan: string = data.plan || "free";
 
             // Compras diretas confirmadas
             const purchased = purchaseMap[uid]
               ? [...purchaseMap[uid]].filter(id => myCourseIdSet.has(id))
               : [];
 
-            // Acesso via plano
-            const byPlan = planCourses
-              .filter(c => {
-                if (plan === "golden") return true;
-                if (plan === "smart") return c.type === "smart";
-                return false;
-              })
-              .map(c => c.id);
-
             // enrolledCourses já processados (compras anteriores)
             const byEnrolled = enrolledCourses.filter(id => myCourseIdSet.has(id));
 
-            const allAccess = new Set([...purchased, ...byPlan, ...byEnrolled]);
+            const allAccess = new Set([...purchased, ...byEnrolled]);
             if (allAccess.size === 0) return;
 
             studentList.push({
@@ -115,11 +99,9 @@ export default function AdminStudentsPage() {
               name: data.name || "Sem nome",
               email: data.email || "",
               role: data.role || "aluno",
-              plan,
               createdAt: (data.createdAt as Timestamp)?.toDate?.() ?? new Date(data.createdAt as string),
               enrolledCourses,
               teacherCourseIds: [...allAccess],
-              accessType: purchased.length > 0 ? "purchase" : "plan",
             });
           });
 
@@ -137,7 +119,6 @@ export default function AdminStudentsPage() {
               name: data.name || "Sem nome",
               email: data.email || "",
               role: data.role || "aluno",
-              plan: data.plan || "free",
               createdAt: (data.createdAt as Timestamp)?.toDate?.() ?? new Date(data.createdAt as string),
               enrolledCourses: data.enrolledCourses,
             };
@@ -178,15 +159,6 @@ export default function AdminStudentsPage() {
     } catch {
       toast.error("Erro ao promover.");
     }
-  };
-
-  const planBadge = (plan?: string) => {
-    const colors: Record<string, string> = {
-      free: "bg-gray-500/10 text-gray-400",
-      smart: "bg-blue-500/10 text-blue-400",
-      golden: "bg-amber-500/10 text-amber-400",
-    };
-    return colors[plan || "free"] || colors.free;
   };
 
   return (
@@ -242,7 +214,7 @@ export default function AdminStudentsPage() {
               search
                 ? "Tenta pesquisar por outro termo."
                 : isTeacher
-                ? "Os alunos aparecem aqui quando comprarem ou tiverem plano que inclua os teus cursos."
+                ?               "Os alunos aparecem aqui quando comprarem os teus cursos."
                 : "Os alunos aparecerão aqui depois de se registarem na plataforma."
             }
             compact
@@ -252,13 +224,11 @@ export default function AdminStudentsPage() {
             <table className="w-full">
               <caption className="sr-only">Lista de alunos</caption>
               <thead>
-                <tr className="border-b border-gray-800 text-left text-xs uppercase tracking-wider text-gray-500">
+                <tr className="border-b border-gray-800 text-left text-sm uppercase tracking-wider text-gray-500">
                   <th scope="col" className="py-4 px-6 font-medium">Aluno</th>
                   <th scope="col" className="py-4 px-6 font-medium">Email</th>
-                  <th scope="col" className="py-4 px-6 font-medium">Plano</th>
                   <th scope="col" className="py-4 px-6 font-medium">Registado</th>
                   <th scope="col" className="py-4 px-6 font-medium">{isTeacher ? "Meus Cursos" : "Cursos"}</th>
-                  {isTeacher && <th scope="col" className="py-4 px-6 font-medium">Acesso</th>}
                   {isAdmin && <th scope="col" className="py-4 px-6 font-medium">Acções</th>}
                 </tr>
               </thead>
@@ -276,47 +246,29 @@ export default function AdminStudentsPage() {
                         </div>
                         <div>
                           <p className="text-sm font-medium text-white">{student.name}</p>
-                          <p className="text-xs text-gray-500 font-mono">{student.id.slice(0, 12)}...</p>
+                          <p className="text-sm text-gray-500 font-mono">{student.id.slice(0, 12)}...</p>
                         </div>
                       </div>
                     </td>
                     <td className="py-4 px-6 text-sm text-gray-400">{student.email}</td>
-                    <td className="py-4 px-6">
-                      <span className={`px-2.5 py-1 text-xs font-medium ${planBadge(student.plan)}`}>
-                        {student.plan || "free"}
-                      </span>
-                    </td>
                     <td className="py-4 px-6 text-sm text-gray-400">
                       {student.createdAt.toLocaleDateString("pt-PT")}
                     </td>
                     <td className="py-4 px-6 text-sm text-gray-400">
                       {isTeacher ? (student.teacherCourseIds?.length ?? 0) : (student.enrolledCourses?.length ?? 0)}
                     </td>
-                    {isTeacher && (
-                      <td className="py-4 px-6">
-                        {student.accessType === "purchase" ? (
-                          <span className="flex items-center gap-1 text-xs text-green-400 font-medium">
-                            <CreditCard className="h-3 w-3" /> Compra
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-xs text-blue-400 font-medium">
-                            <Award className="h-3 w-3" /> Plano
-                          </span>
-                        )}
-                      </td>
-                    )}
                     {isAdmin && (
                       <td className="py-4 px-6" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => setSelectedStudent(student)}
-                            className="px-3 py-1.5 text-xs font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
+                            className="px-3 py-1.5 text-sm font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
                           >
                             Detalhes
                           </button>
                           <button
                             onClick={() => handlePromoteToTeacher(student)}
-                            className="px-3 py-1.5 text-xs font-medium bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+                            className="px-3 py-1.5 text-sm font-medium bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
                           >
                             <GraduationCap className="h-3 w-3 inline mr-1" />Professor
                           </button>
@@ -334,7 +286,7 @@ export default function AdminStudentsPage() {
       {/* Detail Drawer */}
       {selectedStudent && (
         <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setSelectedStudent(null)} />
+          <div className="absolute inset-0 bg-black" onClick={() => setSelectedStudent(null)} />
           <div className="relative w-96 bg-gray-900 border-l border-gray-800 p-8 overflow-y-auto animate-in slide-in-from-right duration-300">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-lg font-bold text-white">Detalhes do Aluno</h3>
@@ -348,16 +300,6 @@ export default function AdminStudentsPage() {
                 {selectedStudent.name.charAt(0).toUpperCase()}
               </div>
               <h4 className="text-xl font-bold text-white">{selectedStudent.name}</h4>
-              <span className={`mt-2 px-3 py-1 text-xs font-medium ${planBadge(selectedStudent.plan)}`}>
-                {selectedStudent.plan || "free"}
-              </span>
-              {isTeacher && selectedStudent.accessType && (
-                <span className={`mt-1 flex items-center gap-1 text-xs font-medium ${selectedStudent.accessType === "purchase" ? "text-green-400" : "text-blue-400"}`}>
-                  {selectedStudent.accessType === "purchase"
-                    ? <><CreditCard className="h-3 w-3" /> Acesso por compra</>
-                    : <><Award className="h-3 w-3" /> Acesso por plano</>}
-                </span>
-              )}
             </div>
 
             <div className="space-y-4">
@@ -379,17 +321,17 @@ export default function AdminStudentsPage() {
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <UserCheck className="h-4 w-4 text-gray-500 shrink-0" />
-                <span className="text-gray-300 font-mono text-xs break-all">ID: {selectedStudent.id}</span>
+                <span className="text-gray-300 font-mono text-sm break-all">ID: {selectedStudent.id}</span>
               </div>
             </div>
 
             {/* Lista de cursos do teacher que o aluno tem */}
             {isTeacher && selectedStudent.teacherCourseIds && selectedStudent.teacherCourseIds.length > 0 && (
               <div className="mt-6 pt-6 border-t border-gray-800">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Cursos com acesso</p>
+                <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Cursos com acesso</p>
                 <div className="space-y-2">
                   {selectedStudent.teacherCourseIds.map(cid => (
-                    <div key={cid} className="flex items-center gap-2 bg-gray-800/50 px-3 py-2 text-sm text-gray-300">
+                    <div key={cid} className="flex items-center gap-2 bg-gray-800 px-3 py-2 text-sm text-gray-300">
                       <BookOpen className="h-3.5 w-3.5 text-purple shrink-0" />
                       {courseMap[cid] ?? cid}
                     </div>

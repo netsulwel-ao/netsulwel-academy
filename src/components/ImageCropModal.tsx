@@ -81,7 +81,7 @@ export function ImageCropModal({ imageUrl, title, aspectRatio, outputWidth, outp
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black p-4"
       role="dialog" aria-modal="true" aria-labelledby="crop-title"
       onKeyDown={(e) => { if (e.key === "Escape" && !saving) onCancel(); }}>
       <div className="bg-gray-950 border border-gray-800 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
@@ -120,7 +120,7 @@ export function ImageCropModal({ imageUrl, title, aspectRatio, outputWidth, outp
             <input type="range" min={1} max={3} step={0.01} value={zoom}
               onChange={(e) => setZoom(Number(e.target.value))}
               className="flex-1 accent-purple h-1.5 appearance-none bg-gray-700 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple [&::-webkit-slider-thumb]:cursor-pointer" />
-            <span className="text-xs text-gray-500 w-8 text-right">{Math.round(zoom * 100)}%</span>
+            <span className="text-sm text-gray-500 w-8 text-right">{Math.round(zoom * 100)}%</span>
           </div>
         </div>
 

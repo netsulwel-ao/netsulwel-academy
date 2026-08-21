@@ -9,7 +9,7 @@ export default function ChatsPage() {
 
       {/* ── Cabeçalho ── */}
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
           // mensagens
         </p>
         <h1 className="text-2xl font-bold text-gray-100">Chats</h1>
@@ -19,7 +19,7 @@ export default function ChatsPage() {
       </div>
 
       {/* ── Lista de conversas ── */}
-      <div className="border border-gray-800/60 bg-gray-900/10">
+      <div className="border border-gray-800 bg-gray-900">
         <ChatList />
       </div>
     </div>

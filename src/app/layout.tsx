@@ -3,8 +3,19 @@ import { Inter, Press_Start_2P } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { TransitionProvider } from "@/contexts/TransitionContext";
-import { TransitionOverlay } from "@/components/TransitionOverlay";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Toaster } from "sonner";
+
+const ANTI_FOUC_SCRIPT = `
+(function(){
+  try {
+    var t = localStorage.getItem('theme');
+    if (t === 'light' || t === 'dark') {
+      document.documentElement.setAttribute('data-theme', t);
+    }
+  } catch(e) {}
+})();
+`;
 
 const inter = Inter({
  variable: "--font-inter",
@@ -84,12 +95,17 @@ export default function RootLayout({
 }>) {
  return (
  <html lang="pt-AO" className={`${inter.variable} ${pressStart.variable} scroll-smooth`}>
-  <body className="min-h-screen bg-background text-foreground antialiased">
-   <TransitionProvider>
+  <head>
+    <script dangerouslySetInnerHTML={{ __html: ANTI_FOUC_SCRIPT }} />
+  </head>
+  <body className="bg-background text-foreground antialiased">
+    <ThemeProvider>
+    <TransitionProvider>
     <AuthProvider>
-      <TransitionOverlay />
-      <div className="animate-in fade-in duration-300">
-        {children}
+      <div className="app-scale-wrapper">
+        <div className="animate-in fade-in duration-300">
+          {children}
+        </div>
       </div>
       <Toaster
         position="bottom-right"
@@ -101,6 +117,7 @@ export default function RootLayout({
       />
     </AuthProvider>
    </TransitionProvider>
+   </ThemeProvider>
  </body>
  </html>
  );

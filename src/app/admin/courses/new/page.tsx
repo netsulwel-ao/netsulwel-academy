@@ -70,7 +70,7 @@ export default function NewCoursePage() {
         <div className="flex h-16 w-16 items-center justify-center border border-green/25 bg-green/8">
           <CheckCircle2 className="h-7 w-7 text-green/70" strokeWidth={1.5} />
         </div>
-        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-600">// curso criado</p>
+        <p className="font-mono text-[13px] uppercase tracking-widest text-gray-600">// curso criado</p>
         <p className="text-sm text-gray-600">A redirecionar...</p>
       </div>
     );

@@ -25,8 +25,8 @@ export function Card({
   return (
     <div
       className={`
-        rounded-lg border border-gray-700 bg-gradient-to-br from-white/10 to-white/5
-        backdrop-blur-xl shadow-lg
+        rounded-lg border border-gray-700 bg-gray-900
+        shadow-lg
         ${hover ? "hover:border-purple-500/50 hover:shadow-xl transition-all" : ""}
         ${paddingVariants[padding]}
         ${className || ""}

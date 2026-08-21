@@ -95,7 +95,7 @@ export default function TeacherCoursesPage() {
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-green-400" /></div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20 bg-gray-900/40 border border-gray-800">
+        <div className="text-center py-20 bg-gray-900 border border-gray-800">
           <BookOpen className="h-12 w-12 text-gray-600 mx-auto mb-4" />
           <p className="text-gray-400 mb-4">{search ? "Nenhum curso encontrado." : "Ainda não criaste nenhum curso."}</p>
           {!search && (
@@ -108,9 +108,9 @@ export default function TeacherCoursesPage() {
       ) : (
         <div className="grid gap-4">
           {filtered.map((course) => (
-            <div key={course.id} className="bg-gray-900/40 border border-gray-800 hover:border-gray-700 transition-colors">
-              <div className="flex items-center gap-4 p-5">
-                <div className="h-16 w-24 rounded bg-gray-800 overflow-hidden shrink-0">
+            <div key={course.id} className="bg-gray-900 border border-gray-800 hover:border-gray-700 transition-colors">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 sm:p-5">
+                <div className="h-32 sm:h-16 sm:w-24 rounded bg-gray-800 overflow-hidden shrink-0">
                   {course.thumbnail ? (
                      <img src={course.thumbnail} alt={course.title} className="h-full w-full object-cover" />
                   ) : (
@@ -118,9 +118,9 @@ export default function TeacherCoursesPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-1">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-1 flex-wrap">
                     <h3 className="font-bold text-white truncate">{course.title}</h3>
-                    <span className={`shrink-0 px-2 py-0.5 text-xs font-bold ${
+                    <span className={`shrink-0 px-2 py-0.5 text-[13px] font-bold ${
                       course.status === "published"
                         ? "bg-green-500/15 text-green-400 border border-green-500/25"
                         : "bg-yellow-500/15 text-yellow-400 border border-yellow-500/25"
@@ -130,7 +130,7 @@ export default function TeacherCoursesPage() {
                   </div>
                   <p className="text-sm text-gray-500">{course.modulesCount ?? 0} módulos • {course.lessonsCount ?? 0} aulas • {formatKz(course.price)}</p>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1 sm:gap-2 shrink-0 justify-end sm:justify-start">
                   <Link href={`/dashboard/courses/${course.id}`}
                     className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 transition-all" title="Ver">
                     <Eye className="h-4 w-4" />

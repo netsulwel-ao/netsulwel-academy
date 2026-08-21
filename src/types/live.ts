@@ -1,7 +1,7 @@
 import type { CourseMaterial } from "./course";
 
 export type LiveStatus = "scheduled" | "live" | "ended";
-export type LiveTarget = "free" | "smart" | "golden" | "standalone";
+export type LiveTarget = "free" | "standalone";
 
 export interface LiveSession {
   id?: string;

@@ -152,12 +152,12 @@ export default function CommunityPostDetailPage() {
       </div>
 
       {/* Post */}
-      <div className="bg-gray-900/40 border border-gray-800">
+      <div className="bg-gray-900 border border-gray-800">
         <div className="p-6 sm:p-8 space-y-5">
           {/* Header */}
           <div className="flex items-start justify-between gap-3">
             <Link href={`/dashboard/community/profile/${post.authorId}`} className="flex items-center gap-3 group">
-              <div className="h-12 w-12 shrink-0 overflow-hidden border border-gray-800/60">
+              <div className="h-12 w-12 shrink-0 overflow-hidden border border-gray-800">
                 <Avatar uid={post.authorId} photoURL={post.authorPhoto} name={post.authorName} size={48} />
               </div>
               <div>
@@ -221,7 +221,7 @@ export default function CommunityPostDetailPage() {
       </div>
 
       {/* Comments */}
-      <div className="mt-6 bg-gray-900/40 border border-gray-800 p-6 sm:p-8">
+      <div className="mt-6 bg-gray-900 border border-gray-800 p-6 sm:p-8">
         <CommentSection postId={id} postAuthorId={post.authorId} postTitle={post.title} />
       </div>
     </div>

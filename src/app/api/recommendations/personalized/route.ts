@@ -103,7 +103,7 @@ Responde APENAS com um array JSON de IDs dos cursos que recomendas (máximo 8), 
         Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: "llama-3.1-8b-instant",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.3,
         max_tokens: 500,
