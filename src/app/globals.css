@@ -130,29 +130,26 @@
 }
 
 /* ── Light mode: force all text to #67676f ── */
-[data-theme="light"] body,
-[data-theme="light"] body *:not(svg):not(img):not(video):not(canvas):not([class*="bg-"]):not([style*="background"]) {
+[data-theme="light"] * {
   color: #67676f !important;
 }
-[data-theme="light"] body svg {
+[data-theme="light"] svg {
   color: #67676f;
 }
-[data-theme="light"] a,
-[data-theme="light"] button,
-[data-theme="light"] span,
-[data-theme="light"] p,
-[data-theme="light"] h1,
-[data-theme="light"] h2,
-[data-theme="light"] h3,
-[data-theme="light"] h4,
-[data-theme="light"] h5,
-[data-theme="light"] h6,
-[data-theme="light"] label,
-[data-theme="light"] td,
-[data-theme="light"] th,
-[data-theme="light"] li,
-[data-theme="light"] div {
-  color: #67676f !important;
+[data-theme="light"] .text-green,
+[data-theme="light"] .text-green-light,
+[data-theme="light"] .text-purple,
+[data-theme="light"] .text-purple-light,
+[data-theme="light"] .text-red-400,
+[data-theme="light"] .text-red-500,
+[data-theme="light"] .text-green-400,
+[data-theme="light"] .text-green-500,
+[data-theme="light"] .text-amber-300,
+[data-theme="light"] .text-amber-400,
+[data-theme="light"] .text-cyan-400,
+[data-theme="light"] .text-blue-500,
+[data-theme="light"] .text-blue-400 {
+  color: inherit !important;
 }
 [data-theme="light"] body {
   font-size: 15px;
