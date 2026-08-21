@@ -283,7 +283,7 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: 6rem;
   height: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .app-scale-wrapper {
@@ -291,7 +291,7 @@ html {
   transform-origin: top left;
   width: calc(100vw / 0.9);
   height: calc(100vh / 0.9);
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 body {
@@ -299,7 +299,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-inter), system-ui, sans-serif;
   height: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 /* ΓöÇΓöÇ Custom Scrollbar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
