@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import { doc, setDoc, deleteDoc } from "firebase/firestore";
-import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useRouter } from "next/navigation";
 
 
@@ -83,7 +83,11 @@ export default function InstitutionRegisterPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erro ao registar instituição.");
-      await sendEmailVerification(cred.user);
+      await fetch("/api/auth/send-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: adminEmail }),
+      });
       router.push("/verify-email");
     } catch (err: unknown) {
       if (createdUser) {

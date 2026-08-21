@@ -12,7 +12,6 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   updateProfile,
-  sendEmailVerification,
   signInWithPopup,
   GoogleAuthProvider,
   GithubAuthProvider,
@@ -112,7 +111,11 @@ export default function RegisterPage() {
         nacionalidade,
         morada,
       });
-      await sendEmailVerification(cred.user);
+      await fetch("/api/auth/send-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
       router.push(`/verify-email${redirectTo !== "/dashboard" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`);
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code ?? "";

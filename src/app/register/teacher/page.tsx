@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
-import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useRouter } from "next/navigation";
 
 
@@ -52,7 +52,11 @@ export default function TeacherRegisterPage() {
         bio: bio.trim() || "",
         createdAt: new Date(),
       });
-      await sendEmailVerification(cred.user);
+      await fetch("/api/auth/send-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
       router.push("/verify-email");
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code ?? "";
