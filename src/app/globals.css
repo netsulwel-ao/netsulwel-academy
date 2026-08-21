@@ -82,9 +82,9 @@
   --bg-overlay:      rgba(15, 23, 42, 0.5);
 
   /* ── Semantic: text ── */
-  --text-primary:    #0f172a;
-  --text-secondary:  #475569;
-  --text-muted:      #94a3b8;
+  --text-primary:    #67676f;
+  --text-secondary:  #67676f;
+  --text-muted:      #67676f;
   --text-on-brand:   #ffffff;
 
   /* ── Semantic: borders ── */
@@ -103,30 +103,60 @@
 
   /* ── Legacy tokens ── */
   --background: #f8fafc;
-  --foreground: #0f172a;
-  --gray-100: #0f172a;
-  --gray-200: #1e293b;
-  --gray-300: #334155;
-  --gray-400: #475569;
-  --gray-500: #64748b;
-  --gray-600: #94a3b8;
-  --gray-700: #cbd5e1;
+  --foreground: #67676f;
+  --gray-100: #67676f;
+  --gray-200: #67676f;
+  --gray-300: #67676f;
+  --gray-400: #67676f;
+  --gray-500: #67676f;
+  --gray-600: #67676f;
+  --gray-700: #67676f;
   --gray-800: #e2e8f0;
   --gray-900: #ffffff;
   --gray-950: #f8fafc;
-  --slate-100: #0f172a;
-  --slate-200: #1e293b;
-  --slate-300: #334155;
-  --slate-400: #475569;
-  --slate-500: #64748b;
-  --slate-600: #94a3b8;
-  --slate-700: #cbd5e1;
+  --slate-100: #67676f;
+  --slate-200: #67676f;
+  --slate-300: #67676f;
+  --slate-400: #67676f;
+  --slate-500: #67676f;
+  --slate-600: #67676f;
+  --slate-700: #67676f;
   --slate-800: #e2e8f0;
   --slate-900: #ffffff;
   --slate-950: #f8fafc;
   --popup-bg: #ffffff;
   --card: #ffffff;
   --card-border: #e2e8f0;
+}
+
+/* ── Light mode: force all text to #67676f ── */
+[data-theme="light"] body,
+[data-theme="light"] body *:not(svg):not(img):not(video):not(canvas):not([class*="bg-"]):not([style*="background"]) {
+  color: #67676f !important;
+}
+[data-theme="light"] body svg {
+  color: #67676f;
+}
+[data-theme="light"] a,
+[data-theme="light"] button,
+[data-theme="light"] span,
+[data-theme="light"] p,
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] h5,
+[data-theme="light"] h6,
+[data-theme="light"] label,
+[data-theme="light"] td,
+[data-theme="light"] th,
+[data-theme="light"] li,
+[data-theme="light"] div {
+  color: #67676f !important;
+}
+[data-theme="light"] body {
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 @theme {
