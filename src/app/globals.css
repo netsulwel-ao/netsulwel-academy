@@ -250,24 +250,7 @@
 [data-theme="light"] .recharts-cartesian-grid-vertical line { stroke: var(--border-default); }
 
 /* ═══ LIGHT MODE — Login page ═══ */
-[data-theme="light"] .bg-gray-950\/20.carousel-overlay,
-[data-theme="light"] .carousel-overlay { background-color: rgba(9,9,11,0.4); }
-[data-theme="light"] .carousel-gradient { background: linear-gradient(to top, #09090b, rgba(9,9,11,0.6), transparent); }
-[data-theme="light"] .carousel-title { color: var(--text-on-brand); }
-[data-theme="light"] .carousel-desc { color: #d4d4d8; }
-[data-theme="light"] .carousel-indicator { background-color: rgba(255,255,255,0.4); }
-[data-theme="light"] .carousel-indicator-active { background-color: var(--text-on-brand); }
 [data-theme="light"] .grid-bg { opacity: 0.04; }
-[data-theme="light"] .login-card {
-  box-shadow: var(--shadow-card);
-  border-color: var(--border-default);
-}
-[data-theme="light"] .login-card-glow { opacity: 0; }
-[data-theme="light"] .login-register-text { color: var(--text-secondary); }
-[data-theme="dark"] .login-card {
-  border-color: rgba(255,255,255,0.08);
-  box-shadow: 0 0 0 1px rgba(124,58,237,0.08), 0 4px 24px rgba(124,58,237,0.06);
-}
 
 html {
   scroll-behavior: smooth;
