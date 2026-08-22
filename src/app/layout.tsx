@@ -171,11 +171,10 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     icons: {
       icon: [
-        { url: "/favicon.ico", sizes: "any" },
         { url: "/Logo-Academy-White.svg", type: "image/svg+xml" },
       ],
       apple: [
-        { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+        { url: "/Logo-Academy-White.svg", type: "image/svg+xml" },
       ],
     },
     manifest: "/manifest.json",
@@ -249,7 +248,6 @@ export default function RootLayout({
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="geo.region" content="AO" />
     <meta name="geo.placename" content="Luanda" />
   </head>
