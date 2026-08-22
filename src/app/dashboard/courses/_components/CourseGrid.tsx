@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { Play, Lock, Search, BookOpen, ArrowRight } from "lucide-react";
+import { Search } from "lucide-react";
 import type { Course } from "@/types/course";
 import { CourseCard } from "./CourseCard";
 import { useAccess } from "@/hooks/useAccess";
@@ -57,7 +56,6 @@ export function CourseGrid({
       {/* ── Secção: Disponíveis ── */}
       {accessible.length > 0 && (
         <section>
-          {/* Cabeçalho editorial */}
           <div className="flex items-end justify-between mb-4">
             <div>
               <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green/60 mb-1">
@@ -68,100 +66,20 @@ export function CourseGrid({
                 <span className="ml-2 font-mono text-sm text-gray-700">({accessible.length})</span>
               </h2>
             </div>
-            <Link
-              href="/dashboard/courses"
-              className="font-mono text-[13px] uppercase tracking-widest text-gray-700 hover:text-gray-500 transition-colors"
-            >
-              ver todos →
-            </Link>
           </div>
 
-          {/* Grid editorial assimétrico: destaque grande + lista */}
-          {accessible.length === 1 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {accessible.map(c => (
               <CourseCard
-                course={accessible[0]}
+                key={c.id}
+                course={c}
                 locked={false}
                 enrolledCourses={enrolledCourses}
                 creatorNames={creatorNames}
-                isOwn={ownCourseIds.has(accessible[0].id!)}
+                isOwn={ownCourseIds.has(c.id!)}
               />
-            </div>
-          ) : accessible.length <= 3 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {accessible.map(c => (
-                <CourseCard
-                  key={c.id}
-                  course={c}
-                  locked={false}
-                  enrolledCourses={enrolledCourses}
-                  creatorNames={creatorNames}
-                  isOwn={ownCourseIds.has(c.id!)}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {/* Destaque horizontal */}
-              <Link
-                href={
-                  ownCourseIds.has(accessible[0].id!)
-                    ? `/dashboard/teacher/courses/${accessible[0].id}/edit`
-                    : `/dashboard/courses/${accessible[0].id}`
-                }
-                className="group relative flex flex-col md:flex-row overflow-hidden border border-gray-800 bg-gray-900 hover:border-gray-700 hover:bg-gray-900 transition-all"
-              >
-                <div className="relative h-44 md:h-auto md:w-72 lg:w-80 shrink-0 bg-gray-900">
-                  {accessible[0].thumbnail ? (
-                    <img src={accessible[0].thumbnail} alt={accessible[0].title}
-                      className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center">
-                      <BookOpen className="h-8 w-8 text-gray-800" strokeWidth={1} />
-                    </div>
-                  )}
-                  {/* Badge "Teu curso" no destaque */}
-                  {ownCourseIds.has(accessible[0].id!) && (
-                    <div className="absolute left-2.5 top-2.5">
-                      <span className="font-mono text-[13px] uppercase tracking-widest border border-purple/30 bg-purple/15 px-2 py-0.5 text-purple/80">
-                        Teu curso
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-1 flex-col justify-between p-4 sm:p-5">
-                  <div>
-                    <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">// destaque</p>
-                    <h3 className="text-sm sm:text-base font-bold text-gray-200 group-hover:text-white transition-colors leading-snug">
-                      {accessible[0].title}
-                    </h3>
-                    {accessible[0].description && (
-                      <p className="mt-1.5 text-sm text-gray-600 line-clamp-2">{accessible[0].description}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-800">
-                    <span className="font-mono text-[13px] text-gray-700">{accessible[0].lessonsCount ?? 0} aulas</span>
-                    <span className="flex items-center gap-1 font-mono text-[13px] text-purple/60 group-hover:text-purple/80 transition-colors">
-                      {ownCourseIds.has(accessible[0].id!) ? "Gerir" : "Iniciar"} <ArrowRight className="h-3 w-3" />
-                    </span>
-                  </div>
-                </div>
-              </Link>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                {accessible.slice(1).map(c => (
-                  <CourseCard
-                    key={c.id}
-                    course={c}
-                    locked={false}
-                    enrolledCourses={enrolledCourses}
-                    creatorNames={creatorNames}
-                    isOwn={ownCourseIds.has(c.id!)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+            ))}
+          </div>
         </section>
       )}
 

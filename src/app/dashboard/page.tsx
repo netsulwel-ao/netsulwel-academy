@@ -343,7 +343,7 @@ export default function DashboardPage() {
           )}
 
           {/* ─────────────────────────────────────────
-              CONTINUAR A APRENDER
+              CONTINUAR A APRENDER (carrossel)
           ───────────────────────────────────────── */}
           {continueCourses.length > 0 && (
             <Section
@@ -351,9 +351,11 @@ export default function DashboardPage() {
               title="Continua de onde paraste"
               action={{ label: "ver tudo", href: "/dashboard/courses" }}
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 -mx-1 px-1 scrollbar-hide">
                 {continueCourses.map(c => (
-                  <CourseCard key={c.id} course={c} enrolled={enrolledSet.has(c.id!)} size="lg" />
+                  <div key={c.id} className="min-w-[280px] sm:min-w-[320px] max-w-[360px] shrink-0 snap-start">
+                    <CourseCard course={c} enrolled={enrolledSet.has(c.id!)} size="lg" />
+                  </div>
                 ))}
               </div>
             </Section>

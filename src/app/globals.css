@@ -617,6 +617,14 @@ body {
   .duration-500 { animation-duration: 500ms; }
   .duration-700 { animation-duration: 700ms; }
   .duration-1000 { animation-duration: 1000ms; }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* ΓöÇΓöÇ Bloquear overlays de download managers (IDM, etc.) ΓöÇΓöÇ */
