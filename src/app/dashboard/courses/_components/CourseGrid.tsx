@@ -3,7 +3,6 @@
 import { Search } from "lucide-react";
 import type { Course } from "@/types/course";
 import { CourseCard } from "./CourseCard";
-import { useAccess } from "@/hooks/useAccess";
 
 interface CourseGridProps {
   accessible: Course[];
@@ -24,7 +23,6 @@ export function CourseGrid({
   hasActiveFilters,
   onClearFilters,
 }: CourseGridProps) {
-  const { } = useAccess();
 
   // ── Empty state ──────────────────────────────────────────────
   if (accessible.length === 0 && locked.length === 0) {

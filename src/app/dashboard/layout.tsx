@@ -32,7 +32,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
  if (loading || !profileLoaded) {
    return (
-     <div className="flex items-center justify-center bg-background" style={{ height: "calc(100vh / 0.9)" }}>
+     <div className="flex items-center justify-center bg-background h-screen">
        <Loader2 className="h-8 w-8 animate-spin text-brand-purple" />
      </div>
    );
@@ -41,7 +41,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
  if (!user) return null;
 
   return (
-  <div className="flex overflow-hidden bg-background" style={{ height: "calc(100vh / 0.9)" }}>
+  <div className="flex overflow-hidden bg-background h-screen">
   <Sidebar
     isCollapsed={isCollapsed}
     setIsCollapsed={setIsCollapsed}

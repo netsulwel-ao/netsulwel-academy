@@ -71,12 +71,14 @@ export function QuestionCard({ question, index, total, answer, onAnswer }: Quest
         {/* Verdadeiro / Falso */}
         {question.type === "true_false" && (
           <div className="flex gap-3">
-            {["Verdadeiro", "Falso"].map((opt, i) => {
-              const val = String(i);
+            {[
+              { label: "Verdadeiro", val: "true" },
+              { label: "Falso", val: "false" },
+            ].map(({ label, val }) => {
               const selected = answer === val;
               return (
                 <label
-                  key={i}
+                  key={val}
                   className={`flex flex-1 items-center justify-center gap-2 border px-4 py-3 cursor-pointer transition-all ${
                     selected
                       ? "border-purple/40 bg-purple/10 text-gray-100"
@@ -91,7 +93,7 @@ export function QuestionCard({ question, index, total, answer, onAnswer }: Quest
                     onChange={() => onAnswer(val)}
                     className="sr-only"
                   />
-                  <span className="text-sm font-medium">{opt}</span>
+                  <span className="text-sm font-medium">{label}</span>
                 </label>
               );
             })}

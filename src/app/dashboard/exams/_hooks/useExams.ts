@@ -87,6 +87,28 @@ export function useExams(): UseExamsReturn {
               allExams.push({ id: d.id, ...d.data() } as Exam & { id: string });
             });
           });
+
+          // Também buscar exames associados a lives inscritas
+          const enrolledLives: string[] = userSnap.data()?.enrolledLives ?? [];
+          if (enrolledLives.length > 0) {
+            const liveChunks: string[][] = [];
+            for (let i = 0; i < enrolledLives.length; i += 10) {
+              liveChunks.push(enrolledLives.slice(i, i + 10));
+            }
+            const liveSnaps = await Promise.all(
+              liveChunks.map(chunk =>
+                getDocs(query(collection(db, "exams"), where("liveId", "in", chunk)))
+              )
+            );
+            liveSnaps.forEach(snap => {
+              snap.docs.forEach(d => {
+                const exam = { id: d.id, ...d.data() } as Exam & { id: string };
+                if (!allExams.some(e => e.id === exam.id)) {
+                  allExams.push(exam);
+                }
+              });
+            });
+          }
         }
 
         // 5. Resultados do aluno

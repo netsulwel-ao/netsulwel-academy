@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import {
@@ -94,7 +94,13 @@ export function useTrailDetail(id: string): UseTrailDetailReturn {
     return () => { cancelled = true; };
   }, [id, user?.uid]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const hasTrailAccess = true;
+  const hasTrailAccess = useMemo(() => {
+    if (!trail) return false;
+    // Trilhas são acessíveis se o aluno tem acesso a pelo menos 1 curso dela
+    const trailCourseIds = trail.courseIds ?? [];
+    if (trailCourseIds.length === 0) return true;
+    return trailCourseIds.some(cid => enrolledCourses.includes(cid));
+  }, [trail, enrolledCourses]);
 
   return { trail, courses, lives, enrolledCourses, loading, hasTrailAccess };
 }

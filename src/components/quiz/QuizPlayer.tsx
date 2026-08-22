@@ -17,8 +17,17 @@ export default function QuizPlayer({ quiz, onFinish, submitting }: QuizPlayerPro
   const [showConfirm, setShowConfirm] = useState(false);
 
   const questions = quiz.questions;
-  const current = questions[currentIndex];
   const total = questions.length;
+
+  if (total === 0) {
+    return (
+      <div className="max-w-4xl mx-auto text-center py-20">
+        <p className="text-gray-500">Este quiz não tem perguntas.</p>
+      </div>
+    );
+  }
+
+  const current = questions[currentIndex];
   const answered = Object.keys(answers).length;
   const progressPct = total > 0 ? Math.round((answered / total) * 100) : 0;
 

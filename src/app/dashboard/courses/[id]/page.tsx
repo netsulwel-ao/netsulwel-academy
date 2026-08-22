@@ -178,16 +178,19 @@ export default function CourseDetailPage() {
           setProgressLoaded(true);
           if (data.modules?.[0]?.videos?.[0]) setActiveLesson({ mi: 0, vi: 0 });
         }
-      // Buscar quizzes do curso para saber que módulos têm quiz
-      try {
-        const modules = await getQuizModules(id);
-        setQuizModules(modules);
-      } catch {}
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+
+        // Buscar quizzes do curso para saber que módulos têm quiz
+        try {
+          const modules = await getQuizModules(id);
+          setQuizModules(modules);
+        } catch {
+          // Quiz fetch failed — not critical, continue
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
   };
   fetchData();
   }, [id, user, router]);

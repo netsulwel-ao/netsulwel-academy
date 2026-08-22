@@ -20,29 +20,8 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { useCountdown } from "@/hooks/useCountdown";
 import type { LiveSession } from "@/types/live";
-
-/* ─── Countdown Hook ──────────────────────────────────── */
-function useCountdown(targetDate: string) {
-  const calc = () => {
-    const diff = new Date(targetDate).getTime() - Date.now();
-    if (diff <= 0) return { d: 0, h: 0, m: 0, s: 0, expired: true };
-    const d = Math.floor(diff / 86400000);
-    const h = Math.floor((diff % 86400000) / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    return { d, h, m, s, expired: false };
-  };
-
-  const [time, setTime] = useState(calc);
-
-  useEffect(() => {
-    const t = setInterval(() => setTime(calc), 1000);
-    return () => clearInterval(t);
-  }, [targetDate]);
-
-  return time;
-}
 
 /* ─── Countdown Display ───────────────────────────────── */
 function CountdownDisplay({ scheduledAt }: { scheduledAt: string }) {
