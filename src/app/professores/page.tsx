@@ -119,7 +119,7 @@ export default function ProfessoresPage() {
             {showDropdown && results.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 border border-gray-800 shadow-2xl z-50">
                 {results.map((t) => (
-                  <Link key={t.id} href={`/profile/${t.id}`}
+                  <Link key={t.id} href="/login"
                     onClick={() => { setShowDropdown(false); setSearch(""); }}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 transition-colors">
                     {t.photoURL ? (
@@ -150,7 +150,7 @@ export default function ProfessoresPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filtered.map((t) => (
-                <Link key={t.id} href={`/profile/${t.id}`}
+                <Link key={t.id} href="/login"
                   className="group bg-gray-900 border border-gray-800 hover:border-purple/30 p-6 transition-all duration-300 text-center">
                   {t.photoURL ? (
                     <img src={t.photoURL} alt={t.name} className="h-20 w-20 rounded-full object-cover mx-auto mb-4 ring-2 ring-purple-500/20 group-hover:ring-purple-500/40 transition-all" />

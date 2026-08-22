@@ -141,7 +141,7 @@ export function Teachers() {
                 </div>
               ) : (
                 results.map((t) => (
-                  <TransitionLink key={t.id} href={`/profile/${t.id}`}
+                  <TransitionLink key={t.id} href="/login"
                     onClick={() => { setShowDropdown(false); setSearch(""); }}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 transition-colors">
                     {t.photoURL ? (
@@ -173,7 +173,7 @@ export function Teachers() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {displayTeachers.map((t, i) => (
               <Reveal key={t.id} delay={i * 0.1} y={32}>
-              <TransitionLink href={`/profile/${t.id}`}
+              <TransitionLink href="/login"
                 whileHover={{ y: -6 }}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
                 className="group block bg-gray-900 border border-gray-800 hover:border-purple/30 p-6 transition-colors duration-300 text-center">
