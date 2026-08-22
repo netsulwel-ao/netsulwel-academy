@@ -140,7 +140,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
     return () => window.removeEventListener("keydown", handler);
   }, [searchOpen]);
 
-  // AI-powered search
+  // AI-powered search — cursos + professores
   const doSearch = useCallback(async (q: string) => {
     if (q.trim().length < 2) { setSearchResults([]); return; }
     setSearchLoading(true);
@@ -151,10 +151,18 @@ export default function Header({ onMenuClick }: HeaderProps) {
         body: JSON.stringify({ query: q }),
       });
       const { terms } = await aiRes.json();
-      const snap = await getDocs(query(collection(db, "courses"), where("status", "==", "published")));
-      const allCourses = snap.docs.map(d => ({ id: d.id, ...d.data() } as Record<string, unknown>));
       const lower = q.toLowerCase().trim();
-      const scored = allCourses.map((c) => {
+
+      // Buscar cursos
+      const coursesSnap = await getDocs(query(collection(db, "courses"), where("status", "==", "published")));
+      const allCourses = coursesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Record<string, unknown>));
+
+      // Buscar professores
+      const usersSnap = await getDocs(query(collection(db, "users"), where("role", "==", "teacher")));
+      const allTeachers = usersSnap.docs.map(d => ({ id: d.id, ...d.data() } as Record<string, unknown>));
+
+      // Scoring cursos
+      const scoredCourses = allCourses.map((c) => {
         const title = (c.title as string)?.toLowerCase() || "";
         const desc = (c.description as string)?.toLowerCase() || "";
         const tags = ((c.tags as string[]) || []).join(" ").toLowerCase();
@@ -168,10 +176,30 @@ export default function Header({ onMenuClick }: HeaderProps) {
           if (cat.includes(t)) score += 3;
           if (desc.includes(t)) score += 1;
         }
-        return { course: c, score };
+        return { ...c, _type: "course" as const, score };
       });
-      const matches = scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score).slice(0, 6).map((s) => s.course);
-      setSearchResults(matches);
+
+      // Scoring professores
+      const scoredTeachers = allTeachers.map((t) => {
+        const name = ((t.name as string) || (t.displayName as string) || "").toLowerCase();
+        const bio = (t.bio as string)?.toLowerCase() || "";
+        let score = 0;
+        if (name.includes(lower)) score += 10;
+        for (const term of terms) {
+          const tLower = term.toLowerCase();
+          if (name.includes(tLower)) score += 5;
+          if (bio.includes(tLower)) score += 2;
+        }
+        return { ...t, _type: "teacher" as const, score };
+      });
+
+      // Combinar e ordenar
+      const allResults = [...scoredCourses, ...scoredTeachers]
+        .filter(r => r.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 8);
+
+      setSearchResults(allResults);
     } catch { setSearchResults([]); }
     setSearchLoading(false);
   }, []);
@@ -453,48 +481,83 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <div className="flex-1 overflow-y-auto">
             {searchQuery.length < 2 ? (
               <div className={`px-5 py-12 text-center text-sm ${theme === "light" ? "text-text-muted" : "text-text-muted"}`}>
-                Escreva para pesquisar cursos...
+                Escreva para pesquisar cursos ou professores...
               </div>
             ) : searchResults.length === 0 && !searchLoading ? (
               <p className={`px-5 py-12 text-center text-sm ${theme === "light" ? "text-text-muted" : "text-text-muted"}`}>
-                Nenhum curso encontrado para "{searchQuery}"
+                Nenhum resultado para &quot;{searchQuery}&quot;
               </p>
             ) : (
               <>
                 <p className={`px-5 pt-4 pb-2 text-xs font-medium ${theme === "light" ? "text-text-muted" : "text-text-muted"}`}>
                   {searchResults.length} resultado{searchResults.length !== 1 && "s"}
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 px-5 pb-5">
-                  {searchResults.map((c) => (
-                    <a
-                      key={c.id as string}
-                      href={`/dashboard/courses/${c.id as string}`}
-                      className={`group flex gap-3 border p-3 transition-all ${
-                        theme === "light"
-                          ? "border-border-default hover:border-border-strong hover:bg-hover-bg"
-                          : "border-border-default hover:border-border-strong hover:bg-hover-bg"
-                      }`}
-                      onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
-                    >
-                      {c.thumbnail ? (
-                        <img src={c.thumbnail as string} alt="" className="h-20 w-28 shrink-0 object-cover" />
-                      ) : (
-                        <div className={`flex h-20 w-28 shrink-0 items-center justify-center ${theme === "light" ? "bg-bg-surface-2" : "bg-bg-surface-2"}`}>
-                          <BookOpen className={`h-6 w-6 ${theme === "light" ? "text-text-muted" : "text-text-muted"}`} />
-                        </div>
-                      )}
-                      <div className="min-w-0 flex-1 flex flex-col justify-between py-0.5">
-                        <div>
-                          <p className={`text-sm font-semibold line-clamp-2 leading-snug ${theme === "light" ? "text-text-primary" : "text-text-primary group-hover:text-text-primary"}`}>{c.title as string}</p>
-                          <p className={`text-xs mt-1 line-clamp-1 ${theme === "light" ? "text-text-muted" : "text-text-muted"}`}>
-                            {(c.description as string) || "Sem descrição"}
+                <div className="space-y-2 px-5 pb-5">
+                  {searchResults.map((r) => (
+                    r._type === "course" ? (
+                      <a
+                        key={r.id as string}
+                        href={`/dashboard/courses/${r.id as string}`}
+                        className={`group flex gap-3 border p-3 transition-all ${
+                          theme === "light"
+                            ? "border-border-default hover:border-border-strong hover:bg-hover-bg"
+                            : "border-border-default hover:border-border-strong hover:bg-hover-bg"
+                        }`}
+                        onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                      >
+                        {r.thumbnail ? (
+                          <img src={r.thumbnail as string} alt="" className="h-16 w-24 shrink-0 object-cover" />
+                        ) : (
+                          <div className={`flex h-16 w-24 shrink-0 items-center justify-center ${theme === "light" ? "bg-bg-surface-2" : "bg-bg-surface-2"}`}>
+                            <BookOpen className={`h-5 w-5 ${theme === "light" ? "text-text-muted" : "text-text-muted"}`} />
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1 flex flex-col justify-between py-0.5">
+                          <div>
+                            <span className={`text-[11px] font-mono uppercase tracking-wider ${theme === "light" ? "text-text-muted" : "text-text-muted"}`}>Curso</span>
+                            <p className={`text-sm font-semibold line-clamp-2 leading-snug ${theme === "light" ? "text-text-primary" : "text-text-primary group-hover:text-text-primary"}`}>{r.title as string}</p>
+                            <p className={`text-xs mt-1 line-clamp-1 ${theme === "light" ? "text-text-muted" : "text-text-muted"}`}>
+                              {(r.description as string) || "Sem descrição"}
+                            </p>
+                          </div>
+                          <p className={`text-sm font-bold ${theme === "light" ? "text-text-secondary" : "text-text-secondary"}`}>
+                            {r.price === 0 ? "Grátis" : `${(r.price as number)?.toLocaleString("pt-AO")} Kz`}
                           </p>
                         </div>
-                        <p className={`text-sm font-bold ${theme === "light" ? "text-text-secondary" : "text-text-secondary"}`}>
-                          {c.price === 0 ? "Grátis" : `${(c.price as number)?.toLocaleString("pt-AO")} Kz`}
-                        </p>
-                      </div>
-                    </a>
+                      </a>
+                    ) : (
+                      <a
+                        key={r.id as string}
+                        href={`/profile/${r.id as string}`}
+                        className={`group flex items-center gap-3 border p-3 transition-all ${
+                          theme === "light"
+                            ? "border-border-default hover:border-border-strong hover:bg-hover-bg"
+                            : "border-border-default hover:border-border-strong hover:bg-hover-bg"
+                        }`}
+                        onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                      >
+                        {r.photoURL ? (
+                          <img src={r.photoURL as string} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover" />
+                        ) : (
+                          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${theme === "light" ? "bg-bg-surface-2" : "bg-bg-surface-2"}`}>
+                            <span className={`text-sm font-bold ${theme === "light" ? "text-text-muted" : "text-text-muted"}`}>
+                              {((r.name as string) || (r.displayName as string) || "?").charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <span className={`text-[11px] font-mono uppercase tracking-wider ${theme === "light" ? "text-text-muted" : "text-text-muted"}`}>Professor</span>
+                          <p className={`text-sm font-semibold line-clamp-1 ${theme === "light" ? "text-text-primary" : "text-text-primary group-hover:text-text-primary"}`}>
+                            {(r.name as string) || (r.displayName as string) || "Sem nome"}
+                          </p>
+                          {(r.bio as string) && (
+                            <p className={`text-xs mt-0.5 line-clamp-1 ${theme === "light" ? "text-text-muted" : "text-text-muted"}`}>
+                              {r.bio as string}
+                            </p>
+                          )}
+                        </div>
+                      </a>
+                    )
                   ))}
                 </div>
               </>
