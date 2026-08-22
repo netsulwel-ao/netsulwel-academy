@@ -1,0 +1,22 @@
+{
+  "name": "Netsulwel Academy",
+  "short_name": "Netsulwel",
+  "description": "Domine programação, finanças, tecnologia e investimentos com a Netsulwel Academy.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a14",
+  "theme_color": "#1a1a2e",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/Logo-Academy-White.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
