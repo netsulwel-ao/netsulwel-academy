@@ -362,7 +362,7 @@ export default function DashboardPage() {
           )}
 
           {/* ─────────────────────────────────────────
-              LAYOUT EDITORIAL: destaque + lista lateral
+              LAYOUT EDITORIAL: grid simples
               (só aparece se houver cursos)
           ───────────────────────────────────────── */}
           {courses.length > 0 && (
@@ -371,40 +371,10 @@ export default function DashboardPage() {
               title="Todos os cursos"
               action={{ label: "explorar todos", href: "/dashboard/courses" }}
             >
-              {/* Mobile/tablet: grid simples. Desktop: destaque + lista lateral */}
-              <div className="block lg:hidden">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {courses.slice(0, 4).map(c => (
-                    <CourseCard key={c.id} course={c} enrolled={enrolledSet.has(c.id!)} size="lg" />
-                  ))}
-                </div>
-                {courses.length > 4 && (
-                  <Link
-                    href="/dashboard/courses"
-                    className="mt-3 flex items-center justify-center gap-1.5 border border-border-default py-3 text-sm text-text-muted hover:text-text-primary hover:border-border-strong transition-all font-mono"
-                  >
-                    +{courses.length - 4} mais cursos <ArrowRight className="h-3 w-3" />
-                  </Link>
-                )}
-              </div>
-
-              <div className="hidden lg:grid lg:grid-cols-[1fr_300px] gap-4">
-                {/* Curso em destaque — grande */}
-                <CourseCard course={courses[0]} enrolled={enrolledSet.has(courses[0].id!)} size="lg" />
-                {/* Lista lateral — compacta */}
-                <div className="space-y-2">
-                  {courses.slice(1, 6).map(c => (
-                    <CourseCard key={c.id} course={c} enrolled={enrolledSet.has(c.id!)} size="sm" />
-                  ))}
-                  {courses.length > 6 && (
-                    <Link
-                      href="/dashboard/courses"
-                      className="flex items-center justify-center gap-1.5 border border-border-default py-3 text-sm text-text-muted hover:text-text-primary hover:border-border-strong transition-all font-mono"
-                    >
-                      +{courses.length - 6} mais <ArrowRight className="h-3 w-3" />
-                    </Link>
-                  )}
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {courses.map(c => (
+                  <CourseCard key={c.id} course={c} enrolled={enrolledSet.has(c.id!)} size="lg" />
+                ))}
               </div>
             </Section>
           )}
