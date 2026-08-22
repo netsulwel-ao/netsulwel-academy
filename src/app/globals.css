@@ -23,8 +23,8 @@
 
   /* ── Semantic: text ── */
   --text-primary:    #ffffff;
-  --text-secondary:  #a1a1aa;
-  --text-muted:      #71717a;
+  --text-secondary:  #ffffff;
+  --text-muted:      #ffffff;
   --text-on-brand:   #ffffff;
 
   /* ── Semantic: borders ── */
@@ -54,8 +54,8 @@
   --gray-300: #ffffff;
   --gray-400: #ffffff;
   --gray-500: #ffffff;
-  --gray-600: #323238;
-  --gray-700: #29292e;
+  --gray-600: #ffffff;
+  --gray-700: #ffffff;
   --gray-800: #202024;
   --gray-900: #121214;
   --gray-950: #09090b;
@@ -64,8 +64,8 @@
   --slate-300: #ffffff;
   --slate-400: #ffffff;
   --slate-500: #ffffff;
-  --slate-600: #323238;
-  --slate-700: #29292e;
+  --slate-600: #ffffff;
+  --slate-700: #ffffff;
   --slate-800: #202024;
   --slate-900: #121214;
   --slate-950: #09090b;
@@ -154,6 +154,22 @@
 [data-theme="light"] body {
   font-size: 15px;
   line-height: 1.6;
+}
+
+/* ── Dark mode (default): force all text + icons to white ── */
+[data-theme="dark"] *,
+:not([data-theme="light"]) * {
+  color: #ffffff !important;
+}
+[data-theme="dark"] .text-green,
+[data-theme="dark"] .text-green-light,
+[data-theme="dark"] .text-purple,
+[data-theme="dark"] .text-purple-light,
+:not([data-theme="light"]) .text-green,
+:not([data-theme="light"]) .text-green-light,
+:not([data-theme="light"]) .text-purple,
+:not([data-theme="light"]) .text-purple-light {
+  color: inherit !important;
 }
 
 @theme {
