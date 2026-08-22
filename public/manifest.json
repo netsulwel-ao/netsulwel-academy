@@ -9,6 +9,16 @@
   "orientation": "any",
   "icons": [
     {
+      "src": "/favicon-64.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
       "src": "/Logo-Academy-White.svg",
       "sizes": "any",
       "type": "image/svg+xml"

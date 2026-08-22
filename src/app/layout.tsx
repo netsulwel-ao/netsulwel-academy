@@ -171,10 +171,11 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     icons: {
       icon: [
+        { url: "/favicon-64.png", sizes: "64x64", type: "image/png" },
         { url: "/Logo-Academy-White.svg", type: "image/svg+xml" },
       ],
       apple: [
-        { url: "/Logo-Academy-White.svg", type: "image/svg+xml" },
+        { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
       ],
     },
     manifest: "/manifest.json",
