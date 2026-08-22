@@ -22,6 +22,7 @@ import { GoogleIcon, GithubIcon } from "@/components/ui/AuthIcons";
 
 import { PageTransition } from "@/components/PageTransition";
 import { TransitionLink } from "@/components/TransitionLink";
+import { COUNTRIES } from "@/data/countries";
 
 type Step = 1 | 2;
 
@@ -466,11 +467,16 @@ export default function RegisterPage() {
                         </label>
                         <div className="relative">
                           <Globe className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
-                          <input
-                            id="pais" type="text" required disabled={isAnyLoading} placeholder="Angola"
+                          <select
+                            id="pais" required disabled={isAnyLoading}
                             value={pais} onChange={(e) => setPais(e.target.value)}
-                            className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
-                          />
+                            className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors appearance-none"
+                          >
+                            <option value="" disabled className="bg-gray-900">Selecionar país</option>
+                            {COUNTRIES.map((c) => (
+                              <option key={c} value={c} className="bg-gray-900">{c}</option>
+                            ))}
+                          </select>
                         </div>
                       </motion.div>
 
