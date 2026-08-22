@@ -13,11 +13,10 @@ const links = {
  { label: "Parceiros", href: "#parceiros" },
  { label: "Contato", href: "#contato" },
  ],
- Legal: [
- { label: "Termos de uso", href: "#termos" },
- { label: "Privacidade", href: "#privacidade" },
- { label: "Cookies", href: "#cookies" },
- ],
+  Legal: [
+  { label: "Termos de uso", href: "/terms" },
+  { label: "Privacidade", href: "/privacy" },
+  ],
 };
 
 const socials = [
