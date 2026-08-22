@@ -300,7 +300,7 @@ export default function FreeLiveRequestsPage() {
                         <button
                           onClick={() => handleApprove(req)}
                           disabled={!!actioningId}
-                          className="flex items-center gap-1.5 border border-green/30 bg-green/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-green/80 hover:bg-green/15 disabled:opacity-40 transition-all"
+                          className="flex items-center gap-1.5 bg-green-600 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-white hover:bg-green-700 disabled:opacity-40 transition-all"
                         >
                           {actioningId === req.id
                             ? <Loader2 className="h-3 w-3 animate-spin" />

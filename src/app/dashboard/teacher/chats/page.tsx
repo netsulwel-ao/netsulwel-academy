@@ -261,7 +261,7 @@ export default function TeacherChatsPage() {
           <p className="text-sm text-gray-600 mb-5">Cria um curso primeiro para depois criar um chat de grupo.</p>
           <Link
             href="/dashboard/teacher/courses/new"
-            className="flex items-center gap-1.5 border border-green/25 bg-green/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-green/70 hover:bg-green/15 transition-all"
+            className="flex items-center gap-1.5 bg-green-600 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-white hover:bg-green-700 transition-all"
           >
             <Plus className="h-3 w-3" /> Criar curso
           </Link>
@@ -321,7 +321,7 @@ export default function TeacherChatsPage() {
                         </button>
                         <Link
                           href={`/dashboard/chats/${existingChat.id}`}
-                          className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all"
+                          className="flex items-center gap-1.5 bg-purple px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-white hover:bg-purple-600 transition-all"
                         >
                           <MessageSquare className="h-3 w-3" strokeWidth={1.5} /> Abrir chat
                         </Link>
@@ -331,7 +331,7 @@ export default function TeacherChatsPage() {
                         type="button"
                         onClick={() => handleCreateGroupChat(course)}
                         disabled={isCreating}
-                        className="flex items-center gap-1.5 border border-green/25 bg-green/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-green/70 hover:bg-green/15 disabled:opacity-50 transition-all"
+                        className="flex items-center gap-1.5 bg-green-600 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-white hover:bg-green-700 disabled:opacity-50 transition-all"
                       >
                         {isCreating
                           ? <Loader2 className="h-3 w-3 animate-spin" />

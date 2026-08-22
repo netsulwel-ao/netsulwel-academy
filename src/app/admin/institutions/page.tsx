@@ -430,7 +430,7 @@ export default function AdminInstitutionsPage() {
                 <button
                   onClick={() => handleApprove(selectedInst as Institution & { id: string })}
                   disabled={actioningId === selectedInst.id}
-                  className="w-full flex items-center justify-center gap-1.5 border border-green/30 bg-green/8 py-2.5 font-mono text-[13px] uppercase tracking-widest text-green/80 hover:bg-green/15 disabled:opacity-40 transition-all"
+                  className="w-full flex items-center justify-center gap-1.5 bg-green-600 py-2.5 font-mono text-[13px] uppercase tracking-widest text-white hover:bg-green-700 disabled:opacity-40 transition-all"
                 >
                   {actioningId === selectedInst.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" strokeWidth={1.5} />}
                   Aprovar instituição

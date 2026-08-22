@@ -266,7 +266,7 @@ export default function InstitutionSettingsPage() {
         <div className="pt-4 border-t border-gray-800 flex justify-end">
           <button
             onClick={handleSave} disabled={saving}
-            className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-6 py-2.5 font-mono text-[13px] uppercase tracking-widest text-purple/80 hover:bg-purple/15 disabled:opacity-40 transition-all"
+            className="flex items-center gap-1.5 bg-purple px-6 py-2.5 font-mono text-[13px] uppercase tracking-widest text-white hover:bg-purple-600 disabled:opacity-40 transition-all"
           >
             {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
             {saving ? "A guardar..." : "Guardar alterações"}

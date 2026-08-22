@@ -26,7 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading || !profileLoaded) {
     return (
-      <div className="flex items-center justify-center bg-background" style={{ height: "calc(100vh / 0.9)" }}>
+      <div className="flex items-center justify-center bg-background h-screen overflow-hidden">
         <Loader2 className="h-8 w-8 animate-spin text-brand-purple" />
       </div>
     );
@@ -34,14 +34,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!isAdminOrTeacher) {
     return (
-      <div className="flex items-center justify-center bg-background" style={{ height: "calc(100vh / 0.9)" }}>
+      <div className="flex items-center justify-center bg-background h-screen overflow-hidden">
         <Loader2 className="h-8 w-8 animate-spin text-brand-purple" />
       </div>
     );
   }
 
   return (
-    <div className="flex overflow-hidden bg-background relative" style={{ height: "calc(100vh / 0.9)" }}>
+    <div className="flex overflow-hidden bg-background relative h-screen">
       <Sidebar
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}

@@ -257,7 +257,7 @@ export default function AdminDashboardPage() {
         {isAdmin && (
           <Link
             href="/admin/users"
-            className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all shrink-0"
+            className="flex items-center gap-1.5 bg-purple px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-white hover:bg-purple-600 transition-all shrink-0"
           >
             <Users className="h-3 w-3" /> Gerir utilizadores
           </Link>

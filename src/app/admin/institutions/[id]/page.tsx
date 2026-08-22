@@ -215,7 +215,7 @@ export default function InstitutionDetailPage() {
               </select>
               <button
                 type="submit" disabled={inviting}
-                className="flex items-center justify-center gap-1.5 border border-purple/25 bg-purple/8 px-5 py-2.5 font-mono text-[13px] uppercase tracking-widest text-purple/80 hover:bg-purple/15 disabled:opacity-40 transition-all whitespace-nowrap"
+                className="flex items-center justify-center gap-1.5 bg-purple px-5 py-2.5 font-mono text-[13px] uppercase tracking-widest text-white hover:bg-purple-600 disabled:opacity-40 transition-all whitespace-nowrap"
               >
                 {inviting
                   ? <><Loader2 className="h-3 w-3 animate-spin" /> A enviar...</>

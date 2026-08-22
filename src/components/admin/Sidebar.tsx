@@ -236,7 +236,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
 
  </div>
 
- <div className={`p-4 shrink-0 space-y-3 ${theme === "light" ? "border-t border-border-default" : ""}`}>
+ <div className={`p-4 shrink-0 space-y-3 border-t ${theme === "light" ? "border-border-default" : "border-gray-800"}`}>
 
   <button
   onClick={handleLogout}
@@ -245,13 +245,13 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
  isCollapsed ? "w-12 h-12 justify-center mx-auto" : "w-full px-3 py-2.5 gap-3"
  } ${
    theme === "light"
-     ? "text-text-muted hover:bg-red-50 hover:text-red-500"
-     : "text-text-muted hover:bg-red-500/10 hover:text-red-400"
+     ? "text-red-500 hover:bg-red-50"
+     : "text-red-400 hover:bg-red-500/10"
  }`}
  title={isCollapsed ? "Terminar Sessão" : ""}
  >
- <LogOut className="h-5 w-5 shrink-0 group-hover:text-red-400" />
- {!isCollapsed && <span className="text-sm font-medium">Sair do Admin</span>}
+ <LogOut className="h-5 w-5 shrink-0" />
+ {!isCollapsed && <span className="text-sm font-bold">Sair do Admin</span>}
  </button>
  </div>
   </aside>

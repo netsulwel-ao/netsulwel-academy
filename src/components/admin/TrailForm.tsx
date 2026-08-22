@@ -146,7 +146,7 @@ export function TrailForm({
           <button
             type="button" onClick={() => handleSave("published")}
             disabled={saving || thumbUploading}
-            className="flex items-center gap-1.5 border border-purple/30 bg-purple/10 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-purple/80 hover:bg-purple/20 disabled:opacity-40 transition-all"
+            className="flex items-center gap-1.5 bg-purple px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-white hover:bg-purple-600 disabled:opacity-40 transition-all"
           >
             {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
             {mode === "edit" ? "Actualizar" : "Publicar"}
