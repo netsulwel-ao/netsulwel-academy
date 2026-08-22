@@ -36,7 +36,7 @@ export default function CourseCatalogPage() {
       {/* ── Cabeçalho ── */}
       <div>
         <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
-          // catálogo de cursos
+          // meus cursos
         </p>
         <h1 className="text-2xl font-bold text-gray-100">
           {institutionId
@@ -46,7 +46,7 @@ export default function CourseCatalogPage() {
         <p className="mt-1 text-sm text-gray-600">
           {loading
             ? "A carregar catálogo..."
-            : `${courses.length} curso${courses.length !== 1 ? "s" : ""} disponíve${courses.length !== 1 ? "is" : "l"}`}
+            : `${accessible.length} curso${accessible.length !== 1 ? "s" : ""} disponíve${accessible.length !== 1 ? "is" : "l"}`}
         </p>
       </div>
 

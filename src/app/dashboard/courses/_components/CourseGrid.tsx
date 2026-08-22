@@ -83,19 +83,9 @@ export function CourseGrid({
         </section>
       )}
 
-      {/* ── Secção: Bloqueados ── */}
+      {/* ── Secção: Bloqueados — oculta ── */}
       {locked.length > 0 && (
-        <section>
-          <div className="mb-4">
-            <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-gray-700 mb-1">
-              // requer upgrade
-            </p>
-            <h2 className="text-base font-bold text-gray-500">
-              Cursos bloqueados
-              <span className="ml-2 font-mono text-sm text-gray-700">({locked.length})</span>
-            </h2>
-          </div>
-
+        <section className="hidden">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {locked.map(c => (
               <CourseCard
