@@ -602,30 +602,11 @@ export function useWebRTC({ role, liveId, user, deviceIds }: UseWebRTCOptions): 
     remoteRef.current = { sessionId: remoteSessionId, trackName };
 
     try {
-      // Find an existing recvonly transceiver for this kind, or add one
-      const existingTransceiver = pc.getTransceivers().find(
-        (t) => t.receiver.track?.kind === kind && t.direction === "recvonly"
-      );
-      if (!existingTransceiver) {
-        pc.addTransceiver(kind, { direction: "recvonly" });
-      }
-
-      const pullResult = await cfPullTracks(user, liveId, sessionIdRef.current, [{
-        location: "remote",
-        trackName,
-        sessionId: remoteSessionId,
-      }]);
-
-      if (pullResult.requiresImmediateRenegotiation && pullResult.sessionDescription) {
-        await pc.setRemoteDescription(new RTCSessionDescription(pullResult.sessionDescription));
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        await cfRenegotiate(user, liveId, sessionIdRef.current, pc.localDescription!);
-      } else if (pullResult.sessionDescription) {
-        await pc.setRemoteDescription(new RTCSessionDescription(pullResult.sessionDescription));
-      }
+      // Store the new remote reference
+      remoteRef.current = { sessionId: remoteSessionId, trackName };
 
       // Promise that resolves when the matching track arrives
+      // MUST be set up BEFORE renegotiation so we don't miss the event
       const trackArrived = new Promise<void>((resolve) => {
         const timeout = setTimeout(() => {
           pc.removeEventListener("track", handler);
@@ -668,6 +649,29 @@ export function useWebRTC({ role, liveId, user, deviceIds }: UseWebRTCOptions): 
 
         pc.addEventListener("track", handler);
       });
+
+      // Find an existing recvonly transceiver for this kind, or add one
+      const existingTransceiver = pc.getTransceivers().find(
+        (t) => t.receiver.track?.kind === kind && t.direction === "recvonly"
+      );
+      if (!existingTransceiver) {
+        pc.addTransceiver(kind, { direction: "recvonly" });
+      }
+
+      const pullResult = await cfPullTracks(user, liveId, sessionIdRef.current, [{
+        location: "remote",
+        trackName,
+        sessionId: remoteSessionId,
+      }]);
+
+      if (pullResult.requiresImmediateRenegotiation && pullResult.sessionDescription) {
+        await pc.setRemoteDescription(new RTCSessionDescription(pullResult.sessionDescription));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        await cfRenegotiate(user, liveId, sessionIdRef.current, pc.localDescription!);
+      } else if (pullResult.sessionDescription) {
+        await pc.setRemoteDescription(new RTCSessionDescription(pullResult.sessionDescription));
+      }
 
       await trackArrived;
     } catch (err) {
