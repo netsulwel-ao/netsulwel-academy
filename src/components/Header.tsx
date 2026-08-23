@@ -204,7 +204,7 @@ export function Header() {
         value={searchQuery}
         onChange={e => setSearchQuery(e.target.value)}
         onFocus={() => setSearchOpen(true)}
-        className="w-full bg-transparent py-3 text-sm text-white placeholder-gray-500 outline-none"
+        className="w-full bg-transparent py-3 text-sm text-white outline-none"
       />
       {searchLoading && <Loader2 className="h-4 w-4 animate-spin text-gray-500 shrink-0" />}
     </div>
@@ -286,7 +286,7 @@ export function Header() {
            placeholder="Pesquisar cursos..."
            value={searchQuery}
            onChange={e => setSearchQuery(e.target.value)}
-           className="w-full bg-transparent py-5 text-lg text-white placeholder-gray-600 outline-none"
+           className="w-full bg-transparent py-5 text-lg text-white outline-none"
          />
          {searchLoading && <Loader2 className="h-5 w-5 animate-spin shrink-0 text-gray-600" />}
          <button

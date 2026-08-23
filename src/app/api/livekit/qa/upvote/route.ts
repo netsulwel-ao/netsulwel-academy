@@ -4,14 +4,9 @@ import { getFirebaseAdmin } from "@/lib/firebase-admin";
 
 /**
  * POST /api/livekit/qa/upvote
- * Upvote or downvote a question
- * 
- * Body:
- * {
- *   liveId: string,
- *   questionId: string,
- *   action: "upvote" | "downvote" | "remove"
- * }
+ * Atomic upvote/downvote using Firestore transaction (no race conditions)
+ *
+ * Body: { liveId, questionId, action: "upvote" | "downvote" | "remove" }
  */
 export async function POST(req: NextRequest) {
   try {
@@ -21,109 +16,56 @@ export async function POST(req: NextRequest) {
     const { liveId, questionId, action } = await req.json();
 
     if (!liveId || !questionId || !action) {
-      return Response.json(
-        { error: "liveId, questionId e action são obrigatórios." },
-        { status: 400 }
-      );
+      return Response.json({ error: "liveId, questionId e action são obrigatórios." }, { status: 400 });
     }
 
     if (!["upvote", "downvote", "remove"].includes(action)) {
-      return Response.json(
-        { error: "action deve ser 'upvote', 'downvote' ou 'remove'." },
-        { status: 400 }
-      );
+      return Response.json({ error: "action deve ser 'upvote', 'downvote' ou 'remove'." }, { status: 400 });
     }
 
     const admin = getFirebaseAdmin();
+    const db = admin.firestore();
+    const questionRef = db.collection("lives").doc(liveId).collection("qa_questions").doc(questionId);
+    const voteRef = questionRef.collection("votes").doc(uid);
 
-    // Check if user already voted
-    const votesRef = admin
-      .firestore()
-      .collection("lives")
-      .doc(liveId)
-      .collection("qa_questions")
-      .doc(questionId)
-      .collection("votes")
-      .doc(uid);
+    // Atomic transaction: read current state + write new state in one operation
+    const result = await db.runTransaction(async (tx) => {
+      const [questionSnap, voteSnap] = await Promise.all([tx.get(questionRef), tx.get(voteRef)]);
 
-    const existingVote = await votesRef.get();
-    let currentUpvotes = 0;
-
-    // Get current upvote count
-    const questionDoc = await admin
-      .firestore()
-      .collection("lives")
-      .doc(liveId)
-      .collection("qa_questions")
-      .doc(questionId)
-      .get();
-
-    if (questionDoc.exists) {
-      currentUpvotes = questionDoc.data()?.upvotes || 0;
-    } else {
-      return Response.json({ error: "Pergunta não encontrada." }, { status: 404 });
-    }
-
-    // Update vote
-    if (action === "remove") {
-      // Remove existing vote
-      if (existingVote.exists) {
-        const previousVote = existingVote.data()?.vote;
-        if (previousVote === "upvote") {
-          currentUpvotes = Math.max(0, currentUpvotes - 1);
-        } else if (previousVote === "downvote") {
-          currentUpvotes = Math.min(10000, currentUpvotes + 1); // Assuming min downvotes don't go negative
-        }
-        await votesRef.delete();
-      }
-    } else {
-      // Add or update vote
-      if (existingVote.exists) {
-        const previousVote = existingVote.data()?.vote;
-        
-        // Remove previous vote effect
-        if (previousVote === "upvote") {
-          currentUpvotes = Math.max(0, currentUpvotes - 1);
-        } else if (previousVote === "downvote") {
-          currentUpvotes = Math.min(10000, currentUpvotes + 1);
-        }
+      if (!questionSnap.exists) {
+        throw new Error("Pergunta não encontrada.");
       }
 
-      // Apply new vote effect
-      if (action === "upvote") {
-        currentUpvotes += 1;
-      } else if (action === "downvote") {
-        currentUpvotes = Math.max(0, currentUpvotes - 1);
+      const currentUpvotes = questionSnap.data()?.upvotes || 0;
+      const previousVote = voteSnap.data()?.vote as string | undefined;
+      let newUpvotes = currentUpvotes;
+
+      // Remove previous vote effect
+      if (previousVote === "upvote") newUpvotes -= 1;
+      else if (previousVote === "downvote") newUpvotes += 1;
+
+      if (action === "remove") {
+        if (voteSnap.exists) tx.delete(voteRef);
+      } else {
+        // Apply new vote effect
+        if (action === "upvote") newUpvotes += 1;
+        else if (action === "downvote") newUpvotes -= 1;
+
+        tx.set(voteRef, { vote: action, votedAt: new Date().toISOString() });
       }
 
-      await votesRef.set({
-        vote: action,
-        votedAt: new Date().toISOString(),
-      });
-    }
+      newUpvotes = Math.max(0, newUpvotes);
+      tx.update(questionRef, { upvotes: newUpvotes });
 
-    // Update question upvote count
-    await admin
-      .firestore()
-      .collection("lives")
-      .doc(liveId)
-      .collection("qa_questions")
-      .doc(questionId)
-      .update({
-        upvotes: currentUpvotes,
-        updatedAt: new Date().toISOString(),
-      });
-
-    return Response.json({
-      success: true,
-      upvotes: currentUpvotes,
-      message: "Voto atualizado com sucesso.",
+      return { upvotes: newUpvotes };
     });
-  } catch (error) {
+
+    return Response.json({ success: true, upvotes: result.upvotes });
+  } catch (error: any) {
+    if (error.message === "Pergunta não encontrada.") {
+      return Response.json({ error: error.message }, { status: 404 });
+    }
     console.error("Erro ao votar em pergunta:", error);
-    return Response.json(
-      { error: "Erro interno do servidor." },
-      { status: 500 }
-    );
+    return Response.json({ error: "Erro interno do servidor." }, { status: 500 });
   }
 }

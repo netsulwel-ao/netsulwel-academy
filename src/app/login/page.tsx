@@ -254,7 +254,7 @@ export default function LoginPage() {
                         placeholder="seu@email.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 placeholder-gray-700 transition-colors focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50"
+                        className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 transition-colors focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50"
                       />
                     </div>
                   </motion.div>
@@ -290,7 +290,7 @@ export default function LoginPage() {
                           placeholder="••••••••"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-10 text-sm text-gray-100 placeholder-gray-700 transition-colors focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50"
+                          className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-10 text-sm text-gray-100 transition-colors focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50"
                         />
                         <button
                           type="button"

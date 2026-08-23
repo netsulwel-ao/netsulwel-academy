@@ -141,13 +141,13 @@ export default function EditExamPage() {
         <div>
           <label className="block text-sm text-gray-400 mb-1">Título</label>
           <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white placeholder-gray-600 focus:outline-none transition-colors"
+            className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white focus:outline-none transition-colors"
             placeholder="Ex: Teste de Matemática Financeira" />
         </div>
         <div>
           <label className="block text-sm text-gray-400 mb-1">Descrição</label>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2}
-            className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white placeholder-gray-600 focus:outline-none transition-colors resize-none"
+            className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white focus:outline-none transition-colors resize-none"
             placeholder="Ex: Avaliação sobre juros compostos e amortização" />
         </div>
         <div>
@@ -198,7 +198,7 @@ export default function EditExamPage() {
 
             <div className="space-y-3">
               <input type="text" value={q.question} onChange={(e) => updateQuestion(i, "question", e.target.value)}
-                className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-2.5 px-3 text-white placeholder-gray-600 focus:outline-none transition-colors text-sm"
+                className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-2.5 px-3 text-white focus:outline-none transition-colors text-sm"
                 placeholder="Escreve a pergunta..." />
 
               <div className="flex items-center gap-4">
@@ -230,7 +230,7 @@ export default function EditExamPage() {
                         newOpts[oi] = e.target.value;
                         updateQuestion(i, "options", newOpts);
                       }}
-                        className="flex-1 bg-gray-950 border border-gray-800 focus:border-purple/50 py-2 px-3 text-white placeholder-gray-600 focus:outline-none transition-colors text-sm"
+                        className="flex-1 bg-gray-950 border border-gray-800 focus:border-purple/50 py-2 px-3 text-white focus:outline-none transition-colors text-sm"
                         placeholder={`Opção ${oi + 1}`} />
                     </div>
                   ))}
@@ -256,7 +256,7 @@ export default function EditExamPage() {
                 <div>
                   <label className="block text-sm text-gray-400 mb-1">Resposta correta:</label>
                   <input type="text" value={q.correctAnswer} onChange={(e) => updateQuestion(i, "correctAnswer", e.target.value)}
-                    className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-2.5 px-3 text-white placeholder-gray-600 focus:outline-none transition-colors text-sm"
+                    className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-2.5 px-3 text-white focus:outline-none transition-colors text-sm"
                     placeholder="Ex: 15%" />
                 </div>
               )}

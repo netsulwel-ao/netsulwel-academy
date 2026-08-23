@@ -1,9 +1,10 @@
-import StudioPage from "@/components/StudioPage";
+"use client";
 
-/**
- * Professor entra no estúdio da aula ao vivo a partir do dashboard.
- * Usa o mesmo StudioPage do admin, com redirect de volta para as lives do professor.
- */
+import { useParams } from "next/navigation";
+import LiveStudioPage from "@/components/webrtc/LiveStudioPage";
+
 export default function TeacherStudioPage() {
-  return <StudioPage redirectAfterEnd="/dashboard/teacher/lives" />;
+  const params = useParams();
+  const liveId = params.id as string;
+  return <LiveStudioPage liveId={liveId} role="host" />;
 }

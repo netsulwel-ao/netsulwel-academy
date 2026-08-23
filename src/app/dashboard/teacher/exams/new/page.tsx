@@ -25,7 +25,7 @@ function emptyQuestion(): Question {
   };
 }
 
-const inputCls = "w-full border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-700 focus:border-green/40 focus:outline-none transition-colors";
+const inputCls = "w-full border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-200 focus:border-green/40 focus:outline-none transition-colors";
 const labelCls = "font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-1.5 block";
 
 export default function NewExamPage() {

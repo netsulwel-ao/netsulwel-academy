@@ -156,7 +156,7 @@ export default function AdminTeachersPage() {
           <input
             type="text" placeholder="Pesquisar professor..." value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-gray-900 border border-gray-800 py-2.5 pl-10 pr-4 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-purple"
+            className="w-full bg-gray-900 border border-gray-800 py-2.5 pl-10 pr-4 text-sm text-gray-200 focus:outline-none focus:border-purple"
           />
         </div>
         <div className="flex gap-1 bg-gray-900 border border-gray-800 p-1">

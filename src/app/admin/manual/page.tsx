@@ -211,7 +211,7 @@ export default function AdminManualPage() {
             placeholder="Pesquisar no manual..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full py-2.5 pl-10 pr-4 text-sm bg-gray-900 border border-gray-800 text-gray-200 placeholder-gray-500 focus:outline-none focus:border-blue-600 transition-colors"
+            className="w-full py-2.5 pl-10 pr-4 text-sm bg-gray-900 border border-gray-800 text-gray-200 focus:outline-none focus:border-blue-600 transition-colors"
           />
         </div>
       </div>

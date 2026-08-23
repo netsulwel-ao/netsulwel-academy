@@ -185,7 +185,7 @@ export default function TeacherSalesPage() {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Pesquisar por aluno, email ou curso..."
-                className="w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-8 text-sm text-gray-200 placeholder-gray-700 focus:border-green/40 focus:outline-none transition-colors"
+                className="w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-8 text-sm text-gray-200 focus:border-green/40 focus:outline-none transition-colors"
               />
               {search && (
                 <button type="button" onClick={() => setSearch("")}

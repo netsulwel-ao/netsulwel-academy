@@ -561,7 +561,7 @@ export default function CourseDetailPage() {
                         onChange={(e) => { setAccessCodeInput(e.target.value.toUpperCase()); setAccessCodeError(""); }}
                         onKeyDown={(e) => e.key === "Enter" && verifyAccessCode()}
                         placeholder="Introduza o código de acesso"
-                        className="w-full px-4 py-3 bg-bg-surface border border-border-strong text-text-primary text-center text-lg font-mono tracking-widest placeholder-gray-600 focus:outline-none focus:border-amber-500 transition-colors"
+                        className="w-full px-4 py-3 bg-bg-surface border border-border-strong text-text-primary text-center text-lg font-mono tracking-widest focus:outline-none focus:border-amber-500 transition-colors"
                         disabled={accessCodeLoading}
                         autoFocus
                       />

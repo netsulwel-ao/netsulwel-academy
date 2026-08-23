@@ -15,18 +15,13 @@ export interface LiveSession {
   createdBy: string;          // admin UID (consistente com courses/trails)
   institutionId?: string;     // ID da instituição a que pertence
   hostName?: string;
-  roomName: string;           // LiveKit room slug
+  roomName: string;           // unique room slug
   startedAt?: string;
   endedAt?: string;
   participantCount?: number;
   views?: number;
   recordingUrl?: string;      // R2 URL after recording saved
   materials?: CourseMaterial[];
-  // Recording fields
-  recordingStatus?: "idle" | "recording" | "processing" | "ready" | "failed";
-  egressId?: string;          // LiveKit egress ID
-  recordingStartedAt?: string;
-  recordingStoppedAt?: string;
   // Q&A fields
   qaMode?: boolean;
   qaQuestions?: QAQuestion[];

@@ -10,7 +10,7 @@ import type { LiveSession } from "@/types/live";
 import { toDatetimeLocal } from "./_upload";
 
 const inputCls =
-  "w-full border border-gray-800 bg-gray-900 py-2 px-3 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors";
+  "w-full border border-gray-800 bg-gray-900 py-2 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors";
 
 interface Props {
   allCourses: Course[];
@@ -335,7 +335,7 @@ export function TrailContentPanel({
                           type="number" min={0} step={100} value={sess.price || ""}
                           onChange={(e) => updateLiveSession(idx, "price", Number(e.target.value) || 0)}
                           placeholder="Preço"
-                          className="w-32 border border-gray-800 bg-gray-900 py-2 px-3 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors"
+                          className="w-32 border border-gray-800 bg-gray-900 py-2 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors"
                         />
                         <span className="font-mono text-[13px] text-gray-700">Kz</span>
                       </div>

@@ -298,7 +298,7 @@ export default function SchedulesPage() {
                               <input type="text" value={sess.title}
                                 onChange={(e) => updateSession(trail.id!, idx, "title", e.target.value)}
                                 placeholder="Título da aula ao vivo"
-                                className="w-full bg-gray-800 border border-gray-700 focus:border-orange-500/50 py-2 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
+                                className="w-full bg-gray-800 border border-gray-700 focus:border-orange-500/50 py-2 px-3 text-white text-sm focus:outline-none transition-all" />
                               <div className="flex gap-2">
                                 <div className="relative flex-1">
                                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
@@ -314,7 +314,7 @@ export default function SchedulesPage() {
                           <textarea rows={2} value={sess.description}
                             onChange={(e) => updateSession(trail.id!, idx, "description", e.target.value)}
                             placeholder="Descrição da aula (opcional)"
-                            className="w-full bg-gray-800 border border-gray-700 focus:border-orange-500/50 py-2 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all resize-none" />
+                            className="w-full bg-gray-800 border border-gray-700 focus:border-orange-500/50 py-2 px-3 text-white text-sm focus:outline-none transition-all resize-none" />
 
                           {/* Plano / Preço */}
                           <div>
@@ -343,7 +343,7 @@ export default function SchedulesPage() {
                                 <input type="number" min={0} step={100} value={sess.price || ""}
                                   onChange={(e) => updateSession(trail.id!, idx, "price", Number(e.target.value) || 0)}
                                   placeholder="Preço (Kz)"
-                                  className="w-40 bg-gray-800 border border-gray-700 focus:border-purple-500/50 py-1.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
+                                  className="w-40 bg-gray-800 border border-gray-700 focus:border-purple-500/50 py-1.5 px-3 text-white text-sm focus:outline-none transition-all" />
                                 <span className="text-sm text-gray-500">Kz</span>
                               </div>
                             )}

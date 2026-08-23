@@ -42,7 +42,7 @@ function RoleBadge({ role }: { role: string }) {
 }
 
 const inputCls =
-  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors";
+  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors";
 
 // ── Page ──────────────────────────────────────────────────────
 export default function InstitutionDetailPage() {
@@ -235,7 +235,7 @@ export default function InstitutionDetailPage() {
                   type="text" value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Pesquisar membro..."
-                  className="w-full border border-gray-800 bg-gray-900 pl-9 pr-3 py-2 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors"
+                  className="w-full border border-gray-800 bg-gray-900 pl-9 pr-3 py-2 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors"
                 />
               </div>
               <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 ml-auto">

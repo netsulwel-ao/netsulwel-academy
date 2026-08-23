@@ -26,8 +26,6 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1054.0",
     "@aws-sdk/s3-request-presigner": "^3.1054.0",
-    "@livekit/components-react": "^2.9.21",
-    "@livekit/components-styles": "^1.2.0",
     "@paypal/react-paypal-js": "^9.2.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
@@ -42,8 +40,6 @@
     "firebase-admin": "^13.10.0",
     "framer-motion": "^13.0.0",
     "jimp": "^1.6.1",
-    "livekit-client": "^2.19.0",
-    "livekit-server-sdk": "^2.15.3",
     "lucide-react": "^1.16.0",
     "next": "16.2.6",
     "nodemailer": "^8.0.10",

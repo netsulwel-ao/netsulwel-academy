@@ -505,7 +505,7 @@ export default function AnnouncementsPage() {
                   <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Título *</label>
                   <input type="text" value={annForm.title} onChange={e=>setAnnForm(f=>({...f,title:e.target.value}))}
                     placeholder="Ex: ?? Aula ao Vivo começa em 10 minutos!"
-                    className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
+                    className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none transition-all"/>
                 </div>
 
                 {/* Corpo */}
@@ -513,7 +513,7 @@ export default function AnnouncementsPage() {
                   <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Mensagem *</label>
                   <textarea rows={3} value={annForm.body} onChange={e=>setAnnForm(f=>({...f,body:e.target.value}))}
                     placeholder="Descreve o anúncio..."
-                    className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all resize-none"/>
+                    className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none transition-all resize-none"/>
                 </div>
 
                 {/* Badge */}
@@ -521,7 +521,7 @@ export default function AnnouncementsPage() {
                   <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Badge (opcional)</label>
                   <input type="text" value={annForm.badgeLabel??""} onChange={e=>setAnnForm(f=>({...f,badgeLabel:e.target.value}))}
                     placeholder="Ex: Oferta por 24h ? Poupa 40%"
-                    className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
+                    className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none transition-all"/>
                 </div>
 
                 {/* Imagem */}
@@ -558,13 +558,13 @@ export default function AnnouncementsPage() {
                     <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Botão</label>
                     <input type="text" value={annForm.ctaLabel??""} onChange={e=>setAnnForm(f=>({...f,ctaLabel:e.target.value}))}
                       placeholder="Ex: Entrar na Aula"
-                      className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
+                      className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none transition-all"/>
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">URL do Botão</label>
                     <input type="text" value={annForm.ctaUrl??""} onChange={e=>setAnnForm(f=>({...f,ctaUrl:e.target.value}))}
                       placeholder="/dashboard/courses ou https://..."
-                      className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
+                      className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none transition-all"/>
                   </div>
                 </div>
 
@@ -624,10 +624,10 @@ export default function AnnouncementsPage() {
                         <div className="flex-1 space-y-1.5">
                           <input type="text" value={b.title} placeholder="Título do benefício"
                             onChange={e=>{const arr=[...(annForm.benefits??[])];arr[i]={...arr[i],title:e.target.value};setAnnForm(f=>({...f,benefits:arr}));}}
-                            className="w-full bg-gray-900 border border-gray-800 py-1.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none"/>
+                            className="w-full bg-gray-900 border border-gray-800 py-1.5 px-3 text-white text-sm focus:outline-none"/>
                           <input type="text" value={b.desc??""} placeholder="Descri??o curta (opcional)"
                             onChange={e=>{const arr=[...(annForm.benefits??[])];arr[i]={...arr[i],desc:e.target.value};setAnnForm(f=>({...f,benefits:arr}));}}
-                            className="w-full bg-gray-900 border border-gray-800 py-1.5 px-3 text-gray-400 placeholder-gray-600 text-sm focus:outline-none"/>
+                            className="w-full bg-gray-900 border border-gray-800 py-1.5 px-3 text-gray-400 text-sm focus:outline-none"/>
                         </div>
                         <button type="button" onClick={()=>setAnnForm(f=>({...f,benefits:(f.benefits??[]).filter((_,j)=>j!==i)}))}
                           aria-label="Remover benefício"
@@ -684,7 +684,7 @@ export default function AnnouncementsPage() {
                     <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Banner *</label>
                     <input type="text" value={cdForm.label} onChange={e=>setCdForm(f=>({...f,label:e.target.value}))}
                       placeholder="Ex: Promoção termina em ? Aula ao vivo começa em"
-                      className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
+                      className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none transition-all"/>
                   </div>
 
                   <div>
@@ -724,7 +724,7 @@ export default function AnnouncementsPage() {
                         <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Badge</label>
                         <input type="text" value={cdForm.badgeLabel ?? ""} onChange={e => setCdForm(f => ({ ...f, badgeLabel: e.target.value }))}
                           placeholder="Ex: 82% OFF ? Promoção ? Limitado"
-                          className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
+                          className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none transition-all"/>
                       </div>
                     </div>
                   )}
@@ -734,13 +734,13 @@ export default function AnnouncementsPage() {
                       <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Texto do Botão</label>
                       <input type="text" value={cdForm.ctaLabel??""} onChange={e=>setCdForm(f=>({...f,ctaLabel:e.target.value}))}
                         placeholder="Ex: Ver Promoção"
-                        className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
+                        className="w-full bg-gray-950 border border-gray-800 focus:border-blue-500/50 py-2.5 px-3 text-white text-sm focus:outline-none transition-all"/>
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">URL do Botão</label>
                       <input type="text" value={cdForm.ctaUrl??""} onChange={e=>setCdForm(f=>({...f,ctaUrl:e.target.value}))}
                         placeholder="/dashboard/finances"
-                        className="w-full bg-gray-950 border border-gray-800 py-2.5 px-3 text-white placeholder-gray-600 text-sm focus:outline-none transition-all"/>
+                        className="w-full bg-gray-950 border border-gray-800 py-2.5 px-3 text-white text-sm focus:outline-none transition-all"/>
                     </div>
                   </div>
 

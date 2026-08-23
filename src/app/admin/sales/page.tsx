@@ -319,7 +319,7 @@ export default function SalesPage() {
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Pesquisar por nome, email, referência..."
-            className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 pl-10 pr-4 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
+            className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 pl-10 pr-4 text-white text-sm focus:outline-none transition-all" />
         </div>
         <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
           className="bg-gray-900 border border-gray-800 text-gray-300 text-sm py-2.5 px-4 focus:outline-none appearance-none cursor-pointer">

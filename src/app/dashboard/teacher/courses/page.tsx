@@ -82,7 +82,7 @@ export default function TeacherCoursesPage() {
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
         <input type="text" value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Pesquisar curso..."
-          className="w-full bg-gray-900 border border-gray-800 focus:border-green-500/50 py-2.5 pl-10 pr-9 text-white placeholder-gray-600 text-sm focus:outline-none transition-all" />
+          className="w-full bg-gray-900 border border-gray-800 focus:border-green-500/50 py-2.5 pl-10 pr-9 text-white text-sm focus:outline-none transition-all" />
         {search && (
           <button onClick={() => setSearch("")}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">

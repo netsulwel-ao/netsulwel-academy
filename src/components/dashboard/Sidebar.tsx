@@ -261,18 +261,16 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
              </li>
            );
          })}
-       </ul>
-     </div>
-   )}
-
- </div>
+        </ul>
+      </div>
+    )}
 
   {/* Secção para Professores */}
   {isTeacher && !isInstitution && (
     <div>
       {!isCollapsed && (
         <>
-          <h3 className="px-3 pl-6 mb-2 text-xs font-bold uppercase tracking-widest text-brand-green">PROFESSOR</h3>
+          <h3 className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-brand-green">PROFESSOR</h3>
         </>
       )}
       <ul className="space-y-1">
@@ -288,7 +286,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
                 onClick={handleNavClick}
                 aria-current={isActive ? "page" : undefined}
                 title={isCollapsed && !mobileOpen ? item.label : ""}
-                className={`group transition-all relative ${mobileOpen ? "flex flex-col items-center justify-center py-4 mx-2 rounded-xl text-center gap-1.5" : "flex items-center pl-6 py-2.5 pr-3"} ${isActive
+                className={`group transition-all relative ${mobileOpen ? "flex flex-col items-center justify-center py-4 mx-2 rounded-xl text-center gap-1.5" : "flex items-center px-3 py-2.5"} ${isActive
                   ? theme === "light"
                     ? "bg-brand-green/10 text-brand-green-on-light font-semibold"
                     : "bg-brand-green text-text-on-brand shadow-[0_0_15px_rgba(34,197,94,0.3)]"
@@ -339,7 +337,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
   : { label: "Aluno", color: "from-blue-900/80 to-blue-600/40", colorLight: "bg-blue-50 border-blue-200", icon: User };
   const RoleIcon = roleData.icon;
   return (
-  <div className={`mx-4 mt-10 p-4 bg-gradient-to-br relative overflow-hidden group border ${
+  <div className={`p-4 bg-gradient-to-br relative overflow-hidden group border ${
     theme === "light" ? roleData.colorLight : roleData.color + " border-transparent"
   }`}>
   <div className="absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 bg-white blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
@@ -357,6 +355,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
   </div>
   );
   })()}
+
+ </div>
  </div>
 
  {/* 5. Footer da Sidebar (Temas + Logout) */}

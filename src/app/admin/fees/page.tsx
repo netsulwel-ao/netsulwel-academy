@@ -84,7 +84,7 @@ export default function AdminFeesPage() {
           placeholder="Pesquisar cursos..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-gray-900 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple"
+          className="w-full pl-12 pr-4 py-3 bg-gray-900 border border-gray-800 rounded-lg text-white focus:outline-none focus:border-purple"
         />
       </div>
 

@@ -151,14 +151,14 @@ export default function TeacherEditLivePage() {
           <label className="flex items-center gap-2 text-sm font-medium text-gray-300"><Type className="h-4 w-4 text-gray-500" /> Título</label>
           <input type="text" value={title} onChange={e => setTitle(e.target.value)}
             placeholder="Ex: Introdução ao React — Aula ao Vivo"
-            className="w-full bg-gray-900 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors" required />
+            className="w-full bg-gray-900 border border-gray-800 px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" required />
         </div>
 
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-sm font-medium text-gray-300"><AlignLeft className="h-4 w-4 text-gray-500" /> Descrição</label>
           <textarea value={description} onChange={e => setDescription(e.target.value)}
             placeholder="Descreva o que será abordado..." rows={4}
-            className="w-full bg-gray-900 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors resize-none" />
+            className="w-full bg-gray-900 border border-gray-800 px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors resize-none" />
         </div>
 
         <div className="space-y-2">
@@ -172,7 +172,7 @@ export default function TeacherEditLivePage() {
             <label className="flex items-center gap-2 text-sm font-medium text-gray-300"><DollarSign className="h-4 w-4 text-gray-500" /> Preço (Kz)</label>
             <input type="number" min="0" value={price} onChange={e => setPrice(e.target.value)}
               placeholder="Ex: 5000"
-              className="w-full bg-gray-900 border border-gray-800 px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
+              className="w-full bg-gray-900 border border-gray-800 px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" />
           </div>
         )}
 

@@ -110,7 +110,7 @@ export default function MaterialEditor({ materials, onChange }: MaterialEditorPr
           <div className="flex items-center gap-2">
             <input type="text" value={title} onChange={e => setTitle(e.target.value)}
               placeholder="Nome do material"
-              className="flex-1 bg-gray-900 border border-gray-800 px-2.5 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50" />
+              className="flex-1 bg-gray-900 border border-gray-800 px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500/50" />
             <select value={type} onChange={e => setType(e.target.value as MaterialType)}
               className="w-24 bg-gray-900 border border-gray-800 px-2 py-1.5 text-sm text-white focus:outline-none">
               {MATERIAL_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
@@ -133,7 +133,7 @@ export default function MaterialEditor({ materials, onChange }: MaterialEditorPr
               <div className="flex-1 flex gap-1">
                 <input type="text" value={url} onChange={e => setUrl(e.target.value)}
                   placeholder="https://..."
-                  className="flex-1 bg-gray-900 border border-gray-800 px-2.5 py-1.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50" />
+                  className="flex-1 bg-gray-900 border border-gray-800 px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500/50" />
                 <button type="button" onClick={addLink} disabled={!url.trim()}
                   className="px-2.5 py-1.5 bg-purple text-white text-sm font-medium disabled:opacity-40 flex items-center gap-1">
                   <Plus className="w-3 h-3" />

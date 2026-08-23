@@ -59,5 +59,5 @@ export function toDatetimeLocal(iso: string) {
 }
 
 // shared input classes
-export const inputCls = "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors";
+export const inputCls = "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors";
 export const selectCls = "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none appearance-none cursor-pointer transition-colors";

@@ -194,7 +194,7 @@ export default function RootLayout({
  children: React.ReactNode;
 }>) {
  return (
- <html lang="pt-AO" className={`${inter.variable} ${pressStart.variable} scroll-smooth`}>
+ <html lang="pt-AO" data-theme="dark" className={`${inter.variable} ${pressStart.variable} scroll-smooth`}>
   <head>
     <script dangerouslySetInnerHTML={{ __html: ANTI_FOUC_SCRIPT }} />
     <Script

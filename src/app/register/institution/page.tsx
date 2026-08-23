@@ -115,7 +115,7 @@ export default function InstitutionRegisterPage() {
   };
 
   // Classe base para inputs
-  const inputBase = "block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 placeholder-gray-700 focus:border-blue-500/50 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors";
+  const inputBase = "block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-blue-500/50 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors";
 
   return (
     <main className="flex min-h-screen bg-gray-950">

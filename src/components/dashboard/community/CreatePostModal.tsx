@@ -144,7 +144,7 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ex: Como resolver erro X?"
-              className="w-full border border-gray-700 bg-gray-950 py-2.5 px-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple"
+              className="w-full border border-gray-700 bg-gray-950 py-2.5 px-3 text-white transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple"
             />
           </div>
 
@@ -156,7 +156,7 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
               onChange={(e) => setContent(e.target.value)}
               placeholder="Escreve o teu post..."
               rows={5}
-              className="w-full border border-gray-700 bg-gray-950 py-2.5 px-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple resize-y"
+              className="w-full border border-gray-700 bg-gray-950 py-2.5 px-3 text-white transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple resize-y"
             />
           </div>
 
@@ -200,7 +200,7 @@ export default function CreatePostModal({ open, onClose, onCreated }: Props) {
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
               placeholder="Ex: react, javascript, iniciante"
-              className="w-full border border-gray-700 bg-gray-950 py-2.5 px-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple"
+              className="w-full border border-gray-700 bg-gray-950 py-2.5 px-3 text-white transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple"
             />
           </div>
 

@@ -78,7 +78,7 @@ export function ModulesPanel({
                 value={module.title}
                 onChange={(e) => updateModuleTitle(mi, e.target.value)}
                 placeholder="Nome do módulo (ex: Introdução)"
-                className="flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-700 focus:outline-none"
+                className="flex-1 bg-transparent text-sm text-gray-200 focus:outline-none"
               />
               {modules.length > 1 && (
                 <button

@@ -176,7 +176,7 @@ export default function AdminLivesPage() {
             <input
               type="text" value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Pesquisar por título..."
-              className="w-full border border-gray-800 bg-gray-900 pl-9 pr-9 py-2.5 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/30 focus:outline-none transition-colors"
+              className="w-full border border-gray-800 bg-gray-900 pl-9 pr-9 py-2.5 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">

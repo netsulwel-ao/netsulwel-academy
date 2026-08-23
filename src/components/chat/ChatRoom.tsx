@@ -199,7 +199,7 @@ export default function ChatRoom({ chatId, height = "h-full" }: ChatRoomProps) {
           placeholder="Escreve uma mensagem..."
           disabled={sending}
           maxLength={1000}
-          className="flex-1 border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none disabled:opacity-50 transition-colors"
+          className="flex-1 border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple/40 focus:outline-none disabled:opacity-50 transition-colors"
         />
         <button
           type="submit"

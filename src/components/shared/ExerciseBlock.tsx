@@ -128,7 +128,7 @@ export default function ExerciseBlock({ exercises }: ExerciseBlockProps) {
                       onChange={e => setAnswers(prev => ({ ...prev, [i]: { selected: e.target.value, revealed: false } }))}
                       disabled={a?.revealed}
                       placeholder="Escreve a tua resposta..."
-                      className="flex-1 bg-gray-950 border border-gray-800 px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50 disabled:opacity-60" />
+                      className="flex-1 bg-gray-950 border border-gray-800 px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500/50 disabled:opacity-60" />
                     {!a?.revealed && (
                       <button type="button" onClick={() => reveal(i)}
                         disabled={!a?.selected?.trim()}

@@ -257,7 +257,7 @@ export default function DashboardSettingsPage() {
             <label htmlFor="displayName" className="font-mono text-[13px] uppercase tracking-widest text-gray-700">nome</label>
             <input id="displayName" type="text" value={displayName} onChange={e => setDisplayName(e.target.value)}
               placeholder="O teu nome"
-              className="w-full border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none transition-colors" />
+              className="w-full border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-200 focus:border-purple/40 focus:outline-none transition-colors" />
           </div>
 
           {/* Bio */}
@@ -265,7 +265,7 @@ export default function DashboardSettingsPage() {
             <label htmlFor="bio" className="font-mono text-[13px] uppercase tracking-widest text-gray-700">biografia</label>
             <textarea id="bio" value={bio} onChange={e => setBio(e.target.value)} rows={3}
               placeholder="Fala sobre ti..."
-              className="w-full border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none transition-colors resize-none" />
+              className="w-full border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-200 focus:border-purple/40 focus:outline-none transition-colors resize-none" />
           </div>
 
           {/* Vídeo */}
@@ -278,7 +278,7 @@ export default function DashboardSettingsPage() {
               </button>
               <input type="url" value={promoVideoUrl} onChange={e => setPromoVideoUrl(e.target.value)}
                 placeholder="https://youtube.com/watch?v=..."
-                className="flex-1 border border-gray-800 bg-gray-900 px-3 py-2 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none transition-colors" />
+                className="flex-1 border border-gray-800 bg-gray-900 px-3 py-2 text-sm text-gray-200 focus:border-purple/40 focus:outline-none transition-colors" />
               <input ref={promoVideoInputRef} type="file" accept="video/*" className="hidden"
                 onChange={async e => {
                   const file = e.target.files?.[0];
@@ -391,7 +391,7 @@ export default function DashboardSettingsPage() {
                   </p>
                   <input type="password" value={deletePass} onChange={e => setDeletePass(e.target.value)}
                     placeholder="Confirma a tua palavra-passe"
-                    className="w-full border border-red-500/25 bg-gray-900 px-3 py-2 text-sm text-gray-300 placeholder-gray-700 focus:border-red-500/40 focus:outline-none transition-colors" />
+                    className="w-full border border-red-500/25 bg-gray-900 px-3 py-2 text-sm text-gray-300 focus:border-red-500/40 focus:outline-none transition-colors" />
                   {deleteErr && <p className="text-sm text-red-400/80">{deleteErr}</p>}
                   <div className="flex gap-2">
                     <button type="button" onClick={() => setShowDelete(false)}

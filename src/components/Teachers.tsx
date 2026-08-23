@@ -120,7 +120,7 @@ export function Teachers() {
           <input ref={inputRef}
             type="text" value={search} onChange={(e) => handleSearch(e.target.value)}
             placeholder="Pesquisar professor..."
-            className="w-full bg-gray-900 border border-gray-800 focus:border-purple/50 py-3.5 pl-12 pr-10 text-white placeholder-gray-600 text-base focus:outline-none transition-all" />
+            className="w-full bg-gray-900 border border-gray-800 focus:border-purple/50 py-3.5 pl-12 pr-10 text-white text-base focus:outline-none transition-all" />
           {search && (
             <button onClick={() => { setSearch(""); setShowDropdown(false); inputRef.current?.focus(); }}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors">

@@ -107,7 +107,7 @@ export function QuestionCard({ question, index, total, answer, onAnswer }: Quest
             value={answer ?? ""}
             onChange={e => onAnswer(e.target.value)}
             placeholder="Escreve a tua resposta..."
-            className="w-full border border-gray-800 bg-gray-900 px-4 py-3 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none transition-colors"
+            className="w-full border border-gray-800 bg-gray-900 px-4 py-3 text-sm text-gray-200 focus:border-purple/40 focus:outline-none transition-colors"
           />
         )}
       </div>

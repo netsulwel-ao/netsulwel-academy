@@ -161,6 +161,11 @@
 :not([data-theme="light"]) * {
   color: #ffffff !important;
 }
+/* Placeholders: consistent grey, not white, not too dark */
+[data-theme="dark"] ::placeholder,
+:not([data-theme="light"]) ::placeholder {
+  color: #9ca3af !important;
+}
 [data-theme="dark"] .text-green,
 [data-theme="dark"] .text-green-light,
 [data-theme="dark"] .text-purple,

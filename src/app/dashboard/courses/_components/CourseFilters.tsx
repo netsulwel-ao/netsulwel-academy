@@ -89,7 +89,7 @@ export function CourseFilters({
             value={search}
             onChange={e => onSearchChange(e.target.value)}
             placeholder="Título, descrição ou tag..."
-            className="w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-8 text-sm text-gray-200 placeholder-gray-700 focus:border-purple/40 focus:outline-none transition-colors"
+            className="w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-8 text-sm text-gray-200 focus:border-purple/40 focus:outline-none transition-colors"
           />
           {search && (
             <button

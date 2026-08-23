@@ -133,7 +133,7 @@ export default function CommentSection({ postId, postAuthorId, postTitle }: { po
               }
             }}
             placeholder="Escreve um comentário..."
-            className="flex-1 border border-gray-700 bg-gray-950 py-2.5 px-3 text-white placeholder-gray-600 transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple text-sm"
+            className="flex-1 border border-gray-700 bg-gray-950 py-2.5 px-3 text-white transition-colors focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple text-sm"
           />
           <button
             onClick={sendComment}

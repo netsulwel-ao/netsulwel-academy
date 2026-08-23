@@ -297,7 +297,7 @@ export default function RegisterPage() {
                           id="name" type="text" required autoComplete="name"
                           disabled={isAnyLoading} placeholder="João Silva"
                           value={name} onChange={(e) => setName(e.target.value)}
-                          className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                          className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
                         />
                       </div>
                     </motion.div>
@@ -313,7 +313,7 @@ export default function RegisterPage() {
                           id="email" type="email" required autoComplete="email"
                           disabled={isAnyLoading} placeholder="email@exemplo.com"
                           value={email} onChange={(e) => setEmail(e.target.value)}
-                          className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                          className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
                         />
                       </div>
                     </motion.div>
@@ -330,7 +330,7 @@ export default function RegisterPage() {
                             id="password" type={showPassword ? "text" : "password"} required
                             autoComplete="new-password" disabled={isAnyLoading} placeholder="••••••"
                             value={password} onChange={(e) => setPassword(e.target.value)}
-                            className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-8 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                            className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-8 text-sm text-gray-100 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
                           />
                           <button type="button" tabIndex={-1} onClick={() => setShowPassword(!showPassword)}
                             className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-400">
@@ -349,7 +349,7 @@ export default function RegisterPage() {
                             id="confirm" type={showConfirm ? "text" : "password"} required
                             autoComplete="new-password" disabled={isAnyLoading} placeholder="••••••"
                             value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-8 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                            className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-8 text-sm text-gray-100 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
                           />
                           <button type="button" tabIndex={-1} onClick={() => setShowConfirm(!showConfirm)}
                             className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-400">
@@ -422,7 +422,7 @@ export default function RegisterPage() {
                             id="telefone" type="tel" required disabled={isAnyLoading}
                             placeholder="+244 900 000 000"
                             value={telefone} onChange={(e) => setTelefone(e.target.value)}
-                            className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                            className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
                           />
                         </div>
                       </motion.div>
@@ -438,7 +438,7 @@ export default function RegisterPage() {
                             id="idade" type="number" required min="12" max="120"
                             disabled={isAnyLoading} placeholder="18"
                             value={idade} onChange={(e) => setIdade(e.target.value)}
-                            className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                            className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
                           />
                         </div>
                       </motion.div>
@@ -490,7 +490,7 @@ export default function RegisterPage() {
                           <input
                             id="nacionalidade" type="text" required disabled={isAnyLoading} placeholder="Angolana"
                             value={nacionalidade} onChange={(e) => setNacionalidade(e.target.value)}
-                            className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                            className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
                           />
                         </div>
                       </motion.div>
@@ -504,7 +504,7 @@ export default function RegisterPage() {
                           id="morada" type="text" required disabled={isAnyLoading}
                           placeholder="Rua Principal, 123, Luanda"
                           value={morada} onChange={(e) => setMorada(e.target.value)}
-                          className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-100 placeholder-gray-700 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                          className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-100 focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
                         />
                       </motion.div>
                     </div>

@@ -11,9 +11,8 @@ import {
 interface DirectSource  { type: "direct";   src: string; poster?: string; }
 interface YoutubeSource { type: "youtube";  youtubeId: string; }
 interface VimeoSource   { type: "vimeo";    vimeoId: string; }
-interface LiveKitSource { type: "livekit";  videoTrack?: React.ReactNode; screenTrack?: React.ReactNode; }
 
-type VideoSource = DirectSource | YoutubeSource | VimeoSource | LiveKitSource;
+type VideoSource = DirectSource | YoutubeSource | VimeoSource;
 
 interface VideoPlayerProps {
   source: VideoSource;
@@ -88,14 +87,6 @@ export function VideoPlayer({ source, className = "", onProgress }: VideoPlayerP
       )}
       {(source.type === "youtube" || source.type === "vimeo") && (
         <EmbedPlayer source={source} />
-      )}
-      {source.type === "livekit" && (
-        <LiveKitPlayer
-          source={source}
-          showControls={showControls}
-          onFullscreen={toggleFullscreen}
-          fullscreen={fullscreen}
-        />
       )}
     </div>
   );
@@ -393,49 +384,5 @@ function EmbedPlayer({ source }: { source: YoutubeSource | VimeoSource }) {
       allowFullScreen
       title="Video player"
     />
-  );
-}
-
-// ── LiveKitPlayer ─────────────────────────────────────────────
-function LiveKitPlayer({
-  source, showControls, onFullscreen, fullscreen,
-}: {
-  source: LiveKitSource;
-  showControls: boolean;
-  onFullscreen: () => void;
-  fullscreen: boolean;
-}) {
-  return (
-    <div className="relative w-full h-full">
-      {source.screenTrack ? (
-        <>
-          {source.screenTrack}
-          {source.videoTrack && (
-            <div className="absolute bottom-16 right-4 w-36 sm:w-44 aspect-video border border-purple/50 overflow-hidden shadow-2xl">
-              {source.videoTrack}
-            </div>
-          )}
-        </>
-      ) : source.videoTrack ? (
-        <div className="w-full h-full">{source.videoTrack}</div>
-      ) : (
-        <div className="flex h-full items-center justify-center">
-          <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">
-            // a aguardar transmissão
-          </p>
-        </div>
-      )}
-
-      {/* Fullscreen button */}
-      <button
-        onClick={onFullscreen}
-        aria-label={fullscreen ? "Sair de ecrã inteiro" : "Ecrã inteiro"}
-        className={`absolute top-3 right-3 z-20 flex h-8 w-8 items-center justify-center bg-black text-white hover:bg-black transition-opacity ${
-          showControls ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        {fullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-      </button>
-    </div>
   );
 }

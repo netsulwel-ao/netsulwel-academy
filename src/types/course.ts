@@ -31,7 +31,7 @@ export interface VideoItem {
   uploadError?: string;
   /** Apenas para cursos ao vivo (format === "live") */
   scheduledAt?: string;   // ISO datetime
-  roomName?: string;      // LiveKit room slug
+  roomName?: string;      // unique room slug
   materials?: CourseMaterial[];
   exercises?: ExerciseItem[];
 }
