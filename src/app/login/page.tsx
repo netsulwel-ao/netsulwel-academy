@@ -19,6 +19,7 @@ import {
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { GoogleIcon, GithubIcon } from "@/components/ui/AuthIcons";
+import { setAuthCookie } from "@/lib/authService";
 
 import { PageTransition } from "@/components/PageTransition";
 import { TransitionLink } from "@/components/TransitionLink";
@@ -70,6 +71,8 @@ export default function LoginPage() {
       if (view === "login") {
         await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
         const cred = await signInWithEmailAndPassword(auth, email, password);
+        const idToken = await cred.user.getIdToken();
+        await setAuthCookie(cred.user.uid, idToken);
         const snap = await getDoc(doc(db, "users", cred.user.uid));
         const role = snap.exists() ? snap.data().role : "aluno";
         router.push(getRoleRedirect(role, redirectTo));
@@ -110,9 +113,10 @@ export default function LoginPage() {
     try {
       const authProvider = provider === "google" ? new GoogleAuthProvider() : new GithubAuthProvider();
       const result = await signInWithPopup(auth, authProvider);
+      const idToken = await result.user.getIdToken();
+      await setAuthCookie(result.user.uid, idToken);
       const snap = await getDoc(doc(db, "users", result.user.uid));
       if (!snap.exists()) {
-        // Conta social sem perfil → criar perfil automaticamente
         await setDoc(doc(db, "users", result.user.uid), {
           email: result.user.email,
           name: result.user.displayName || result.user.email?.split("@")[0] || "Utilizador",

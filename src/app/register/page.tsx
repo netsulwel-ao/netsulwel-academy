@@ -18,6 +18,7 @@ import {
   type AuthProvider,
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import { setAuthCookie } from "@/lib/authService";
 import { GoogleIcon, GithubIcon } from "@/components/ui/AuthIcons";
 
 import { PageTransition } from "@/components/PageTransition";
@@ -100,6 +101,8 @@ export default function RegisterPage() {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(cred.user, { displayName: name });
+      const idToken = await cred.user.getIdToken();
+      await setAuthCookie(cred.user.uid, idToken);
       await setDoc(doc(db, "users", cred.user.uid), {
         email,
         name,
@@ -137,11 +140,12 @@ export default function RegisterPage() {
   };
 
   const handleSocial = async (provider: AuthProvider, name: string) => {
-    // Social login não precisa de validação de formulário
     setError("");
     setSocialLoading(name);
     try {
       const cred = await signInWithPopup(auth, provider);
+      const idToken = await cred.user.getIdToken();
+      await setAuthCookie(cred.user.uid, idToken);
       const ref = doc(db, "users", cred.user.uid);
       const snap = await getDoc(ref);
       if (!snap.exists()) {

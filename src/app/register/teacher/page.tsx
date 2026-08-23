@@ -11,6 +11,7 @@ import { auth, db } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import { setAuthCookie } from "@/lib/authService";
 
 
 const PERKS = [
@@ -42,6 +43,8 @@ export default function TeacherRegisterPage() {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(cred.user, { displayName: name });
+      const idToken = await cred.user.getIdToken();
+      await setAuthCookie(cred.user.uid, idToken);
       await setDoc(doc(db, "users", cred.user.uid), {
         email,
         name,

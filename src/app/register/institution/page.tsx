@@ -11,6 +11,7 @@ import { auth, db } from "@/lib/firebase";
 import { doc, setDoc, deleteDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import { setAuthCookie } from "@/lib/authService";
 
 
 const PERKS = [
@@ -83,6 +84,7 @@ export default function InstitutionRegisterPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erro ao registar instituição.");
+      await setAuthCookie(cred.user.uid, token);
       await fetch("/api/auth/send-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
