@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAuth } from "@/lib/api-auth";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { sanitizePromptInput } from "@/lib/html-escape";
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  if (!rateLimit(`ai-desc:${ip}`, { maxRequests: 10, windowMs: 60_000 })) {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
+
   try {
     const { uid, error } = await verifyAuth(req);
     if (!uid) return NextResponse.json({ error }, { status: 401 });
@@ -12,14 +19,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Título é obrigatório." }, { status: 400 });
     }
 
+    const safeTitle = sanitizePromptInput(title, 200);
+
     // Monta lista de módulos e aulas para o contexto
     const modulesText = modules
       ?.map((m: { title: string; videos: { title: string }[] }, i: number) => {
         const lessons = m.videos
           ?.filter((v: { title: string }) => v.title?.trim())
-          .map((v: { title: string }) => `    - ${v.title}`)
+          .map((v: { title: string }) => `    - ${sanitizePromptInput(v.title, 100)}`)
           .join("\n");
-        return `  Módulo ${i + 1}: ${m.title || "(sem nome)"}${lessons ? "\n" + lessons : ""}`;
+        return `  Módulo ${i + 1}: ${sanitizePromptInput(m.title || "(sem nome)", 100)}${lessons ? "\n" + lessons : ""}`;
       })
       .join("\n") ?? "";
 
@@ -27,7 +36,7 @@ export async function POST(req: NextRequest) {
 
 Gera uma descrição de curso atrativa, clara e profissional em português europeu (Portugal/Angola) com base nas seguintes informações:
 
-Título do curso: ${title}
+Título do curso: ${safeTitle}
 ${modulesText ? `\nEstrutura do curso:\n${modulesText}` : ""}
 
 Requisitos da descrição:

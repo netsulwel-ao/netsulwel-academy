@@ -13,7 +13,7 @@ import type { ModuleQuiz } from "@/types/quiz";
 export default function CourseQuizzesPage() {
   const params = useParams();
   const router = useRouter();
-  const courseId = params?.id as string;
+  const courseId = params?.id;
   const { user } = useAuth();
 
   const [quizzes, setQuizzes] = useState<ModuleQuiz[]>([]);
@@ -22,7 +22,7 @@ export default function CourseQuizzesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!courseId || !user) return;
+    if (!courseId || typeof courseId !== "string" || !user) return;
     const load = async () => {
       const snap = await getDoc(doc(db, "courses", courseId));
       if (snap.exists()) {
@@ -36,7 +36,7 @@ export default function CourseQuizzesPage() {
   }, [courseId, user]);
 
   useEffect(() => {
-    if (!courseId) return;
+    if (!courseId || typeof courseId !== "string") return;
     const unsub = listenCourseQuizzes(courseId, setQuizzes);
     return () => unsub();
   }, [courseId]);
@@ -48,7 +48,7 @@ export default function CourseQuizzesPage() {
 
   const modulesWithQuiz = new Set(quizzes.map((q) => q.moduleIndex));
 
-  if (loading) {
+  if (loading || !courseId || typeof courseId !== "string") {
     return <div className="flex items-center justify-center min-h-[40vh]"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>;
   }
 

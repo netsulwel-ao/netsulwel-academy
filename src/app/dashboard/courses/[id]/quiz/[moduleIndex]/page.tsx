@@ -13,7 +13,7 @@ import type { ModuleQuiz, ModuleQuizResult } from "@/types/quiz";
 
 export default function ModuleQuizPage() {
   const params = useParams();
-  const courseId = params?.id as string;
+  const courseId = params?.id;
   const moduleIndex = Number(params?.moduleIndex);
   const { user } = useAuth();
 
@@ -49,7 +49,7 @@ export default function ModuleQuizPage() {
   }, [courseId, moduleIndex, user]);
 
   useEffect(() => {
-    if (!user || !courseId) return;
+    if (!user || !courseId || typeof courseId !== "string") return;
     const unsub = listenQuizResults(user.uid, courseId, (res) => {
       setResults(res);
     });
@@ -84,7 +84,7 @@ export default function ModuleQuizPage() {
     ? moduleResults.reduce((best, r) => (r.score > best.score ? r : best), moduleResults[0])
     : null;
 
-  if (loading) {
+  if (loading || !courseId || typeof courseId !== "string" || isNaN(moduleIndex)) {
     return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>;
   }
 

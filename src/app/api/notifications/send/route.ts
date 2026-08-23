@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFirebaseAdmin } from "@/lib/firebase-admin";
 import { verifyAuth } from "@/lib/api-auth";
+import { escapeHtml } from "@/lib/html-escape";
 import nodemailer from "nodemailer";
 
 function buildSaleConfirmedEmailHtml(data: {
@@ -13,6 +14,9 @@ function buildSaleConfirmedEmailHtml(data: {
 }): string {
   const { studentName, itemTitle, itemType, amount, siteUrl, dashboardUrl } = data;
   const noun = itemType === "live" ? "Aula ao Vivo" : itemType === "standalone" ? "Curso" : "Plano";
+
+  const safeName = escapeHtml(studentName);
+  const safeTitle = escapeHtml(itemTitle);
 
   return `<!DOCTYPE html>
 <html lang="pt">
@@ -55,7 +59,7 @@ function buildSaleConfirmedEmailHtml(data: {
               <tr>
                 <td style="padding:36px 40px 32px;">
                   <h1 style="color:#ffffff;font-size:22px;font-weight:700;text-align:center;margin:0 0 14px 0;line-height:1.3;">
-                    Ola, <span style="color:#4ade80;">${studentName}</span>!
+                    Ola, <span style="color:#4ade80;">${safeName}</span>!
                   </h1>
 
                   <p style="color:#7070a0;font-size:14px;line-height:1.75;text-align:center;margin:0 0 28px 0;">
@@ -70,7 +74,7 @@ function buildSaleConfirmedEmailHtml(data: {
                         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                           <tr>
                             <td style="color:#4a4a6a;font-size:12px;padding-bottom:8px;">Item</td>
-                            <td style="color:#ffffff;font-size:14px;font-weight:600;text-align:right;padding-bottom:8px;">${itemTitle}</td>
+                            <td style="color:#ffffff;font-size:14px;font-weight:600;text-align:right;padding-bottom:8px;">${safeTitle}</td>
                           </tr>
                           <tr>
                             <td style="color:#4a4a6a;font-size:12px;padding-bottom:8px;">Tipo</td>
@@ -142,7 +146,6 @@ export async function POST(req: NextRequest) {
     const { uid, error } = await verifyAuth(req);
     if (!uid) return NextResponse.json({ error }, { status: 401 });
 
-    // Only admins can send sale confirmation emails
     const admin = getFirebaseAdmin();
     const db = admin.firestore();
     const userSnap = await db.collection("users").doc(uid).get();
@@ -155,7 +158,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Campos obrigatórios em falta." }, { status: 400 });
     }
 
-    // Resolve o ID real do item (curso/live) — usa itemId se fornecido, senão busca da venda
     let resolvedItemId = itemId;
     if (!resolvedItemId) {
       const saleSnap = await db.collection("sales").doc(saleId).get();
@@ -166,7 +168,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Fetch student email
     const studentSnap = await db.collection("users").doc(userId).get();
     if (!studentSnap.exists) {
       return NextResponse.json({ error: "Aluno não encontrado." }, { status: 404 });
@@ -181,7 +182,6 @@ export async function POST(req: NextRequest) {
 
     const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
     if (!smtpConfigured) {
-      console.log("[Email] SMTP não configurado — email de confirmação ignorado para:", studentEmail);
       return NextResponse.json({ success: true, skipped: true, reason: "smtp_not_configured" });
     }
 
@@ -202,7 +202,7 @@ export async function POST(req: NextRequest) {
     await transporter.sendMail({
       from: process.env.EMAIL_FROM,
       to: studentEmail,
-      subject: `Pagamento Confirmado — ${itemTitle} | Netsulwel Academy`,
+      subject: `Pagamento Confirmado — ${escapeHtml(itemTitle)} | Netsulwel Academy`,
       html: buildSaleConfirmedEmailHtml({
         studentName,
         itemTitle,

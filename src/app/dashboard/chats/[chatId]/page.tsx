@@ -20,7 +20,10 @@ export default function ChatRoomPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!chatId) return;
+    if (!chatId) {
+      setLoading(false);
+      return;
+    }
     getDoc(doc(db, "courseChats", chatId))
       .then(snap => {
         if (snap.exists()) setChat({ id: snap.id, ...snap.data() } as CourseChat);

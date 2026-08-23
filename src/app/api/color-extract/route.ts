@@ -1,16 +1,71 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Jimp, intToRGBA } from "jimp";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
+const ALLOWED_PROTOCOLS = ["https:"];
+const ALLOWED_HOSTS = new Set([
+  "r2.dev",
+  "pexels.com",
+  "firebasestorage.googleapis.com",
+  "lh3.googleusercontent.com",
+  "avatars.githubusercontent.com",
+  "cdn-icons-png.flaticon.com",
+  "images.unsplash.com",
+  "i.imgur.com",
+]);
+
+function isAllowedUrl(urlStr: string): boolean {
+  try {
+    const url = new URL(urlStr);
+    if (!ALLOWED_PROTOCOLS.includes(url.protocol)) return false;
+    // Check if host matches any allowed host (including subdomains)
+    const host = url.hostname.toLowerCase();
+    return Array.from(ALLOWED_HOSTS).some(
+      (allowed) => host === allowed || host.endsWith("." + allowed),
+    );
+  } catch {
+    return false;
+  }
+}
+
 export async function GET(req: NextRequest) {
+  const ip = getClientIp(req);
+  if (!rateLimit(`color-extract:${ip}`, { maxRequests: 10, windowMs: 60_000 })) {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
+
   const imageUrl = req.nextUrl.searchParams.get("url");
   if (!imageUrl) {
     return NextResponse.json({ error: "Missing url" }, { status: 400 });
   }
 
+  if (!isAllowedUrl(imageUrl)) {
+    return NextResponse.json({ error: "URL not allowed" }, { status: 403 });
+  }
+
   try {
-    const image = await Jimp.read(imageUrl);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
+
+    const imageResponse = await fetch(imageUrl, {
+      signal: controller.signal,
+      headers: { "User-Agent": "NetsulwelAcademy-ColorExtract/1.0" },
+    });
+    clearTimeout(timeout);
+
+    if (!imageResponse.ok) {
+      return NextResponse.json({ error: "Failed to fetch image" }, { status: 502 });
+    }
+
+    const contentType = imageResponse.headers.get("content-type") || "";
+    if (!contentType.startsWith("image/")) {
+      return NextResponse.json({ error: "URL does not point to an image" }, { status: 400 });
+    }
+
+    const buffer = Buffer.from(await imageResponse.arrayBuffer());
+    const image = await Jimp.fromBuffer(buffer);
     image.resize({ w: 50, h: 50 });
 
     const colorBuckets: Record<string, { r: number; g: number; b: number; count: number }> = {};

@@ -11,6 +11,18 @@ import { useCertificateDetail } from "../_hooks/useCertificateDetail";
 export default function CertificatePage() {
   const { courseId } = useParams<{ courseId: string }>();
   const router = useRouter();
+
+  if (!courseId || typeof courseId !== "string") {
+    return (
+      <div className="max-w-[56rem] mx-auto py-20 text-center px-4">
+        <p className="text-sm text-gray-600">ID do curso inválido.</p>
+        <Link href="/dashboard/certificates" className="font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors mt-4 inline-block">
+          ← Voltar aos certificados
+        </Link>
+      </div>
+    );
+  }
+
   const { cert, course, loading, error } = useCertificateDetail(courseId);
 
   if (loading) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 function buildVerificationEmailHtml(verifyLink: string, siteUrl: string): string {
   return `<!DOCTYPE html>
@@ -179,6 +180,11 @@ function buildVerificationEmailHtml(verifyLink: string, siteUrl: string): string
 }
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  if (!rateLimit(`send-verify:${ip}`, { maxRequests: 5, windowMs: 900_000 })) {
+    return NextResponse.json({ error: "Tentativas excessivas. Tenta novamente mais tarde." }, { status: 429 });
+  }
+
   try {
     const { email } = await req.json();
 

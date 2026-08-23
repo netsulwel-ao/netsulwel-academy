@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAuth } from "@/lib/api-auth";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { sanitizePromptInput } from "@/lib/html-escape";
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  if (!rateLimit(`ai-announce:${ip}`, { maxRequests: 10, windowMs: 60_000 })) {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
+
   try {
     const { uid, error } = await verifyAuth(req);
     if (!uid) return NextResponse.json({ error }, { status: 401 });
@@ -25,10 +32,12 @@ export async function POST(req: NextRequest) {
       standalone: "alunos com acesso pago",
     };
 
+    const safeTitle = title ? sanitizePromptInput(title, 200) : "";
+
     const prompt = `És um especialista em marketing para plataformas de educação online. Trabalhas para a Netsulwel Academy, uma plataforma angolana de cursos de tecnologia, finanças e investimentos.
 
 Cria um anúncio do tipo "${typeLabels[type] || type}" direcionado a ${targetLabels[target] || "todos os alunos"}.
-${title ? `Tema/contexto do anúncio: "${title}"` : ""}
+${safeTitle ? `Tema/contexto do anúncio: "${safeTitle}"` : ""}
 
 Responde APENAS com um JSON válido neste formato exato (sem markdown, sem explicações):
 {

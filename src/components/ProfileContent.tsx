@@ -215,7 +215,7 @@ export function ProfileContent({ profile, courses, lives, courseHref, coverClass
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
               {courses.filter(c => c.id).map((course) => (
-                <Link key={course.id} href={courseHref(course.id!)}
+                <Link key={course.id} href={courseHref(course.id ?? "")}
                   className="group flex flex-col bg-gray-900 overflow-hidden transition-all hover:bg-gray-900 rounded-xl">
                    <div className="relative h-36 sm:h-44 bg-gray-800">
                     {course.thumbnail ? (

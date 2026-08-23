@@ -45,7 +45,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (currentUser) {
           isLoggingOut.current = false;
           setUser(currentUser);
-          setAuthCookie(currentUser.uid).catch(() => {});
+          currentUser.getIdToken().then((token) => {
+            setAuthCookie(currentUser.uid, token).catch(() => {});
+          }).catch(() => {});
           logger.info("User authenticated", { uid: currentUser.uid });
         } else {
           setUser(null);

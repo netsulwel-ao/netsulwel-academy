@@ -9,6 +9,18 @@ import { ResultReview } from "../../_components/ResultReview";
 export default function ExamResultPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+
+  if (!id || typeof id !== "string") {
+    return (
+      <div className="max-w-[56rem] mx-auto py-20 text-center px-4">
+        <p className="text-sm text-gray-600">Exame inválido.</p>
+        <Link href="/dashboard/exams" className="font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors mt-4 inline-block">
+          ← Voltar
+        </Link>
+      </div>
+    );
+  }
+
   const { exam, result, allResults, loading } = useExamResult(id);
 
   if (loading) {

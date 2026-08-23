@@ -54,8 +54,6 @@ function getServiceAccount(): admin.ServiceAccount | null {
 
   // 3. Ficheiro na raiz do projeto (não versionado)
   const files = [
-    "netsulwel-academy-firebase-adminsdk-fbsvc-e584df89a9.json",
-    "netsulwel-academy-firebase-adminsdk-fbsvc-aad186c64e.json",
     "service-account.json",
     "serviceAccountKey.json",
   ];

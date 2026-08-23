@@ -15,7 +15,7 @@ export default function CreateQuizPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const courseId = params?.id as string;
+  const courseId = params?.id;
   const moduleIndex = Number(searchParams?.get("module")) || 0;
   const { user } = useAuth();
 
@@ -25,7 +25,7 @@ export default function CreateQuizPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!courseId || !user) return;
+    if (!courseId || typeof courseId !== "string" || !user) return;
     const load = async () => {
       const snap = await getDoc(doc(db, "courses", courseId));
       if (snap.exists()) {
@@ -40,7 +40,7 @@ export default function CreateQuizPage() {
   }, [courseId, user, moduleIndex]);
 
   const handleSave = async (data: { questions: ModuleQuizQuestion[]; passingScore: number; maxAttempts: number }) => {
-    if (!user || !courseId) return;
+    if (!user || !courseId || typeof courseId !== "string") return;
     setSaving(true);
     try {
       await createQuiz({
@@ -57,7 +57,7 @@ export default function CreateQuizPage() {
     setSaving(false);
   };
 
-  if (loading) {
+  if (loading || !courseId || typeof courseId !== "string") {
     return <div className="flex items-center justify-center min-h-[40vh]"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>;
   }
 

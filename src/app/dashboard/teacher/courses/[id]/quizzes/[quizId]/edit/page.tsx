@@ -12,8 +12,8 @@ import type { ModuleQuiz, ModuleQuizQuestion } from "@/types/quiz";
 export default function EditQuizPage() {
   const params = useParams();
   const router = useRouter();
-  const courseId = params?.id as string;
-  const quizId = params?.quizId as string;
+  const courseId = params?.id;
+  const quizId = params?.quizId;
   const { user } = useAuth();
 
   const [quiz, setQuiz] = useState<ModuleQuiz | null>(null);
@@ -21,7 +21,7 @@ export default function EditQuizPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!quizId) return;
+    if (!quizId || typeof quizId !== "string") return;
     getQuiz(quizId).then((q) => {
       setQuiz(q);
       setLoading(false);
@@ -29,20 +29,21 @@ export default function EditQuizPage() {
   }, [quizId]);
 
   const handleSave = async (data: { questions: ModuleQuizQuestion[]; passingScore: number; maxAttempts: number }) => {
-    if (!quizId || !user) return;
+    if (!quizId || typeof quizId !== "string" || !user) return;
+    const qid = quizId;
     setSaving(true);
     try {
-      await updateQuiz(quizId, {
+      await updateQuiz(qid, {
         questions: data.questions,
         passingScore: data.passingScore,
         maxAttempts: data.maxAttempts,
       });
-      router.push(`/dashboard/teacher/courses/${courseId}/quizzes`);
+      router.push(`/dashboard/teacher/courses/${courseId as string}/quizzes`);
     } catch {}
     setSaving(false);
   };
 
-  if (loading) {
+  if (loading || !courseId || typeof courseId !== "string" || !quizId || typeof quizId !== "string") {
     return <div className="flex items-center justify-center min-h-[40vh]"><Loader2 className="h-8 w-8 animate-spin text-purple" /></div>;
   }
 

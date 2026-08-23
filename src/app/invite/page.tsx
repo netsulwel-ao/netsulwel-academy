@@ -123,11 +123,11 @@ function InviteContent() {
 
         {!user ? (
           <div className="space-y-3">
-            <Link href={`/login?redirect=/invite?token=${token}`}
+            <Link href={`/login?redirect=/invite?token=${token ?? ""}`}
               className="flex items-center justify-center gap-2 w-full bg-purple hover:bg-purple-light text-white font-bold py-3 transition-colors">
               <LogIn className="h-5 w-5" />Fazer Login
             </Link>
-            <Link href={`${inviteRole === "teacher" ? "/register/teacher" : "/register"}?redirect=/invite?token=${token}`}
+            <Link href={`${inviteRole === "teacher" ? "/register/teacher" : "/register"}?redirect=/invite?token=${token ?? ""}`}
               className="flex items-center justify-center gap-2 w-full bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 transition-colors border border-gray-700">
               <UserPlus className="h-5 w-5" />Criar Conta
             </Link>

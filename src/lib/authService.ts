@@ -116,12 +116,17 @@ export async function logoutUser(): Promise<void> {
 
 /**
  * Set auth cookie via API route (HttpOnly, Secure)
+ * Requires the Firebase ID token for server-side verification.
  */
-export async function setAuthCookie(uid: string): Promise<void> {
+export async function setAuthCookie(uid: string, idToken?: string): Promise<void> {
   try {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (idToken) {
+      headers["Authorization"] = `Bearer ${idToken}`;
+    }
     await fetch("/api/auth/session", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({ uid, action: "set" }),
     });
   } catch (error) {

@@ -63,6 +63,11 @@ export default function InstitutionDetailPage() {
 
   // ── Load ──────────────────────────────────────────────────
   const load = useCallback(async () => {
+    if (!id || typeof id !== "string") {
+      setError("ID da instituição inválido.");
+      setLoading(false);
+      return;
+    }
     setLoading(true); setError(null);
     try {
       const [instSnap, membersSnap] = await Promise.all([

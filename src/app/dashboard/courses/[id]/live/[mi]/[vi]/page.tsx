@@ -10,14 +10,13 @@ import { useParams, useRouter } from "next/navigation";
 export default function CourseLivePage() {
   const params = useParams();
   const router = useRouter();
-  const courseId = params.id as string;
+  const courseId = params?.id;
 
-  // For course-embedded lives, redirect to the lives viewer
-  // The liveId should be stored in the course material
   useEffect(() => {
-    // For now, redirect to the lives list
     router.replace("/dashboard/lives");
   }, [router]);
+
+  if (!courseId || typeof courseId !== "string") return null;
 
   return null;
 }

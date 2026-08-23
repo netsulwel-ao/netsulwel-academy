@@ -130,7 +130,7 @@ export default function CommunityProfilePage() {
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl font-bold text-white">{profile.name}</h1>
             </div>
-            <p className="text-sm text-gray-500 mt-1">{profile.email}</p>
+            <p className="text-sm text-gray-500 mt-1">{isAdmin ? profile.email : ""}</p>
             <div className="flex items-center gap-4 mt-3 text-sm text-gray-400">
               <span className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4" />
