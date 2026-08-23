@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import type { LiveTarget } from "@/types/live";
 
 const inputCls =
-  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors";
+  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors";
 
 const TARGETS: { value: LiveTarget; label: string; desc: string; icon: React.ElementType }[] = [
   { value: "free",       label: "Gratuito",   desc: "Todos os alunos",   icon: Radio  },
@@ -106,8 +106,8 @@ export default function NewLivePage() {
   if (success) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <div className="flex h-16 w-16 items-center justify-center border border-green/25 bg-green/8">
-          <CheckCircle2 className="h-7 w-7 text-green/70" strokeWidth={1.5} />
+        <div className="flex h-16 w-16 items-center justify-center border border-green bg-green/8">
+          <CheckCircle2 className="h-7 w-7 text-green" strokeWidth={1.5} />
         </div>
         <p className="font-mono text-[13px] uppercase tracking-widest text-gray-600">// live criada</p>
         <p className="text-sm text-gray-600">A redirecionar...</p>
@@ -137,7 +137,7 @@ export default function NewLivePage() {
         {/* ── Título ── */}
         <div>
           <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-gray-600 mb-2">
-            // título <span className="text-red-400/80">*</span>
+            // título <span className="text-red-400">*</span>
           </p>
           <input
             type="text" value={title} onChange={e => setTitle(e.target.value)}
@@ -159,7 +159,7 @@ export default function NewLivePage() {
         {/* ── Data/hora ── */}
         <div>
           <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-gray-600 mb-2">
-            // data e hora <span className="text-red-400/80">*</span>
+            // data e hora <span className="text-red-400">*</span>
           </p>
           <div className="relative">
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-700 pointer-events-none" strokeWidth={1.5} />
@@ -179,13 +179,13 @@ export default function NewLivePage() {
                 key={value} type="button" onClick={() => setTarget(value)}
                 className={`flex flex-col gap-2 p-4 border text-left transition-all ${
                   target === value
-                    ? "border-purple/40 bg-purple/8"
+                    ? "border-purple bg-purple/8"
                     : "border-gray-800 bg-gray-900 hover:border-gray-700"
                 }`}
               >
-                <Icon className={`h-4 w-4 ${target === value ? "text-purple/70" : "text-gray-600"}`} strokeWidth={1.5} />
+                <Icon className={`h-4 w-4 ${target === value ? "text-purple" : "text-gray-600"}`} strokeWidth={1.5} />
                 <div>
-                  <p className={`text-sm font-semibold ${target === value ? "text-purple/80" : "text-gray-400"}`}>{label}</p>
+                  <p className={`text-sm font-semibold ${target === value ? "text-purple" : "text-gray-400"}`}>{label}</p>
                   <p className="font-mono text-[13px] text-gray-700 mt-0.5">{desc}</p>
                 </div>
               </button>
@@ -197,7 +197,7 @@ export default function NewLivePage() {
         {target === "standalone" && (
           <div>
             <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-gray-600 mb-2">
-              // preço (Kz) <span className="text-red-400/80">*</span>
+              // preço (Kz) <span className="text-red-400">*</span>
             </p>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-sm text-gray-600">Kz</span>
@@ -217,7 +217,7 @@ export default function NewLivePage() {
             role="button" tabIndex={0} aria-label="Carregar capa"
             onClick={() => inputRef.current?.click()}
             onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); inputRef.current?.click(); } }}
-            className="relative w-full aspect-video border border-gray-800 bg-gray-900 cursor-pointer overflow-hidden group hover:border-purple/30 transition-colors"
+            className="relative w-full aspect-video border border-gray-800 bg-gray-900 cursor-pointer overflow-hidden group hover:border-purple transition-colors"
           >
             {thumbPreview ? (
               <>
@@ -244,7 +244,7 @@ export default function NewLivePage() {
 
         {/* ── Erro ── */}
         {error && (
-          <div className="border border-red-500/20 bg-red-500/8 px-4 py-3 text-sm text-red-400/80">
+          <div className="border border-red-500 bg-red-500/8 px-4 py-3 text-sm text-red-400">
             {error}
           </div>
         )}
@@ -256,7 +256,7 @@ export default function NewLivePage() {
           </Link>
           <button
             type="submit" disabled={saving || thumbUpload}
-            className="flex items-center gap-1.5 border border-red-500/30 bg-red-500/8 px-5 py-2.5 font-mono text-[13px] uppercase tracking-widest text-red-400/80 hover:bg-red-500/15 disabled:opacity-40 transition-all"
+            className="flex items-center gap-1.5 border border-red-500 bg-red-500/8 px-5 py-2.5 font-mono text-[13px] uppercase tracking-widest text-red-400 hover:bg-red-500/15 disabled:opacity-40 transition-all"
           >
             {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
             {saving ? "A criar..." : "Criar Live"}

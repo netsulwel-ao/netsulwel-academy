@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Radio, Calendar, Clock, Lock, Play } from "lucide-react";
@@ -22,7 +22,7 @@ export function TrailLiveList({ lives, enrolledLives }: TrailLiveListProps) {
   return (
     <section>
       <div className="mb-4">
-        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-red-400/60 mb-1">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-red-400 mb-1">
           // aulas ao vivo
         </p>
         <h2 className="text-base font-bold text-gray-200">
@@ -73,7 +73,7 @@ export function TrailLiveList({ lives, enrolledLives }: TrailLiveListProps) {
                 <p className="text-sm font-semibold text-gray-300 truncate">{live.title}</p>
                 <div className="mt-0.5 font-mono text-[13px] text-gray-700">
                   {isLive ? (
-                    <span className="flex items-center gap-1 text-red-400/80">
+                    <span className="flex items-center gap-1 text-red-400">
                       <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />
                       ao vivo agora
                     </span>
@@ -134,16 +134,16 @@ export function TrailScheduleList({ sessions }: TrailScheduleListProps) {
   if (!sessions || sessions.length === 0) return null;
 
   const TARGET_BADGE: Record<string, string> = {
-    free:       "border-green/25  bg-green/8   text-green/70",
-    smart:      "border-blue-500/25 bg-blue-500/10 text-blue-400/70",
-    golden:     "border-yellow-500/25 bg-yellow-500/10 text-yellow-400/70",
-    standalone: "border-purple/25 bg-purple/8  text-purple/70",
+    free:       "border-green  bg-green/8   text-green",
+    smart:      "border-blue-500 bg-blue-500/10 text-blue-400",
+    golden:     "border-yellow-500 bg-yellow-500/10 text-yellow-400",
+    standalone: "border-purple bg-purple/8  text-purple",
   };
 
   return (
     <section>
       <div className="mb-4">
-        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-amber-400/60 mb-1">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-amber-400 mb-1">
           // cronograma
         </p>
         <h2 className="text-base font-bold text-gray-200">
@@ -201,7 +201,7 @@ export function TrailScheduleList({ sessions }: TrailScheduleListProps) {
               <span className={`shrink-0 font-mono text-[13px] uppercase tracking-widest border px-2 py-1 ${
                 isPast
                   ? "border-gray-800 text-gray-700"
-                  : "border-green/20 bg-green/5 text-green/70"
+                  : "border-green bg-green/5 text-green"
               }`}>
                 {isPast ? "Realizada" : "Agendada"}
               </span>

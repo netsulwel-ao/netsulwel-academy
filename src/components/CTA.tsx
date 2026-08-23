@@ -1,4 +1,4 @@
-import { ArrowRight, Rocket, CheckCircle2 } from "lucide-react";
+﻿import { ArrowRight, Rocket, CheckCircle2 } from "lucide-react";
 import { TransitionLink } from "./TransitionLink";
 import { Reveal } from "./motion/Reveal";
 
@@ -41,7 +41,7 @@ export function CTA() {
                 "Cancele quando quiser, sem burocracia",
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2 text-sm text-gray-500">
-                  <CheckCircle2 className="h-4 w-4 text-green/50 shrink-0" strokeWidth={1.5} />
+                  <CheckCircle2 className="h-4 w-4 text-green shrink-0" strokeWidth={1.5} />
                   {item}
                 </li>
               ))}

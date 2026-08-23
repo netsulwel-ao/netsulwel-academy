@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -146,7 +146,7 @@ export default function PostCard({ post }: { post: CommunityPost }) {
           </button>
           <Link
             href={`/dashboard/community/${post.id}`}
-            className="flex items-center gap-1.5 font-mono text-[13px] text-gray-700 hover:text-blue-400/80 transition-colors"
+            className="flex items-center gap-1.5 font-mono text-[13px] text-gray-700 hover:text-blue-400 transition-colors"
           >
             <MessageCircle className="h-3.5 w-3.5" strokeWidth={1.5} />
             {post.commentsCount ?? 0}

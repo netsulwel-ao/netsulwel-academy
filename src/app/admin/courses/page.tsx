@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { db } from "@/lib/firebase";
@@ -48,8 +48,8 @@ function StatusBadge({ status }: { status: "published" | "draft" }) {
   return (
     <span className={`font-mono text-[13px] uppercase tracking-widest px-2 py-0.5 border ${
       status === "published"
-        ? "border-green/30 text-green/70 bg-green/8"
-        : "border-amber-500/30 text-amber-400/70 bg-amber-500/8"
+        ? "border-green text-green bg-green/8"
+        : "border-amber-500 text-amber-400 bg-amber-500/8"
     }`}>
       {status === "published" ? "pub" : "draft"}
     </span>
@@ -58,9 +58,9 @@ function StatusBadge({ status }: { status: "published" | "draft" }) {
 
 function TypeBadge({ type }: { type?: string }) {
   const map: Record<string, string> = {
-    standalone: "border-blue-500/25 text-blue-400/70",
-    smart:      "border-green/25 text-green/70",
-    golden:     "border-amber-500/25 text-amber-400/70",
+    standalone: "border-blue-500 text-blue-400",
+    smart:      "border-green text-green",
+    golden:     "border-amber-500 text-amber-400",
   };
   if (!type) return null;
   return (
@@ -179,7 +179,7 @@ export default function CoursesPage() {
       {/* ── Cabeçalho ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-2">
             // gestão de cursos
           </p>
           <h1 className="text-2xl font-bold text-gray-100">Cursos</h1>
@@ -206,7 +206,7 @@ export default function CoursesPage() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Pesquisar por título ou descrição..."
-              className="w-full border border-gray-800 bg-gray-900 pl-9 pr-9 py-2.5 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors"
+              className="w-full border border-gray-800 bg-gray-900 pl-9 pr-9 py-2.5 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -220,7 +220,7 @@ export default function CoursesPage() {
             onClick={() => setShowFilters(v => !v)}
             className={`flex items-center gap-1.5 border px-3 py-2.5 font-mono text-[13px] uppercase tracking-widest transition-all shrink-0 ${
               hasFilters
-                ? "border-purple/30 bg-purple/8 text-purple/70"
+                ? "border-purple bg-purple/8 text-purple"
                 : "border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-400"
             }`}
           >
@@ -237,7 +237,7 @@ export default function CoursesPage() {
             <select
               value={filterStatus}
               onChange={e => setFilterStatus(e.target.value as typeof filterStatus)}
-              className="border border-gray-800 bg-gray-900 text-sm text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
+              className="border border-gray-800 bg-gray-900 text-sm text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple transition-colors"
             >
               <option value="all">Todos os estados</option>
               <option value="published">Publicado</option>
@@ -248,7 +248,7 @@ export default function CoursesPage() {
             <select
               value={filterType}
               onChange={e => setFilterType(e.target.value as typeof filterType)}
-              className="border border-gray-800 bg-gray-900 text-sm text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
+              className="border border-gray-800 bg-gray-900 text-sm text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple transition-colors"
             >
               <option value="all">Todos os tipos</option>
               <option value="standalone">Standalone</option>
@@ -260,7 +260,7 @@ export default function CoursesPage() {
             <select
               value={filterFormat}
               onChange={e => setFilterFormat(e.target.value as typeof filterFormat)}
-              className="border border-gray-800 bg-gray-900 text-sm text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
+              className="border border-gray-800 bg-gray-900 text-sm text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple transition-colors"
             >
               <option value="all">Todos os formatos</option>
               <option value="recorded">Gravado</option>
@@ -281,9 +281,9 @@ export default function CoursesPage() {
 
       {/* ── Erro ── */}
       {error && (
-        <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
-          <p className="text-sm text-amber-400/80">{error}</p>
+        <div className="flex items-start gap-3 border border-amber-500 bg-amber-500/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" strokeWidth={1.5} />
+          <p className="text-sm text-amber-400">{error}</p>
         </div>
       )}
 
@@ -364,7 +364,7 @@ export default function CoursesPage() {
                 <div className="flex flex-wrap items-center gap-1.5 lg:flex-col lg:items-start">
                   <TypeBadge type={course.type} />
                   {course.format === "live" && (
-                    <span className="font-mono text-[13px] uppercase tracking-widest px-2 py-0.5 border border-red-500/25 text-red-400/70 flex items-center gap-1">
+                    <span className="font-mono text-[13px] uppercase tracking-widest px-2 py-0.5 border border-red-500 text-red-400 flex items-center gap-1">
                       <Radio className="h-2.5 w-2.5" strokeWidth={1.5} /> live
                     </span>
                   )}
@@ -414,7 +414,7 @@ export default function CoursesPage() {
                     className="flex h-8 w-8 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all"
                   >
                     {copiedId === course.id
-                      ? <CheckCircle2 className="h-3.5 w-3.5 text-green/60" strokeWidth={1.5} />
+                      ? <CheckCircle2 className="h-3.5 w-3.5 text-green" strokeWidth={1.5} />
                       : <Share2 className="h-3.5 w-3.5" strokeWidth={1.5} />
                     }
                   </button>
@@ -424,7 +424,7 @@ export default function CoursesPage() {
                     <Link
                       href={`/admin/courses/${course.id}/live-studio`}
                       title="Estúdio ao vivo"
-                      className="flex h-8 w-8 items-center justify-center border border-red-500/25 bg-red-500/5 text-red-400/70 hover:bg-red-500/15 transition-all"
+                      className="flex h-8 w-8 items-center justify-center border border-red-500 bg-red-500/5 text-red-400 hover:bg-red-500/15 transition-all"
                     >
                       <Radio className="h-3.5 w-3.5" strokeWidth={1.5} />
                     </Link>
@@ -434,7 +434,7 @@ export default function CoursesPage() {
                   <Link
                     href={`/admin/courses/${course.id}/edit`}
                     title="Editar curso"
-                    className="flex h-8 w-8 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-purple/30 hover:text-purple/70 transition-all"
+                    className="flex h-8 w-8 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-purple hover:text-purple transition-all"
                   >
                     <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
                   </Link>
@@ -444,7 +444,7 @@ export default function CoursesPage() {
                     onClick={() => handleDelete(course)}
                     disabled={deletingId === course.id}
                     title="Apagar curso"
-                    className="flex h-8 w-8 items-center justify-center border border-red-500/15 bg-red-500/5 text-red-400/50 hover:border-red-500/30 hover:text-red-400/80 disabled:opacity-40 transition-all"
+                    className="flex h-8 w-8 items-center justify-center border border-red-500 bg-red-500/5 text-red-400 hover:border-red-500 hover:text-red-400 disabled:opacity-40 transition-all"
                   >
                     {deletingId === course.id
                       ? <Loader2 className="h-3.5 w-3.5 animate-spin" />

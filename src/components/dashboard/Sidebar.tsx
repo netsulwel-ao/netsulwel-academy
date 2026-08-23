@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -349,7 +349,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, mobileOpen, setMo
   </div>
 
   <h4 className={`font-bold text-base ${theme === "light" ? "text-text-primary" : "text-white"}`}>{roleData.label}</h4>
-  <div className={`mt-1 text-sm ${theme === "light" ? "text-text-secondary" : "text-white/70"}`}>
+  <div className={`mt-1 text-sm ${theme === "light" ? "text-text-secondary" : "text-white"}`}>
   {isAdmin ? "Acesso total ao sistema" : isTeacher ? "Gere os teus cursos" : isInstitution ? "Gere a tua instituição" : "Acesso aos cursos"}
   </div>
   </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,10 +19,10 @@ interface Member {
 
 // ── Role badge ────────────────────────────────────────────────
 const ROLE_MAP: Record<string, { cls: string; label: string }> = {
-  admin:   { cls: "border-purple/25 text-purple/70",       label: "Admin"     },
-  teacher: { cls: "border-green/25 text-green/70",         label: "Professor" },
-  student: { cls: "border-blue-500/25 text-blue-400/70",   label: "Aluno"     },
-  aluno:   { cls: "border-blue-500/25 text-blue-400/70",   label: "Aluno"     },
+  admin:   { cls: "border-purple text-purple",       label: "Admin"     },
+  teacher: { cls: "border-green text-green",         label: "Professor" },
+  student: { cls: "border-blue-500 text-blue-400",   label: "Aluno"     },
+  aluno:   { cls: "border-blue-500 text-blue-400",   label: "Aluno"     },
 };
 function RoleBadge({ role }: { role: string }) {
   const { cls, label } = ROLE_MAP[role] ?? ROLE_MAP.aluno;
@@ -30,7 +30,7 @@ function RoleBadge({ role }: { role: string }) {
 }
 
 const inputCls =
-  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors";
+  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors";
 
 export default function InstitutionMembersPage() {
   const { institutionId } = useAuth();
@@ -127,12 +127,12 @@ export default function InstitutionMembersPage() {
 
       {/* ── Cabeçalho ── */}
       <div>
-        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">// membros</p>
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-2">// membros</p>
         <h1 className="text-2xl font-bold text-gray-100">Membros</h1>
         <p className="mt-1 text-sm text-gray-600">
           {members.length} membro{members.length !== 1 ? "s" : ""} ·{" "}
-          <span className="text-green/60">{teacherCount} professor{teacherCount !== 1 ? "es" : ""}</span> ·{" "}
-          <span className="text-blue-400/60">{studentCount} aluno{studentCount !== 1 ? "s" : ""}</span>
+          <span className="text-green">{teacherCount} professor{teacherCount !== 1 ? "es" : ""}</span> ·{" "}
+          <span className="text-blue-400">{studentCount} aluno{studentCount !== 1 ? "s" : ""}</span>
         </p>
       </div>
 
@@ -142,8 +142,8 @@ export default function InstitutionMembersPage() {
         {/* Alunos */}
         <div className="border border-gray-800 bg-gray-900 p-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center border border-blue-500/25 bg-blue-500/8">
-              <UserPlus className="h-4 w-4 text-blue-400/70" strokeWidth={1.5} />
+            <div className="flex h-8 w-8 items-center justify-center border border-blue-500 bg-blue-500/8">
+              <UserPlus className="h-4 w-4 text-blue-400" strokeWidth={1.5} />
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-200">Link para Alunos</p>
@@ -154,7 +154,7 @@ export default function InstitutionMembersPage() {
             <button
               onClick={() => generateLink("student")}
               disabled={!!generatingRole}
-              className="flex items-center gap-1.5 border border-blue-500/25 bg-blue-500/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-blue-400/80 hover:bg-blue-500/15 disabled:opacity-40 transition-all"
+              className="flex items-center gap-1.5 border border-blue-500 bg-blue-500/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-blue-400 hover:bg-blue-500/15 disabled:opacity-40 transition-all"
             >
               {generatingRole === "student" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Link2 className="h-3 w-3" />}
               {generatingRole === "student" ? "A gerar..." : "Gerar link"}
@@ -164,7 +164,7 @@ export default function InstitutionMembersPage() {
               <div className="flex gap-2">
                 <input type="text" value={studentLink} readOnly className={`${inputCls} flex-1 font-mono text-sm`} />
                 <button onClick={() => copyLink(studentLink, "student")} className="flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all">
-                  {copiedRole === "student" ? <CheckCheck className="h-3.5 w-3.5 text-green/60" /> : <Copy className="h-3.5 w-3.5" strokeWidth={1.5} />}
+                  {copiedRole === "student" ? <CheckCheck className="h-3.5 w-3.5 text-green" /> : <Copy className="h-3.5 w-3.5" strokeWidth={1.5} />}
                 </button>
                 <button onClick={() => setStudentLink("")} className="flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800 bg-gray-900 text-gray-700 hover:text-gray-400 transition-all" title="Limpar">
                   <X className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -180,8 +180,8 @@ export default function InstitutionMembersPage() {
         {/* Professores */}
         <div className="border border-gray-800 bg-gray-900 p-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center border border-green/25 bg-green/8">
-              <GraduationCap className="h-4 w-4 text-green/70" strokeWidth={1.5} />
+            <div className="flex h-8 w-8 items-center justify-center border border-green bg-green/8">
+              <GraduationCap className="h-4 w-4 text-green" strokeWidth={1.5} />
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-200">Link para Professores</p>
@@ -192,7 +192,7 @@ export default function InstitutionMembersPage() {
             <button
               onClick={() => generateLink("teacher")}
               disabled={!!generatingRole}
-              className="flex items-center gap-1.5 border border-green/25 bg-green/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-green/80 hover:bg-green/15 disabled:opacity-40 transition-all"
+              className="flex items-center gap-1.5 border border-green bg-green/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-green hover:bg-green/15 disabled:opacity-40 transition-all"
             >
               {generatingRole === "teacher" ? <Loader2 className="h-3 w-3 animate-spin" /> : <Link2 className="h-3 w-3" />}
               {generatingRole === "teacher" ? "A gerar..." : "Gerar link"}
@@ -202,7 +202,7 @@ export default function InstitutionMembersPage() {
               <div className="flex gap-2">
                 <input type="text" value={teacherLink} readOnly className={`${inputCls} flex-1 font-mono text-sm`} />
                 <button onClick={() => copyLink(teacherLink, "teacher")} className="flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-300 transition-all">
-                  {copiedRole === "teacher" ? <CheckCheck className="h-3.5 w-3.5 text-green/60" /> : <Copy className="h-3.5 w-3.5" strokeWidth={1.5} />}
+                  {copiedRole === "teacher" ? <CheckCheck className="h-3.5 w-3.5 text-green" /> : <Copy className="h-3.5 w-3.5" strokeWidth={1.5} />}
                 </button>
                 <button onClick={() => setTeacherLink("")} className="flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800 bg-gray-900 text-gray-700 hover:text-gray-400 transition-all" title="Limpar">
                   <X className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -225,7 +225,7 @@ export default function InstitutionMembersPage() {
             <input
               type="text" value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Pesquisar membro..."
-              className="w-full border border-gray-800 bg-gray-900 pl-9 pr-3 py-2 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors"
+              className="w-full border border-gray-800 bg-gray-900 pl-9 pr-3 py-2 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors"
             />
           </div>
           <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700">

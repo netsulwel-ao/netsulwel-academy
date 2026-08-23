@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { BookOpen, Radio, ChevronRight } from "lucide-react";
@@ -51,8 +51,8 @@ export function TeacherCard({ teacher, featured = false }: TeacherCardProps) {
         <div className="mt-1 flex flex-wrap items-center gap-2">
           <span className={`font-mono text-[13px] uppercase tracking-widest border px-1.5 py-0.5 ${
             isInstitution
-              ? "border-blue-500/25 bg-blue-500/8 text-blue-400/70"
-              : "border-green/25 bg-green/8 text-green/70"
+              ? "border-blue-500 bg-blue-500/8 text-blue-400"
+              : "border-green bg-green/8 text-green"
           }`}>
             {isInstitution ? "Instituição" : "Professor"}
           </span>

@@ -199,12 +199,12 @@ function CompactPage({ course, teacher, hasAccess, authLoading, copied, user, on
           </div>
           <div className="flex-1 min-w-0 space-y-4">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-blue-500/15 border-blue-500/30 text-blue-400">
+              <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-blue-500/15 border-blue-500 text-blue-400">
                 <TypeIcon className="h-3.5 w-3.5" />
                 {typeConf.label}
               </span>
               {course.hasCertificate && (
-                <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/30 text-amber-400">
+                <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500 text-amber-400">
                   <Award className="h-3.5 w-3.5" /> Certificado
                 </span>
               )}
@@ -297,12 +297,12 @@ function RichPage({ course, teacher, hasAccess, authLoading, copied, user, onCTA
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
             <div className="flex-1 space-y-5 sm:space-y-6 w-full">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-blue-500/15 border-blue-500/30 text-blue-400">
+                <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-blue-500/15 border-blue-500 text-blue-400">
                   <TypeIcon className="h-3.5 w-3.5" />
                   {typeConf.label}
                 </span>
                 {course.hasCertificate && (
-                  <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/30 text-amber-400">
+                  <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500 text-amber-400">
                     <Award className="h-3.5 w-3.5" /> Certificado
                   </span>
                 )}
@@ -332,7 +332,7 @@ function RichPage({ course, teacher, hasAccess, authLoading, copied, user, onCTA
 
               {teacher && (
                 <div className="flex items-center gap-3 pt-2">
-                  <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-br from-purple-500/20 to-purple-700/20 flex items-center justify-center text-purple-400 font-bold text-sm sm:text-base shrink-0 border border-purple-500/10">
+                  <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-br from-purple-500/20 to-purple-700/20 flex items-center justify-center text-purple-400 font-bold text-sm sm:text-base shrink-0 border border-purple-500">
                     {teacher.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
@@ -418,7 +418,7 @@ function RichPage({ course, teacher, hasAccess, authLoading, copied, user, onCTA
               <h2 className="text-xl sm:text-2xl font-bold text-white">Sobre o Instrutor</h2>
             </div>
             <div className="flex items-start gap-4 sm:gap-6 p-4 sm:p-6 bg-gray-900 border border-gray-800">
-              <div className="h-14 w-14 sm:h-16 sm:w-16 bg-gradient-to-br from-purple-500/20 to-purple-700/20 flex items-center justify-center text-purple-400 font-bold text-lg sm:text-xl shrink-0 border border-purple-500/10">
+              <div className="h-14 w-14 sm:h-16 sm:w-16 bg-gradient-to-br from-purple-500/20 to-purple-700/20 flex items-center justify-center text-purple-400 font-bold text-lg sm:text-xl shrink-0 border border-purple-500">
                 {teacher.name.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">

@@ -55,7 +55,7 @@ export default function CourseLiveStudioPage() {
       <div className="bg-gray-900 border border-gray-800 p-6 mb-6">
         <h1 className="text-xl font-bold text-white">{course.title}</h1>
         <p className="text-sm text-gray-400 mt-1">Estúdio de Aulas ao Vivo</p>
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-sm font-bold bg-purple-500/15 text-purple-400 border border-purple-500/25 mt-2">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-sm font-bold bg-purple-500/15 text-purple-400 border border-purple-500 mt-2">
           <Radio className="h-3.5 w-3.5" /> Ao Vivo
         </span>
       </div>
@@ -88,9 +88,9 @@ export default function CourseLiveStudioPage() {
                       {video.duration && <p className="text-sm text-gray-600">Duração: {video.duration} min</p>}
                     </div>
                     <span className={`px-2.5 py-1 text-sm font-bold uppercase tracking-wider ${
-                      st.status === "live" ? "bg-green-500/15 text-green-400 border border-green-500/25" :
+                      st.status === "live" ? "bg-green-500/15 text-green-400 border border-green-500" :
                       st.status === "ended" ? "bg-gray-800 text-gray-500 border border-gray-700" :
-                      "bg-blue-500/15 text-blue-400 border border-blue-500/25"
+                      "bg-blue-500/15 text-blue-400 border border-blue-500"
                     }`}>{st.label}</span>
                     <div className="flex gap-2 shrink-0">
                       {st.status !== "ended" && (

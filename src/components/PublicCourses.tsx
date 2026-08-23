@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useRef } from "react";
 import { db } from "@/lib/firebase";
@@ -17,16 +17,16 @@ const CATEGORY_CONFIG: Record<CourseCategory, {
   accent: string;
   badge: string;
 }> = {
-  tech:        { label: "Tecnologia",    icon: Code2,      accent: "text-blue-400",   badge: "bg-blue-500/15 text-blue-300 border-blue-500/25" },
-  finance:     { label: "Finanças",      icon: Wallet,     accent: "text-green-400",  badge: "bg-green-500/15 text-green-300 border-green-500/25" },
-  investments: { label: "Investimentos", icon: TrendingUp, accent: "text-amber-400",  badge: "bg-amber-500/15 text-amber-300 border-amber-500/25" },
-  other:       { label: "Outros",        icon: Layers,     accent: "text-purple-400", badge: "bg-purple-500/15 text-purple-300 border-purple-500/25" },
+  tech:        { label: "Tecnologia",    icon: Code2,      accent: "text-blue-400",   badge: "bg-blue-500/15 text-blue-300 border-blue-500" },
+  finance:     { label: "Finanças",      icon: Wallet,     accent: "text-green-400",  badge: "bg-green-500/15 text-green-300 border-green-500" },
+  investments: { label: "Investimentos", icon: TrendingUp, accent: "text-amber-400",  badge: "bg-amber-500/15 text-amber-300 border-amber-500" },
+  other:       { label: "Outros",        icon: Layers,     accent: "text-purple-400", badge: "bg-purple-500/15 text-purple-300 border-purple-500" },
 };
 
 const CAT_ORDER: CourseCategory[] = ["tech", "finance", "investments", "other"];
 
 function getTierTag(course: Course): { label: string; color: string } {
-  if (course.price === 0)       return { label: "Grátis", color: "bg-blue-500/20 text-blue-300 border-blue-500/30" };
+  if (course.price === 0)       return { label: "Grátis", color: "bg-blue-500/20 text-blue-300 border-blue-500" };
   return { label: "Avulso", color: "bg-gray-500 text-gray-300 border-gray-500" };
 }
 
@@ -203,7 +203,7 @@ function CourseCard({ course, catKey }: { course: Course; catKey: CourseCategory
             {tag.label}
           </span>
           {course.hasCertificate && (
-            <span className="px-2 py-0.5 text-[13px] font-bold uppercase tracking-wider border bg-amber-500/20 text-amber-300 border-amber-500/30 flex items-center gap-1">
+            <span className="px-2 py-0.5 text-[13px] font-bold uppercase tracking-wider border bg-amber-500/20 text-amber-300 border-amber-500 flex items-center gap-1">
               <Award className="h-2.5 w-2.5" /> Cert.
             </span>
           )}

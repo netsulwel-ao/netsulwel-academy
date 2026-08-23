@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Save, ArrowLeft, Loader2, AlertCircle, X } from "lucide-react";
 import Link from "next/link";
@@ -66,7 +66,7 @@ export function FormTopBar({
       {error && (
         <div
           role="alert"
-          className="mx-6 mt-4 flex items-center gap-2 border border-red-500/20 bg-red-500/8 px-4 py-3 text-sm text-red-400"
+          className="mx-6 mt-4 flex items-center gap-2 border border-red-500 bg-red-500/8 px-4 py-3 text-sm text-red-400"
         >
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span className="flex-1">{error}</span>

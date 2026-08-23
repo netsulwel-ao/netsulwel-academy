@@ -48,7 +48,7 @@ export default function TakeExamPage() {
             {timeLeft !== null && (
               <div className={`flex items-center gap-1.5 border px-3 py-1.5 font-mono text-[13px] font-bold transition-colors ${
                 isTimeCritical(timeLeft)
-                  ? "border-red-500/30 bg-red-500/8 text-red-400/80"
+                  ? "border-red-500 bg-red-500/8 text-red-400"
                   : "border-gray-800 bg-gray-900 text-gray-500"
               }`}>
                 <Clock className="h-3 w-3" strokeWidth={1.5} />
@@ -74,7 +74,7 @@ export default function TakeExamPage() {
 
       {/* ── Cabeçalho do exame ── */}
       <div>
-        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-2">
           // avaliação em curso
         </p>
         <h1 className="text-xl sm:text-2xl font-bold text-gray-100">{exam.title}</h1>
@@ -99,9 +99,9 @@ export default function TakeExamPage() {
 
       {/* ── Erro de submissão ── */}
       {error && (
-        <div className="flex items-start gap-2.5 border border-red-500/20 bg-red-500/5 px-4 py-3">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400/70" strokeWidth={1.5} />
-          <p className="text-sm text-red-400/80">{error}</p>
+        <div className="flex items-start gap-2.5 border border-red-500 bg-red-500/5 px-4 py-3">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" strokeWidth={1.5} />
+          <p className="text-sm text-red-400">{error}</p>
         </div>
       )}
 

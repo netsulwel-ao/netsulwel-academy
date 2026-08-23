@@ -453,9 +453,9 @@ export default function CourseDetailPage() {
                             </div>
                             <div className="flex items-center gap-3 shrink-0">
                               <span className={`px-2.5 py-1 text-sm font-bold uppercase tracking-wider ${
-                                st.status === "live" ? "bg-green-500/15 text-green-400 border border-green-500/25" :
+                                st.status === "live" ? "bg-green-500/15 text-green-400 border border-green-500" :
                                 st.status === "ended" ? "bg-bg-surface-2 text-text-muted border border-border-strong" :
-                                "bg-blue-500/15 text-blue-400 border border-blue-500/25"
+                                "bg-blue-500/15 text-blue-400 border border-blue-500"
                               }`}>{st.label}</span>
                               {st.status === "live" && hasAccess && (
                                 <Link href={`/dashboard/courses/${course.id}/live/${mi}/${vi}`}
@@ -653,9 +653,9 @@ export default function CourseDetailPage() {
             <div>
               <h1 className="text-3xl font-bold text-text-primary">{course.title}</h1>
               <div className="flex flex-wrap items-center gap-3 mt-2">
-                <span className="px-2.5 py-1 text-sm font-bold uppercase tracking-wider border bg-blue-500/15 text-blue-400 border-blue-500/25">Avulso</span>
+                <span className="px-2.5 py-1 text-sm font-bold uppercase tracking-wider border bg-blue-500/15 text-blue-400 border-blue-500">Avulso</span>
                 {course.hasCertificate && (
-                  <span className="flex items-center gap-1 px-2.5 py-1 text-sm font-bold uppercase tracking-wider border bg-amber-500/15 text-amber-400 border-amber-500/25">
+                  <span className="flex items-center gap-1 px-2.5 py-1 text-sm font-bold uppercase tracking-wider border bg-amber-500/15 text-amber-400 border-amber-500">
                     <Award className="h-4 w-4" /> Certificado
                   </span>
                 )}
@@ -704,7 +704,7 @@ export default function CourseDetailPage() {
                   </div>
                   {progressPct === 100 && course?.hasCertificate && (
                     <Link href={`/dashboard/certificates/${course.id}`}
-                      className="mt-3 flex items-center justify-center gap-2 w-full px-3 py-2 bg-amber-500/20 border border-amber-500/30 text-amber-300 text-sm font-bold hover:bg-amber-500/30 transition-colors">
+                      className="mt-3 flex items-center justify-center gap-2 w-full px-3 py-2 bg-amber-500/20 border border-amber-500 text-amber-300 text-sm font-bold hover:bg-amber-500/30 transition-colors">
                       <Award className="h-4 w-4" />
                       Ver Certificado
                     </Link>

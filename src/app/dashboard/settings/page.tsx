@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
 import {
@@ -167,15 +167,15 @@ export default function DashboardSettingsPage() {
 
       {/* Alerts globais */}
       {error && (
-        <div className="flex items-start gap-2.5 border border-red-500/20 bg-red-500/5 px-4 py-3">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400/70" strokeWidth={1.5} />
-          <p className="text-sm text-red-400/80">{error}</p>
+        <div className="flex items-start gap-2.5 border border-red-500 bg-red-500/5 px-4 py-3">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" strokeWidth={1.5} />
+          <p className="text-sm text-red-400">{error}</p>
         </div>
       )}
       {success && (
-        <div className="flex items-start gap-2.5 border border-green-500/20 bg-green-500/5 px-4 py-3">
-          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green/70" strokeWidth={1.5} />
-          <p className="text-sm text-green/80">{success}</p>
+        <div className="flex items-start gap-2.5 border border-green-500 bg-green-500/5 px-4 py-3">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green" strokeWidth={1.5} />
+          <p className="text-sm text-green">{success}</p>
         </div>
       )}
 
@@ -186,7 +186,7 @@ export default function DashboardSettingsPage() {
           <div>
             <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-1">// perfil</p>
             <h2 className="text-base font-bold text-gray-200 flex items-center gap-2">
-              <User className="h-4 w-4 text-purple/70" strokeWidth={1.5} /> Editar perfil
+              <User className="h-4 w-4 text-purple" strokeWidth={1.5} /> Editar perfil
             </h2>
           </div>
 
@@ -237,7 +237,7 @@ export default function DashboardSettingsPage() {
                 </button>
                 {bannerURL && (
                   <button type="button" onClick={() => setBannerURL("")}
-                    className="text-sm text-gray-700 hover:text-red-400/70 transition-colors">Remover</button>
+                    className="text-sm text-gray-700 hover:text-red-400 transition-colors">Remover</button>
                 )}
               </div>
               <input ref={bannerInputRef} type="file" accept="image/*" className="hidden"
@@ -257,7 +257,7 @@ export default function DashboardSettingsPage() {
             <label htmlFor="displayName" className="font-mono text-[13px] uppercase tracking-widest text-gray-700">nome</label>
             <input id="displayName" type="text" value={displayName} onChange={e => setDisplayName(e.target.value)}
               placeholder="O teu nome"
-              className="w-full border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-200 focus:border-purple/40 focus:outline-none transition-colors" />
+              className="w-full border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors" />
           </div>
 
           {/* Bio */}
@@ -265,7 +265,7 @@ export default function DashboardSettingsPage() {
             <label htmlFor="bio" className="font-mono text-[13px] uppercase tracking-widest text-gray-700">biografia</label>
             <textarea id="bio" value={bio} onChange={e => setBio(e.target.value)} rows={3}
               placeholder="Fala sobre ti..."
-              className="w-full border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-200 focus:border-purple/40 focus:outline-none transition-colors resize-none" />
+              className="w-full border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors resize-none" />
           </div>
 
           {/* Vídeo */}
@@ -278,7 +278,7 @@ export default function DashboardSettingsPage() {
               </button>
               <input type="url" value={promoVideoUrl} onChange={e => setPromoVideoUrl(e.target.value)}
                 placeholder="https://youtube.com/watch?v=..."
-                className="flex-1 border border-gray-800 bg-gray-900 px-3 py-2 text-sm text-gray-200 focus:border-purple/40 focus:outline-none transition-colors" />
+                className="flex-1 border border-gray-800 bg-gray-900 px-3 py-2 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors" />
               <input ref={promoVideoInputRef} type="file" accept="video/*" className="hidden"
                 onChange={async e => {
                   const file = e.target.files?.[0];
@@ -327,7 +327,7 @@ export default function DashboardSettingsPage() {
             <div className="mb-4">
               <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-1">// conta</p>
               <h2 className="text-base font-bold text-gray-200 flex items-center gap-2">
-                <Shield className="h-4 w-4 text-green/70" strokeWidth={1.5} /> Informações
+                <Shield className="h-4 w-4 text-green" strokeWidth={1.5} /> Informações
               </h2>
             </div>
             <div className="space-y-3">
@@ -345,10 +345,10 @@ export default function DashboardSettingsPage() {
           </div>
 
           {/* DANGER ZONE */}
-          <div className="border border-red-500/20">
-            <div className="flex items-center gap-2 border-b border-red-500/15 bg-red-500/5 px-5 py-3">
-              <AlertTriangle className="h-3.5 w-3.5 text-red-400/60 shrink-0" strokeWidth={1.5} />
-              <p className="font-mono text-[13px] uppercase tracking-widest text-red-400/60">// zona de perigo</p>
+          <div className="border border-red-500">
+            <div className="flex items-center gap-2 border-b border-red-500 bg-red-500/5 px-5 py-3">
+              <AlertTriangle className="h-3.5 w-3.5 text-red-400 shrink-0" strokeWidth={1.5} />
+              <p className="font-mono text-[13px] uppercase tracking-widest text-red-400">// zona de perigo</p>
             </div>
 
             <div className="p-5 space-y-5">
@@ -370,36 +370,36 @@ export default function DashboardSettingsPage() {
               {/* Eliminar conta */}
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-semibold text-red-400/80">Eliminar conta</p>
+                  <p className="text-sm font-semibold text-red-400">Eliminar conta</p>
                   <p className="text-sm text-gray-600 mt-0.5">
                     Remove permanentemente a conta e todos os dados. Irreversível.
                   </p>
                 </div>
                 <button type="button"
                   onClick={() => { setShowDelete(true); setDeleteErr(""); setDeletePass(""); }}
-                  className="flex items-center gap-1.5 border border-red-500/25 bg-red-500/8 px-3 py-2 font-mono text-[13px] uppercase tracking-widest text-red-400/70 hover:bg-red-500/15 transition-all shrink-0">
+                  className="flex items-center gap-1.5 border border-red-500 bg-red-500/8 px-3 py-2 font-mono text-[13px] uppercase tracking-widest text-red-400 hover:bg-red-500/15 transition-all shrink-0">
                   <Trash2 className="h-3 w-3" strokeWidth={1.5} /> Eliminar
                 </button>
               </div>
 
               {/* Confirmação inline */}
               {showDelete && (
-                <div className="border border-red-500/20 bg-red-500/5 p-4 space-y-3">
-                  <p className="text-sm text-red-400/80 leading-relaxed">
+                <div className="border border-red-500 bg-red-500/5 p-4 space-y-3">
+                  <p className="text-sm text-red-400 leading-relaxed">
                     <strong className="text-red-400">Atenção:</strong> esta acção é permanente e não pode ser desfeita.
                     Todos os dados serão eliminados.
                   </p>
                   <input type="password" value={deletePass} onChange={e => setDeletePass(e.target.value)}
                     placeholder="Confirma a tua palavra-passe"
-                    className="w-full border border-red-500/25 bg-gray-900 px-3 py-2 text-sm text-gray-300 focus:border-red-500/40 focus:outline-none transition-colors" />
-                  {deleteErr && <p className="text-sm text-red-400/80">{deleteErr}</p>}
+                    className="w-full border border-red-500 bg-gray-900 px-3 py-2 text-sm text-gray-300 focus:border-red-500 focus:outline-none transition-colors" />
+                  {deleteErr && <p className="text-sm text-red-400">{deleteErr}</p>}
                   <div className="flex gap-2">
                     <button type="button" onClick={() => setShowDelete(false)}
                       className="flex-1 border border-gray-800 bg-gray-900 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:text-gray-400 transition-colors">
                       Cancelar
                     </button>
                     <button type="button" onClick={handleDelete} disabled={deleting || !deletePass}
-                      className="flex flex-1 items-center justify-center gap-1.5 border border-red-500/30 bg-red-500/15 py-2 font-mono text-[13px] uppercase tracking-widest text-red-400/80 hover:bg-red-500/25 disabled:opacity-50 transition-all">
+                      className="flex flex-1 items-center justify-center gap-1.5 border border-red-500 bg-red-500/15 py-2 font-mono text-[13px] uppercase tracking-widest text-red-400 hover:bg-red-500/25 disabled:opacity-50 transition-all">
                       {deleting
                         ? <Loader2 className="h-3 w-3 animate-spin" />
                         : <><Trash2 className="h-3 w-3" /> Confirmar</>

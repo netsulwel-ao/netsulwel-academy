@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -122,7 +122,7 @@ export default function InstitutionOverviewPage() {
                 A tua instituição está sob revisão pela equipa Netsulwel.
                 Receberás uma notificação assim que for aprovada.
               </p>
-              <div className="inline-flex items-center gap-2 border border-amber-500/20 bg-amber-500/5 px-3 py-1.5 font-mono text-sm text-amber-400/80">
+              <div className="inline-flex items-center gap-2 border border-amber-500 bg-amber-500/5 px-3 py-1.5 font-mono text-sm text-amber-400">
                 <span className="h-1.5 w-1.5 bg-amber-400/60 animate-pulse" />
                 pendente
               </div>
@@ -131,7 +131,7 @@ export default function InstitutionOverviewPage() {
             <>
               <h2 className="text-lg font-bold text-gray-200 mb-2">Instituição suspensa</h2>
               <p className="text-sm text-gray-500 mb-6">Contacta a administração para mais informações.</p>
-              <div className="inline-flex items-center gap-2 border border-red-500/20 bg-red-500/5 px-3 py-1.5 font-mono text-sm text-red-400/80">
+              <div className="inline-flex items-center gap-2 border border-red-500 bg-red-500/5 px-3 py-1.5 font-mono text-sm text-red-400">
                 suspensa
               </div>
             </>
@@ -142,10 +142,10 @@ export default function InstitutionOverviewPage() {
   }
 
   const kpis = [
-    { icon: GraduationCap, label: "Professores",     value: stats.teachers,              accent: "text-green/80" },
-    { icon: Users,         label: "Alunos",          value: stats.students,              accent: "text-blue-400/80" },
-    { icon: DollarSign,    label: "Receita Líquida", value: formatKz(stats.revenue),     accent: "text-amber-400/80" },
-    { icon: TrendingUp,    label: "Vendas",          value: stats.salesCount,            accent: "text-purple/80" },
+    { icon: GraduationCap, label: "Professores",     value: stats.teachers,              accent: "text-green" },
+    { icon: Users,         label: "Alunos",          value: stats.students,              accent: "text-blue-400" },
+    { icon: DollarSign,    label: "Receita Líquida", value: formatKz(stats.revenue),     accent: "text-amber-400" },
+    { icon: TrendingUp,    label: "Vendas",          value: stats.salesCount,            accent: "text-purple" },
   ];
 
   return (
@@ -155,17 +155,17 @@ export default function InstitutionOverviewPage() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-gray-800 pb-6">
         <div className="flex items-center gap-4">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center border border-gray-800 bg-gray-900">
-            <Building2 className="h-5 w-5 text-blue-400/70" strokeWidth={1.5} />
+            <Building2 className="h-5 w-5 text-blue-400" strokeWidth={1.5} />
           </div>
           <div>
-            <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-blue-500/60 mb-1">// instituição</p>
+            <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-blue-500 mb-1">// instituição</p>
             <h1 className="text-xl font-bold text-gray-100">{institution?.name}</h1>
             <p className="text-sm text-gray-600 mt-0.5">Visão geral da tua organização</p>
           </div>
         </div>
         <Link
           href="/dashboard/institution/members"
-          className="flex items-center gap-1.5 border border-blue-500/25 bg-blue-500/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-blue-400/80 hover:bg-blue-500/15 transition-all shrink-0"
+          className="flex items-center gap-1.5 border border-blue-500 bg-blue-500/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-blue-400 hover:bg-blue-500/15 transition-all shrink-0"
         >
           <Mail className="h-3 w-3" /> Convidar membros
         </Link>
@@ -201,7 +201,7 @@ export default function InstitutionOverviewPage() {
                 <Users className="h-4 w-4 text-gray-700" strokeWidth={1.5} />
               </div>
               <p className="text-sm text-gray-600 mb-3">Ainda não tens membros.</p>
-              <Link href="/dashboard/institution/members" className="font-mono text-[13px] uppercase tracking-widest text-blue-400/60 hover:text-blue-400 transition-colors">
+              <Link href="/dashboard/institution/members" className="font-mono text-[13px] uppercase tracking-widest text-blue-400 hover:text-blue-400 transition-colors">
                 Convidar primeiro membro →
               </Link>
             </div>
@@ -219,8 +219,8 @@ export default function InstitutionOverviewPage() {
                     </div>
                   </div>
                   <span className={`shrink-0 font-mono text-[13px] uppercase tracking-widest px-2 py-0.5 border ${
-                    member.institutionRole === "teacher" ? "border-green/20 text-green/70"
-                    : member.institutionRole === "admin" ? "border-purple/20 text-purple/70"
+                    member.institutionRole === "teacher" ? "border-green text-green"
+                    : member.institutionRole === "admin" ? "border-purple text-purple"
                     : "border-gray-700 text-gray-600"
                   }`}>
                     {member.institutionRole === "teacher" ? "Prof." : member.institutionRole === "admin" ? "Admin" : "Aluno"}
@@ -261,7 +261,7 @@ export default function InstitutionOverviewPage() {
                     <p className="text-sm text-gray-300 truncate">{sale.itemTitle ?? sale.type}</p>
                     <p className="font-mono text-[13px] text-gray-700 mt-0.5">{sale.userName}</p>
                   </div>
-                  <p className="ml-4 shrink-0 font-mono text-sm font-bold text-green/80">
+                  <p className="ml-4 shrink-0 font-mono text-sm font-bold text-green">
                     {formatKz(sale.netAmount ?? sale.amount ?? 0)}
                   </p>
                 </div>

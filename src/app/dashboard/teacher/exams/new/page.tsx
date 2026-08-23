@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -25,7 +25,7 @@ function emptyQuestion(): Question {
   };
 }
 
-const inputCls = "w-full border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-200 focus:border-green/40 focus:outline-none transition-colors";
+const inputCls = "w-full border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm text-gray-200 focus:border-green focus:outline-none transition-colors";
 const labelCls = "font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-1.5 block";
 
 export default function NewExamPage() {
@@ -152,7 +152,7 @@ export default function NewExamPage() {
         >
           <ChevronLeft className="h-3 w-3" /> Avaliações
         </button>
-        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green/60 mb-2">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green mb-2">
           // nova avaliação
         </p>
         <h1 className="text-2xl font-bold text-gray-100">Criar avaliação</h1>
@@ -160,9 +160,9 @@ export default function NewExamPage() {
 
       {/* Erro */}
       {error && (
-        <div className="flex items-start gap-2.5 border border-red-500/20 bg-red-500/5 px-4 py-3">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400/70" strokeWidth={1.5} />
-          <p className="text-sm text-red-400/80">{error}</p>
+        <div className="flex items-start gap-2.5 border border-red-500 bg-red-500/5 px-4 py-3">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" strokeWidth={1.5} />
+          <p className="text-sm text-red-400">{error}</p>
         </div>
       )}
 
@@ -193,7 +193,7 @@ export default function NewExamPage() {
               onClick={() => { setContentType("course"); setLiveId(""); }}
               className={`flex flex-1 items-center justify-center gap-2 border py-2.5 text-sm font-medium transition-all ${
                 contentType === "course"
-                  ? "border-green/30 bg-green/8 text-green/80"
+                  ? "border-green bg-green/8 text-green"
                   : "border-gray-800 text-gray-600 hover:border-gray-700"
               }`}
             >
@@ -204,7 +204,7 @@ export default function NewExamPage() {
               onClick={() => { setContentType("live"); setCourseId(""); }}
               className={`flex flex-1 items-center justify-center gap-2 border py-2.5 text-sm font-medium transition-all ${
                 contentType === "live"
-                  ? "border-red-500/30 bg-red-500/8 text-red-400/80"
+                  ? "border-red-500 bg-red-500/8 text-red-400"
                   : "border-gray-800 text-gray-600 hover:border-gray-700"
               }`}
             >
@@ -232,7 +232,7 @@ export default function NewExamPage() {
               ))}
             </select>
             {courses.length === 0 && (
-              <p className="font-mono text-[13px] text-amber-400/60">
+              <p className="font-mono text-[13px] text-amber-400">
                 Nenhum curso encontrado. Cria um curso primeiro.
               </p>
             )}
@@ -255,7 +255,7 @@ export default function NewExamPage() {
               ))}
             </select>
             {lives.length === 0 && (
-              <p className="font-mono text-[13px] text-amber-400/60">
+              <p className="font-mono text-[13px] text-amber-400">
                 Nenhuma live encontrada. Cria uma aula ao vivo primeiro.
               </p>
             )}
@@ -290,7 +290,7 @@ export default function NewExamPage() {
           <button
             type="button"
             onClick={addQuestion}
-            className="flex items-center gap-1.5 border border-green/25 bg-green/8 px-3 py-1.5 font-mono text-[13px] uppercase tracking-widest text-green/70 hover:bg-green/15 transition-all"
+            className="flex items-center gap-1.5 border border-green bg-green/8 px-3 py-1.5 font-mono text-[13px] uppercase tracking-widest text-green hover:bg-green/15 transition-all"
           >
             <Plus className="h-3 w-3" /> Adicionar pergunta
           </button>
@@ -317,7 +317,7 @@ export default function NewExamPage() {
                   <button
                     type="button"
                     onClick={() => removeQuestion(i)}
-                    className="flex items-center justify-center h-7 w-7 border border-red-500/20 bg-red-500/8 text-red-400/70 hover:bg-red-500/15 transition-all"
+                    className="flex items-center justify-center h-7 w-7 border border-red-500 bg-red-500/8 text-red-400 hover:bg-red-500/15 transition-all"
                     aria-label="Remover pergunta"
                   >
                     <Trash2 className="h-3 w-3" strokeWidth={1.5} />
@@ -374,7 +374,7 @@ export default function NewExamPage() {
                       key={oi}
                       className={`flex flex-1 items-center justify-center gap-2 border py-2.5 cursor-pointer text-sm transition-all ${
                         q.correctAnswer === String(oi)
-                          ? "border-green/30 bg-green/8 text-green/80"
+                          ? "border-green bg-green/8 text-green"
                           : "border-gray-800 text-gray-600 hover:border-gray-700"
                       }`}
                     >

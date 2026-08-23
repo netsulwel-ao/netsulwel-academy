@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -440,7 +440,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 <img src={user.photoURL} alt="Avatar" className="h-full w-full object-cover" />
               ) : isInstitution ? (
                 <div className="flex h-full w-full items-center justify-center bg-bg-surface-2">
-                  <Building2 className="h-4 w-4 text-blue-400/70" strokeWidth={1.5} />
+                  <Building2 className="h-4 w-4 text-blue-400" strokeWidth={1.5} />
                 </div>
               ) : (
                 <Avatar uid={user?.uid ?? ""} photoURL={user?.photoURL} name={user?.displayName} size={36} />

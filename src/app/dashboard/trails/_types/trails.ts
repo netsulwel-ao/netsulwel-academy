@@ -1,9 +1,9 @@
-import type { CourseCategory, CourseLevel } from "@/types/course";
+﻿import type { CourseCategory, CourseLevel } from "@/types/course";
 
 // ── Type badge ────────────────────────────────────────────────
 
 export const TYPE_BADGE: Record<string, { label: string; color: string }> = {
-  standalone: { label: "Standalone", color: "border-purple/25 bg-purple/8 text-purple/70" },
+  standalone: { label: "Standalone", color: "border-purple bg-purple/8 text-purple" },
 };
 
 // ── Labels ────────────────────────────────────────────────────

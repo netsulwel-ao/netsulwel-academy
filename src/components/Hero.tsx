@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   TrendingUp,
@@ -188,7 +188,7 @@ export function Hero() {
 
               {/* Tag flutuante */}
               <motion.div
-                className="absolute -bottom-4 -left-4 hidden lg:flex items-center gap-2 border border-green/30 bg-gray-950 px-3 py-2"
+                className="absolute -bottom-4 -left-4 hidden lg:flex items-center gap-2 border border-green bg-gray-950 px-3 py-2"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: [0, -8, 0] }}
                 transition={{

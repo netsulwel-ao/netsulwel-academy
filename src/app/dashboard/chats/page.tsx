@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { MessageCircle } from "lucide-react";
 import ChatList from "@/components/chat/ChatList";
@@ -9,7 +9,7 @@ export default function ChatsPage() {
 
       {/* ── Cabeçalho ── */}
       <div>
-        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-2">
           // mensagens
         </p>
         <h1 className="text-2xl font-bold text-gray-100">Chats</h1>

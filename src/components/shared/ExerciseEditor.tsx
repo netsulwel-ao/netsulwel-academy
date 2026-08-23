@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Plus, Trash2, X, CheckCircle2, HelpCircle } from "lucide-react";
@@ -85,7 +85,7 @@ export default function ExerciseEditor({ exercises, onChange }: ExerciseEditorPr
               <textarea value={ex.question} onChange={e => update(i, "question", e.target.value)}
                 placeholder="Escreve a pergunta..."
                 rows={2}
-                className="w-full bg-gray-950 border border-gray-800 px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500/50 resize-none" />
+                className="w-full bg-gray-950 border border-gray-800 px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 resize-none" />
 
               {ex.type === "multiple_choice" && (
                 <div className="space-y-1.5 pl-2">
@@ -101,7 +101,7 @@ export default function ExerciseEditor({ exercises, onChange }: ExerciseEditorPr
                       </button>
                       <input type="text" value={opt} onChange={e => updateOption(i, oi, e.target.value)}
                         placeholder={`Opção ${oi + 1}`}
-                        className="flex-1 bg-gray-950 border border-gray-800 px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500/50" />
+                        className="flex-1 bg-gray-950 border border-gray-800 px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500" />
                       <button type="button" onClick={() => removeOption(i, oi)}
                         className="p-0.5 text-gray-600 hover:text-red-400 opacity-0 hover:opacity-100 transition-all">
                         <X className="h-3 w-3" />
@@ -135,13 +135,13 @@ export default function ExerciseEditor({ exercises, onChange }: ExerciseEditorPr
                 <div className="pl-2">
                   <input type="text" value={ex.correctAnswer} onChange={e => update(i, "correctAnswer", e.target.value)}
                     placeholder="Resposta correta..."
-                    className="w-full bg-gray-950 border border-gray-800 px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500/50" />
+                    className="w-full bg-gray-950 border border-gray-800 px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500" />
                 </div>
               )}
 
               <input type="text" value={ex.explanation || ""} onChange={e => update(i, "explanation", e.target.value)}
                 placeholder="Explicação (opcional — aparece após responder)"
-                className="w-full bg-gray-950 border border-gray-800 px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500/50" />
+                className="w-full bg-gray-950 border border-gray-800 px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500" />
             </div>
           ))}
 

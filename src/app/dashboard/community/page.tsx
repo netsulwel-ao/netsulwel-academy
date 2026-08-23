@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
@@ -44,7 +44,7 @@ export default function DashboardCommunityPage() {
       {/* ── Cabeçalho ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-2">
             // comunidade
           </p>
           <h1 className="text-2xl font-bold text-gray-100">Comunidade</h1>
@@ -75,7 +75,7 @@ export default function DashboardCommunityPage() {
             onClick={() => setFilter(f.value)}
             className={`shrink-0 border px-3 py-1.5 font-mono text-[13px] uppercase tracking-widest transition-colors ${
               filter === f.value
-                ? "border-purple/40 bg-purple/15 text-purple/90"
+                ? "border-purple bg-purple/15 text-purple"
                 : "border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-400"
             }`}
           >
@@ -107,7 +107,7 @@ export default function DashboardCommunityPage() {
               <button
                 type="button"
                 onClick={() => setShowCreate(true)}
-                className="flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:border-purple/30 hover:text-purple/70 transition-all"
+                className="flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-600 hover:border-purple hover:text-purple transition-all"
               >
                 <Plus className="h-3 w-3" /> Publicar
               </button>

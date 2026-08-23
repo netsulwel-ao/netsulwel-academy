@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import {
@@ -277,7 +277,7 @@ function DirectPlayer({
             <button
               onClick={() => { const v = videoRef.current; v?.paused ? v.play() : v?.pause(); }}
               aria-label={playing ? "Pausar" : "Reproduzir"}
-              className="flex h-9 w-9 items-center justify-center text-white hover:text-purple/80 transition-colors shrink-0"
+              className="flex h-9 w-9 items-center justify-center text-white hover:text-purple transition-colors shrink-0"
             >
               {playing
                 ? <Pause className="h-5 w-5 fill-white" />

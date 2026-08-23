@@ -1,4 +1,4 @@
-import {
+﻿import {
   Code2,
   TrendingUp,
   Layers,
@@ -139,7 +139,7 @@ export function Trails() {
                     href="#planos"
                     className={`group/btn flex items-center gap-2 border px-5 py-2.5 text-sm font-semibold transition-all duration-300 ${
                       i === 1
-                        ? "border-purple/50 bg-purple/10 text-purple-light hover:bg-purple/20"
+                        ? "border-purple bg-purple/10 text-purple-light hover:bg-purple/20"
                         : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-100"
                     }`}
                   >
@@ -160,19 +160,19 @@ export function Trails() {
         <Reveal delay={0.2}>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-8 text-gray-600 py-6">
           <span className="flex items-center gap-2 text-sm">
-            <CheckCircle2 className="h-4 w-4 text-green/50" strokeWidth={1.5} />
+            <CheckCircle2 className="h-4 w-4 text-green" strokeWidth={1.5} />
             Certificado incluído
           </span>
           <span className="flex items-center gap-2 text-sm">
-            <CheckCircle2 className="h-4 w-4 text-green/50" strokeWidth={1.5} />
+            <CheckCircle2 className="h-4 w-4 text-green" strokeWidth={1.5} />
             Projetos para portfólio
           </span>
           <span className="flex items-center gap-2 text-sm">
-            <CheckCircle2 className="h-4 w-4 text-green/50" strokeWidth={1.5} />
+            <CheckCircle2 className="h-4 w-4 text-green" strokeWidth={1.5} />
             Mentorias ao vivo
           </span>
           <span className="flex items-center gap-2 text-sm">
-            <CheckCircle2 className="h-4 w-4 text-green/50" strokeWidth={1.5} />
+            <CheckCircle2 className="h-4 w-4 text-green" strokeWidth={1.5} />
             Acesso à comunidade
           </span>
         </div>

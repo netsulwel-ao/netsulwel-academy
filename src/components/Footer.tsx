@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Code2, Share2, Play, MessagesSquare } from "lucide-react";
 import { TransitionLink } from "./TransitionLink";
 
@@ -77,7 +77,7 @@ export function Footer() {
                 key={label}
                 href="#"
                 aria-label={label}
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-700 text-gray-300 transition-all hover:border-purple/50 hover:text-purple-light"
+                className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-700 text-gray-300 transition-all hover:border-purple hover:text-purple-light"
               >
                 <Icon className="h-4 w-4" />
               </a>

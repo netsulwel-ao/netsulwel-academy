@@ -141,7 +141,7 @@ export default function TeacherEditLivePage() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500 px-4 py-3 text-sm text-red-400">
           <AlertCircle className="h-4 w-4 shrink-0" />{error}
         </div>
       )}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Clock, CheckCircle2, XCircle, ArrowRight, FileText, RotateCcw } from "lucide-react";
@@ -28,14 +28,14 @@ export function ExamCard({ exam, result, allResults }: ExamCardProps) {
         !hasResult
           ? "border-gray-800 bg-gray-900"
           : result?.passed
-          ? "border-green/25 bg-green/8"
-          : "border-red-500/25 bg-red-500/8"
+          ? "border-green bg-green/8"
+          : "border-red-500 bg-red-500/8"
       }`}>
         {!hasResult
           ? <FileText className="h-4 w-4 text-gray-600" strokeWidth={1.5} />
           : result?.passed
-          ? <CheckCircle2 className="h-4 w-4 text-green/70" strokeWidth={1.5} />
-          : <XCircle className="h-4 w-4 text-red-400/70" strokeWidth={1.5} />
+          ? <CheckCircle2 className="h-4 w-4 text-green" strokeWidth={1.5} />
+          : <XCircle className="h-4 w-4 text-red-400" strokeWidth={1.5} />
         }
       </div>
 
@@ -68,8 +68,8 @@ export function ExamCard({ exam, result, allResults }: ExamCardProps) {
         {result && (
           <div className={`mt-2 inline-flex items-center gap-1.5 font-mono text-[13px] uppercase tracking-widest border px-2 py-0.5 ${
             result.passed
-              ? "border-green/25 bg-green/8 text-green/70"
-              : "border-red-500/25 bg-red-500/8 text-red-400/70"
+              ? "border-green bg-green/8 text-green"
+              : "border-red-500 bg-red-500/8 text-red-400"
           }`}>
             {result.passed ? <CheckCircle2 className="h-2.5 w-2.5" /> : <XCircle className="h-2.5 w-2.5" />}
             {Math.round(result.score)}% · {result.passed ? "Aprovado" : "Reprovado"}
@@ -84,8 +84,8 @@ export function ExamCard({ exam, result, allResults }: ExamCardProps) {
           !canRetry && hasResult
             ? "border-gray-800 text-gray-700 cursor-not-allowed pointer-events-none"
             : hasResult
-            ? "border-amber-500/25 bg-amber-500/8 text-amber-400/80 hover:bg-amber-500/15"
-            : "border-purple/30 bg-purple/8 text-purple/80 hover:bg-purple/15"
+            ? "border-amber-500 bg-amber-500/8 text-amber-400 hover:bg-amber-500/15"
+            : "border-purple bg-purple/8 text-purple hover:bg-purple/15"
         }`}
       >
         {!canRetry && hasResult

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FileText, Link2, Image, Film, File, Download, ExternalLink } from "lucide-react";
 import type { CourseMaterial, MaterialType } from "@/types/course";
@@ -33,7 +33,7 @@ export default function MaterialsList({ materials }: { materials: CourseMaterial
           const isLink = mat.type === "link";
           return (
             <a key={i} href={mat.url} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-3 px-4 py-3 bg-gray-900 border border-gray-800 hover:border-blue-500/40 hover:bg-gray-900 transition-all group">
+              className="flex items-center gap-3 px-4 py-3 bg-gray-900 border border-gray-800 hover:border-blue-500 hover:bg-gray-900 transition-all group">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-blue-500/10 text-blue-400 group-hover:bg-blue-500/20 transition-colors">
                 <Icon className="h-4 w-4" />
               </div>

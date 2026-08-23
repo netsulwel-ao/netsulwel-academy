@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -82,7 +82,7 @@ export default function TeacherCoursesPage() {
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
         <input type="text" value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Pesquisar curso..."
-          className="w-full bg-gray-900 border border-gray-800 focus:border-green-500/50 py-2.5 pl-10 pr-9 text-white text-sm focus:outline-none transition-all" />
+          className="w-full bg-gray-900 border border-gray-800 focus:border-green-500 py-2.5 pl-10 pr-9 text-white text-sm focus:outline-none transition-all" />
         {search && (
           <button onClick={() => setSearch("")}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
@@ -122,8 +122,8 @@ export default function TeacherCoursesPage() {
                     <h3 className="font-bold text-white truncate">{course.title}</h3>
                     <span className={`shrink-0 px-2 py-0.5 text-[13px] font-bold ${
                       course.status === "published"
-                        ? "bg-green-500/15 text-green-400 border border-green-500/25"
-                        : "bg-yellow-500/15 text-yellow-400 border border-yellow-500/25"
+                        ? "bg-green-500/15 text-green-400 border border-green-500"
+                        : "bg-yellow-500/15 text-yellow-400 border border-yellow-500"
                     }`}>
                       {course.status === "published" ? "Publicado" : "Rascunho"}
                     </span>

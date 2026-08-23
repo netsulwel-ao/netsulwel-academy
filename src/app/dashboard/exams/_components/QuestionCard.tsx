@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { Question } from "@/types/exam";
 
@@ -43,7 +43,7 @@ export function QuestionCard({ question, index, total, answer, onAnswer }: Quest
                   key={i}
                   className={`flex items-center gap-3 border px-4 py-3 cursor-pointer transition-all ${
                     selected
-                      ? "border-purple/40 bg-purple/10 text-gray-100"
+                      ? "border-purple bg-purple/10 text-gray-100"
                       : "border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700 hover:text-gray-300"
                   }`}
                 >
@@ -57,7 +57,7 @@ export function QuestionCard({ question, index, total, answer, onAnswer }: Quest
                   />
                   {/* Indicador visual */}
                   <span className={`flex h-4 w-4 shrink-0 items-center justify-center border font-mono text-[13px] transition-colors ${
-                    selected ? "border-purple/60 bg-purple/30 text-purple/90" : "border-gray-700 text-gray-700"
+                    selected ? "border-purple bg-purple/30 text-purple" : "border-gray-700 text-gray-700"
                   }`}>
                     {String.fromCharCode(65 + i)}
                   </span>
@@ -81,7 +81,7 @@ export function QuestionCard({ question, index, total, answer, onAnswer }: Quest
                   key={val}
                   className={`flex flex-1 items-center justify-center gap-2 border px-4 py-3 cursor-pointer transition-all ${
                     selected
-                      ? "border-purple/40 bg-purple/10 text-gray-100"
+                      ? "border-purple bg-purple/10 text-gray-100"
                       : "border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700 hover:text-gray-300"
                   }`}
                 >
@@ -107,7 +107,7 @@ export function QuestionCard({ question, index, total, answer, onAnswer }: Quest
             value={answer ?? ""}
             onChange={e => onAnswer(e.target.value)}
             placeholder="Escreve a tua resposta..."
-            className="w-full border border-gray-800 bg-gray-900 px-4 py-3 text-sm text-gray-200 focus:border-purple/40 focus:outline-none transition-colors"
+            className="w-full border border-gray-800 bg-gray-900 px-4 py-3 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors"
           />
         )}
       </div>

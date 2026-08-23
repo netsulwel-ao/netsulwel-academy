@@ -58,7 +58,7 @@ export default function CertificatePage() {
         </button>
         <button
           onClick={() => window.print()}
-          className="flex items-center gap-2 border border-gray-800 bg-gray-900 px-3 sm:px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-500 hover:border-purple-500/30 hover:text-purple-400/70 transition-all shrink-0"
+          className="flex items-center gap-2 border border-gray-800 bg-gray-900 px-3 sm:px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-500 hover:border-purple-500 hover:text-purple-400 transition-all shrink-0"
         >
           <Printer className="h-3.5 w-3.5" strokeWidth={1.5} />
           <span className="hidden sm:inline">Imprimir / Guardar PDF</span>

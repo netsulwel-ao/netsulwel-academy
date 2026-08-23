@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef } from "react";
 import {
@@ -99,7 +99,7 @@ export function DeviceSettingsModal({ devices, onClose, onApply }: DeviceSetting
                 <select
                   value={selected.cameraId}
                   onChange={(e) => setCamera(e.target.value)}
-                  className="w-full appearance-none bg-gray-800 border border-gray-700 text-white text-sm px-3 py-2.5 pr-8 focus:outline-none focus:border-purple/50 transition-colors"
+                  className="w-full appearance-none bg-gray-800 border border-gray-700 text-white text-sm px-3 py-2.5 pr-8 focus:outline-none focus:border-purple transition-colors"
                 >
                   {cameras.map((c) => (
                     <option key={c.deviceId} value={c.deviceId}>{c.label}</option>
@@ -108,7 +108,7 @@ export function DeviceSettingsModal({ devices, onClose, onApply }: DeviceSetting
                 <ChevronDown className="absolute right-2.5 top-3 h-4 w-4 text-gray-500 pointer-events-none" />
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-sm text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3 py-2">
+              <div className="flex items-center gap-2 text-sm text-amber-400 bg-amber-400/10 border border-amber-400 px-3 py-2">
                 <AlertTriangle className="h-4 w-4 shrink-0" />
                 Nenhuma câmara encontrada
               </div>
@@ -127,7 +127,7 @@ export function DeviceSettingsModal({ devices, onClose, onApply }: DeviceSetting
                   <select
                     value={selected.micId}
                     onChange={(e) => setMic(e.target.value)}
-                    className="w-full appearance-none bg-gray-800 border border-gray-700 text-white text-sm px-3 py-2.5 pr-8 focus:outline-none focus:border-purple/50 transition-colors"
+                    className="w-full appearance-none bg-gray-800 border border-gray-700 text-white text-sm px-3 py-2.5 pr-8 focus:outline-none focus:border-purple transition-colors"
                   >
                     {microphones.map((m) => (
                       <option key={m.deviceId} value={m.deviceId}>{m.label}</option>
@@ -152,7 +152,7 @@ export function DeviceSettingsModal({ devices, onClose, onApply }: DeviceSetting
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-sm text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3 py-2">
+              <div className="flex items-center gap-2 text-sm text-amber-400 bg-amber-400/10 border border-amber-400 px-3 py-2">
                 <AlertTriangle className="h-4 w-4 shrink-0" />
                 Nenhum microfone encontrado
               </div>
@@ -170,7 +170,7 @@ export function DeviceSettingsModal({ devices, onClose, onApply }: DeviceSetting
                 <select
                   value={selected.speakerId}
                   onChange={(e) => setSpeaker(e.target.value)}
-                  className="w-full appearance-none bg-gray-800 border border-gray-700 text-white text-sm px-3 py-2.5 pr-8 focus:outline-none focus:border-purple/50 transition-colors"
+                  className="w-full appearance-none bg-gray-800 border border-gray-700 text-white text-sm px-3 py-2.5 pr-8 focus:outline-none focus:border-purple transition-colors"
                 >
                   {speakers.map((s) => (
                     <option key={s.deviceId} value={s.deviceId}>{s.label}</option>

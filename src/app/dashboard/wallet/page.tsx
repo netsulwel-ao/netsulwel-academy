@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -72,7 +72,7 @@ function VirtualCard({
           {/* Topo — logo e chip */}
           <div className="flex items-center justify-between">
             {/* Chip EMV */}
-            <div className="h-9 w-12 rounded-md border border-amber-300/60 bg-gradient-to-br from-amber-200/80 to-amber-400/80 flex items-center justify-center"
+            <div className="h-9 w-12 rounded-md border border-amber-300 bg-gradient-to-br from-amber-200/80 to-amber-400/80 flex items-center justify-center"
               style={{ boxShadow: "inset 0 1px 2px rgba(255,255,255,0.4)" }}>
               <div className="grid grid-cols-2 gap-[2px] opacity-60">
                 {[...Array(4)].map((_, i) => (
@@ -196,7 +196,7 @@ export default function WalletPage() {
 
       {/* Cabeçalho */}
       <div>
-        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green/60 mb-2">// carteira</p>
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green mb-2">// carteira</p>
         <h1 className="text-2xl font-bold text-gray-100">Minha Carteira</h1>
         <p className="mt-1 text-sm text-gray-600">
           {sales.length} venda{sales.length !== 1 ? "s" : ""} confirmada{sales.length !== 1 ? "s" : ""}
@@ -222,21 +222,21 @@ export default function WalletPage() {
               label: "Saldo líquido",
               value: fmtKz(stats.balance),
               sub: "Após dedução de taxas",
-              accent: "text-green/70",
+              accent: "text-green",
             },
             {
               icon: TrendingUp,
               label: "Total de vendas",
               value: fmtKz(stats.totalSales),
               sub: "Valor bruto",
-              accent: "text-purple/70",
+              accent: "text-purple",
             },
             {
               icon: ArrowDown,
               label: "Taxas deduzidas",
               value: fmtKz(stats.totalFees),
               sub: "Comissão da plataforma",
-              accent: "text-red-400/60",
+              accent: "text-red-400",
             },
           ].map(({ icon: Icon, label, value, sub, accent }) => (
             <div key={label} className="flex items-center gap-4 border border-gray-800 bg-gray-900 p-4">
@@ -282,7 +282,7 @@ export default function WalletPage() {
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="font-mono text-sm font-bold text-green/80">
+                  <p className="font-mono text-sm font-bold text-green">
                     +{fmtKz(sale.netAmount ?? sale.amount)}
                   </p>
                   {(sale.fee ?? 0) > 0 && (

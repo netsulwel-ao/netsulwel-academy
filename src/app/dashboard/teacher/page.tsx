@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -99,7 +99,7 @@ export default function TeacherDashboardPage() {
       {/* ── Cabeçalho ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green/60 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green mb-2">
             // painel do professor
           </p>
           <h1 className="text-2xl font-bold text-gray-100">
@@ -152,10 +152,10 @@ export default function TeacherDashboardPage() {
       {hasContent && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            { icon: BookOpen,   label: "Cursos",          value: stats.totalCourses,              accent: "text-green/70"   },
-            { icon: Users,      label: "Alunos",          value: stats.totalStudents,             accent: "text-blue-400/70" },
-            { icon: DollarSign, label: "Receita líquida", value: formatKz(stats.totalRevenue),   accent: "text-green/70"   },
-            { icon: TrendingUp, label: "Vendas",          value: stats.totalSales,                accent: "text-amber-400/70" },
+            { icon: BookOpen,   label: "Cursos",          value: stats.totalCourses,              accent: "text-green"   },
+            { icon: Users,      label: "Alunos",          value: stats.totalStudents,             accent: "text-blue-400" },
+            { icon: DollarSign, label: "Receita líquida", value: formatKz(stats.totalRevenue),   accent: "text-green"   },
+            { icon: TrendingUp, label: "Vendas",          value: stats.totalSales,                accent: "text-amber-400" },
           ].map(({ icon: Icon, label, value, accent }) => (
             <div key={label} className="border border-gray-800 bg-gray-900 p-5">
               <div className="flex items-center gap-2 mb-3">
@@ -173,9 +173,9 @@ export default function TeacherDashboardPage() {
         <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-3">acções rápidas</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
-            { icon: BookOpen, label: "Gerir cursos",      sub: "Edita, publica e arquiva",          href: "/dashboard/teacher/courses",     accent: "border-green/20 hover:border-green/40" },
-            { icon: Radio,    label: "Aulas ao vivo",     sub: "Agenda ou inicia uma sessão",        href: "/dashboard/teacher/lives",       accent: "border-purple/20 hover:border-purple/40" },
-            { icon: BarChart2,label: "Analytics",         sub: "Vê o desempenho dos teus cursos",    href: "/dashboard/teacher/analytics",   accent: "border-amber-500/20 hover:border-amber-500/40" },
+            { icon: BookOpen, label: "Gerir cursos",      sub: "Edita, publica e arquiva",          href: "/dashboard/teacher/courses",     accent: "border-green hover:border-green" },
+            { icon: Radio,    label: "Aulas ao vivo",     sub: "Agenda ou inicia uma sessão",        href: "/dashboard/teacher/lives",       accent: "border-purple hover:border-purple" },
+            { icon: BarChart2,label: "Analytics",         sub: "Vê o desempenho dos teus cursos",    href: "/dashboard/teacher/analytics",   accent: "border-amber-500 hover:border-amber-500" },
           ].map(({ icon: Icon, label, sub, href, accent }) => (
             <Link
               key={href}
@@ -230,7 +230,7 @@ export default function TeacherDashboardPage() {
                 </div>
                 <span className={`shrink-0 px-2.5 py-1 text-[13px] font-bold uppercase tracking-wider border ${
                   course.status === "published"
-                    ? "border-green/30 bg-green/8 text-green/80"
+                    ? "border-green bg-green/8 text-green"
                     : "border-gray-700 bg-gray-900 text-gray-600"
                 }`}>
                   {course.status === "published" ? "Publicado" : "Rascunho"}
@@ -257,7 +257,7 @@ export default function TeacherDashboardPage() {
                   <p className="text-sm text-gray-300 truncate">{sale.itemTitle ?? sale.type}</p>
                   <p className="text-sm text-gray-600 mt-0.5">{sale.userName}</p>
                 </div>
-                <p className="shrink-0 ml-4 font-mono text-sm font-bold text-green/80">
+                <p className="shrink-0 ml-4 font-mono text-sm font-bold text-green">
                   {formatKz(sale.netAmount ?? sale.amount)}
                 </p>
               </div>

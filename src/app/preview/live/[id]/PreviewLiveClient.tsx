@@ -132,7 +132,7 @@ export default function PreviewLiveClient({ live }: { live: LivePreview }) {
                 </div>
               )}
               {isScheduled && (
-                <div className="flex items-center gap-2 bg-blue-500/15 border border-blue-500/30 px-4 py-1.5 text-sm font-bold text-blue-400">
+                <div className="flex items-center gap-2 bg-blue-500/15 border border-blue-500 px-4 py-1.5 text-sm font-bold text-blue-400">
                   <Calendar className="h-4 w-4" />
                   Agendada
                 </div>

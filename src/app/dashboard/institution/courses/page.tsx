@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -108,7 +108,7 @@ export default function InstitutionCoursesPage() {
       {/* ── Cabeçalho ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">// cursos</p>
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-2">// cursos</p>
           <h1 className="text-2xl font-bold text-gray-100">Cursos</h1>
           <p className="mt-1 text-sm text-gray-600">
             {filtered.length} de {courses.length} curso{courses.length !== 1 ? "s" : ""} dos teus professores
@@ -123,7 +123,7 @@ export default function InstitutionCoursesPage() {
           <input
             type="text" value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Pesquisar cursos..."
-            className="w-full border border-gray-800 bg-gray-900 pl-9 pr-9 py-2.5 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors"
+            className="w-full border border-gray-800 bg-gray-900 pl-9 pr-9 py-2.5 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors"
           />
           {search && (
             <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -133,7 +133,7 @@ export default function InstitutionCoursesPage() {
         </div>
         <select
           value={filter} onChange={e => setFilter(e.target.value as typeof filter)}
-          className="border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-400 focus:border-purple/30 focus:outline-none transition-colors"
+          className="border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-400 focus:border-purple focus:outline-none transition-colors"
         >
           <option value="all">Todos</option>
           <option value="published">Publicados</option>
@@ -161,7 +161,7 @@ export default function InstitutionCoursesPage() {
               ← Limpar filtros
             </button>
           ) : (
-            <Link href="/dashboard/institution/members" className="flex items-center gap-1.5 border border-purple/25 bg-purple/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-purple/70 hover:bg-purple/15 transition-all">
+            <Link href="/dashboard/institution/members" className="flex items-center gap-1.5 border border-purple bg-purple/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-purple hover:bg-purple/15 transition-all">
               Convidar Professores <ArrowRight className="h-3 w-3" />
             </Link>
           )}
@@ -175,7 +175,7 @@ export default function InstitutionCoursesPage() {
             <Link
               key={course.id}
               href={`/dashboard/courses/${course.id}`}
-              className="group border border-gray-800 bg-gray-900 overflow-hidden hover:border-purple/30 hover:bg-gray-900 transition-all"
+              className="group border border-gray-800 bg-gray-900 overflow-hidden hover:border-purple hover:bg-gray-900 transition-all"
             >
               {/* Thumb */}
               <div className="relative h-40 bg-gray-900 overflow-hidden">
@@ -193,8 +193,8 @@ export default function InstitutionCoursesPage() {
                 {/* Status badge */}
                 <span className={`absolute top-3 left-3 font-mono text-[13px] uppercase tracking-widest px-2 py-0.5 border ${
                   course.status === "published"
-                    ? "border-green/30 text-green/80 bg-gray-950"
-                    : "border-amber-500/30 text-amber-400/80 bg-gray-950"
+                    ? "border-green text-green bg-gray-950"
+                    : "border-amber-500 text-amber-400 bg-gray-950"
                 }`}>
                   {course.status === "published" ? "pub" : "draft"}
                 </span>
@@ -206,7 +206,7 @@ export default function InstitutionCoursesPage() {
                   className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center border border-gray-800 bg-gray-950 text-gray-500 hover:text-gray-200 transition-all"
                 >
                   {copiedId === course.id
-                    ? <CheckCircle2 className="h-3.5 w-3.5 text-green/60" strokeWidth={1.5} />
+                    ? <CheckCircle2 className="h-3.5 w-3.5 text-green" strokeWidth={1.5} />
                     : <Share2 className="h-3.5 w-3.5" strokeWidth={1.5} />
                   }
                 </button>

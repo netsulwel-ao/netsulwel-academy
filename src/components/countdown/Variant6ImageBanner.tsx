@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useCountdown } from "@/hooks/useCountdown";
 import Link from "next/link";
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23202224'/%3E%3Ctext x='200' y='110' text-anchor='middle' fill='%23666' font-size='16' font-family='sans-serif'%3EPromo%3C/text%3E%3C/svg%3E";
@@ -52,8 +52,8 @@ export default function Variant6ImageBanner({
             {label || "Oferta Especial"}
           </span>
 
-          <span className="hidden sm:inline text-white/20 text-xl font-light">|</span>
-          <span className="hidden sm:inline text-white/50 text-sm whitespace-nowrap">Termina em</span>
+          <span className="hidden sm:inline text-white text-xl font-light">|</span>
+          <span className="hidden sm:inline text-white text-sm whitespace-nowrap">Termina em</span>
 
           <div className="flex items-center gap-1 sm:gap-2">
             {units.flatMap((u, i) => [
@@ -64,12 +64,12 @@ export default function Variant6ImageBanner({
                 <span className="text-lg sm:text-xl font-bold text-white leading-none tabular-nums">
                   {String(u.value).padStart(2, "0")}
                 </span>
-                <span className="text-[8px] sm:text-[10px] text-white/60 leading-none mt-0.5">
+                <span className="text-[8px] sm:text-[10px] text-white leading-none mt-0.5">
                   {u.label}
                 </span>
               </div>,
               i < units.length - 1 ? (
-                <span key={`sep-${u.label}`} className="text-white/30 text-sm sm:text-lg font-bold">:</span>
+                <span key={`sep-${u.label}`} className="text-white text-sm sm:text-lg font-bold">:</span>
               ) : null,
             ])}
           </div>

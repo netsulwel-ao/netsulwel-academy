@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -118,7 +118,7 @@ export default function TeacherLivesPage() {
       {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green/60 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green mb-2">
             // aulas ao vivo
           </p>
           <h1 className="text-2xl font-bold text-gray-100">Aulas ao Vivo</h1>
@@ -136,9 +136,9 @@ export default function TeacherLivesPage() {
 
       {/* Erro */}
       {error && (
-        <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
-          <p className="text-sm text-amber-400/80">{error}</p>
+        <div className="flex items-start gap-3 border border-amber-500 bg-amber-500/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" strokeWidth={1.5} />
+          <p className="text-sm text-amber-400">{error}</p>
         </div>
       )}
 
@@ -161,7 +161,7 @@ export default function TeacherLivesPage() {
           <p className="text-sm text-gray-600 mb-5">Ainda não agendaste nenhuma aula ao vivo.</p>
           <Link
             href="/dashboard/teacher/lives/new"
-            className="flex items-center gap-1.5 border border-green/25 bg-green/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-green/70 hover:bg-green/15 transition-all"
+            className="flex items-center gap-1.5 border border-green bg-green/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-green hover:bg-green/15 transition-all"
           >
             <Plus className="h-3 w-3" /> Agendar primeira aula
           </Link>
@@ -176,9 +176,9 @@ export default function TeacherLivesPage() {
             <section>
               <div className="flex items-center gap-2 mb-3">
                 <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />
-                <p className="font-mono text-[13px] uppercase tracking-widest text-red-400/70">ao vivo agora</p>
+                <p className="font-mono text-[13px] uppercase tracking-widest text-red-400">ao vivo agora</p>
               </div>
-              <div className="border border-red-500/20 divide-y divide-gray-800">
+              <div className="border border-red-500 divide-y divide-gray-800">
                 {active.map(l => (
                   <div key={l.id} className="flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-4 bg-red-500/5">
                     <div className="flex-1 min-w-0">
@@ -191,7 +191,7 @@ export default function TeacherLivesPage() {
                         <Play className="h-4 w-4" strokeWidth={1.5} /> Ir para estúdio
                       </Link>
                       <button type="button" onClick={() => handleDelete(l.id!, l.title)} disabled={deletingId === l.id}
-                        className="flex h-8 w-8 items-center justify-center border border-red-500/20 bg-red-500/8 text-red-400/70 hover:bg-red-500/15 disabled:opacity-50 transition-all">
+                        className="flex h-8 w-8 items-center justify-center border border-red-500 bg-red-500/8 text-red-400 hover:bg-red-500/15 disabled:opacity-50 transition-all">
                         {deletingId === l.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />}
                       </button>
                     </div>
@@ -225,7 +225,7 @@ export default function TeacherLivesPage() {
                         <Edit className="h-3.5 w-3.5" strokeWidth={1.5} />
                       </Link>
                       <button type="button" onClick={() => handleDelete(l.id!, l.title)} disabled={deletingId === l.id}
-                        className="flex h-8 w-8 items-center justify-center border border-red-500/20 bg-red-500/8 text-red-400/70 hover:bg-red-500/15 disabled:opacity-50 transition-all">
+                        className="flex h-8 w-8 items-center justify-center border border-red-500 bg-red-500/8 text-red-400 hover:bg-red-500/15 disabled:opacity-50 transition-all">
                         {deletingId === l.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />}
                       </button>
                     </div>
@@ -249,7 +249,7 @@ export default function TeacherLivesPage() {
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="font-mono text-[13px] uppercase tracking-widest text-gray-700">concluída</span>
                       <button type="button" onClick={() => handleDelete(l.id!, l.title)} disabled={deletingId === l.id}
-                        className="flex h-7 w-7 items-center justify-center border border-red-500/20 bg-red-500/8 text-red-400/60 hover:bg-red-500/15 disabled:opacity-50 transition-all">
+                        className="flex h-7 w-7 items-center justify-center border border-red-500 bg-red-500/8 text-red-400 hover:bg-red-500/15 disabled:opacity-50 transition-all">
                         {deletingId === l.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" strokeWidth={1.5} />}
                       </button>
                     </div>
@@ -276,12 +276,12 @@ export default function TeacherLivesPage() {
                           </p>
                         )}
                         {r.status === "approved" && (
-                          <p className="font-mono text-[13px] text-green/60">
+                          <p className="font-mono text-[13px] text-green">
                             ✓ Live criada — aparece na lista acima
                           </p>
                         )}
                         {r.status === "rejected" && (
-                          <p className="font-mono text-[13px] text-red-400/60">
+                          <p className="font-mono text-[13px] text-red-400">
                             Contacta o administrador para mais informações
                           </p>
                         )}
@@ -289,10 +289,10 @@ export default function TeacherLivesPage() {
                     </div>
                     <span className={`shrink-0 flex items-center gap-1.5 font-mono text-[13px] uppercase tracking-widest border px-2.5 py-1 ${
                       r.status === "approved"
-                        ? "border-green/25 bg-green/8 text-green/70"
+                        ? "border-green bg-green/8 text-green"
                         : r.status === "rejected"
-                        ? "border-red-500/25 bg-red-500/8 text-red-400/70"
-                        : "border-amber-500/25 bg-amber-500/8 text-amber-400/70"
+                        ? "border-red-500 bg-red-500/8 text-red-400"
+                        : "border-amber-500 bg-amber-500/8 text-amber-400"
                     }`}>
                       {r.status === "approved"  && <><CheckCircle2 className="h-2.5 w-2.5" /> aprovado</>}
                       {r.status === "rejected"  && <><XCircle className="h-2.5 w-2.5" /> rejeitado</>}

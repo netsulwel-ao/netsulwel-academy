@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -127,9 +127,9 @@ export function LiveChat({ liveId, role }: LiveChatProps) {
     <div className="flex flex-col h-full">
       {/* Pinned message */}
       {isHost && pinnedMessage && (
-        <div className="px-3 py-2.5 bg-purple/10 border-b border-purple/20 flex items-start gap-2">
+        <div className="px-3 py-2.5 bg-purple/10 border-b border-purple flex items-start gap-2">
           <Pin className="h-3.5 w-3.5 text-purple mt-0.5 shrink-0" />
-          <p className="text-xs text-purple/80 leading-relaxed">{pinnedMessage.text}</p>
+          <p className="text-xs text-purple leading-relaxed">{pinnedMessage.text}</p>
         </div>
       )}
 
@@ -214,7 +214,7 @@ export function LiveChat({ liveId, role }: LiveChatProps) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Escrever mensagem..."
-            className="flex-1 bg-gray-800/80 text-[13px] text-white px-3 py-2.5 rounded-lg border border-gray-700/50 focus:outline-none focus:border-purple/50 focus:ring-1 focus:ring-purple/20 transition-colors min-w-0"
+            className="flex-1 bg-gray-800/80 text-[13px] text-white px-3 py-2.5 rounded-lg border border-gray-700 focus:outline-none focus:border-purple focus:ring-1 focus:ring-purple/20 transition-colors min-w-0"
           />
           <button
             type="submit"

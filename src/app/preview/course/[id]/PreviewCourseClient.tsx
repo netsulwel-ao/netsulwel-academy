@@ -102,12 +102,12 @@ export default function PreviewCourseClient({ course }: { course: CoursePreview 
           <div className="flex-1 space-y-6">
             {/* Badges */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-blue-500/15 border-blue-500/30 text-blue-400">
+              <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-blue-500/15 border-blue-500 text-blue-400">
                 <TypeIcon className="h-3.5 w-3.5" />
                 {typeConf.label}
               </span>
               {course.hasCertificate && (
-                <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500/30 text-amber-400">
+                <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider border bg-amber-500/15 border-amber-500 text-amber-400">
                   <Award className="h-3.5 w-3.5" /> Certificado
                 </span>
               )}

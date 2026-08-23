@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -181,8 +181,8 @@ export default function ChatRoom({ chatId, height = "h-full" }: ChatRoomProps) {
 
       {/* ── Erro de envio ── */}
       {error && (
-        <div className="px-4 py-2 bg-red-500/8 border-t border-red-500/20">
-          <p className="text-sm text-red-400/80">{error}</p>
+        <div className="px-4 py-2 bg-red-500/8 border-t border-red-500">
+          <p className="text-sm text-red-400">{error}</p>
         </div>
       )}
 
@@ -199,7 +199,7 @@ export default function ChatRoom({ chatId, height = "h-full" }: ChatRoomProps) {
           placeholder="Escreve uma mensagem..."
           disabled={sending}
           maxLength={1000}
-          className="flex-1 border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple/40 focus:outline-none disabled:opacity-50 transition-colors"
+          className="flex-1 border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple focus:outline-none disabled:opacity-50 transition-colors"
         />
         <button
           type="submit"

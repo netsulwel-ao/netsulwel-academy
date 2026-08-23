@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -115,7 +115,7 @@ export default function InstitutionRegisterPage() {
   };
 
   // Classe base para inputs
-  const inputBase = "block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-blue-500/50 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors";
+  const inputBase = "block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-blue-500 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors";
 
   return (
     <main className="flex min-h-screen bg-gray-950">
@@ -160,7 +160,7 @@ export default function InstitutionRegisterPage() {
 
             {/* Eyebrow */}
             <div className="mb-5">
-              <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-blue-500/70 mb-2">
+              <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-blue-500 mb-2">
                 // registo de instituição
               </p>
               <h1 className="text-2xl font-bold text-gray-100">
@@ -178,7 +178,7 @@ export default function InstitutionRegisterPage() {
               <div className="mb-5 space-y-2">
                 {PERKS.map(({ icon: Icon, label, sub }) => (
                   <div key={label} className="flex items-center gap-3 py-2 border-b border-gray-800 last:border-b-0">
-                    <Icon className="h-3.5 w-3.5 text-blue-500/60 shrink-0" strokeWidth={1.5} />
+                    <Icon className="h-3.5 w-3.5 text-blue-500 shrink-0" strokeWidth={1.5} />
                     <div>
                       <span className="text-sm font-medium text-gray-300">{label}</span>
                       <span className="text-sm text-gray-600 ml-2">{sub}</span>
@@ -190,7 +190,7 @@ export default function InstitutionRegisterPage() {
 
             {/* Error */}
             {error && (
-              <div className="mb-5 flex items-start gap-2.5 border border-red-500/20 bg-red-500/8 px-4 py-3 text-sm text-red-400">
+              <div className="mb-5 flex items-start gap-2.5 border border-red-500 bg-red-500/8 px-4 py-3 text-sm text-red-400">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <p>{error}</p>
               </div>
@@ -293,10 +293,10 @@ export default function InstitutionRegisterPage() {
                 </div>
 
                 {/* Aviso aprovação */}
-                <div className="flex items-start gap-2.5 border border-amber-500/20 bg-amber-500/5 px-3 py-2.5">
-                  <span className="text-amber-400/80 text-sm mt-0.5">⚠</span>
-                  <p className="text-sm text-amber-400/70 leading-relaxed">
-                    Após o registo, a instituição ficará em <strong className="text-amber-400/90">avaliação</strong> até ser aprovada.
+                <div className="flex items-start gap-2.5 border border-amber-500 bg-amber-500/5 px-3 py-2.5">
+                  <span className="text-amber-400 text-sm mt-0.5">⚠</span>
+                  <p className="text-sm text-amber-400 leading-relaxed">
+                    Após o registo, a instituição ficará em <strong className="text-amber-400">avaliação</strong> até ser aprovada.
                   </p>
                 </div>
 
@@ -320,7 +320,7 @@ export default function InstitutionRegisterPage() {
             <div className="mt-8 space-y-3 border-t border-gray-800 pt-6">
               <p className="text-center text-sm text-gray-600">
                 Já tem conta?{" "}
-                <Link href="/login" className="text-blue-500/80 hover:text-blue-400 font-semibold transition-colors">
+                <Link href="/login" className="text-blue-500 hover:text-blue-400 font-semibold transition-colors">
                   Entrar agora
                 </Link>
               </p>

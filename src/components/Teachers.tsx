@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { db } from "@/lib/firebase";
@@ -120,7 +120,7 @@ export function Teachers() {
           <input ref={inputRef}
             type="text" value={search} onChange={(e) => handleSearch(e.target.value)}
             placeholder="Pesquisar professor..."
-            className="w-full bg-gray-900 border border-gray-800 focus:border-purple/50 py-3.5 pl-12 pr-10 text-white text-base focus:outline-none transition-all" />
+            className="w-full bg-gray-900 border border-gray-800 focus:border-purple py-3.5 pl-12 pr-10 text-white text-base focus:outline-none transition-all" />
           {search && (
             <button onClick={() => { setSearch(""); setShowDropdown(false); inputRef.current?.focus(); }}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors">
@@ -176,7 +176,7 @@ export function Teachers() {
               <TransitionLink href="/login"
                 whileHover={{ y: -6 }}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                className="group block bg-gray-900 border border-gray-800 hover:border-purple/30 p-6 transition-colors duration-300 text-center">
+                className="group block bg-gray-900 border border-gray-800 hover:border-purple p-6 transition-colors duration-300 text-center">
                 {t.photoURL ? (
                    <img src={t.photoURL} alt={t.name} className="h-20 w-20 rounded-full object-cover mx-auto mb-4 ring-2 ring-purple-500/20 group-hover:ring-purple-500/40 transition-all" />
                 ) : (
@@ -186,7 +186,7 @@ export function Teachers() {
                 )}
                 <h3 className="text-lg font-bold text-white group-hover:text-purple-300 transition-colors truncate">{t.name}</h3>
                 <span className={`inline-block mt-1 text-sm font-bold px-2.5 py-1 border ${
-                  t.role === "institution" ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/25" : "bg-green-500/15 text-green-400 border-green-500/25"
+                  t.role === "institution" ? "bg-cyan-500/15 text-cyan-400 border-cyan-500" : "bg-green-500/15 text-green-400 border-green-500"
                 }`}>
                   {t.role === "institution" ? "Instituição" : "Professor"}
                 </span>

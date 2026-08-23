@@ -14,9 +14,9 @@ import type { LiveSession } from "@/types/live";
 
 // ── Labels ────────────────────────────────────────────────────
 const ROLE_BADGE: Record<string, { label: string; color: string }> = {
-  teacher:     { label: "Professor",  color: "border-green/25 bg-green/8 text-green/80" },
-  institution: { label: "Instituição",color: "border-blue-500/25 bg-blue-500/8 text-blue-400/80" },
-  admin:       { label: "Admin",      color: "border-purple/25 bg-purple/8 text-purple/80" },
+  teacher:     { label: "Professor",  color: "border-green bg-green/8 text-green" },
+  institution: { label: "Instituição",color: "border-blue-500 bg-blue-500/8 text-blue-400" },
+  admin:       { label: "Admin",      color: "border-purple bg-purple/8 text-purple" },
 };
 
 function fmtDate(iso: string) {
@@ -44,7 +44,7 @@ function ProfileCourseCard({ course, href }: { course: Course; href: string }) {
         <div className="absolute right-2.5 top-2.5">
           <span className={`font-mono text-[13px] font-bold border px-2 py-0.5 ${
             (course.price ?? 0) === 0
-              ? "border-green/25 bg-gray-950 text-green/80"
+              ? "border-green bg-gray-950 text-green"
               : "border-gray-700 bg-gray-950 text-gray-400"
           }`}>
             {(course.price ?? 0) === 0 ? "Grátis" : `${course.price!.toLocaleString("pt-AO")} Kz`}
@@ -87,7 +87,7 @@ function ProfileLiveCard({ live }: { live: LiveSession }) {
         <p className="text-sm font-semibold text-gray-300 truncate">{live.title}</p>
         <div className="mt-0.5 flex items-center gap-2 font-mono text-[13px] text-gray-700">
           {live.status === "live" && (
-            <span className="text-red-400/80 flex items-center gap-1">
+            <span className="text-red-400 flex items-center gap-1">
               <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />
               ao vivo
             </span>
@@ -203,9 +203,9 @@ export default function DashboardProfilePage() {
       {/* ── Stats ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
-          { icon: BookOpen, label: "Cursos",  value: courses.length, color: "text-purple/70" },
-          { icon: Radio,    label: "Ao vivo", value: lives.length,   color: "text-red-400/70" },
-          { icon: Users,    label: "Alcance", value: totalViews,     color: "text-blue-400/70" },
+          { icon: BookOpen, label: "Cursos",  value: courses.length, color: "text-purple" },
+          { icon: Radio,    label: "Ao vivo", value: lives.length,   color: "text-red-400" },
+          { icon: Users,    label: "Alcance", value: totalViews,     color: "text-blue-400" },
         ].map(({ icon: Icon, label, value, color }) => (
           <div key={label} className="border border-gray-800 bg-gray-900 px-4 py-4 flex items-center gap-3">
             <Icon className={`h-5 w-5 shrink-0 ${color}`} strokeWidth={1.5} />
@@ -229,7 +229,7 @@ export default function DashboardProfilePage() {
       {courses.length > 0 && (
         <section>
           <div className="mb-4">
-            <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-1">// cursos</p>
+            <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-1">// cursos</p>
             <h2 className="text-base font-bold text-gray-200">
               Cursos publicados
               <span className="ml-2 font-mono text-sm text-gray-700">({courses.length})</span>
@@ -251,7 +251,7 @@ export default function DashboardProfilePage() {
       {lives.length > 0 && (
         <section>
           <div className="mb-4">
-            <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-red-400/60 mb-1">// ao vivo</p>
+            <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-red-400 mb-1">// ao vivo</p>
             <h2 className="text-base font-bold text-gray-200">
               Aulas ao vivo
               <span className="ml-2 font-mono text-sm text-gray-700">({lives.length})</span>

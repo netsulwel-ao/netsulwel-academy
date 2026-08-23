@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import {
@@ -169,7 +169,7 @@ export function OnboardingTour() {
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-5 pb-0">
-          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple">
             {s.tag}
           </p>
           <button
@@ -185,7 +185,7 @@ export function OnboardingTour() {
         <div className="px-6 pt-5 pb-6">
           {/* Ícone */}
           <div className="mb-5 flex h-12 w-12 items-center justify-center border border-gray-800 bg-gray-900">
-            <s.icon className="h-5 w-5 text-purple/80" strokeWidth={1.5} />
+            <s.icon className="h-5 w-5 text-purple" strokeWidth={1.5} />
           </div>
 
           {/* Texto */}

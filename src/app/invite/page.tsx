@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -88,7 +88,7 @@ function InviteContent() {
           <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/10 blur-3xl rounded-full" />
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 blur-3xl rounded-full" />
           <div className="relative animate-in zoom-in-95 duration-500">
-            <div className="h-20 w-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6 border border-green-500/30 shadow-lg shadow-green-500/20">
+            <div className="h-20 w-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6 border border-green-500 shadow-lg shadow-green-500/20">
               <Check className="h-10 w-10 text-green-400" />
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">Bem-vindo!</h1>

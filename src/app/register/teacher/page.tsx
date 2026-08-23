@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -96,7 +96,7 @@ export default function TeacherRegisterPage() {
 
             {/* Eyebrow */}
             <div className="mb-6">
-              <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green/70 mb-2">
+              <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green mb-2">
                 // registo de professor
               </p>
               <h1 className="text-2xl font-bold text-gray-100">Torne-se professor</h1>
@@ -109,7 +109,7 @@ export default function TeacherRegisterPage() {
             <div className="mb-6 space-y-2">
               {PERKS.map(({ icon: Icon, label, sub }) => (
                 <div key={label} className="flex items-center gap-3 py-2 border-b border-gray-800 last:border-b-0">
-                  <Icon className="h-3.5 w-3.5 text-green/60 shrink-0" strokeWidth={1.5} />
+                  <Icon className="h-3.5 w-3.5 text-green shrink-0" strokeWidth={1.5} />
                   <div>
                     <span className="text-sm font-medium text-gray-300">{label}</span>
                     <span className="text-sm text-gray-600 ml-2">{sub}</span>
@@ -120,7 +120,7 @@ export default function TeacherRegisterPage() {
 
             {/* Error */}
             {error && (
-              <div className="mb-5 flex items-start gap-2.5 border border-red-500/20 bg-red-500/8 px-4 py-3 text-sm text-red-400">
+              <div className="mb-5 flex items-start gap-2.5 border border-red-500 bg-red-500/8 px-4 py-3 text-sm text-red-400">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <p>{error}</p>
               </div>
@@ -139,7 +139,7 @@ export default function TeacherRegisterPage() {
                     id="name" type="text" required autoComplete="name"
                     disabled={loading} placeholder="João Silva"
                     value={name} onChange={(e) => setName(e.target.value)}
-                    className="block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-green/50 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                    className="block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-green focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
                   />
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default function TeacherRegisterPage() {
                     id="email" type="email" required autoComplete="email"
                     disabled={loading} placeholder="professor@email.com"
                     value={email} onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-green/50 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                    className="block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-green focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
                   />
                 </div>
               </div>
@@ -171,7 +171,7 @@ export default function TeacherRegisterPage() {
                     id="password" type={showPassword ? "text" : "password"} required
                     autoComplete="new-password" disabled={loading} placeholder="min. 6 caracteres"
                     value={password} onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-10 text-sm text-gray-100 focus:border-green/50 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                    className="block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-10 text-sm text-gray-100 focus:border-green focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
                   />
                   <button type="button" tabIndex={-1} onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-400 transition-colors">
@@ -191,7 +191,7 @@ export default function TeacherRegisterPage() {
                     id="specialty" type="text" required disabled={loading}
                     placeholder="Ex: Programação Web, Finanças"
                     value={specialty} onChange={(e) => setSpecialty(e.target.value)}
-                    className="block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-green/50 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
+                    className="block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-green focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors"
                   />
                 </div>
               </div>
@@ -207,16 +207,16 @@ export default function TeacherRegisterPage() {
                     id="bio" rows={3} disabled={loading}
                     placeholder="Conte sobre a sua experiência e formação..."
                     value={bio} onChange={(e) => setBio(e.target.value)}
-                    className="block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-green/50 focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors resize-none"
+                    className="block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 focus:border-green focus:outline-none focus:bg-gray-900 disabled:opacity-50 transition-colors resize-none"
                   />
                 </div>
               </div>
 
               {/* Aviso de aprovação */}
-              <div className="flex items-start gap-2.5 border border-amber-500/20 bg-amber-500/5 px-3 py-2.5">
-                <span className="text-amber-400/80 text-sm mt-0.5">⚠</span>
-                <p className="text-sm text-amber-400/70 leading-relaxed">
-                  A conta ficará em <strong className="text-amber-400/90">avaliação</strong> até ser aprovada pela administração.
+              <div className="flex items-start gap-2.5 border border-amber-500 bg-amber-500/5 px-3 py-2.5">
+                <span className="text-amber-400 text-sm mt-0.5">⚠</span>
+                <p className="text-sm text-amber-400 leading-relaxed">
+                  A conta ficará em <strong className="text-amber-400">avaliação</strong> até ser aprovada pela administração.
                 </p>
               </div>
 
@@ -238,7 +238,7 @@ export default function TeacherRegisterPage() {
             <div className="mt-8 space-y-3 border-t border-gray-800 pt-6">
               <p className="text-center text-sm text-gray-600">
                 Já tem conta?{" "}
-                <Link href="/login" className="text-green/80 hover:text-green font-semibold transition-colors">
+                <Link href="/login" className="text-green hover:text-green font-semibold transition-colors">
                   Entrar agora
                 </Link>
               </p>

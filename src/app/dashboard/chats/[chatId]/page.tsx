@@ -84,7 +84,7 @@ export default function ChatRoomPage() {
         <div className="h-9 w-9 shrink-0 overflow-hidden border border-gray-800">
           {isGroup ? (
             <div className="flex h-full w-full items-center justify-center bg-gray-900">
-              <Users className="h-4 w-4 text-purple/70" strokeWidth={1.5} />
+              <Users className="h-4 w-4 text-purple" strokeWidth={1.5} />
             </div>
           ) : (
             <Avatar uid={otherId} photoURL={otherPhoto} name={otherName} size={36} />
@@ -102,13 +102,13 @@ export default function ChatRoomPage() {
         {/* Link para o curso */}
         <Link
           href={`/dashboard/courses/${chat.courseId}`}
-          className="shrink-0 font-mono text-[13px] uppercase tracking-widest text-gray-700 hover:text-purple/70 transition-colors hidden sm:inline"
+          className="shrink-0 font-mono text-[13px] uppercase tracking-widest text-gray-700 hover:text-purple transition-colors hidden sm:inline"
         >
           ver curso →
         </Link>
         <Link
           href={`/dashboard/courses/${chat.courseId}`}
-          className="shrink-0 sm:hidden text-gray-700 hover:text-purple/70 transition-colors"
+          className="shrink-0 sm:hidden text-gray-700 hover:text-purple transition-colors"
           aria-label="Ver curso"
         >
           <BookOpen className="h-4 w-4" strokeWidth={1.5} />

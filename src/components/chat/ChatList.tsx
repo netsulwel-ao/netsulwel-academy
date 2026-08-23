@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -28,7 +28,7 @@ function ChatAvatar({ chat, currentUid }: { chat: CourseChat; currentUid: string
   if (chat.type === "group") {
     return (
       <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-gray-800 bg-gray-900">
-        <Users className="h-4 w-4 text-purple/70" strokeWidth={1.5} />
+        <Users className="h-4 w-4 text-purple" strokeWidth={1.5} />
       </div>
     );
   }
@@ -75,7 +75,7 @@ function ChatItem({ chat, currentUid, href, onSelect }: ChatItemProps) {
         </div>
         <div className="flex items-center gap-1.5 mt-0.5">
           {chat.type === "group" && (
-            <span className="font-mono text-[13px] uppercase tracking-widest border border-purple/20 bg-purple/8 text-purple/60 px-1.5 py-px shrink-0">
+            <span className="font-mono text-[13px] uppercase tracking-widest border border-purple bg-purple/8 text-purple px-1.5 py-px shrink-0">
               grupo
             </span>
           )}

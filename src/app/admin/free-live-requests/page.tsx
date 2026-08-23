@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
@@ -59,9 +59,9 @@ function generateRoomName(title: string) {
 // -- Status badge ----------------------------------------------
 function StatusBadge({ status }: { status: FreeLiveRequest["status"] }) {
   const map = {
-    pending:  "border-amber-500/30 text-amber-400/80 bg-amber-500/8",
-    approved: "border-green/30 text-green/80 bg-green/8",
-    rejected: "border-red-500/30 text-red-400/80 bg-red-500/8",
+    pending:  "border-amber-500 text-amber-400 bg-amber-500/8",
+    approved: "border-green text-green bg-green/8",
+    rejected: "border-red-500 text-red-400 bg-red-500/8",
   };
   const labels = { pending: "pendente", approved: "aprovado", rejected: "rejeitado" };
   return (
@@ -215,7 +215,7 @@ export default function FreeLiveRequestsPage() {
 
       {/* -- Cabe�alho -- */}
       <div>
-        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-2">
           // pedidos de lives
         </p>
         <h1 className="text-2xl font-bold text-gray-100">Lives Gratuitas</h1>
@@ -257,12 +257,12 @@ export default function FreeLiveRequestsPage() {
             <section>
               <div className="flex items-center gap-2 mb-3">
                 <span className="h-1.5 w-1.5 bg-amber-400 animate-pulse" />
-                <p className="font-mono text-[13px] uppercase tracking-widest text-amber-400/70">
+                <p className="font-mono text-[13px] uppercase tracking-widest text-amber-400">
                   pendentes � {pending.length}
                 </p>
               </div>
 
-              <div className="border border-amber-500/20 divide-y divide-gray-800">
+              <div className="border border-amber-500 divide-y divide-gray-800">
                 {pending.map(req => (
                   <div key={req.id} className="px-5 py-5 hover:bg-gray-900 transition-colors">
                     <div className="flex flex-col sm:flex-row sm:items-start gap-4">
@@ -312,7 +312,7 @@ export default function FreeLiveRequestsPage() {
                         <button
                           onClick={() => handleReject(req)}
                           disabled={!!actioningId}
-                          className="flex items-center gap-1.5 border border-red-500/30 bg-red-500/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-red-400/80 hover:bg-red-500/15 disabled:opacity-40 transition-all"
+                          className="flex items-center gap-1.5 border border-red-500 bg-red-500/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-red-400 hover:bg-red-500/15 disabled:opacity-40 transition-all"
                         >
                           {actioningId === req.id
                             ? <Loader2 className="h-3 w-3 animate-spin" />

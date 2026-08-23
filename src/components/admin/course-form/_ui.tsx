@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 // Shared UI atoms used only inside CourseForm
 
@@ -12,7 +12,7 @@ export function FieldLabel({
   return (
     <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-gray-600 mb-2">
       {children}
-      {required && <span className="text-red-400/80 ml-1">*</span>}
+      {required && <span className="text-red-400 ml-1">*</span>}
     </p>
   );
 }
@@ -34,7 +34,7 @@ export function Toggle({
       aria-label={label}
       onClick={onChange}
       className={`relative inline-flex h-5 w-9 shrink-0 items-center border transition-colors ${
-        checked ? "bg-purple border-purple/60" : "bg-gray-800 border-gray-700"
+        checked ? "bg-purple border-purple" : "bg-gray-800 border-gray-700"
       }`}
     >
       <span

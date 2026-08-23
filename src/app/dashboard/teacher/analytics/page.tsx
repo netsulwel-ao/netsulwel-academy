@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -48,7 +48,7 @@ function StatCard({ label, value, sub, up, accent = "text-gray-200" }: {
         <p className={`text-2xl font-bold tabular-nums leading-none ${accent}`}>{value}</p>
         {up !== undefined && (
           up
-            ? <ArrowUpRight className="h-4 w-4 text-green/60 mb-0.5 shrink-0" strokeWidth={1.5} />
+            ? <ArrowUpRight className="h-4 w-4 text-green mb-0.5 shrink-0" strokeWidth={1.5} />
             : <Minus className="h-4 w-4 text-gray-700 mb-0.5 shrink-0" strokeWidth={1.5} />
         )}
       </div>
@@ -75,7 +75,7 @@ function BarChart({ data }: { data: { key: string; label: string; value: number;
           >
             <div className={`mb-1 text-center transition-opacity duration-150 ${isHov ? "opacity-100" : "opacity-0"}`}>
               <p className="font-mono text-[13px] text-white whitespace-nowrap">{value}v</p>
-              {revenue > 0 && <p className="font-mono text-[8px] text-green/60">{formatKz(revenue)}</p>}
+              {revenue > 0 && <p className="font-mono text-[8px] text-green">{formatKz(revenue)}</p>}
             </div>
             <div
               className={`w-full transition-colors duration-150 ${value > 0 ? (isHov ? "bg-green/50" : "bg-green/25") : "bg-gray-800"}`}
@@ -222,7 +222,7 @@ export default function TeacherAnalyticsPage() {
 
       {/* ── Cabeçalho ── */}
       <div>
-        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-2">
           // analytics
         </p>
         <h1 className="text-2xl font-bold text-gray-100">Analytics</h1>
@@ -233,9 +233,9 @@ export default function TeacherAnalyticsPage() {
 
       {/* ── Erro ── */}
       {error && (
-        <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
-          <p className="text-sm text-amber-400/80">{error}</p>
+        <div className="flex items-start gap-3 border border-amber-500 bg-amber-500/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" strokeWidth={1.5} />
+          <p className="text-sm text-amber-400">{error}</p>
         </div>
       )}
 
@@ -255,7 +255,7 @@ export default function TeacherAnalyticsPage() {
               value={formatKz(m.totalRevenue)}
               sub={`${m.totalSales} venda${m.totalSales !== 1 ? "s" : ""} confirmada${m.totalSales !== 1 ? "s" : ""}`}
               up={m.totalRevenue > 0}
-              accent="text-green/80"
+              accent="text-green"
             />
             <StatCard
               label="Ticket médio"
@@ -266,7 +266,7 @@ export default function TeacherAnalyticsPage() {
               label="Alunos únicos"
               value={String(m.uniqueStudents)}
               sub="de vendas avulsas"
-              accent="text-purple/80"
+              accent="text-purple"
             />
             <StatCard
               label="Cursos"
@@ -350,7 +350,7 @@ export default function TeacherAnalyticsPage() {
                         <div className="flex items-center gap-2 mt-0.5 font-mono text-[13px] text-gray-700">
                           <span>{c.lessonsCount ?? 0} aulas</span>
                           <span>·</span>
-                          <span className={c.status === "published" ? "text-green/60" : "text-gray-700"}>
+                          <span className={c.status === "published" ? "text-green" : "text-gray-700"}>
                             {c.status === "published" ? "pub" : "draft"}
                           </span>
                         </div>
@@ -390,7 +390,7 @@ export default function TeacherAnalyticsPage() {
                       </div>
                       <div className="text-right shrink-0">
                         <p className="font-mono text-sm text-gray-300">
-                          {l.price ? formatKz(l.revenue) : <span className="text-green/60">grátis</span>}
+                          {l.price ? formatKz(l.revenue) : <span className="text-green">grátis</span>}
                         </p>
                         <p className="font-mono text-[13px] text-gray-700">{l.saleCount}v</p>
                       </div>
@@ -423,7 +423,7 @@ export default function TeacherAnalyticsPage() {
                         </p>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="font-mono text-sm text-green/70">{formatKz(s.netAmount ?? s.amount ?? 0)}</p>
+                        <p className="font-mono text-sm text-green">{formatKz(s.netAmount ?? s.amount ?? 0)}</p>
                         <p className="font-mono text-[13px] text-gray-700">{dateStr}</p>
                       </div>
                     </div>

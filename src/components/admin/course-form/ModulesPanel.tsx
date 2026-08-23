@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef } from "react";
 import {
@@ -208,7 +208,7 @@ export function ModulesPanel({
                               <button
                                 type="button"
                                 onClick={() => videoRefs.current[key(mi, vi)]?.click()}
-                                className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-700 bg-gray-900 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-700 hover:border-purple/30 hover:text-gray-500 transition-colors"
+                                className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-700 bg-gray-900 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-700 hover:border-purple hover:text-gray-500 transition-colors"
                               >
                                 <UploadCloud className="h-3.5 w-3.5" /> Selecionar vídeo
                               </button>
@@ -235,9 +235,9 @@ export function ModulesPanel({
                             )}
                             {video.url && !video.uploading && (
                               <div className="flex items-center gap-2">
-                                <div className="flex-1 flex items-center gap-2 border border-green/20 bg-green/5 px-3 py-1.5">
-                                  <CheckCircle2 className="h-3 w-3 text-green/60 shrink-0" strokeWidth={1.5} />
-                                  <span className="font-mono text-[13px] text-green/60 truncate">
+                                <div className="flex-1 flex items-center gap-2 border border-green bg-green/5 px-3 py-1.5">
+                                  <CheckCircle2 className="h-3 w-3 text-green shrink-0" strokeWidth={1.5} />
+                                  <span className="font-mono text-[13px] text-green truncate">
                                     {video.url.split("/").pop()}
                                   </span>
                                 </div>
@@ -252,7 +252,7 @@ export function ModulesPanel({
                               </div>
                             )}
                             {video.uploadError && (
-                              <p className="font-mono text-[13px] text-red-400/80 flex items-center gap-1">
+                              <p className="font-mono text-[13px] text-red-400 flex items-center gap-1">
                                 <AlertCircle className="h-3 w-3" strokeWidth={1.5} />
                                 {video.uploadError}
                               </p>

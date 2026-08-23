@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useState, useEffect } from "react";
 import {
@@ -82,7 +82,7 @@ function VerifyEmailContent() {
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-950">
-        <Loader2 className="h-6 w-6 animate-spin text-purple/60" />
+        <Loader2 className="h-6 w-6 animate-spin text-purple" />
       </div>
     );
   }
@@ -134,7 +134,7 @@ function VerifyEmailContent() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: EASE }}
             >
-              <div className="flex h-14 w-14 items-center justify-center border border-purple/30 bg-purple/10">
+              <div className="flex h-14 w-14 items-center justify-center border border-purple bg-purple/10">
                 <Mail className="h-6 w-6 text-purple-light" />
               </div>
               <div className="mt-4 h-px w-8 bg-purple/30" />
@@ -147,7 +147,7 @@ function VerifyEmailContent() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.08, ease: EASE }}
             >
-              <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/70 mb-3">
+              <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-3">
                 // verificação de conta
               </p>
               <h1 className="text-2xl font-bold text-gray-100">
@@ -168,7 +168,7 @@ function VerifyEmailContent() {
               <motion.div
                 initial={{ opacity: 0, y: -8, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                className="mb-5 flex items-start gap-2.5 border border-green-500/20 bg-green-500/8 px-4 py-3 text-sm text-green-400"
+                className="mb-5 flex items-start gap-2.5 border border-green-500 bg-green-500/8 px-4 py-3 text-sm text-green-400"
               >
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
                 <p>Email reenviado. Verifique a caixa de entrada e a pasta de spam.</p>
@@ -178,7 +178,7 @@ function VerifyEmailContent() {
               <motion.div
                 initial={{ opacity: 0, y: -8, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                className="mb-5 flex items-start gap-2.5 border border-red-500/20 bg-red-500/8 px-4 py-3 text-sm text-red-400"
+                className="mb-5 flex items-start gap-2.5 border border-red-500 bg-red-500/8 px-4 py-3 text-sm text-red-400"
               >
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <p>{error}</p>
@@ -251,7 +251,7 @@ export default function VerifyEmailPage() {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-gray-950">
-          <Loader2 className="h-6 w-6 animate-spin text-purple/60" />
+          <Loader2 className="h-6 w-6 animate-spin text-purple" />
         </div>
       }
     >

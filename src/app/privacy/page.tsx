@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 export const metadata = {
@@ -15,7 +15,7 @@ export default function PrivacyPage() {
             <ArrowRight className="h-3.5 w-3.5 rotate-180 transition-transform group-hover:-translate-x-0.5" />
             Voltar
           </Link>
-          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/70 mb-3">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-3">
             // legal
           </p>
           <h1 className="text-3xl font-bold text-white mb-4">Política de Privacidade</h1>
@@ -88,7 +88,7 @@ export default function PrivacyPage() {
             </p>
             <p>
               Pode solicitar a eliminação da sua conta e dados pessoais contactando-nos em{" "}
-              <a href="mailto:apoio@netsulwel.tech" className="text-purple/80 hover:text-purple-light transition-colors">
+              <a href="mailto:apoio@netsulwel.tech" className="text-purple hover:text-purple-light transition-colors">
                 apoio@netsulwel.tech
               </a>.
             </p>
@@ -132,7 +132,7 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-semibold text-white mb-3">11. Contacto</h2>
             <p>
               Para exercer os seus direitos ou esclarecer dúvidas sobre esta Política, contacte-nos em{" "}
-              <a href="mailto:apoio@netsulwel.tech" className="text-purple/80 hover:text-purple-light transition-colors">
+              <a href="mailto:apoio@netsulwel.tech" className="text-purple hover:text-purple-light transition-colors">
                 apoio@netsulwel.tech
               </a>
             </p>

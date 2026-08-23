@@ -1,13 +1,13 @@
-"use client";
+﻿"use client";
 
 import { useRef } from "react";
 import { ImagePlus, Loader2, CheckCircle2, Plus, X, Tag } from "lucide-react";
 import type { CourseType, CourseLevel, CourseCategory } from "@/types/course";
 
 const inputCls =
-  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors";
+  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors";
 const selectCls =
-  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none appearance-none cursor-pointer transition-colors";
+  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple focus:outline-none appearance-none cursor-pointer transition-colors";
 
 const TYPE_OPTIONS: { value: CourseType; label: string; desc: string }[] = [
   { value: "standalone", label: "Standalone",   desc: "Compra individual em Kz" },
@@ -45,7 +45,7 @@ export function TrailSettingsPanel({
           role="button" tabIndex={0} aria-label="Carregar capa"
           onClick={() => inputRef.current?.click()}
           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); inputRef.current?.click(); } }}
-          className="relative w-full aspect-video border border-gray-800 bg-gray-900 cursor-pointer overflow-hidden group hover:border-purple/30 transition-colors"
+          className="relative w-full aspect-video border border-gray-800 bg-gray-900 cursor-pointer overflow-hidden group hover:border-purple transition-colors"
         >
           {thumbPreview ? (
             <>
@@ -71,12 +71,12 @@ export function TrailSettingsPanel({
           onChange={(e) => { const f = e.target.files?.[0]; if (f) onThumbChange(f); }}
         />
         {thumbUploading && (
-          <p className="mt-1.5 font-mono text-[13px] text-purple/60 flex items-center gap-1">
+          <p className="mt-1.5 font-mono text-[13px] text-purple flex items-center gap-1">
             <Loader2 className="h-2.5 w-2.5 animate-spin" /> A enviar...
           </p>
         )}
         {thumbUploaded && !thumbUploading && (
-          <p className="mt-1.5 font-mono text-[13px] text-green/60 flex items-center gap-1">
+          <p className="mt-1.5 font-mono text-[13px] text-green flex items-center gap-1">
             <CheckCircle2 className="h-2.5 w-2.5" /> Upload concluído
           </p>
         )}
@@ -85,7 +85,7 @@ export function TrailSettingsPanel({
       {/* Título */}
       <div>
         <p className="font-mono text-[13px] uppercase tracking-[0.2em] text-gray-600 mb-2">
-          // nome da trilha <span className="text-red-400/80">*</span>
+          // nome da trilha <span className="text-red-400">*</span>
         </p>
         <input
           type="text" value={title} onChange={(e) => setTitle(e.target.value)}
@@ -113,13 +113,13 @@ export function TrailSettingsPanel({
               key={t.value} type="button" onClick={() => setTrailType(t.value)}
               className={`w-full flex items-center gap-3 px-4 py-3 border text-left transition-all ${
                 trailType === t.value
-                  ? "border-purple/40 bg-purple/8"
+                  ? "border-purple bg-purple/8"
                   : "border-gray-800 bg-gray-900 hover:border-gray-700"
               }`}
             >
               <span className={`h-2 w-2 shrink-0 ${trailType === t.value ? "bg-purple" : "bg-gray-700"}`} />
               <div>
-                <p className={`text-sm font-semibold ${trailType === t.value ? "text-purple/80" : "text-gray-400"}`}>
+                <p className={`text-sm font-semibold ${trailType === t.value ? "text-purple" : "text-gray-400"}`}>
                   {t.label}
                 </p>
                 <p className="font-mono text-[13px] text-gray-700">{t.desc}</p>

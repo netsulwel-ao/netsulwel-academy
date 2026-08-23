@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -165,7 +165,7 @@ export default function DashboardFinancesPage() {
     <div className="max-w-4xl mx-auto animate-in fade-in duration-500 space-y-8">
       {/* Header */}
       <div className="flex items-start gap-4">
-        <div className="h-12 w-12 bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
+        <div className="h-12 w-12 bg-blue-500/10 border border-blue-500 flex items-center justify-center shrink-0">
           <CreditCard className="h-6 w-6 text-blue-400" />
         </div>
         <div className="min-w-0">
@@ -205,7 +205,7 @@ export default function DashboardFinancesPage() {
         <section>
           <h2 className="text-xl font-bold text-white mb-4">Método de Pagamento</h2>
           {activeMethods.length === 0 ? (
-            <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 px-4 py-3 text-base text-amber-200">
+            <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500 px-4 py-3 text-base text-amber-200">
               <AlertCircle className="h-5 w-5 shrink-0" />
               Nenhum método de pagamento ativo. Contacta o administrador.
             </div>
@@ -360,7 +360,7 @@ export default function DashboardFinancesPage() {
                   </div>
                 ) : (
                   <>
-                    <div className="bg-amber-500/10 border border-amber-500/20 px-4 py-3 text-base text-amber-200">
+                    <div className="bg-amber-500/10 border border-amber-500 px-4 py-3 text-base text-amber-200">
                       PayPal não configurado — o administrador precisa definir o Client ID nas configurações.
                     </div>
                     {methods.paypal.email && (

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useMemo } from "react";
 import { db } from "@/lib/firebase";
@@ -156,7 +156,7 @@ export default function UsersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Pesquisar por nome ou email..."
-            className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500/50 py-2.5 pl-10 pr-4 text-white text-sm focus:outline-none transition-all"
+            className="w-full bg-gray-900 border border-gray-800 focus:border-blue-500 py-2.5 pl-10 pr-4 text-white text-sm focus:outline-none transition-all"
           />
           {search && (
             <button onClick={() => setSearch("")} aria-label="Limpar pesquisa" className="absolute right-3 top-2.5 text-gray-500 hover:text-white">
@@ -181,7 +181,7 @@ export default function UsersPage() {
         <div className="relative shrink-0">
           <Filter className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
           <select value={sortBy} onChange={(e) => setSortBy(e.target.value as SortBy)}
-            className="bg-gray-900 border border-gray-800 text-gray-300 text-sm py-2.5 pl-9 pr-8 focus:outline-none focus:border-blue-500/50 appearance-none cursor-pointer">
+            className="bg-gray-900 border border-gray-800 text-gray-300 text-sm py-2.5 pl-9 pr-8 focus:outline-none focus:border-blue-500 appearance-none cursor-pointer">
             <option value="date">Mais recentes</option>
             <option value="name">Nome A-Z</option>
             <option value="role">Por role</option>
@@ -241,8 +241,8 @@ export default function UsersPage() {
                     <div className="flex-1 px-1">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-sm font-bold uppercase tracking-wider ${
                         u.role === "admin"
-                          ? "bg-purple-500/15 text-purple-400 border border-purple-500/25"
-                          : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                          ? "bg-purple-500/15 text-purple-400 border border-purple-500"
+                          : "bg-blue-500/10 text-blue-400 border border-blue-500"
                       }`}>
                         {u.role === "admin" ? <Shield className="h-3 w-3" /> : <BookOpen className="h-3 w-3" />}
                         {u.role}
@@ -374,8 +374,8 @@ export default function UsersPage() {
                 </div>
                 <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-sm font-bold uppercase tracking-wider ${
                   selectedUser.role === "admin"
-                    ? "bg-purple-500/15 text-purple-400 border border-purple-500/25"
-                    : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                    ? "bg-purple-500/15 text-purple-400 border border-purple-500"
+                    : "bg-blue-500/10 text-blue-400 border border-blue-500"
                 }`}>
                   {selectedUser.role === "admin" ? <Shield className="h-3 w-3" /> : <BookOpen className="h-3 w-3" />}
                   {selectedUser.role}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -89,7 +89,7 @@ export default function TeacherNewLivePage() {
   };
 
   const TARGET_OPTIONS: { value: LiveTarget; label: string; desc: string; color: string }[] = [
-    { value: "standalone", label: "Pago", desc: "Venda avulsa", color: "border-green-500/30 bg-green-500/5 hover:bg-green-500/10 data-[active=true]:border-green-500 data-[active=true]:bg-green-500/15" },
+    { value: "standalone", label: "Pago", desc: "Venda avulsa", color: "border-green-500 bg-green-500/5 hover:bg-green-500/10 data-[active=true]:border-green-500 data-[active=true]:bg-green-500/15" },
   ];
 
   const handleRequestFreeLive = async () => {
@@ -131,7 +131,7 @@ export default function TeacherNewLivePage() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500 px-4 py-3 text-sm text-red-400">
           <AlertCircle className="h-4 w-4 shrink-0" />{error}
         </div>
       )}
@@ -186,7 +186,7 @@ export default function TeacherNewLivePage() {
               </div>
             </div>
           ) : (
-            <div className="mt-3 p-4 border border-green-500/20 bg-green-500/5">
+            <div className="mt-3 p-4 border border-green-500 bg-green-500/5">
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
                 <p className="text-sm text-green-300">Pedido enviado! O administrador irá analisar e responder brevemente.</p>

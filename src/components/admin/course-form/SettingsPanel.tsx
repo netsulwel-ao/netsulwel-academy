@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Loader2, Sparkles, Award, Plus, X, Tag, Radio, Video } from "lucide-react";
 import type { CourseLevel, CourseCategory, CourseFormat, Trail } from "@/types/course";
@@ -71,7 +71,7 @@ export function SettingsPanel(p: Props) {
             type="button"
             onClick={p.onGenerateDesc}
             disabled={p.generatingDesc || !p.title.trim()}
-            className="flex items-center gap-1 font-mono text-[13px] uppercase tracking-widest text-purple/60 hover:text-purple/80 disabled:opacity-30 transition-colors"
+            className="flex items-center gap-1 font-mono text-[13px] uppercase tracking-widest text-purple hover:text-purple disabled:opacity-30 transition-colors"
           >
             {p.generatingDesc
               ? <><Loader2 className="h-2.5 w-2.5 animate-spin" /> A gerar...</>
@@ -89,7 +89,7 @@ export function SettingsPanel(p: Props) {
           />
           {p.generatingDesc && (
             <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-purple/60 animate-pulse" />
+              <Sparkles className="h-4 w-4 text-purple animate-pulse" />
             </div>
           )}
         </div>
@@ -107,7 +107,7 @@ export function SettingsPanel(p: Props) {
                 onClick={() => p.setFormat(val as CourseFormat)}
                 className={`flex items-center justify-center gap-2 py-2.5 border text-sm transition-all ${
                   p.format === val
-                    ? "border-purple/40 bg-purple/8 text-purple/80"
+                    ? "border-purple bg-purple/8 text-purple"
                     : "border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700"
                 }`}
               >
@@ -187,7 +187,7 @@ export function SettingsPanel(p: Props) {
         <div className="flex items-center justify-between border border-gray-800 bg-gray-900 px-4 py-3">
           <div>
             <p className="text-sm text-gray-300 flex items-center gap-2">
-              <Award className="h-3.5 w-3.5 text-amber-400/70" strokeWidth={1.5} /> Certificado
+              <Award className="h-3.5 w-3.5 text-amber-400" strokeWidth={1.5} /> Certificado
             </p>
             <p className="font-mono text-[8px] text-gray-700 mt-0.5">Gerado ao completar 100%</p>
           </div>
@@ -196,7 +196,7 @@ export function SettingsPanel(p: Props) {
         <div className="flex items-center justify-between border border-gray-800 bg-gray-900 px-4 py-3">
           <div>
             <p className="text-sm text-gray-300 flex items-center gap-2">
-              <Sparkles className="h-3.5 w-3.5 text-blue-400/70" strokeWidth={1.5} /> Em destaque
+              <Sparkles className="h-3.5 w-3.5 text-blue-400" strokeWidth={1.5} /> Em destaque
             </p>
             <p className="font-mono text-[8px] text-gray-700 mt-0.5">Aparece na landing page</p>
           </div>
@@ -249,7 +249,7 @@ export function SettingsPanel(p: Props) {
         {p.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {p.tags.map((t) => (
-              <span key={t} className="flex items-center gap-1 border border-purple/20 bg-purple/8 text-purple/70 px-2 py-0.5 font-mono text-[13px] uppercase tracking-widest">
+              <span key={t} className="flex items-center gap-1 border border-purple bg-purple/8 text-purple px-2 py-0.5 font-mono text-[13px] uppercase tracking-widest">
                 {t}
                 <button onClick={() => p.removeTag(t)} aria-label={`Remover tag ${t}`}>
                   <X className="h-2.5 w-2.5 hover:text-white transition-colors" />

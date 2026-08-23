@@ -39,23 +39,23 @@ export default function ExamResultPage() {
       {/* ── Score card ── */}
       <div className={`border p-8 sm:p-10 ${
         passed
-          ? "border-green/20 bg-green/5"
-          : "border-red-500/20 bg-red-500/5"
+          ? "border-green bg-green/5"
+          : "border-red-500 bg-red-500/5"
       }`}>
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
 
           {/* Ícone + score */}
           <div className="text-center shrink-0">
             <div className={`inline-flex h-16 w-16 items-center justify-center border ${
-              passed ? "border-green/30 bg-green/10" : "border-red-500/30 bg-red-500/10"
+              passed ? "border-green bg-green/10" : "border-red-500 bg-red-500/10"
             }`}>
               {passed
-                ? <CheckCircle2 className="h-8 w-8 text-green/70" strokeWidth={1.5} />
-                : <XCircle className="h-8 w-8 text-red-400/70" strokeWidth={1.5} />
+                ? <CheckCircle2 className="h-8 w-8 text-green" strokeWidth={1.5} />
+                : <XCircle className="h-8 w-8 text-red-400" strokeWidth={1.5} />
               }
             </div>
             <p className={`mt-3 font-mono text-4xl font-extrabold ${
-              passed ? "text-green/80" : "text-red-400/80"
+              passed ? "text-green" : "text-red-400"
             }`}>
               {score}%
             </p>

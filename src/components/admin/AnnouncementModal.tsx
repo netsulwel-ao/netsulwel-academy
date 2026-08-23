@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { Zap, BookOpen, Radio, Megaphone } from "lucide-react";
@@ -6,10 +6,10 @@ import { getLucideIcon } from "@/components/admin/IconPicker";
 import type { Announcement, AnnouncementType } from "@/types/announcement";
 
 const TYPE_CONFIG: Record<AnnouncementType, { label: string; icon: React.ElementType; color: string; bg: string; accent: string }> = {
-  promo:      { label: "Promoção",     icon: Zap,      color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/30", accent: "bg-yellow-500 text-gray-900" },
-  new_course: { label: "Novo Curso",   icon: BookOpen, color: "text-blue-400",   bg: "bg-blue-500/10 border-blue-500/30",   accent: "bg-purple text-white" },
-  live:       { label: "Aula ao Vivo", icon: Radio,    color: "text-red-400",    bg: "bg-red-500/10 border-red-500/30",     accent: "bg-red-600 text-white" },
-  general:    { label: "Aviso Geral",  icon: Megaphone,color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/30", accent: "bg-purple-600 text-white" },
+  promo:      { label: "Promoção",     icon: Zap,      color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500", accent: "bg-yellow-500 text-gray-900" },
+  new_course: { label: "Novo Curso",   icon: BookOpen, color: "text-blue-400",   bg: "bg-blue-500/10 border-blue-500",   accent: "bg-purple text-white" },
+  live:       { label: "Aula ao Vivo", icon: Radio,    color: "text-red-400",    bg: "bg-red-500/10 border-red-500",     accent: "bg-red-600 text-white" },
+  general:    { label: "Aviso Geral",  icon: Megaphone,color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500", accent: "bg-purple-600 text-white" },
 };
 
 export function AnnouncementModal({ announcement, onClose, preview=false }:

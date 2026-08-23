@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -43,7 +43,7 @@ export default function CommunityPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <div className="flex items-center gap-2">
-              <div className="h-10 w-10 bg-purple/10 border border-purple/20 flex items-center justify-center">
+              <div className="h-10 w-10 bg-purple/10 border border-purple flex items-center justify-center">
                 <Users className="h-5 w-5 text-purple-light" />
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold text-white">Comunidade</h1>

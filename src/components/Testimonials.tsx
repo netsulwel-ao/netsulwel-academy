@@ -1,4 +1,4 @@
-import { Star, Quote } from "lucide-react";
+﻿import { Star, Quote } from "lucide-react";
 import { Reveal } from "./motion/Reveal";
 
 const testimonials = [
@@ -79,10 +79,10 @@ export function Testimonials() {
                   i === 1 ? "md:ml-8" : i === 2 ? "md:ml-4" : ""
                 }`}
               >
-                <Quote className="absolute top-4 right-4 h-6 w-6 text-gray-800 transition-colors group-hover:text-purple/30" />
+                <Quote className="absolute top-4 right-4 h-6 w-6 text-gray-800 transition-colors group-hover:text-purple" />
 
                 {/* Resultado destacado */}
-                <div className="mb-4 inline-block font-mono text-sm text-green bg-green/10 border border-green/20 px-2 py-1">
+                <div className="mb-4 inline-block font-mono text-sm text-green bg-green/10 border border-green px-2 py-1">
                   ✓ {t.result}
                 </div>
 

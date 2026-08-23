@@ -131,7 +131,7 @@ export default function EditExamPage() {
       <h1 className="text-2xl sm:text-3xl font-bold text-white mb-8">Editar Avaliação</h1>
 
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 p-3 text-sm text-red-400 border border-red-500/20 mb-6">
+        <div className="flex items-center gap-2 bg-red-500/10 p-3 text-sm text-red-400 border border-red-500 mb-6">
           <AlertCircle className="h-4 w-4 shrink-0" /> {error}
         </div>
       )}
@@ -141,19 +141,19 @@ export default function EditExamPage() {
         <div>
           <label className="block text-sm text-gray-400 mb-1">Título</label>
           <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white focus:outline-none transition-colors"
+            className="w-full bg-gray-950 border border-gray-800 focus:border-purple py-3 px-4 text-white focus:outline-none transition-colors"
             placeholder="Ex: Teste de Matemática Financeira" />
         </div>
         <div>
           <label className="block text-sm text-gray-400 mb-1">Descrição</label>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2}
-            className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white focus:outline-none transition-colors resize-none"
+            className="w-full bg-gray-950 border border-gray-800 focus:border-purple py-3 px-4 text-white focus:outline-none transition-colors resize-none"
             placeholder="Ex: Avaliação sobre juros compostos e amortização" />
         </div>
         <div>
           <label className="block text-sm text-gray-400 mb-1">Curso</label>
           <select value={courseId} onChange={(e) => setCourseId(e.target.value)}
-            className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white focus:outline-none transition-colors">
+            className="w-full bg-gray-950 border border-gray-800 focus:border-purple py-3 px-4 text-white focus:outline-none transition-colors">
             <option value="">Selecionar curso...</option>
             {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
           </select>
@@ -162,17 +162,17 @@ export default function EditExamPage() {
           <div>
             <label className="block text-sm text-gray-400 mb-1">Nota mínima (%)</label>
             <input type="number" value={passingScore} onChange={(e) => setPassingScore(Number(e.target.value))} min={0} max={100}
-              className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white focus:outline-none transition-colors" />
+              className="w-full bg-gray-950 border border-gray-800 focus:border-purple py-3 px-4 text-white focus:outline-none transition-colors" />
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-1">Tempo limite (min)</label>
             <input type="number" value={timeLimit} onChange={(e) => setTimeLimit(Number(e.target.value))} min={0}
-              className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white focus:outline-none transition-colors" />
+              className="w-full bg-gray-950 border border-gray-800 focus:border-purple py-3 px-4 text-white focus:outline-none transition-colors" />
           </div>
           <div>
             <label className="block text-sm text-gray-400 mb-1">Máx. tentativas</label>
             <input type="number" value={maxAttempts} onChange={(e) => setMaxAttempts(Number(e.target.value))} min={1}
-              className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-3 px-4 text-white focus:outline-none transition-colors" />
+              className="w-full bg-gray-950 border border-gray-800 focus:border-purple py-3 px-4 text-white focus:outline-none transition-colors" />
           </div>
         </div>
       </div>
@@ -198,7 +198,7 @@ export default function EditExamPage() {
 
             <div className="space-y-3">
               <input type="text" value={q.question} onChange={(e) => updateQuestion(i, "question", e.target.value)}
-                className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-2.5 px-3 text-white focus:outline-none transition-colors text-sm"
+                className="w-full bg-gray-950 border border-gray-800 focus:border-purple py-2.5 px-3 text-white focus:outline-none transition-colors text-sm"
                 placeholder="Escreve a pergunta..." />
 
               <div className="flex items-center gap-4">
@@ -212,7 +212,7 @@ export default function EditExamPage() {
                     return next;
                   });
                 }}
-                  className="bg-gray-950 border border-gray-800 focus:border-purple/50 py-2 px-3 text-white text-sm focus:outline-none">
+                  className="bg-gray-950 border border-gray-800 focus:border-purple py-2 px-3 text-white text-sm focus:outline-none">
                   <option value="multiple_choice">Múltipla Escolha</option>
                   <option value="true_false">Verdadeiro/Falso</option>
                   <option value="short_answer">Resposta Curta</option>
@@ -230,7 +230,7 @@ export default function EditExamPage() {
                         newOpts[oi] = e.target.value;
                         updateQuestion(i, "options", newOpts);
                       }}
-                        className="flex-1 bg-gray-950 border border-gray-800 focus:border-purple/50 py-2 px-3 text-white focus:outline-none transition-colors text-sm"
+                        className="flex-1 bg-gray-950 border border-gray-800 focus:border-purple py-2 px-3 text-white focus:outline-none transition-colors text-sm"
                         placeholder={`Opção ${oi + 1}`} />
                     </div>
                   ))}
@@ -242,7 +242,7 @@ export default function EditExamPage() {
                 <div className="flex gap-3">
                   {["Verdadeiro", "Falso"].map((opt, oi) => (
                     <label key={oi} className={`flex items-center gap-2 px-4 py-2 border cursor-pointer text-sm ${
-                      q.correctAnswer === String(oi) ? "border-green-500/50 bg-green-500/10 text-green-300" : "border-gray-800 text-gray-400"
+                      q.correctAnswer === String(oi) ? "border-green-500 bg-green-500/10 text-green-300" : "border-gray-800 text-gray-400"
                     }`}>
                       <input type="radio" name={`tf-${q.id}`} checked={q.correctAnswer === String(oi)}
                         onChange={() => updateQuestion(i, "correctAnswer", String(oi))} className="accent-green-500" />
@@ -256,7 +256,7 @@ export default function EditExamPage() {
                 <div>
                   <label className="block text-sm text-gray-400 mb-1">Resposta correta:</label>
                   <input type="text" value={q.correctAnswer} onChange={(e) => updateQuestion(i, "correctAnswer", e.target.value)}
-                    className="w-full bg-gray-950 border border-gray-800 focus:border-purple/50 py-2.5 px-3 text-white focus:outline-none transition-colors text-sm"
+                    className="w-full bg-gray-950 border border-gray-800 focus:border-purple py-2.5 px-3 text-white focus:outline-none transition-colors text-sm"
                     placeholder="Ex: 15%" />
                 </div>
               )}

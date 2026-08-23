@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Save, ArrowLeft, Loader2, AlertCircle, X } from "lucide-react";
@@ -155,11 +155,11 @@ export function TrailForm({
       </div>
 
       {error && (
-        <div role="alert" className="mx-6 mt-4 flex items-center gap-2 border border-red-500/20 bg-red-500/8 px-4 py-3 text-sm text-red-400/80 shrink-0">
+        <div role="alert" className="mx-6 mt-4 flex items-center gap-2 border border-red-500 bg-red-500/8 px-4 py-3 text-sm text-red-400 shrink-0">
           <AlertCircle className="h-4 w-4 shrink-0" strokeWidth={1.5} />
           {error}
           <button type="button" onClick={() => onError("")} aria-label="Fechar" className="ml-auto">
-            <X className="h-4 w-4 text-red-400/50 hover:text-red-400 transition-colors" />
+            <X className="h-4 w-4 text-red-400 hover:text-red-400 transition-colors" />
           </button>
         </div>
       )}

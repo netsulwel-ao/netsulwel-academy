@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { db } from "@/lib/firebase";
@@ -175,7 +175,7 @@ export function RemoteDeviceModal({
           {/* Error */}
           {status === "error" && (
             <div className="space-y-4">
-              <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 px-4 py-3">
+              <div className="flex items-center gap-3 bg-red-500/10 border border-red-500 px-4 py-3">
                 <WifiOff className="h-4 w-4 text-red-400 shrink-0" />
                 <p className="text-sm text-red-300">{errorMsg}</p>
               </div>
@@ -241,11 +241,11 @@ export function RemoteDeviceModal({
           {/* Connected */}
           {status === "connected" && remoteDevice && (
             <div className="space-y-4">
-              <div className="flex items-center gap-3 bg-green-500/10 border border-green-500/20 px-4 py-3">
+              <div className="flex items-center gap-3 bg-green-500/10 border border-green-500 px-4 py-3">
                 <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0" />
                 <div>
                   <p className="text-sm font-semibold text-green-300">Telemóvel ligado!</p>
-                  <p className="text-xs text-green-400/70 mt-0.5">
+                  <p className="text-xs text-green-400 mt-0.5">
                     {remoteDevice.facingMode === "environment" ? "Câmara traseira" : "Câmara frontal"} · A transmitir
                   </p>
                 </div>

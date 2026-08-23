@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -33,9 +33,9 @@ function fmtKz(v: number): string {
 
 // ── Configuração de estado ────────────────────────────────────
 const STATUS: Record<string, { label: string; classes: string }> = {
-  pending:   { label: "Pendente",   classes: "border-amber-500/25 bg-amber-500/8 text-amber-400/80" },
-  confirmed: { label: "Confirmado", classes: "border-green/25 bg-green/8 text-green/80" },
-  cancelled: { label: "Cancelado",  classes: "border-red-500/25 bg-red-500/8 text-red-400/70" },
+  pending:   { label: "Pendente",   classes: "border-amber-500 bg-amber-500/8 text-amber-400" },
+  confirmed: { label: "Confirmado", classes: "border-green bg-green/8 text-green" },
+  cancelled: { label: "Cancelado",  classes: "border-red-500 bg-red-500/8 text-red-400" },
 };
 
 export default function TeacherSalesPage() {
@@ -110,7 +110,7 @@ export default function TeacherSalesPage() {
       {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green/60 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green mb-2">
             // vendas
           </p>
           <h1 className="text-2xl font-bold text-gray-100">Vendas</h1>
@@ -128,9 +128,9 @@ export default function TeacherSalesPage() {
 
       {/* Erro */}
       {error && (
-        <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
-          <p className="text-sm text-amber-400/80">{error}</p>
+        <div className="flex items-start gap-3 border border-amber-500 bg-amber-500/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" strokeWidth={1.5} />
+          <p className="text-sm text-amber-400">{error}</p>
         </div>
       )}
 
@@ -146,9 +146,9 @@ export default function TeacherSalesPage() {
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
-              { icon: Clock,         label: "Pendentes",      value: stats.pending,                        accent: "text-amber-400/70", sub: stats.totalPending > 0 ? fmtKz(stats.totalPending) + " em espera" : null },
-              { icon: CheckCircle2,  label: "Confirmadas",    value: stats.confirmed,                      accent: "text-green/70",    sub: null },
-              { icon: DollarSign,    label: "Receita líquida",value: fmtKz(stats.totalRevenue),            accent: "text-green/70",    sub: null },
+              { icon: Clock,         label: "Pendentes",      value: stats.pending,                        accent: "text-amber-400", sub: stats.totalPending > 0 ? fmtKz(stats.totalPending) + " em espera" : null },
+              { icon: CheckCircle2,  label: "Confirmadas",    value: stats.confirmed,                      accent: "text-green",    sub: null },
+              { icon: DollarSign,    label: "Receita líquida",value: fmtKz(stats.totalRevenue),            accent: "text-green",    sub: null },
             ].map(({ icon: Icon, label, value, accent, sub }) => (
               <div key={label} className="border border-gray-800 bg-gray-900 p-5">
                 <div className="flex items-center gap-2 mb-3">
@@ -156,20 +156,20 @@ export default function TeacherSalesPage() {
                   <span className="text-sm text-gray-600 uppercase tracking-wider">{label}</span>
                 </div>
                 <p className="text-2xl font-bold text-gray-100 font-mono">{value}</p>
-                {sub && <p className="mt-1 font-mono text-[13px] text-amber-400/60">{sub}</p>}
+                {sub && <p className="mt-1 font-mono text-[13px] text-amber-400">{sub}</p>}
               </div>
             ))}
           </div>
 
           {/* Aviso pendentes */}
           {stats.pending > 0 && (
-            <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
+            <div className="flex items-start gap-3 border border-amber-500 bg-amber-500/5 px-4 py-3">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" strokeWidth={1.5} />
               <div>
-                <p className="text-sm font-semibold text-amber-400/80">
+                <p className="text-sm font-semibold text-amber-400">
                   {stats.pending} venda{stats.pending !== 1 ? "s" : ""} por confirmar
                 </p>
-                <p className="text-sm text-amber-400/50 mt-0.5">
+                <p className="text-sm text-amber-400 mt-0.5">
                   O aluno só terá acesso após o administrador confirmar o pagamento.
                 </p>
               </div>
@@ -185,7 +185,7 @@ export default function TeacherSalesPage() {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Pesquisar por aluno, email ou curso..."
-                className="w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-8 text-sm text-gray-200 focus:border-green/40 focus:outline-none transition-colors"
+                className="w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-8 text-sm text-gray-200 focus:border-green focus:outline-none transition-colors"
               />
               {search && (
                 <button type="button" onClick={() => setSearch("")}
@@ -203,7 +203,7 @@ export default function TeacherSalesPage() {
                   onClick={() => setFilterStatus(s)}
                   className={`border px-3 py-2 font-mono text-[13px] uppercase tracking-widest transition-colors ${
                     filterStatus === s
-                      ? "border-green/30 bg-green/8 text-green/80"
+                      ? "border-green bg-green/8 text-green"
                       : "border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-400"
                   }`}
                 >
@@ -264,7 +264,7 @@ export default function TeacherSalesPage() {
                         {fmtKz(sale.amount)}
                       </p>
                       {sale.status === "confirmed" && sale.netAmount !== undefined && sale.netAmount !== sale.amount && (
-                        <p className="font-mono text-[13px] text-green/60 mt-0.5">
+                        <p className="font-mono text-[13px] text-green mt-0.5">
                           líq. {fmtKz(sale.netAmount)}
                         </p>
                       )}

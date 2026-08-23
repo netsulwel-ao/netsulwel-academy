@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Search } from "lucide-react";
 import type { Course } from "@/types/course";
@@ -56,7 +56,7 @@ export function CourseGrid({
         <section>
           <div className="flex items-end justify-between mb-4">
             <div>
-              <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green/60 mb-1">
+              <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green mb-1">
                 // disponíveis
               </p>
               <h2 className="text-base font-bold text-gray-200">

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import {
@@ -192,7 +192,7 @@ export default function LoginPage() {
               >
                 {/* Eyebrow */}
                 <div className="mb-8">
-                  <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/70 mb-3">
+                  <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-3">
                     {view === "login" ? "// acesso à plataforma" : "// recuperação de acesso"}
                   </p>
                   <h1 className="text-2xl font-bold text-gray-100">
@@ -212,7 +212,7 @@ export default function LoginPage() {
                       initial={{ opacity: 0, y: -8, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -8, scale: 0.98 }}
-                      className="mb-6 flex items-start gap-2.5 border border-red-500/20 bg-red-500/8 px-4 py-3 text-sm text-red-400"
+                      className="mb-6 flex items-start gap-2.5 border border-red-500 bg-red-500/8 px-4 py-3 text-sm text-red-400"
                     >
                       <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                       <p>{error}</p>
@@ -223,7 +223,7 @@ export default function LoginPage() {
                       initial={{ opacity: 0, y: -8, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -8, scale: 0.98 }}
-                      className="mb-6 flex items-start gap-2.5 border border-green-500/20 bg-green-500/8 px-4 py-3 text-sm text-green-400"
+                      className="mb-6 flex items-start gap-2.5 border border-green-500 bg-green-500/8 px-4 py-3 text-sm text-green-400"
                     >
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
                       <p>{successMsg}</p>
@@ -254,7 +254,7 @@ export default function LoginPage() {
                         placeholder="seu@email.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 transition-colors focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50"
+                        className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-3 text-sm text-gray-100 transition-colors focus:border-purple focus:outline-none focus:bg-gray-900 disabled:opacity-50"
                       />
                     </div>
                   </motion.div>
@@ -274,7 +274,7 @@ export default function LoginPage() {
                         <button
                           type="button"
                           onClick={() => toggleView("forgot")}
-                          className="text-sm text-gray-600 hover:text-purple/80 transition-colors"
+                          className="text-sm text-gray-600 hover:text-purple transition-colors"
                         >
                           Esqueceu?
                         </button>
@@ -290,7 +290,7 @@ export default function LoginPage() {
                           placeholder="••••••••"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-10 text-sm text-gray-100 transition-colors focus:border-purple/60 focus:outline-none focus:bg-gray-900 disabled:opacity-50"
+                          className="auth-input block w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-10 text-sm text-gray-100 transition-colors focus:border-purple focus:outline-none focus:bg-gray-900 disabled:opacity-50"
                         />
                         <button
                           type="button"
@@ -410,7 +410,7 @@ export default function LoginPage() {
             >
               <p className="text-center text-sm text-gray-600">
                 Sem conta?{" "}
-                <TransitionLink href="/register" className="text-purple/80 hover:text-purple-light font-semibold transition-colors">
+                <TransitionLink href="/register" className="text-purple hover:text-purple-light font-semibold transition-colors">
                   Registar grátis
                 </TransitionLink>
               </p>
@@ -421,7 +421,7 @@ export default function LoginPage() {
                   href="/register/teacher"
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex flex-1 items-center justify-center gap-1.5 border border-gray-800 bg-gray-900 py-2 text-sm text-gray-600 hover:border-green/30 hover:text-green/70 transition-colors"
+                  className="flex flex-1 items-center justify-center gap-1.5 border border-gray-800 bg-gray-900 py-2 text-sm text-gray-600 hover:border-green hover:text-green transition-colors"
                 >
                   <BookOpen className="h-3.5 w-3.5" />
                   Sou professor
@@ -430,7 +430,7 @@ export default function LoginPage() {
                   href="/register/institution"
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex flex-1 items-center justify-center gap-1.5 border border-gray-800 bg-gray-900 py-2 text-sm text-gray-600 hover:border-blue-500/30 hover:text-blue-400/70 transition-colors"
+                  className="flex flex-1 items-center justify-center gap-1.5 border border-gray-800 bg-gray-900 py-2 text-sm text-gray-600 hover:border-blue-500 hover:text-blue-400 transition-colors"
                 >
                   <Building2 className="h-3.5 w-3.5" />
                   Instituição

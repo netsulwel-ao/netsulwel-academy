@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   FolderCode,
@@ -108,7 +108,7 @@ export function Features() {
 
                 {/* Ícone */}
                 <motion.div
-                  className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center border border-gray-800 bg-gray-900 text-gray-500 transition-all group-hover:border-purple/40 group-hover:text-purple-light"
+                  className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center border border-gray-800 bg-gray-900 text-gray-500 transition-all group-hover:border-purple group-hover:text-purple-light"
                   whileHover={{ scale: 1.1, rotate: 6 }}
                   transition={{ type: "spring", stiffness: 300, damping: 15 }}
                 >

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -137,7 +137,7 @@ export default function AdminFeesPage() {
       </div>
 
       {/* Info */}
-      <div className="bg-blue-900/20 border border-blue-800/50 p-4 rounded-lg">
+      <div className="bg-blue-900/20 border border-blue-800 p-4 rounded-lg">
         <p className="text-sm text-blue-300">
           <strong>Nota:</strong> A taxa é aplicada sobre o valor total da venda. O valor líquido (após taxa) é creditado na carteira do vendedor.
         </p>

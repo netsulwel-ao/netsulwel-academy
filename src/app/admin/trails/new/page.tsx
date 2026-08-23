@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -75,8 +75,8 @@ export default function NewTrailPage() {
   if (success) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <div className="flex h-16 w-16 items-center justify-center border border-green/25 bg-green/8">
-          <CheckCircle2 className="h-7 w-7 text-green/70" strokeWidth={1.5} />
+        <div className="flex h-16 w-16 items-center justify-center border border-green bg-green/8">
+          <CheckCircle2 className="h-7 w-7 text-green" strokeWidth={1.5} />
         </div>
         <p className="font-mono text-[13px] uppercase tracking-widest text-gray-600">// trilha criada</p>
         <p className="text-sm text-gray-600">A redirecionar...</p>

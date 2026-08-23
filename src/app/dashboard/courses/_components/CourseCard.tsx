@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { BookOpen, Lock, Play, Award, GraduationCap, ChevronRight, Star } from "lucide-react";
@@ -51,11 +51,11 @@ export function CourseCard({
         {/* Overlay bloqueado */}
         {locked && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gray-950/60">
-            <div className="flex h-10 w-10 items-center justify-center border border-gray-700/50 bg-gray-950/80">
+            <div className="flex h-10 w-10 items-center justify-center border border-gray-700 bg-gray-950/80">
               <Lock className="h-5 w-5 text-gray-300" strokeWidth={1.5} />
             </div>
             {requiredPlan && (
-              <span className="font-mono text-[13px] uppercase tracking-widest border border-gray-700/50 bg-gray-950/80 px-2.5 py-1 text-gray-300">
+              <span className="font-mono text-[13px] uppercase tracking-widest border border-gray-700 bg-gray-950/80 px-2.5 py-1 text-gray-300">
                 {requiredPlan}
               </span>
             )}
@@ -66,7 +66,7 @@ export function CourseCard({
         <div className="absolute right-2.5 top-2.5">
           <span className={`font-mono text-[13px] font-bold border px-2 py-0.5 ${
             (course.price ?? 0) === 0
-              ? "border-green/25 bg-gray-950 text-green/80"
+              ? "border-green bg-gray-950 text-green"
               : "border-gray-700 bg-gray-950 text-gray-400"
           }`}>
             {(course.price ?? 0) === 0
@@ -92,7 +92,7 @@ export function CourseCard({
 
         {/* Professor */}
         {creatorName && (
-          <p className="mt-2 flex items-center gap-1 text-[13px] text-purple/60">
+          <p className="mt-2 flex items-center gap-1 text-[13px] text-purple">
             <GraduationCap className="h-3 w-3 shrink-0" strokeWidth={1.5} />
             {creatorName}
           </p>
@@ -120,12 +120,12 @@ export function CourseCard({
             <Link
               href={`/dashboard/teacher/courses/${course.id}/edit`}
               onClick={e => e.stopPropagation()}
-              className="flex items-center gap-1 text-[13px] text-purple/60 hover:text-purple/80 transition-colors"
+              className="flex items-center gap-1 text-[13px] text-purple hover:text-purple transition-colors"
             >
               Gerir <ChevronRight className="h-3 w-3" />
             </Link>
           ) : (
-            <span className="flex items-center gap-1 text-[13px] text-purple/60 group-hover:text-purple/80 transition-colors">
+            <span className="flex items-center gap-1 text-[13px] text-purple group-hover:text-purple transition-colors">
               Ver <ChevronRight className="h-3 w-3" />
             </span>
           )}

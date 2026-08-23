@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef } from "react";
 import {
@@ -10,7 +10,7 @@ import type { LiveSession } from "@/types/live";
 import { toDatetimeLocal } from "./_upload";
 
 const inputCls =
-  "w-full border border-gray-800 bg-gray-900 py-2 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors";
+  "w-full border border-gray-800 bg-gray-900 py-2 px-3 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors";
 
 interface Props {
   allCourses: Course[];
@@ -113,7 +113,7 @@ export function TrailContentPanel({
                 <button
                   key={course.id} type="button" onClick={() => toggleCourse(course.id!)}
                   className={`flex items-center gap-3 p-3 border text-left transition-all ${
-                    sel ? "border-purple/40 bg-purple/8" : "border-gray-800 bg-gray-900 hover:border-gray-700"
+                    sel ? "border-purple bg-purple/8" : "border-gray-800 bg-gray-900 hover:border-gray-700"
                   }`}
                 >
                   <div className={`h-4 w-4 shrink-0 border flex items-center justify-center transition-colors ${
@@ -138,7 +138,7 @@ export function TrailContentPanel({
       <section>
         <div className="mb-4">
           <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-gray-700 mb-1 flex items-center gap-2">
-            <Radio className="h-3 w-3 text-red-400/60" strokeWidth={1.5} />
+            <Radio className="h-3 w-3 text-red-400" strokeWidth={1.5} />
             // aulas ao vivo (existentes)
           </p>
           <p className="text-sm text-gray-600">Selecciona lives já criadas na plataforma</p>
@@ -161,8 +161,8 @@ export function TrailContentPanel({
                     </span>
                     <span className="flex-1 text-sm text-gray-200 truncate">{live.title}</span>
                     <span className={`font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 border shrink-0 ${
-                      live.status === "live"      ? "border-red-500/30 text-red-400/70"
-                      : live.status === "scheduled" ? "border-blue-500/30 text-blue-400/70"
+                      live.status === "live"      ? "border-red-500 text-red-400"
+                      : live.status === "scheduled" ? "border-blue-500 text-blue-400"
                       : "border-gray-700 text-gray-600"
                     }`}>
                       {live.status === "live" ? "live" : live.status === "scheduled" ? "agendada" : "encerrada"}
@@ -194,7 +194,7 @@ export function TrailContentPanel({
                 <button
                   key={live.id} type="button" onClick={() => toggleLive(live.id!)}
                   className={`flex items-center gap-3 p-3 border text-left transition-all ${
-                    sel ? "border-red-500/30 bg-red-500/5" : "border-gray-800 bg-gray-900 hover:border-gray-700"
+                    sel ? "border-red-500 bg-red-500/5" : "border-gray-800 bg-gray-900 hover:border-gray-700"
                   }`}
                 >
                   <div className={`h-4 w-4 shrink-0 border flex items-center justify-center transition-colors ${
@@ -222,7 +222,7 @@ export function TrailContentPanel({
       <section>
         <div className="mb-4">
           <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-gray-700 mb-1 flex items-center gap-2">
-            <Radio className="h-3 w-3 text-amber-400/60" strokeWidth={1.5} />
+            <Radio className="h-3 w-3 text-amber-400" strokeWidth={1.5} />
             // cronograma próprio · {liveSessions.length}
           </p>
           <p className="text-sm text-gray-600">
@@ -237,7 +237,7 @@ export function TrailContentPanel({
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 py-2.5 bg-gray-900 border-b border-gray-800">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-[13px] uppercase tracking-widest text-amber-400/70">
+                    <span className="font-mono text-[13px] uppercase tracking-widest text-amber-400">
                       aula {String(idx + 1).padStart(2, "0")}
                     </span>
                   </div>
@@ -262,7 +262,7 @@ export function TrailContentPanel({
                       role="button" tabIndex={0} aria-label="Carregar capa"
                       onClick={() => sessionThumbRefs.current.get(idx)?.click()}
                       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); sessionThumbRefs.current.get(idx)?.click(); } }}
-                      className="w-20 shrink-0 aspect-video border border-gray-800 bg-gray-900 cursor-pointer overflow-hidden group hover:border-purple/30 transition-colors"
+                      className="w-20 shrink-0 aspect-video border border-gray-800 bg-gray-900 cursor-pointer overflow-hidden group hover:border-purple transition-colors"
                     >
                       {sess.thumbnail ? (
                         <img src={sess.thumbnail} alt="" className="w-full h-full object-cover" />
@@ -309,10 +309,10 @@ export function TrailContentPanel({
                     <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-2">// plano de acesso</p>
                     <div className="flex flex-wrap gap-1.5">
                       {([
-                        { value: "free",       label: "Grátis",     Icon: Radio,  color: "border-green/25 text-green/70"             },
-                        { value: "smart",      label: "Smart",      Icon: Zap,    color: "border-blue-500/25 text-blue-400/70"       },
-                        { value: "golden",     label: "Golden",     Icon: Crown,  color: "border-amber-500/25 text-amber-400/70"     },
-                        { value: "standalone", label: "Standalone", Icon: Coins,  color: "border-purple/25 text-purple/70"           },
+                        { value: "free",       label: "Grátis",     Icon: Radio,  color: "border-green text-green"             },
+                        { value: "smart",      label: "Smart",      Icon: Zap,    color: "border-blue-500 text-blue-400"       },
+                        { value: "golden",     label: "Golden",     Icon: Crown,  color: "border-amber-500 text-amber-400"     },
+                        { value: "standalone", label: "Standalone", Icon: Coins,  color: "border-purple text-purple"           },
                       ] as const).map(({ value, label, Icon, color }) => {
                         const sel = sess.target === value;
                         return (
@@ -335,7 +335,7 @@ export function TrailContentPanel({
                           type="number" min={0} step={100} value={sess.price || ""}
                           onChange={(e) => updateLiveSession(idx, "price", Number(e.target.value) || 0)}
                           placeholder="Preço"
-                          className="w-32 border border-gray-800 bg-gray-900 py-2 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors"
+                          className="w-32 border border-gray-800 bg-gray-900 py-2 px-3 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors"
                         />
                         <span className="font-mono text-[13px] text-gray-700">Kz</span>
                       </div>

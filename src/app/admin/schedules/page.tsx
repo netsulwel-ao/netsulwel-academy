@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { auth, db } from "@/lib/firebase";
@@ -9,10 +9,10 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import type { Trail, TrailLiveSession } from "@/types/course";
 
 const TARGET_OPTIONS: { value: NonNullable<TrailLiveSession["target"]>; label: string; icon: typeof Crown; color: string }[] = [
-  { value: "free", label: "Grátis", icon: Radio, color: "text-green-400 bg-green-500/10 border-green-500/20" },
-  { value: "smart", label: "Smart", icon: Zap, color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
-  { value: "golden", label: "Golden", icon: Crown, color: "text-yellow-400 bg-yellow-500/10 border-yellow-500/20" },
-  { value: "standalone", label: "Standalone", icon: Coins, color: "text-purple-400 bg-purple-500/10 border-purple-500/20" },
+  { value: "free", label: "Grátis", icon: Radio, color: "text-green-400 bg-green-500/10 border-green-500" },
+  { value: "smart", label: "Smart", icon: Zap, color: "text-blue-400 bg-blue-500/10 border-blue-500" },
+  { value: "golden", label: "Golden", icon: Crown, color: "text-yellow-400 bg-yellow-500/10 border-yellow-500" },
+  { value: "standalone", label: "Standalone", icon: Coins, color: "text-purple-400 bg-purple-500/10 border-purple-500" },
 ];
 
 async function uploadToR2(file: File, folder: string): Promise<string> {
@@ -170,13 +170,13 @@ export default function SchedulesPage() {
       </div>
 
       {success && (
-        <div role="status" className="flex items-center gap-2 bg-green-500/10 border border-green-500/20 px-4 py-3 text-sm text-green-400">
+        <div role="status" className="flex items-center gap-2 bg-green-500/10 border border-green-500 px-4 py-3 text-sm text-green-400">
           <CheckCircle2 className="h-4 w-4 shrink-0" />{success}
         </div>
       )}
 
       {error && (
-        <div role="alert" className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+        <div role="alert" className="flex items-center gap-2 bg-red-500/10 border border-red-500 px-4 py-3 text-sm text-red-400">
           <AlertCircle className="h-4 w-4 shrink-0" />{error}
           <button onClick={() => setError("")} aria-label="Fechar erro" className="ml-auto"><X className="h-4 w-4" /></button>
         </div>
@@ -205,7 +205,7 @@ export default function SchedulesPage() {
                 aria-controls={`sched-${trail.id}`}
                 id={`sched-btn-${trail.id}`}
                 className="w-full flex items-center gap-4 px-6 py-5 hover:bg-gray-800 transition-colors text-left">
-                <div className={`p-1.5 border transition-colors ${isOpen ? "border-orange-500/50 bg-orange-500/10" : "border-gray-700"}`}>
+                <div className={`p-1.5 border transition-colors ${isOpen ? "border-orange-500 bg-orange-500/10" : "border-gray-700"}`}>
                   {isOpen ? <ChevronDown className="h-5 w-5 text-orange-400" /> : <ChevronRight className="h-5 w-5 text-gray-500" />}
                 </div>
                 <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -214,7 +214,7 @@ export default function SchedulesPage() {
                        <img src={trail.thumbnail} alt={trail.title} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-900/30 to-gray-800">
-                        <Calendar className="h-5 w-5 text-orange-600/50" />
+                        <Calendar className="h-5 w-5 text-orange-600" />
                       </div>
                     )}
                   </div>
@@ -229,8 +229,8 @@ export default function SchedulesPage() {
                   </div>
                   <span className={`text-sm font-medium px-2.5 py-1 shrink-0 ${
                     trail.status === "published"
-                      ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                      : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                      ? "bg-green-500/10 text-green-400 border border-green-500"
+                      : "bg-amber-500/10 text-amber-400 border border-amber-500"
                   }`}>
                     {trail.status === "published" ? "Publicada" : "Rascunho"}
                   </span>
@@ -276,7 +276,7 @@ export default function SchedulesPage() {
                           <div className="flex flex-col sm:flex-row gap-4">
                             <div className="w-full sm:w-28 shrink-0">
                               <div onClick={() => { thumbRefs.current.get(trail.id!)?.get(idx)?.click(); }}
-                                className="relative aspect-video sm:aspect-video bg-gray-800 border border-dashed border-gray-700 hover:border-orange-500/50 cursor-pointer overflow-hidden group transition-colors">
+                                className="relative aspect-video sm:aspect-video bg-gray-800 border border-dashed border-gray-700 hover:border-orange-500 cursor-pointer overflow-hidden group transition-colors">
                                 {sess.thumbnail ? (
                                    <img src={sess.thumbnail} alt={sess.title || "Thumbnail da aula"} className="w-full h-full object-cover" />
                                 ) : (
@@ -298,13 +298,13 @@ export default function SchedulesPage() {
                               <input type="text" value={sess.title}
                                 onChange={(e) => updateSession(trail.id!, idx, "title", e.target.value)}
                                 placeholder="Título da aula ao vivo"
-                                className="w-full bg-gray-800 border border-gray-700 focus:border-orange-500/50 py-2 px-3 text-white text-sm focus:outline-none transition-all" />
+                                className="w-full bg-gray-800 border border-gray-700 focus:border-orange-500 py-2 px-3 text-white text-sm focus:outline-none transition-all" />
                               <div className="flex gap-2">
                                 <div className="relative flex-1">
                                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                                   <input type="datetime-local" value={toDatetimeLocal(sess.scheduledAt)}
                                     onChange={(e) => updateSession(trail.id!, idx, "scheduledAt", e.target.value)}
-                                    className="w-full bg-gray-800 border border-gray-700 focus:border-orange-500/50 py-2 pl-10 pr-3 text-white text-sm focus:outline-none transition-all" />
+                                    className="w-full bg-gray-800 border border-gray-700 focus:border-orange-500 py-2 pl-10 pr-3 text-white text-sm focus:outline-none transition-all" />
                                 </div>
                               </div>
                             </div>
@@ -314,7 +314,7 @@ export default function SchedulesPage() {
                           <textarea rows={2} value={sess.description}
                             onChange={(e) => updateSession(trail.id!, idx, "description", e.target.value)}
                             placeholder="Descrição da aula (opcional)"
-                            className="w-full bg-gray-800 border border-gray-700 focus:border-orange-500/50 py-2 px-3 text-white text-sm focus:outline-none transition-all resize-none" />
+                            className="w-full bg-gray-800 border border-gray-700 focus:border-orange-500 py-2 px-3 text-white text-sm focus:outline-none transition-all resize-none" />
 
                           {/* Plano / Preço */}
                           <div>
@@ -343,7 +343,7 @@ export default function SchedulesPage() {
                                 <input type="number" min={0} step={100} value={sess.price || ""}
                                   onChange={(e) => updateSession(trail.id!, idx, "price", Number(e.target.value) || 0)}
                                   placeholder="Preço (Kz)"
-                                  className="w-40 bg-gray-800 border border-gray-700 focus:border-purple-500/50 py-1.5 px-3 text-white text-sm focus:outline-none transition-all" />
+                                  className="w-40 bg-gray-800 border border-gray-700 focus:border-purple-500 py-1.5 px-3 text-white text-sm focus:outline-none transition-all" />
                                 <span className="text-sm text-gray-500">Kz</span>
                               </div>
                             )}
@@ -356,7 +356,7 @@ export default function SchedulesPage() {
                   {/* Footer */}
                   <div className="flex items-center gap-3 px-6 pb-5">
                     <button onClick={() => addSession(trail.id!)}
-                      className="flex items-center gap-2 border-2 border-dashed border-gray-700 hover:border-orange-500/50 py-3 px-5 text-sm font-medium text-gray-400 hover:text-orange-400 transition-colors">
+                      className="flex items-center gap-2 border-2 border-dashed border-gray-700 hover:border-orange-500 py-3 px-5 text-sm font-medium text-gray-400 hover:text-orange-400 transition-colors">
                       <Plus className="h-4 w-4" /> Adicionar Aula ao Vivo
                     </button>
                     <div className="flex-1" />

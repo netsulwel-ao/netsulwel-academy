@@ -142,7 +142,7 @@ export default function InstitutionPublicPage() {
           </div>
           <div className="shrink-0 w-full sm:w-auto">
             {alreadyMember ? (
-              <div className="flex items-center gap-2 bg-green-500/10 text-green-400 border border-green-500/20 px-4 py-2 text-sm font-medium">
+              <div className="flex items-center gap-2 bg-green-500/10 text-green-400 border border-green-500 px-4 py-2 text-sm font-medium">
                 <Check className="h-4 w-4" /> Membro
               </div>
             ) : user && !myInstitutionId ? (
@@ -212,7 +212,7 @@ export default function InstitutionPublicPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {teachers.map(t => (
                     <Link key={t.id} href={`/profile/${t.id}`}
-                      className="flex items-center gap-3 p-4 bg-gray-900 border border-gray-800 hover:border-purple/30 transition-colors group">
+                      className="flex items-center gap-3 p-4 bg-gray-900 border border-gray-800 hover:border-purple transition-colors group">
                       <div className="h-12 w-12 bg-gradient-to-br from-purple-500/20 to-purple-700/20 flex items-center justify-center text-purple-400 font-bold shrink-0">
                         {t.name.charAt(0).toUpperCase()}
                       </div>
@@ -239,7 +239,7 @@ export default function InstitutionPublicPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                   {courses.map(c => (
                     <Link key={c.id} href={`/s/${c.id}`}
-                      className="group bg-gray-900 border border-gray-800 hover:border-purple/30 transition-colors overflow-hidden">
+                      className="group bg-gray-900 border border-gray-800 hover:border-purple transition-colors overflow-hidden">
                       <div className="aspect-video bg-gray-800 overflow-hidden">
                         {c.thumbnail ? (
                           <img src={c.thumbnail} alt={c.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />

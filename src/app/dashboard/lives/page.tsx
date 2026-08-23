@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -166,7 +166,7 @@ export default function DashboardLivesPage() {
               return (
                 <div
                   key={live.id}
-                  className="bg-gray-900 overflow-hidden group border border-red-500/20 hover:border-red-500/40 transition-all"
+                  className="bg-gray-900 overflow-hidden group border border-red-500 hover:border-red-500 transition-all"
                 >
                   <div className="relative h-44 overflow-hidden">
                     {live.thumbnail ? (

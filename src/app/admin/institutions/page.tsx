@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
@@ -26,9 +26,9 @@ function toDate(raw: unknown): Date {
 
 // ── Badges ────────────────────────────────────────────────────
 const STATUS_MAP = {
-  pending:   { label: "pendente",  cls: "border-amber-500/30 text-amber-400/80 bg-amber-500/8", dot: "bg-amber-400" },
-  approved:  { label: "aprovada",  cls: "border-green/30 text-green/80 bg-green/8",             dot: "bg-green-400" },
-  suspended: { label: "suspensa",  cls: "border-red-500/30 text-red-400/80 bg-red-500/8",       dot: "bg-red-400" },
+  pending:   { label: "pendente",  cls: "border-amber-500 text-amber-400 bg-amber-500/8", dot: "bg-amber-400" },
+  approved:  { label: "aprovada",  cls: "border-green text-green bg-green/8",             dot: "bg-green-400" },
+  suspended: { label: "suspensa",  cls: "border-red-500 text-red-400 bg-red-500/8",       dot: "bg-red-400" },
 } as const;
 
 function StatusBadge({ status }: { status: keyof typeof STATUS_MAP }) {
@@ -145,7 +145,7 @@ export default function AdminInstitutionsPage() {
 
       {/* ── Cabeçalho ── */}
       <div>
-        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-2">
           // gestão de instituições
         </p>
         <h1 className="text-2xl font-bold text-gray-100">Instituições</h1>
@@ -184,7 +184,7 @@ export default function AdminInstitutionsPage() {
             <input
               type="text" value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Pesquisar por nome ou email..."
-              className="w-full border border-gray-800 bg-gray-900 pl-9 pr-9 py-2.5 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors"
+              className="w-full border border-gray-800 bg-gray-900 pl-9 pr-9 py-2.5 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -196,7 +196,7 @@ export default function AdminInstitutionsPage() {
             onClick={() => setShowFilters(v => !v)}
             className={`flex items-center gap-1.5 border px-3 py-2.5 font-mono text-[13px] uppercase tracking-widest transition-all shrink-0 ${
               hasFilters
-                ? "border-purple/30 bg-purple/8 text-purple/70"
+                ? "border-purple bg-purple/8 text-purple"
                 : "border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700"
             }`}
           >
@@ -210,7 +210,7 @@ export default function AdminInstitutionsPage() {
             <select
               value={filterStatus}
               onChange={e => setFilterStatus(e.target.value as typeof filterStatus)}
-              className="border border-gray-800 bg-gray-900 text-sm text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30"
+              className="border border-gray-800 bg-gray-900 text-sm text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple"
             >
               <option value="all">Todos os estados</option>
               <option value="pending">Pendentes</option>
@@ -228,9 +228,9 @@ export default function AdminInstitutionsPage() {
 
       {/* ── Erro ── */}
       {error && (
-        <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
-          <p className="text-sm text-amber-400/80">{error}</p>
+        <div className="flex items-start gap-3 border border-amber-500 bg-amber-500/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" strokeWidth={1.5} />
+          <p className="text-sm text-amber-400">{error}</p>
         </div>
       )}
 
@@ -319,7 +319,7 @@ export default function AdminInstitutionsPage() {
                     <button
                       onClick={() => handleApprove(inst)}
                       disabled={actioningId === inst.id}
-                      className="flex items-center gap-1 border border-green/25 bg-green/8 px-3 py-1.5 font-mono text-[13px] uppercase tracking-widest text-green/80 hover:bg-green/15 disabled:opacity-40 transition-all"
+                      className="flex items-center gap-1 border border-green bg-green/8 px-3 py-1.5 font-mono text-[13px] uppercase tracking-widest text-green hover:bg-green/15 disabled:opacity-40 transition-all"
                     >
                       {actioningId === inst.id
                         ? <Loader2 className="h-3 w-3 animate-spin" />
@@ -332,7 +332,7 @@ export default function AdminInstitutionsPage() {
                     <button
                       onClick={() => handleSuspend(inst)}
                       disabled={actioningId === inst.id}
-                      className="flex items-center gap-1 border border-red-500/25 bg-red-500/8 px-3 py-1.5 font-mono text-[13px] uppercase tracking-widest text-red-400/80 hover:bg-red-500/15 disabled:opacity-40 transition-all"
+                      className="flex items-center gap-1 border border-red-500 bg-red-500/8 px-3 py-1.5 font-mono text-[13px] uppercase tracking-widest text-red-400 hover:bg-red-500/15 disabled:opacity-40 transition-all"
                     >
                       {actioningId === inst.id
                         ? <Loader2 className="h-3 w-3 animate-spin" />
@@ -346,7 +346,7 @@ export default function AdminInstitutionsPage() {
                   <button
                     onClick={() => setSelected(inst.id === selected ? null : inst.id)}
                     title="Ver detalhes"
-                    className="flex h-8 w-8 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-purple/30 hover:text-purple/70 transition-all"
+                    className="flex h-8 w-8 items-center justify-center border border-gray-800 bg-gray-900 text-gray-600 hover:border-purple hover:text-purple transition-all"
                   >
                     <Eye className="h-3.5 w-3.5" strokeWidth={1.5} />
                   </button>
@@ -440,7 +440,7 @@ export default function AdminInstitutionsPage() {
                 <button
                   onClick={() => handleSuspend(selectedInst as Institution & { id: string })}
                   disabled={actioningId === selectedInst.id}
-                  className="w-full flex items-center justify-center gap-1.5 border border-red-500/30 bg-red-500/8 py-2.5 font-mono text-[13px] uppercase tracking-widest text-red-400/80 hover:bg-red-500/15 disabled:opacity-40 transition-all"
+                  className="w-full flex items-center justify-center gap-1.5 border border-red-500 bg-red-500/8 py-2.5 font-mono text-[13px] uppercase tracking-widest text-red-400 hover:bg-red-500/15 disabled:opacity-40 transition-all"
                 >
                   {actioningId === selectedInst.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <X className="h-3 w-3" strokeWidth={1.5} />}
                   Suspender instituição

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
@@ -95,7 +95,7 @@ export default function TeacherExamsPage() {
       {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green/60 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green mb-2">
             // avaliações
           </p>
           <h1 className="text-2xl font-bold text-gray-100">Avaliações</h1>
@@ -113,9 +113,9 @@ export default function TeacherExamsPage() {
 
       {/* Erro */}
       {error && (
-        <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
-          <p className="text-sm text-amber-400/80">{error}</p>
+        <div className="flex items-start gap-3 border border-amber-500 bg-amber-500/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" strokeWidth={1.5} />
+          <p className="text-sm text-amber-400">{error}</p>
         </div>
       )}
 
@@ -140,7 +140,7 @@ export default function TeacherExamsPage() {
           </p>
           <Link
             href="/dashboard/teacher/exams/new"
-            className="flex items-center gap-1.5 border border-green/25 bg-green/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-green/70 hover:bg-green/15 transition-all"
+            className="flex items-center gap-1.5 border border-green bg-green/8 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-green hover:bg-green/15 transition-all"
           >
             <Plus className="h-3 w-3" /> Criar avaliação
           </Link>
@@ -194,7 +194,7 @@ export default function TeacherExamsPage() {
                   type="button"
                   onClick={() => handleDelete(exam.id!)}
                   disabled={deletingId === exam.id}
-                  className="flex items-center gap-1.5 border border-red-500/20 bg-red-500/8 px-3 py-2 font-mono text-[13px] uppercase tracking-widest text-red-400/70 hover:bg-red-500/15 disabled:opacity-50 transition-all"
+                  className="flex items-center gap-1.5 border border-red-500 bg-red-500/8 px-3 py-2 font-mono text-[13px] uppercase tracking-widest text-red-400 hover:bg-red-500/15 disabled:opacity-50 transition-all"
                   aria-label="Eliminar avaliação"
                 >
                   {deletingId === exam.id

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
@@ -115,7 +115,7 @@ export default function AnnouncementPopup() {
           <div className="flex items-center justify-between mb-3 px-1">
             {/* Indicador de fila */}
             {queue.length > 0 ? (
-              <span className="flex items-center gap-1.5 bg-purple-500/15 border border-purple-500/25 text-purple-300 text-sm font-semibold px-3 py-1.5 rounded-full">
+              <span className="flex items-center gap-1.5 bg-purple-500/15 border border-purple-500 text-purple-300 text-sm font-semibold px-3 py-1.5 rounded-full">
                 <span className="flex h-1.5 w-1.5 rounded-full bg-purple-400" />
                 +{queue.length} {queue.length === 1 ? "anúncio" : "anúncios"} a seguir
               </span>

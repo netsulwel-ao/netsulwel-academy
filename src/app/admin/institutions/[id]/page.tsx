@@ -26,10 +26,10 @@ interface Member {
 
 // ── Role badge ────────────────────────────────────────────────
 const ROLE_MAP: Record<string, { cls: string; label: string }> = {
-  admin:   { cls: "border-purple/25 text-purple/70",          label: "Admin"     },
-  teacher: { cls: "border-green/25 text-green/70",            label: "Professor" },
-  student: { cls: "border-blue-500/25 text-blue-400/70",      label: "Aluno"     },
-  aluno:   { cls: "border-blue-500/25 text-blue-400/70",      label: "Aluno"     },
+  admin:   { cls: "border-purple text-purple",          label: "Admin"     },
+  teacher: { cls: "border-green text-green",            label: "Professor" },
+  student: { cls: "border-blue-500 text-blue-400",      label: "Aluno"     },
+  aluno:   { cls: "border-blue-500 text-blue-400",      label: "Aluno"     },
 };
 
 function RoleBadge({ role }: { role: string }) {
@@ -42,7 +42,7 @@ function RoleBadge({ role }: { role: string }) {
 }
 
 const inputCls =
-  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors";
+  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors";
 
 // ── Page ──────────────────────────────────────────────────────
 export default function InstitutionDetailPage() {
@@ -158,9 +158,9 @@ export default function InstitutionDetailPage() {
 
       {/* ── Erro ── */}
       {error && (
-        <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
-          <p className="text-sm text-amber-400/80">{error}</p>
+        <div className="flex items-start gap-3 border border-amber-500 bg-amber-500/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" strokeWidth={1.5} />
+          <p className="text-sm text-amber-400">{error}</p>
         </div>
       )}
 
@@ -208,7 +208,7 @@ export default function InstitutionDetailPage() {
               <select
                 value={inviteRole}
                 onChange={e => setInviteRole(e.target.value as typeof inviteRole)}
-                className="border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none sm:w-40 transition-colors"
+                className="border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple focus:outline-none sm:w-40 transition-colors"
               >
                 <option value="teacher">Professor</option>
                 <option value="student">Aluno</option>
@@ -235,7 +235,7 @@ export default function InstitutionDetailPage() {
                   type="text" value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Pesquisar membro..."
-                  className="w-full border border-gray-800 bg-gray-900 pl-9 pr-3 py-2 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors"
+                  className="w-full border border-gray-800 bg-gray-900 pl-9 pr-3 py-2 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors"
                 />
               </div>
               <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 ml-auto">

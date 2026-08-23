@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCountdown } from "@/hooks/useCountdown";
 import { Clock } from "lucide-react";
@@ -34,7 +34,7 @@ export default function Variant5Compact({ targetDate, label }: Props) {
             <span className="text-lg font-bold text-white tabular-nums leading-none">
               {String(u.value).padStart(2, "0")}
             </span>
-            <span className="text-[9px] text-white/70 leading-none mt-0.5">{u.label}</span>
+            <span className="text-[9px] text-white leading-none mt-0.5">{u.label}</span>
           </div>
         ))}
       </div>

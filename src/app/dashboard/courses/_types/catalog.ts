@@ -1,4 +1,4 @@
-import type { CourseType, CourseCategory, CourseLevel } from "@/types/course";
+﻿import type { CourseType, CourseCategory, CourseLevel } from "@/types/course";
 
 export type SortKey = "recent" | "oldest" | "az" | "za" | "price-asc" | "price-desc";
 
@@ -41,7 +41,7 @@ export const CAT_LABEL: Record<CourseCategory, string> = {
 };
 
 export const TYPE_BADGE: Record<CourseType, { label: string; color: string }> = {
-  standalone: { label: "Curso", color: "border-blue-500/25 bg-blue-500/10 text-blue-400/80" },
+  standalone: { label: "Curso", color: "border-blue-500 bg-blue-500/10 text-blue-400" },
 };
 
 export const LEVELS: { value: CourseLevel; label: string }[] = [

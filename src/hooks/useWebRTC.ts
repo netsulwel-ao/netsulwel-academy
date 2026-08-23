@@ -588,13 +588,15 @@ export function useWebRTC({ role, liveId, user, deviceIds }: UseWebRTCOptions): 
         const incomingTrack = event.track;
         if (incomingTrack.kind !== kind) return;
 
+        // Replace the outgoing sender so viewers receive the remote device
         const sender = pc.getSenders().find((s) => s.track?.kind === kind);
         if (sender) {
           await sender.replaceTrack(incomingTrack);
           console.log(`[Host] Remote ${kind} track active:`, incomingTrack.id);
         }
 
-        // Update local preview stream
+        // Update local preview stream — mutate in place so VideoElement
+        // srcObject reference stays valid, then trigger a React re-render
         if (localStreamRef.current) {
           const oldTracks = kind === "video"
             ? localStreamRef.current.getVideoTracks()
@@ -604,7 +606,11 @@ export function useWebRTC({ role, liveId, user, deviceIds }: UseWebRTCOptions): 
             t.stop();
           });
           localStreamRef.current.addTrack(incomingTrack);
-          setLocalStream(new MediaStream(localStreamRef.current.getTracks()));
+          // Force React re-render with a new object reference
+          // so VideoElement useEffect triggers
+          const updated = new MediaStream(localStreamRef.current.getTracks());
+          localStreamRef.current = updated;
+          setLocalStream(updated);
         }
 
         pc.removeEventListener("track", handleTrack);

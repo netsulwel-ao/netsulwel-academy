@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Layers, BookOpen, Radio, ChevronRight } from "lucide-react";
@@ -84,7 +84,7 @@ export function TrailCard({ trail, index }: TrailCardProps) {
               {trail.livesCount ?? 0}
             </span>
           </div>
-          <span className="flex items-center gap-1 font-mono text-[13px] text-purple/60 group-hover:text-purple/80 transition-colors">
+          <span className="flex items-center gap-1 font-mono text-[13px] text-purple group-hover:text-purple transition-colors">
             Ver <ChevronRight className="h-3 w-3" />
           </span>
         </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,7 +15,7 @@ import { logger } from "@/lib/logger";
 import type { Institution } from "@/types/institution";
 
 const inputCls =
-  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors";
+  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors";
 
 export default function InstitutionSettingsPage() {
   const { user, institutionId } = useAuth();
@@ -128,7 +128,7 @@ export default function InstitutionSettingsPage() {
 
       {/* ── Cabeçalho ── */}
       <div>
-        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">// definições</p>
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-2">// definições</p>
         <h1 className="text-2xl font-bold text-gray-100">Definições</h1>
         <p className="mt-1 text-sm text-gray-600">Personaliza a página pública da tua instituição.</p>
       </div>
@@ -167,7 +167,7 @@ export default function InstitutionSettingsPage() {
                 <img src={logo} alt="Logótipo" className="w-24 h-24 object-cover border border-gray-800" />
                 <button
                   type="button" onClick={() => setLogo("")}
-                  className="absolute top-1 right-1 border border-red-500/30 bg-gray-950 px-2 py-0.5 font-mono text-[8px] text-red-400/80 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 border border-red-500 bg-gray-950 px-2 py-0.5 font-mono text-[8px] text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   Remover
                 </button>
@@ -175,7 +175,7 @@ export default function InstitutionSettingsPage() {
             ) : (
               <button
                 type="button" onClick={() => logoInputRef.current?.click()}
-                className="flex h-24 w-24 flex-col items-center justify-center border border-dashed border-gray-700 bg-gray-900 hover:border-purple/30 transition-colors cursor-pointer"
+                className="flex h-24 w-24 flex-col items-center justify-center border border-dashed border-gray-700 bg-gray-900 hover:border-purple transition-colors cursor-pointer"
               >
                 <ImageIcon className="h-6 w-6 text-gray-700 mb-1" strokeWidth={1} />
                 <span className="font-mono text-[8px] text-gray-700">Logo</span>
@@ -193,7 +193,7 @@ export default function InstitutionSettingsPage() {
                 <img src={banner} alt="Banner" className="w-full h-20 object-cover border border-gray-800" />
                 <button
                   type="button" onClick={() => setBanner("")}
-                  className="absolute top-1 right-1 border border-red-500/30 bg-gray-950 px-2 py-0.5 font-mono text-[8px] text-red-400/80 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 border border-red-500 bg-gray-950 px-2 py-0.5 font-mono text-[8px] text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   Remover
                 </button>
@@ -201,7 +201,7 @@ export default function InstitutionSettingsPage() {
             ) : (
               <button
                 type="button" onClick={() => bannerInputRef.current?.click()}
-                className="flex h-20 w-full flex-col items-center justify-center border border-dashed border-gray-700 bg-gray-900 hover:border-purple/30 transition-colors cursor-pointer"
+                className="flex h-20 w-full flex-col items-center justify-center border border-dashed border-gray-700 bg-gray-900 hover:border-purple transition-colors cursor-pointer"
               >
                 <ImageIcon className="h-5 w-5 text-gray-700 mb-1" strokeWidth={1} />
                 <span className="font-mono text-[8px] text-gray-700">Banner 1200×340</span>

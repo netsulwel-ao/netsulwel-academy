@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -218,7 +218,7 @@ export default function TeacherChatsPage() {
       {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-2">
             // chats do professor
           </p>
           <h1 className="text-2xl font-bold text-gray-100">Chats</h1>
@@ -236,9 +236,9 @@ export default function TeacherChatsPage() {
 
       {/* Erro */}
       {error && (
-        <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
-          <p className="text-sm text-amber-400/80">{error}</p>
+        <div className="flex items-start gap-3 border border-amber-500 bg-amber-500/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" strokeWidth={1.5} />
+          <p className="text-sm text-amber-400">{error}</p>
         </div>
       )}
 
@@ -295,7 +295,7 @@ export default function TeacherChatsPage() {
                       <div className="flex items-center gap-2 mt-0.5 font-mono text-[13px] text-gray-700">
                         <span>{course.lessonsCount ?? 0} aulas</span>
                         <span>·</span>
-                        <span className={`${course.status === "published" ? "text-green/60" : "text-gray-700"}`}>
+                        <span className={`${course.status === "published" ? "text-green" : "text-gray-700"}`}>
                           {course.status === "published" ? "publicado" : "rascunho"}
                         </span>
                       </div>

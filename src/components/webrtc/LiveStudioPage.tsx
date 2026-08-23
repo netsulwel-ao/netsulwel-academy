@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -445,7 +445,7 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
                     className="absolute inset-0 flex items-center justify-center bg-black/40 z-10"
                   >
                     <div className="flex flex-col items-center gap-3">
-                      <div className="h-16 w-16 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                      <div className="h-16 w-16 rounded-full bg-black/50 backdrop-blur-sm border border-white flex items-center justify-center">
                         <VolumeX className="h-7 w-7 text-white" />
                       </div>
                       <p className="text-white font-semibold text-sm">Toque para ouvir</p>
@@ -491,7 +491,7 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
                 {!viewerMuted && (
                   <button
                     onClick={() => setViewerMuted(true)}
-                    className="absolute bottom-20 right-3 p-2 bg-black/50 backdrop-blur-sm rounded-full text-white/80 z-10 md:hidden"
+                    className="absolute bottom-20 right-3 p-2 bg-black/50 backdrop-blur-sm rounded-full text-white z-10 md:hidden"
                   >
                     <Volume2 className="h-4 w-4" />
                   </button>
@@ -509,7 +509,7 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
                 </button>
                 <div className="text-center space-y-4 max-w-xs">
                   <div className="relative mx-auto h-20 w-20">
-                    <div className="absolute inset-0 rounded-full border-2 border-purple/30 animate-ping" />
+                    <div className="absolute inset-0 rounded-full border-2 border-purple animate-ping" />
                     <div className="relative h-20 w-20 rounded-full bg-gray-900 border border-gray-800 flex items-center justify-center">
                       <span className="text-3xl">📡</span>
                     </div>

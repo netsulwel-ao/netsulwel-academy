@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Search, X, SlidersHorizontal } from "lucide-react";
 import type { CourseCategory, CourseLevel } from "@/types/course";
@@ -23,7 +23,7 @@ function Chip({
       onClick={onClick}
       className={`border px-2.5 py-1 font-mono text-[13px] tracking-wide transition-colors ${
         selected
-          ? "border-purple/40 bg-purple/15 text-purple/90"
+          ? "border-purple bg-purple/15 text-purple"
           : "border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700 hover:text-gray-400"
       }`}
     >
@@ -89,7 +89,7 @@ export function CourseFilters({
             value={search}
             onChange={e => onSearchChange(e.target.value)}
             placeholder="Título, descrição ou tag..."
-            className="w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-8 text-sm text-gray-200 focus:border-purple/40 focus:outline-none transition-colors"
+            className="w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-8 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors"
           />
           {search && (
             <button
@@ -178,7 +178,7 @@ export function CourseFilters({
             <button
               type="button"
               onClick={onClearAll}
-              className="font-mono text-[13px] tracking-wide text-gray-600 hover:text-purple/70 transition-colors"
+              className="font-mono text-[13px] tracking-wide text-gray-600 hover:text-purple transition-colors"
             >
               Limpar
             </button>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
@@ -90,7 +90,7 @@ export function AlunosPanel({ liveId }: AlunosPanelProps) {
             {handRaises.map((hr) => (
               <div
                 key={hr.id}
-                className="flex items-center gap-2 px-2.5 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg"
+                className="flex items-center gap-2 px-2.5 py-2 bg-amber-500/10 border border-amber-500 rounded-lg"
               >
                 <div className="h-7 w-7 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
                   <span className="text-[10px] font-bold text-amber-400">

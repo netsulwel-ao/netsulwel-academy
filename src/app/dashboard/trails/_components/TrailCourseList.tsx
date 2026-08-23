@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { BookOpen, Lock, Play, ChevronRight } from "lucide-react";
@@ -20,7 +20,7 @@ export function TrailCourseList({ courses, enrolledCourses }: TrailCourseListPro
     <section>
       <div className="flex items-end justify-between mb-4">
         <div>
-          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-1">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-1">
             // cursos
           </p>
           <h2 className="text-base font-bold text-gray-200">
@@ -88,7 +88,7 @@ export function TrailCourseList({ courses, enrolledCourses }: TrailCourseListPro
                 {hasAccess ? (
                   <Link
                     href={`/dashboard/courses/${course.id}`}
-                    className="group flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-3 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-500 hover:border-purple/40 hover:text-purple/80 transition-all"
+                    className="group flex items-center gap-1.5 border border-gray-800 bg-gray-900 px-3 py-2 font-mono text-[13px] uppercase tracking-widest text-gray-500 hover:border-purple hover:text-purple transition-all"
                   >
                     <Play className="h-3 w-3" strokeWidth={1.5} />
                     <span className="hidden sm:inline">Aceder</span>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
@@ -425,16 +425,16 @@ export default function DashboardPage() {
                     label: "Explorar cursos",
                     sub: "Escolhe o teu primeiro curso",
                     href: "/dashboard/courses",
-                    accent: "hover:border-purple/30",
-                    iconAccent: "group-hover:text-purple/70",
+                    accent: "hover:border-purple",
+                    iconAccent: "group-hover:text-purple",
                   },
                   {
                     icon: Radio,
                     label: "Aulas ao vivo",
                     sub: "Participa numa sessão em directo",
                     href: "/dashboard/lives",
-                    accent: "hover:border-red-500/20",
-                    iconAccent: "group-hover:text-red-400/70",
+                    accent: "hover:border-red-500",
+                    iconAccent: "group-hover:text-red-400",
                   },
 
                 ].map(({ icon: Icon, label, sub, href, accent, iconAccent }) => (

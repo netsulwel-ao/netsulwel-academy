@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -65,10 +65,10 @@ function PromoVideoCard({ url }: { url: string; youtubeId: string | null }) {
 }
 
 export const ROLE_LABELS: Record<string, { label: string; color: string }> = {
-  teacher: { label: "Professor", color: "bg-green-500/15 text-green-400 border-green-500/25" },
-  institution: { label: "Instituição", color: "bg-cyan-500/15 text-cyan-400 border-cyan-500/25" },
-  admin: { label: "Admin", color: "bg-purple-500/15 text-purple-400 border-purple-500/25" },
-  aluno: { label: "Aluno", color: "bg-blue-500/15 text-blue-400 border-blue-500/25" },
+  teacher: { label: "Professor", color: "bg-green-500/15 text-green-400 border-green-500" },
+  institution: { label: "Instituição", color: "bg-cyan-500/15 text-cyan-400 border-cyan-500" },
+  admin: { label: "Admin", color: "bg-purple-500/15 text-purple-400 border-purple-500" },
+  aluno: { label: "Aluno", color: "bg-blue-500/15 text-blue-400 border-blue-500" },
 };
 
 export function useProfile(userId: string | undefined) {
@@ -222,7 +222,7 @@ export function ProfileContent({ profile, courses, lives, courseHref, coverClass
                       <img src={course.thumbnail} alt={course.title} className="h-full w-full object-cover" />
                     ) : (
                       <div className="flex h-full items-center justify-center bg-gradient-to-br from-blue-900/40 to-gray-900">
-                        <BookOpen className="h-12 w-12 text-blue-500/40" />
+                        <BookOpen className="h-12 w-12 text-blue-500" />
                       </div>
                     )}
                     {course.price ? (
@@ -230,7 +230,7 @@ export function ProfileContent({ profile, courses, lives, courseHref, coverClass
                         {course.price.toLocaleString("pt-AO")} Kz
                       </span>
                     ) : (
-                      <span className="absolute top-3 right-3 px-2 py-1 text-sm font-bold bg-green-500/15 text-green-400 border border-green-500/25">
+                      <span className="absolute top-3 right-3 px-2 py-1 text-sm font-bold bg-green-500/15 text-green-400 border border-green-500">
                         Grátis
                       </span>
                     )}

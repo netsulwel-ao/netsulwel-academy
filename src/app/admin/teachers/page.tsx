@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { collection, query, where, getDocs, doc, updateDoc, Timestamp } from "firebase/firestore";
@@ -137,7 +137,7 @@ export default function AdminTeachersPage() {
         </div>
         <div className="flex items-center gap-4 text-sm text-gray-400">
           {totalPending > 0 && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/10 text-yellow-400 border border-yellow-500">
               <Clock className="h-4 w-4" />
               <span className="font-bold">{totalPending}</span> pendente(s)
             </div>
@@ -226,11 +226,11 @@ export default function AdminTeachersPage() {
                       <td className="py-4 px-6 text-sm text-gray-400">{teacher.email}</td>
                       <td className="py-4 px-6">
                         {isPending ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-sm font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-sm font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500">
                             <Clock className="h-3 w-3" /> Pendente
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-sm font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-sm font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500">
                             <Check className="h-3 w-3" /> Aprovado
                           </span>
                         )}
@@ -299,7 +299,7 @@ export default function AdminTeachersPage() {
               </div>
               <h4 className="text-xl font-bold text-white">{selectedTeacher.name}</h4>
               {selectedTeacher.status === "pending" ? (
-                <span className="mt-1 px-3 py-1 text-sm font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
+                <span className="mt-1 px-3 py-1 text-sm font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500">
                   <Clock className="h-3 w-3 inline mr-1" />Pendente
                 </span>
               ) : (

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import Cropper, { Area } from "react-easy-crop";
@@ -108,7 +108,7 @@ export function ImageCropModal({ imageUrl, title, aspectRatio, outputWidth, outp
 
         {/* Error */}
         {modalError && (
-          <div className="flex items-center gap-2 bg-red-500/10 border-y border-red-500/20 px-6 py-3 text-sm text-red-400 shrink-0">
+          <div className="flex items-center gap-2 bg-red-500/10 border-y border-red-500 px-6 py-3 text-sm text-red-400 shrink-0">
             <AlertCircle className="h-4 w-4 shrink-0" />{modalError}
           </div>
         )}

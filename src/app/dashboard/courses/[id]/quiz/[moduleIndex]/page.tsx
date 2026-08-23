@@ -212,7 +212,7 @@ export default function ModuleQuizPage() {
       )}
 
       {!canRetry && bestResult && !bestResult.passed && (
-        <div className="bg-red-500/10 border border-red-500/20 p-4 mb-6 text-sm text-red-400">
+        <div className="bg-red-500/10 border border-red-500 p-4 mb-6 text-sm text-red-400">
           Esgotaste o número máximo de tentativas ({quiz.maxAttempts}).
         </div>
       )}

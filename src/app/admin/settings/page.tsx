@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { db } from "@/lib/firebase";
@@ -38,7 +38,7 @@ const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
 
 // ── Shared input classes ──────────────────────────────────────
 const inputCls =
-  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors";
+  "w-full border border-gray-800 bg-gray-900 py-2.5 px-3 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors";
 
 // ── Toggle (sharp, no rounded-full) ──────────────────────────
 function Toggle({ value, onChange, label }: { value: boolean; onChange: (v: boolean) => void; label: string }) {
@@ -47,7 +47,7 @@ function Toggle({ value, onChange, label }: { value: boolean; onChange: (v: bool
       type="button" role="switch" aria-checked={value} aria-label={label}
       onClick={() => onChange(!value)}
       className={`relative inline-flex h-5 w-9 shrink-0 items-center border transition-colors ${
-        value ? "bg-purple border-purple/60" : "bg-gray-800 border-gray-700"
+        value ? "bg-purple border-purple" : "bg-gray-800 border-gray-700"
       }`}
     >
       <span className={`inline-block h-3 w-3 bg-white transition-transform ${value ? "translate-x-5" : "translate-x-1"}`} />
@@ -133,7 +133,7 @@ export default function SettingsPage() {
       {/* ── Cabeçalho ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-2">
             // configurações
           </p>
           <h1 className="text-2xl font-bold text-gray-100">Configurações</h1>
@@ -153,9 +153,9 @@ export default function SettingsPage() {
 
       {/* ── Erro ── */}
       {error && (
-        <div className="flex items-start gap-3 border border-red-500/20 bg-red-500/8 px-4 py-3">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400/70" strokeWidth={1.5} />
-          <p className="text-sm text-red-400/80">{error}</p>
+        <div className="flex items-start gap-3 border border-red-500 bg-red-500/8 px-4 py-3">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" strokeWidth={1.5} />
+          <p className="text-sm text-red-400">{error}</p>
         </div>
       )}
 
@@ -166,7 +166,7 @@ export default function SettingsPage() {
             key={id} onClick={() => setTab(id)}
             className={`flex items-center gap-2 px-4 py-3 font-mono text-[13px] uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap ${
               tab === id
-                ? "border-purple text-purple/80"
+                ? "border-purple text-purple"
                 : "border-transparent text-gray-600 hover:text-gray-400"
             }`}
           >
@@ -186,7 +186,7 @@ export default function SettingsPage() {
           <Card>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-blue-400/70" strokeWidth={1.5} />
+                <CreditCard className="h-4 w-4 text-blue-400" strokeWidth={1.5} />
                 <p className="text-sm font-semibold text-gray-200">Transferência Bancária</p>
               </div>
               <Toggle
@@ -218,7 +218,7 @@ export default function SettingsPage() {
           <Card>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-green/70" strokeWidth={1.5} />
+                <CreditCard className="h-4 w-4 text-green" strokeWidth={1.5} />
                 <p className="text-sm font-semibold text-gray-200">Multicaixa Express</p>
               </div>
               <Toggle
@@ -248,7 +248,7 @@ export default function SettingsPage() {
           <Card>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-blue-400/70" strokeWidth={1.5} />
+                <Globe className="h-4 w-4 text-blue-400" strokeWidth={1.5} />
                 <p className="text-sm font-semibold text-gray-200">PayPal</p>
               </div>
               <Toggle
@@ -266,7 +266,7 @@ export default function SettingsPage() {
                     placeholder="pagamentos@exemplo.com" className={inputCls} />
                 </div>
                 <div>
-                  <FL>// client id &nbsp;<a href="https://developer.paypal.com/dashboard/applications" target="_blank" rel="noopener noreferrer" className="text-purple/60 hover:text-purple/80 transition-colors">(PayPal Developer Dashboard ↗)</a></FL>
+                  <FL>// client id &nbsp;<a href="https://developer.paypal.com/dashboard/applications" target="_blank" rel="noopener noreferrer" className="text-purple hover:text-purple transition-colors">(PayPal Developer Dashboard ↗)</a></FL>
                   <input type="text" value={settings.paymentMethods.paypal.clientId}
                     onChange={e => set("paymentMethods.paypal.clientId", e.target.value)}
                     placeholder="Axxxxxxxxxxxxxxxxxxxxxxxxxxx" className={inputCls} />
@@ -279,7 +279,7 @@ export default function SettingsPage() {
           <Card>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-purple/70" strokeWidth={1.5} />
+                <CreditCard className="h-4 w-4 text-purple" strokeWidth={1.5} />
                 <p className="text-sm font-semibold text-gray-200">Stripe</p>
               </div>
               <Toggle
@@ -307,7 +307,7 @@ export default function SettingsPage() {
         <div className="space-y-4">
           <Card>
             <div className="flex items-center gap-3 pb-4 border-b border-gray-800">
-              <Percent className="h-4 w-4 text-purple/70" strokeWidth={1.5} />
+              <Percent className="h-4 w-4 text-purple" strokeWidth={1.5} />
               <div>
                 <p className="text-sm font-semibold text-gray-200">Taxa Padrão por Curso</p>
                 <p className="font-mono text-[13px] text-gray-600 mt-0.5">Percentagem deduzida do valor bruto de cada venda.</p>
@@ -393,7 +393,7 @@ export default function SettingsPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <FL>// descrição do site (meta description)</FL>
-                <span className={`font-mono text-[13px] ${settings.meta.description.length > 160 ? "text-red-400/70" : "text-gray-700"}`}>
+                <span className={`font-mono text-[13px] ${settings.meta.description.length > 160 ? "text-red-400" : "text-gray-700"}`}>
                   {settings.meta.description.length}/160
                 </span>
               </div>

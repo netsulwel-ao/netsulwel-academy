@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
@@ -33,16 +33,16 @@ function toDate(raw: unknown): Date {
 
 // ── Status badge ──────────────────────────────────────────────
 const STATUS: Record<string, { label: string; cls: string; dot: string; pulse?: boolean }> = {
-  scheduled: { label: "Agendada",  cls: "border-amber-500/30 text-amber-400/80",  dot: "bg-amber-400" },
-  live:      { label: "Ao Vivo",   cls: "border-red-500/30 text-red-400/80",      dot: "bg-red-400",  pulse: true },
+  scheduled: { label: "Agendada",  cls: "border-amber-500 text-amber-400",  dot: "bg-amber-400" },
+  live:      { label: "Ao Vivo",   cls: "border-red-500 text-red-400",      dot: "bg-red-400",  pulse: true },
   ended:     { label: "Encerrada", cls: "border-gray-700 text-gray-600",       dot: "bg-gray-600" },
 };
 
 const TARGET: Record<string, string> = {
-  free:       "border-green/25 text-green/70",
-  smart:      "border-blue-500/25 text-blue-400/70",
-  golden:     "border-amber-500/25 text-amber-400/70",
-  standalone: "border-purple/25 text-purple/70",
+  free:       "border-green text-green",
+  smart:      "border-blue-500 text-blue-400",
+  golden:     "border-amber-500 text-amber-400",
+  standalone: "border-purple text-purple",
 };
 const TARGET_LABEL: Record<string, string> = {
   free: "grátis", smart: "smart", golden: "golden", standalone: "pago",
@@ -134,7 +134,7 @@ export default function AdminLivesPage() {
       {/* ── Cabeçalho ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-2">
             // aulas ao vivo
           </p>
           <h1 className="text-2xl font-bold text-gray-100">Lives</h1>
@@ -144,7 +144,7 @@ export default function AdminLivesPage() {
         </div>
         <Link
           href="/admin/lives/new"
-          className="flex items-center gap-1.5 border border-red-500/25 bg-red-500/5 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-red-400/70 hover:bg-red-500/15 transition-all shrink-0"
+          className="flex items-center gap-1.5 border border-red-500 bg-red-500/5 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-red-400 hover:bg-red-500/15 transition-all shrink-0"
         >
           <Plus className="h-3 w-3" /> Nova live
         </Link>
@@ -176,7 +176,7 @@ export default function AdminLivesPage() {
             <input
               type="text" value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Pesquisar por título..."
-              className="w-full border border-gray-800 bg-gray-900 pl-9 pr-9 py-2.5 text-sm text-gray-200 focus:border-purple/30 focus:outline-none transition-colors"
+              className="w-full border border-gray-800 bg-gray-900 pl-9 pr-9 py-2.5 text-sm text-gray-200 focus:border-purple focus:outline-none transition-colors"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -188,7 +188,7 @@ export default function AdminLivesPage() {
             onClick={() => setShowFilters(v => !v)}
             className={`flex items-center gap-1.5 border px-3 py-2.5 font-mono text-[13px] uppercase tracking-widest transition-all shrink-0 ${
               hasFilters
-                ? "border-purple/30 bg-purple/8 text-purple/70"
+                ? "border-purple bg-purple/8 text-purple"
                 : "border-gray-800 bg-gray-900 text-gray-600 hover:border-gray-700"
             }`}
           >
@@ -202,7 +202,7 @@ export default function AdminLivesPage() {
             <select
               value={filterStatus}
               onChange={e => setFilterStatus(e.target.value as typeof filterStatus)}
-              className="border border-gray-800 bg-gray-900 text-sm text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple/30 transition-colors"
+              className="border border-gray-800 bg-gray-900 text-sm text-gray-400 px-3 py-1.5 focus:outline-none focus:border-purple transition-colors"
             >
               <option value="all">Todos os estados</option>
               <option value="scheduled">Agendada</option>
@@ -220,9 +220,9 @@ export default function AdminLivesPage() {
 
       {/* ── Erro ── */}
       {error && (
-        <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
-          <p className="text-sm text-amber-400/80">{error}</p>
+        <div className="flex items-start gap-3 border border-amber-500 bg-amber-500/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" strokeWidth={1.5} />
+          <p className="text-sm text-amber-400">{error}</p>
         </div>
       )}
 
@@ -250,7 +250,7 @@ export default function AdminLivesPage() {
               ← Limpar filtros
             </button>
           ) : (
-            <Link href="/admin/lives/new" className="flex items-center gap-1.5 border border-red-500/25 bg-red-500/5 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-red-400/70 hover:bg-red-500/15 transition-all">
+            <Link href="/admin/lives/new" className="flex items-center gap-1.5 border border-red-500 bg-red-500/5 px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-red-400 hover:bg-red-500/15 transition-all">
               <Plus className="h-3 w-3" /> Criar live
             </Link>
           )}
@@ -340,7 +340,7 @@ export default function AdminLivesPage() {
                     {live.status === "scheduled" && (
                       <Link
                         href={`/admin/lives/${live.id}/studio`}
-                        className="flex items-center gap-1.5 border border-red-500/30 bg-red-500/8 px-3 py-1.5 font-mono text-[13px] uppercase tracking-widest text-red-400/80 hover:bg-red-500/15 transition-all whitespace-nowrap"
+                        className="flex items-center gap-1.5 border border-red-500 bg-red-500/8 px-3 py-1.5 font-mono text-[13px] uppercase tracking-widest text-red-400 hover:bg-red-500/15 transition-all whitespace-nowrap"
                       >
                         <Play className="h-3 w-3" strokeWidth={1.5} /> Iniciar
                       </Link>
@@ -348,7 +348,7 @@ export default function AdminLivesPage() {
                     {live.status === "live" && (
                       <Link
                         href={`/admin/lives/${live.id}/studio`}
-                        className="flex items-center gap-1.5 border border-red-500/40 bg-red-500/15 px-3 py-1.5 font-mono text-[13px] uppercase tracking-widest text-red-400 animate-pulse transition-all whitespace-nowrap"
+                        className="flex items-center gap-1.5 border border-red-500 bg-red-500/15 px-3 py-1.5 font-mono text-[13px] uppercase tracking-widest text-red-400 animate-pulse transition-all whitespace-nowrap"
                       >
                         <Radio className="h-3 w-3" strokeWidth={1.5} /> Entrar
                       </Link>
@@ -365,7 +365,7 @@ export default function AdminLivesPage() {
                       onClick={() => handleDelete(live)}
                       disabled={deletingId === live.id}
                       title="Apagar"
-                      className="flex h-8 w-8 items-center justify-center border border-red-500/15 bg-red-500/5 text-red-400/50 hover:border-red-500/30 hover:text-red-400/80 disabled:opacity-40 transition-all shrink-0"
+                      className="flex h-8 w-8 items-center justify-center border border-red-500 bg-red-500/5 text-red-400 hover:border-red-500 hover:text-red-400 disabled:opacity-40 transition-all shrink-0"
                     >
                       {deletingId === live.id
                         ? <Loader2 className="h-3.5 w-3.5 animate-spin" />

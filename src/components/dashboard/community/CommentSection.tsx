@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
@@ -113,7 +113,7 @@ export default function CommentSection({ postId, postAuthorId, postTitle }: { po
 
       {/* Error */}
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 p-3 text-sm text-red-400 border border-red-500/20">
+        <div className="flex items-center gap-2 bg-red-500/10 p-3 text-sm text-red-400 border border-red-500">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>

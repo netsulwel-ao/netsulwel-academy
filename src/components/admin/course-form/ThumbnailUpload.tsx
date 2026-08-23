@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef } from "react";
 import { ImagePlus, Loader2, CheckCircle2 } from "lucide-react";
@@ -29,7 +29,7 @@ export function ThumbnailUpload({ preview, uploaded, uploading, onChange }: Prop
             inputRef.current?.click();
           }
         }}
-        className="relative w-full aspect-video border border-gray-800 bg-gray-900 cursor-pointer overflow-hidden group hover:border-purple/30 transition-colors"
+        className="relative w-full aspect-video border border-gray-800 bg-gray-900 cursor-pointer overflow-hidden group hover:border-purple transition-colors"
       >
         {preview ? (
           <>
@@ -64,12 +64,12 @@ export function ThumbnailUpload({ preview, uploaded, uploading, onChange }: Prop
       />
 
       {uploading && (
-        <p className="mt-1.5 font-mono text-[13px] text-purple/60 flex items-center gap-1">
+        <p className="mt-1.5 font-mono text-[13px] text-purple flex items-center gap-1">
           <Loader2 className="h-2.5 w-2.5 animate-spin" /> A enviar...
         </p>
       )}
       {uploaded && !uploading && (
-        <p className="mt-1.5 font-mono text-[13px] text-green/60 flex items-center gap-1">
+        <p className="mt-1.5 font-mono text-[13px] text-green flex items-center gap-1">
           <CheckCircle2 className="h-2.5 w-2.5" /> Upload concluído
         </p>
       )}

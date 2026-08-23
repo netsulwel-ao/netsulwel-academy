@@ -62,7 +62,7 @@ export default function TrailDetailPage() {
 
           {/* Título */}
           <div>
-            <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+            <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-2">
               // trilha
             </p>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-100 leading-tight">

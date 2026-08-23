@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
@@ -223,21 +223,21 @@ export default function AdminDashboardPage() {
   // ── Quick actions ────────────────────────────────────────
   const quickActions = isAdmin
     ? [
-        { icon: Video,        label: "Criar Curso",        href: "/admin/courses/new",         accent: "border-purple/30 text-purple/70" },
-        { icon: Radio,        label: "Aula ao Vivo",        href: "/admin/lives/new",           accent: "border-red-500/30 text-red-400/70" },
-        { icon: Users,        label: "Alunos",              href: "/admin/students",            accent: "border-blue-500/30 text-blue-400/70" },
-        { icon: GraduationCap,label: "Professores",         href: "/admin/teachers",            accent: "border-green/30 text-green/70" },
-        { icon: Building2,    label: "Instituições",        href: "/admin/institutions",        accent: "border-cyan-500/30 text-cyan-400/70" },
-        { icon: Megaphone,    label: "Anúncios",            href: "/admin/announcements",       accent: "border-amber-500/30 text-amber-400/70" },
-        { icon: MailQuestion, label: "Pedidos de Lives",    href: "/admin/free-live-requests",  accent: "border-pink-500/30 text-pink-400/70" },
-        { icon: Settings,     label: "Configurações",       href: "/admin/settings",            accent: "border-gray-600 text-gray-500/70" },
+        { icon: Video,        label: "Criar Curso",        href: "/admin/courses/new",         accent: "border-purple text-purple" },
+        { icon: Radio,        label: "Aula ao Vivo",        href: "/admin/lives/new",           accent: "border-red-500 text-red-400" },
+        { icon: Users,        label: "Alunos",              href: "/admin/students",            accent: "border-blue-500 text-blue-400" },
+        { icon: GraduationCap,label: "Professores",         href: "/admin/teachers",            accent: "border-green text-green" },
+        { icon: Building2,    label: "Instituições",        href: "/admin/institutions",        accent: "border-cyan-500 text-cyan-400" },
+        { icon: Megaphone,    label: "Anúncios",            href: "/admin/announcements",       accent: "border-amber-500 text-amber-400" },
+        { icon: MailQuestion, label: "Pedidos de Lives",    href: "/admin/free-live-requests",  accent: "border-pink-500 text-pink-400" },
+        { icon: Settings,     label: "Configurações",       href: "/admin/settings",            accent: "border-gray-500 text-gray-400" },
       ]
     : [
-        { icon: Video,        label: "Criar Curso",         href: "/admin/courses/new",         accent: "border-purple/30 text-purple/70" },
-        { icon: Radio,        label: "Aula ao Vivo",         href: "/admin/lives/new",           accent: "border-red-500/30 text-red-400/70" },
-        { icon: Users,        label: "Os Meus Alunos",       href: "/admin/students",            accent: "border-blue-500/30 text-blue-400/70" },
-        { icon: DollarSign,   label: "As Minhas Vendas",     href: "/admin/sales",               accent: "border-green/30 text-green/70" },
-        { icon: Megaphone,    label: "Anúncios",             href: "/admin/announcements",       accent: "border-amber-500/30 text-amber-400/70" },
+        { icon: Video,        label: "Criar Curso",         href: "/admin/courses/new",         accent: "border-purple text-purple" },
+        { icon: Radio,        label: "Aula ao Vivo",         href: "/admin/lives/new",           accent: "border-red-500 text-red-400" },
+        { icon: Users,        label: "Os Meus Alunos",       href: "/admin/students",            accent: "border-blue-500 text-blue-400" },
+        { icon: DollarSign,   label: "As Minhas Vendas",     href: "/admin/sales",               accent: "border-green text-green" },
+        { icon: Megaphone,    label: "Anúncios",             href: "/admin/announcements",       accent: "border-amber-500 text-amber-400" },
       ];
 
   return (
@@ -246,7 +246,7 @@ export default function AdminDashboardPage() {
       {/* ── Cabeçalho ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple/60 mb-2">
+          <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-purple mb-2">
             // painel de controlo
           </p>
           <h1 className="text-2xl font-bold text-gray-100">Visão Geral</h1>
@@ -266,9 +266,9 @@ export default function AdminDashboardPage() {
 
       {/* ── Erro ── */}
       {error && (
-        <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
-          <p className="text-sm text-amber-400/80">{error}</p>
+        <div className="flex items-start gap-3 border border-amber-500 bg-amber-500/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" strokeWidth={1.5} />
+          <p className="text-sm text-amber-400">{error}</p>
         </div>
       )}
 
@@ -278,42 +278,42 @@ export default function AdminDashboardPage() {
           label="Alunos"
           value={studentsCount ?? "—"}
           sub="registados na plataforma"
-          accent="text-blue-400/80"
+          accent="text-blue-400"
           loading={loading && studentsCount === null}
         />
         <StatCard
           label="Professores"
           value={teachersCount ?? "—"}
           sub="contas activas"
-          accent="text-green/80"
+          accent="text-green"
           loading={loading && teachersCount === null}
         />
         <StatCard
           label="Instituições"
           value={institutionsCount ?? "—"}
           sub="parceiras"
-          accent="text-cyan-400/80"
+          accent="text-cyan-400"
           loading={loading && institutionsCount === null}
         />
         <StatCard
           label="Cursos"
           value={coursesCount ?? "—"}
           sub="no catálogo"
-          accent="text-purple/80"
+          accent="text-purple"
           loading={loading && coursesCount === null}
         />
         <StatCard
           label="Lives"
           value={livesCount ?? "—"}
           sub="sessões criadas"
-          accent="text-red-400/70"
+          accent="text-red-400"
           loading={loading && livesCount === null}
         />
         <StatCard
           label="Receita total"
           value={allSales.length > 0 ? formatKz(financials.totalRevenue) : "—"}
           sub={allSales.length > 0 ? `${allSales.length} venda${allSales.length !== 1 ? "s" : ""} confirmada${allSales.length !== 1 ? "s" : ""}` : "sem vendas ainda"}
-          accent="text-amber-400/80"
+          accent="text-amber-400"
           loading={loading}
         />
       </div>
@@ -327,13 +327,13 @@ export default function AdminDashboardPage() {
             <p className="font-mono text-[13px] uppercase tracking-widest text-gray-700 mb-1">
               // receita · este mês
             </p>
-            <p className="text-3xl font-bold text-green/80 tabular-nums">
+            <p className="text-3xl font-bold text-green tabular-nums">
               {loading ? <Loader2 className="h-5 w-5 animate-spin text-gray-700" /> : formatKz(financials.curRevenue)}
             </p>
           </div>
           {!loading && financials.prevRevenue > 0 && (
             <div className="flex items-center gap-2">
-              <ArrowUpRight className={`h-3.5 w-3.5 shrink-0 ${financials.curRevenue >= financials.prevRevenue ? "text-green/60" : "text-red-400/60"}`} strokeWidth={2} />
+              <ArrowUpRight className={`h-3.5 w-3.5 shrink-0 ${financials.curRevenue >= financials.prevRevenue ? "text-green" : "text-red-400"}`} strokeWidth={2} />
               <p className="text-sm text-gray-600">
                 {financials.prevRevenue > 0
                   ? `${Math.abs(Math.round(((financials.curRevenue - financials.prevRevenue) / financials.prevRevenue) * 100))}% vs mês anterior (${formatKz(financials.prevRevenue)})`
@@ -401,7 +401,7 @@ export default function AdminDashboardPage() {
             </p>
             <Link
               href="/admin/sales"
-              className="font-mono text-[13px] uppercase tracking-widest text-gray-700 hover:text-purple/70 transition-colors"
+              className="font-mono text-[13px] uppercase tracking-widest text-gray-700 hover:text-purple transition-colors"
             >
               ver todas →
             </Link>
@@ -420,7 +420,7 @@ export default function AdminDashboardPage() {
                     <p className="font-mono text-[13px] text-gray-700 truncate mt-0.5">{label}</p>
                   </div>
                   <div className="text-right shrink-0 space-y-0.5">
-                    <p className="font-mono text-sm text-green/70">{formatKz(s.netAmount ?? s.amount ?? 0)}</p>
+                    <p className="font-mono text-sm text-green">{formatKz(s.netAmount ?? s.amount ?? 0)}</p>
                     <p className="font-mono text-[13px] text-gray-700">{dateStr}</p>
                   </div>
                 </div>

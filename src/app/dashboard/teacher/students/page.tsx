@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -156,7 +156,7 @@ export default function TeacherStudentsPage() {
 
       {/* Cabeçalho */}
       <div>
-        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green/60 mb-2">
+        <p className="font-mono text-[13px] uppercase tracking-[0.25em] text-green mb-2">
           // alunos
         </p>
         <h1 className="text-2xl font-bold text-gray-100">Alunos</h1>
@@ -170,9 +170,9 @@ export default function TeacherStudentsPage() {
 
       {/* Erro */}
       {error && (
-        <div className="flex items-start gap-3 border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/70" strokeWidth={1.5} />
-          <p className="text-sm text-amber-400/80">{error}</p>
+        <div className="flex items-start gap-3 border border-amber-500 bg-amber-500/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" strokeWidth={1.5} />
+          <p className="text-sm text-amber-400">{error}</p>
         </div>
       )}
 
@@ -185,7 +185,7 @@ export default function TeacherStudentsPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Pesquisar por nome ou email..."
-            className="w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-8 text-sm text-gray-200 focus:border-green/40 focus:outline-none transition-colors"
+            className="w-full border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-8 text-sm text-gray-200 focus:border-green focus:outline-none transition-colors"
           />
           {search && (
             <button type="button" onClick={() => setSearch("")}
