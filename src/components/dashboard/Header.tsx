@@ -374,7 +374,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                           !n.read
                             ? theme === "light" ? "text-text-primary font-semibold" : "text-text-primary font-semibold"
                             : theme === "light" ? "text-text-secondary" : "text-text-secondary"
-                        }`}>{n.title}</p>
+                        }`}>{n.title}{(n.count ?? 1) > 1 && ` (${n.count}x)`}</p>
                         <p className={`text-xs mt-0.5 line-clamp-2 ${
                           theme === "light" ? "text-text-muted" : "text-text-muted"
                         }`}>{n.message}</p>

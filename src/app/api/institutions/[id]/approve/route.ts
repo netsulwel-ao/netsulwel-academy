@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFirebaseAdmin } from "@/lib/firebase-admin";
 import { verifyAuth } from "@/lib/api-auth";
+import { sendNotificationAdmin, getInstitutionApprovedGroupKey } from "@/lib/notifications-admin";
 
 export async function POST(
   req: NextRequest,
@@ -44,14 +45,14 @@ export async function POST(
         institutionRole: "admin",
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       });
-      await db.collection("users").doc(institutionData.adminId).collection("notifications").add({
+      await sendNotificationAdmin({
+        db,
         uid: institutionData.adminId,
         type: "institution_approved",
         title: "Instituição Aprovada",
         message: `A instituição "${institutionData.name}" foi aprovada com sucesso. Já podes gerir os teus membros.`,
         link: "/dashboard/institution",
-        read: false,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        groupKey: getInstitutionApprovedGroupKey(id),
       });
     }
     

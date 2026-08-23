@@ -128,6 +128,8 @@ export function useWebRTC({ role, liveId, user, deviceIds }: UseWebRTCOptions): 
   const joiningRef = useRef(false);
   const sessionIdRef = useRef<string | null>(null);
   const deviceIdsRef = useRef<DeviceIds>(deviceIds || {});
+  const remoteVideoRef = useRef<{ sessionId: string; trackName: string } | null>(null);
+  const remoteAudioRef = useRef<{ sessionId: string; trackName: string } | null>(null);
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
@@ -169,6 +171,13 @@ export function useWebRTC({ role, liveId, user, deviceIds }: UseWebRTCOptions): 
         ? { deviceId: { exact: deviceIdsRef.current.micId }, echoCancellation: true, noiseSuppression: true }
         : { echoCancellation: true, noiseSuppression: true },
     });
+
+    // Guard: if PC was closed during the await (cleanup/unmount), abort
+    if (pcRef.current !== pc || pc.signalingState === "closed") {
+      stream.getTracks().forEach((t) => t.stop());
+      throw new Error("Peer connection was closed during join");
+    }
+
     localStreamRef.current = stream;
     setLocalStream(stream);
 
@@ -205,6 +214,7 @@ export function useWebRTC({ role, liveId, user, deviceIds }: UseWebRTCOptions): 
   const pullSpeakerTracks = useCallback(async (speakerSessionId: string, trackNames: string[]) => {
     const pc = pcRef.current;
     if (!pc || !sessionIdRef.current) return;
+    if (pc.signalingState === "closed") return;
 
     try {
       // Add recvonly transceiver for audio
@@ -359,6 +369,8 @@ export function useWebRTC({ role, liveId, user, deviceIds }: UseWebRTCOptions): 
     screenStreamRef.current = null;
     sessionIdRef.current = null;
     combinedStreamRef.current = null;
+    remoteVideoRef.current = null;
+    remoteAudioRef.current = null;
     setSessionId(null);
     setConnected(false);
     setLocalStream(null);
@@ -401,6 +413,12 @@ export function useWebRTC({ role, liveId, user, deviceIds }: UseWebRTCOptions): 
       if (!audioTrack) {
         stream.getTracks().forEach((t) => t.stop());
         throw new Error("Nenhuma faixa de áudio disponível");
+      }
+
+      // Guard: if session was cleared during the await, abort
+      if (!sessionIdRef.current) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
       }
 
       // Create a dedicated PeerConnection for sending audio.
@@ -562,10 +580,35 @@ export function useWebRTC({ role, liveId, user, deviceIds }: UseWebRTCOptions): 
   ) => {
     const pc = pcRef.current;
     if (!pc || !sessionIdRef.current) return;
+    if (pc.signalingState === "closed") return;
+
+    const remoteRef = kind === "video" ? remoteVideoRef : remoteAudioRef;
+
+    // If switching from the same device, skip
+    if (remoteRef.current?.sessionId === remoteSessionId && remoteRef.current?.trackName === trackName) return;
+
+    // If switching away from a previous remote device, replace sender back to local
+    if (remoteRef.current) {
+      const localKind = kind === "video"
+        ? localStreamRef.current?.getVideoTracks()[0]
+        : localStreamRef.current?.getAudioTracks()[0];
+      if (localKind) {
+        const sender = pc.getSenders().find((s) => s.track?.kind === kind);
+        if (sender) await sender.replaceTrack(localKind);
+      }
+    }
+
+    // Store the new remote reference
+    remoteRef.current = { sessionId: remoteSessionId, trackName };
 
     try {
-      // Add a recvonly transceiver so Cloudflare knows we want this track
-      pc.addTransceiver(kind, { direction: "recvonly" });
+      // Find an existing recvonly transceiver for this kind, or add one
+      const existingTransceiver = pc.getTransceivers().find(
+        (t) => t.receiver.track?.kind === kind && t.direction === "recvonly"
+      );
+      if (!existingTransceiver) {
+        pc.addTransceiver(kind, { direction: "recvonly" });
+      }
 
       const pullResult = await cfPullTracks(user, liveId, sessionIdRef.current, [{
         location: "remote",
@@ -582,43 +625,54 @@ export function useWebRTC({ role, liveId, user, deviceIds }: UseWebRTCOptions): 
         await pc.setRemoteDescription(new RTCSessionDescription(pullResult.sessionDescription));
       }
 
-      // When the track arrives via ontrack, replace the outgoing sender
-      // so all viewers receive the remote device's stream instead of local
-      const handleTrack = async (event: RTCTrackEvent) => {
-        const incomingTrack = event.track;
-        if (incomingTrack.kind !== kind) return;
+      // Promise that resolves when the matching track arrives
+      const trackArrived = new Promise<void>((resolve) => {
+        const timeout = setTimeout(() => {
+          pc.removeEventListener("track", handler);
+          console.warn(`[Host] Remote ${kind} track timeout — using fallback`);
+          resolve();
+        }, 10000);
 
-        // Replace the outgoing sender so viewers receive the remote device
-        const sender = pc.getSenders().find((s) => s.track?.kind === kind);
-        if (sender) {
-          await sender.replaceTrack(incomingTrack);
-          console.log(`[Host] Remote ${kind} track active:`, incomingTrack.id);
-        }
+        const handler = (event: RTCTrackEvent) => {
+          const incomingTrack = event.track;
+          if (incomingTrack.kind !== kind) return;
 
-        // Update local preview stream — mutate in place so VideoElement
-        // srcObject reference stays valid, then trigger a React re-render
-        if (localStreamRef.current) {
-          const oldTracks = kind === "video"
-            ? localStreamRef.current.getVideoTracks()
-            : localStreamRef.current.getAudioTracks();
-          oldTracks.forEach((t) => {
-            localStreamRef.current!.removeTrack(t);
-            t.stop();
-          });
-          localStreamRef.current.addTrack(incomingTrack);
-          // Force React re-render with a new object reference
-          // so VideoElement useEffect triggers
-          const updated = new MediaStream(localStreamRef.current.getTracks());
-          localStreamRef.current = updated;
-          setLocalStream(updated);
-        }
+          clearTimeout(timeout);
+          pc.removeEventListener("track", handler);
 
-        pc.removeEventListener("track", handleTrack);
-      };
+          // Replace the outgoing sender so viewers receive the remote device
+          const sender = pc.getSenders().find((s) => s.track?.kind === kind);
+          if (sender) {
+            sender.replaceTrack(incomingTrack).then(() => {
+              console.log(`[Host] Remote ${kind} track active:`, incomingTrack.id);
+            });
+          }
 
-      pc.addEventListener("track", handleTrack);
+          // Update local preview stream
+          if (localStreamRef.current) {
+            const oldTracks = kind === "video"
+              ? localStreamRef.current.getVideoTracks()
+              : localStreamRef.current.getAudioTracks();
+            oldTracks.forEach((t) => {
+              localStreamRef.current!.removeTrack(t);
+              t.stop();
+            });
+            localStreamRef.current.addTrack(incomingTrack);
+            const updated = new MediaStream(localStreamRef.current.getTracks());
+            localStreamRef.current = updated;
+            setLocalStream(updated);
+          }
+
+          resolve();
+        };
+
+        pc.addEventListener("track", handler);
+      });
+
+      await trackArrived;
     } catch (err) {
       console.error(`[Host] useRemoteTrack(${kind}) failed:`, err);
+      remoteRef.current = null;
     }
   }, [user, liveId]);
 
@@ -659,6 +713,10 @@ export function useWebRTC({ role, liveId, user, deviceIds }: UseWebRTCOptions): 
   // ─── Cleanup on unmount ────────────────────────────────────
   useEffect(() => {
     return () => {
+      // Don't close PC while join() is in progress — the async flow
+      // holds a local reference that would fail on a closed PC.
+      if (joiningRef.current) return;
+
       const sid = sessionIdRef.current;
       pcRef.current?.close();
       pcRef.current = null;

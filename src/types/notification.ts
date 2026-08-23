@@ -20,4 +20,5 @@ export interface AppNotification {
   link?: string;
   read: boolean;
   createdAt: unknown;
+  count?: number;
 }

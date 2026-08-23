@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import {
+  doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp,
+} from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Loader2, Radio, ArrowLeft, Play, XCircle, AlertTriangle,
+  Loader2, Radio, ArrowLeft, Play, XCircle,
 } from "lucide-react";
 import type { Course } from "@/types/course";
 
@@ -28,6 +30,7 @@ export default function CourseLiveStudioPage() {
   const { user } = useAuth();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
+  const [launchingKey, setLaunchingKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -37,6 +40,51 @@ export default function CourseLiveStudioPage() {
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [id, router]);
+
+  const handleLaunch = useCallback(async (mi: number, vi: number, roomName: string) => {
+    if (!user || !course) return;
+    const key = `${mi}-${vi}`;
+    setLaunchingKey(key);
+
+    try {
+      // Find existing live with this roomName
+      const livesQuery = query(collection(db, "lives"), where("roomName", "==", roomName));
+      const livesSnap = await getDocs(livesQuery);
+
+      let liveId: string;
+
+      if (!livesSnap.empty) {
+        // Live already exists
+        liveId = livesSnap.docs[0].id;
+      } else {
+        // Create a new live session for this lesson
+        const video = course.modules?.[mi]?.videos?.[vi];
+        const docRef = await addDoc(collection(db, "lives"), {
+          title: video?.title || course.title,
+          description: course.description || "",
+          thumbnail: course.thumbnail || "",
+          scheduledAt: video?.scheduledAt || "",
+          target: "free",
+          price: null,
+          status: "scheduled",
+          createdBy: user.uid,
+          institutionId: (user as Record<string, unknown>).institutionId || null,
+          hostName: user.displayName || user.email || "Professor",
+          roomName,
+          participantCount: 0,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+        liveId = docRef.id;
+      }
+
+      router.push(`/admin/lives/${liveId}/studio?courseId=${course.id}&mi=${mi}&vi=${vi}`);
+    } catch (err) {
+      console.error("Failed to launch live:", err);
+    } finally {
+      setLaunchingKey(null);
+    }
+  }, [user, course, router]);
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-[60vh]">
@@ -72,6 +120,8 @@ export default function CourseLiveStudioPage() {
               {module.videos.map((video, vi) => {
                 if (!video.scheduledAt) return null;
                 const st = getLessonStatus(video.scheduledAt, video.duration);
+                const btnKey = `${mi}-${vi}`;
+                const isLaunching = launchingKey === btnKey;
                 return (
                   <div key={vi} className="flex flex-wrap items-center gap-3 px-5 py-4">
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center ${
@@ -94,15 +144,22 @@ export default function CourseLiveStudioPage() {
                     }`}>{st.label}</span>
                     <div className="flex gap-2 shrink-0">
                       {st.status !== "ended" && (
-                        <Link href={`/admin/live-studio?roomName=${video.roomName}&courseId=${course.id}&mi=${mi}&vi=${vi}`}
+                        <button
+                          onClick={() => handleLaunch(mi, vi, video.roomName)}
+                          disabled={isLaunching}
                           className={`flex items-center gap-2 px-4 py-2 text-sm font-bold transition-colors ${
                             st.status === "live"
                               ? "bg-green-600 hover:bg-green-700 text-white"
                               : "bg-purple hover:bg-purple-light text-white"
-                          }`}>
-                          <Play className="h-4 w-4" />
-                          {st.status === "live" ? "Transmitir" : "Iniciar"}
-                        </Link>
+                          } disabled:opacity-50`}
+                        >
+                          {isLaunching ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Play className="h-4 w-4" />
+                          )}
+                          {isLaunching ? "A abrir..." : st.status === "live" ? "Transmitir" : "Iniciar"}
+                        </button>
                       )}
                     </div>
                   </div>

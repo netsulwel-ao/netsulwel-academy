@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import {
-  collection, query, where, onSnapshot,
+  collection, query, onSnapshot,
   doc, updateDoc, deleteDoc, addDoc, getDoc, serverTimestamp,
 } from "firebase/firestore";
 import {
@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { logger } from "@/lib/logger";
+import { sendNotification, getLiveApprovedGroupKey, getLiveRejectedGroupKey } from "@/lib/notifications";
 import type { LiveTarget } from "@/types/live";
 
 // -- Type ------------------------------------------------------
@@ -136,13 +137,12 @@ export default function FreeLiveRequestsPage() {
       });
 
       // Notify teacher via user notifications subcollection
-      await addDoc(collection(db, "users", req.teacherId, "notifications"), {
-        uid:       req.teacherId,
-        type:      "live_approved",
-        title:     "Live aprovada!",
-        message:   `A tua live "${req.title}" foi aprovada e criada. Podes encontr�-la nas tuas aulas ao vivo.`,
-        read:      false,
-        createdAt: serverTimestamp(),
+      await sendNotification({
+        uid: req.teacherId,
+        type: "live_approved",
+        title: "Live aprovada!",
+        message: `A tua live "${req.title}" foi aprovada e criada. Podes encontrá-la nas tuas aulas ao vivo.`,
+        groupKey: getLiveApprovedGroupKey(req.id),
       }).catch(err => {
         // Non-critical � log but don't fail the approval
         logger.error("FreeLiveRequests: failed to notify teacher", err, { teacherId: req.teacherId });
@@ -168,13 +168,12 @@ export default function FreeLiveRequestsPage() {
       });
 
       // Notify teacher
-      await addDoc(collection(db, "users", req.teacherId, "notifications"), {
-        uid:       req.teacherId,
-        type:      "live_rejected",
-        title:     "Pedido de live rejeitado",
-        message:   `O teu pedido para a live "${req.title}" foi rejeitado pelo administrador.`,
-        read:      false,
-        createdAt: serverTimestamp(),
+      await sendNotification({
+        uid: req.teacherId,
+        type: "live_rejected",
+        title: "Pedido de live rejeitado",
+        message: `O teu pedido para a live "${req.title}" foi rejeitado pelo administrador.`,
+        groupKey: getLiveRejectedGroupKey(req.id),
       }).catch(err => {
         logger.error("FreeLiveRequests: failed to notify teacher on reject", err, { teacherId: req.teacherId });
       });

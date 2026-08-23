@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { db } from "@/lib/firebase";
 import {
-  collection, getDocs, addDoc, updateDoc, deleteDoc,
+  collection, getDocs, updateDoc, deleteDoc,
   doc, getDoc, setDoc, serverTimestamp, orderBy, query, where, arrayUnion, arrayRemove,
 } from "firebase/firestore";
 import {
@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { getOrCreateIndividualChat, groupChatId } from "@/lib/chat";
+import { sendNotification, getPaymentGroupKey } from "@/lib/notifications";
 
 const STATUS_CONFIG = {
   pending:   { label: "Pendente",   color: "text-amber-400",  bg: "bg-amber-500/10 border-amber-500",  icon: Clock },
@@ -184,7 +185,7 @@ export default function SalesPage() {
           });
         }
 
-        await addDoc(collection(db, "users", sale.userId, "notifications"), {
+        await sendNotification({
           uid: sale.userId,
           type: "payment_approved",
           title: "Pagamento Confirmado",
@@ -192,8 +193,7 @@ export default function SalesPage() {
           link: sale.type === "standalone" && sale.itemId ? `/dashboard/courses/${sale.itemId}`
             : sale.type === "live" && sale.itemId ? `/dashboard/lives/${sale.itemId}`
             : "/dashboard",
-          read: false,
-          createdAt: serverTimestamp(),
+          groupKey: getPaymentGroupKey(sale.id),
         });
 
         // Send confirmation email (fire-and-forget — don't block the UI)

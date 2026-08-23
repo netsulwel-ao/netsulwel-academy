@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { verifyAuth } from "@/lib/api-auth";
 import { getFirebaseAdmin } from "@/lib/firebase-admin";
+import { sendNotificationAdmin, getQuestionGroupKey } from "@/lib/notifications-admin";
 
 /**
  * POST /api/livekit/qa/ask
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest) {
     await questionRef.set(questionData);
 
     // Notify teacher that a new question was asked
-    await notifyTeacher(admin, liveId, displayName, question);
+    await notifyTeacher(admin, liveId, displayName, question, uid);
 
     return Response.json({
       success: true,
@@ -97,26 +98,22 @@ async function notifyTeacher(
   admin: any,
   liveId: string,
   askerName: string,
-  question: string
+  question: string,
+  askerUid: string
 ) {
   try {
     const liveDoc = await admin.firestore().collection("lives").doc(liveId).get();
     const teacherId = liveDoc.data()?.createdBy;
 
     if (teacherId) {
-      await admin
-        .firestore()
-        .collection("users")
-        .doc(teacherId)
-        .collection("notifications")
-        .add({
-          uid: teacherId,
-          type: "new_question",
-          title: "Nova Pergunta",
-          message: `${askerName}: "${question.substring(0, 100)}..."`,
-          read: false,
-          createdAt: new Date().toISOString(),
-        });
+      await sendNotificationAdmin({
+        db: admin.firestore(),
+        uid: teacherId,
+        type: "new_question",
+        title: "Nova Pergunta",
+        message: `${askerName}: "${question.substring(0, 100)}..."`,
+        groupKey: getQuestionGroupKey(liveId, askerUid),
+      });
     }
   } catch (error) {
     console.error("Error notifying teacher:", error);

@@ -2,6 +2,7 @@ import type { CourseMaterial } from "./course";
 
 export type LiveStatus = "scheduled" | "live" | "ended";
 export type LiveTarget = "free" | "standalone";
+export type RecordingStatusLive = "none" | "recording" | "uploading" | "ready" | "error";
 
 export interface LiveSession {
   id?: string;
@@ -21,6 +22,7 @@ export interface LiveSession {
   participantCount?: number;
   views?: number;
   recordingUrl?: string;      // R2 URL after recording saved
+  recordingStatus?: RecordingStatusLive;
   materials?: CourseMaterial[];
   // Q&A fields
   qaMode?: boolean;

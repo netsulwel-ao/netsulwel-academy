@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { verifyAuth } from "@/lib/api-auth";
 import { getFirebaseAdmin } from "@/lib/firebase-admin";
+import { sendNotificationAdmin, getAnswerGroupKey } from "@/lib/notifications-admin";
 
 /**
  * POST /api/livekit/qa/answer
@@ -69,13 +70,13 @@ export async function POST(req: NextRequest) {
       const askedByUid = questionDoc.data()?.askedBy;
       if (askedByUid) {
         try {
-          await db.collection("users").doc(askedByUid).collection("notifications").add({
+          await sendNotificationAdmin({
+            db,
             uid: askedByUid,
             type: "question_answered",
             title: "Sua Pergunta Foi Respondida",
             message: `Resposta: "${answer.substring(0, 100)}..."`,
-            read: false,
-            createdAt: new Date().toISOString(),
+            groupKey: getAnswerGroupKey(questionId),
           });
         } catch { /* non-critical */ }
       }

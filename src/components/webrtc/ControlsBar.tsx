@@ -4,7 +4,9 @@ import { useState } from "react";
 import {
   Mic, MicOff, Video, VideoOff, Monitor, MonitorOff,
   PhoneOff, Users, Settings2, ChevronUp, Smartphone,
+  Circle, Pause, Square, Loader2,
 } from "lucide-react";
+import type { RecordingStatus } from "@/hooks/useLiveRecording";
 
 interface ControlsBarProps {
   isMicOn: boolean;
@@ -17,6 +19,13 @@ interface ControlsBarProps {
   onOpenDeviceSettings?: () => void;
   onOpenRemoteDevice?: () => void;
   participantCount?: number;
+  recordingStatus?: RecordingStatus;
+  recordingDuration?: string;
+  uploadProgress?: number;
+  onStartRecording?: () => void;
+  onPauseRecording?: () => void;
+  onResumeRecording?: () => void;
+  onStopRecording?: () => void;
 }
 
 export function ControlsBar({
@@ -30,8 +39,20 @@ export function ControlsBar({
   onOpenDeviceSettings,
   onOpenRemoteDevice,
   participantCount = 0,
+  recordingStatus = "idle",
+  recordingDuration = "00:00",
+  uploadProgress = 0,
+  onStartRecording,
+  onPauseRecording,
+  onResumeRecording,
+  onStopRecording,
 }: ControlsBarProps) {
   const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [showStopRecordingConfirm, setShowStopRecordingConfirm] = useState(false);
+
+  const isRecording = recordingStatus === "recording";
+  const isPaused = recordingStatus === "paused";
+  const isUploading = recordingStatus === "uploading";
 
   return (
     <>
@@ -147,6 +168,67 @@ export function ControlsBar({
             </button>
           )}
 
+          {/* ── Recording ─────────────────────────────── */}
+          {onStartRecording && (
+            <>
+              {(isRecording || isPaused) && (
+                <span className="flex items-center gap-1.5 text-xs font-mono text-red-400 mr-1">
+                  <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                  {recordingDuration}
+                </span>
+              )}
+
+              {!isRecording && !isPaused && !isUploading && (
+                <button
+                  onClick={onStartRecording}
+                  title="Iniciar gravação"
+                  className="h-10 px-3 flex items-center gap-1.5 bg-gray-800 text-red-400 hover:bg-gray-600 hover:text-red-300 transition-colors text-xs font-semibold"
+                >
+                  <Circle className="h-3 w-3 fill-red-500" />
+                  <span className="hidden sm:inline">Gravar</span>
+                </button>
+              )}
+
+              {isRecording && onPauseRecording && (
+                <button
+                  onClick={onPauseRecording}
+                  title="Pausar gravação"
+                  className="h-10 w-10 flex items-center justify-center bg-gray-800 text-amber-400 hover:bg-gray-600 transition-colors"
+                >
+                  <Pause className="h-4 w-4" />
+                </button>
+              )}
+
+              {isPaused && onResumeRecording && (
+                <button
+                  onClick={onResumeRecording}
+                  title="Retomar gravação"
+                  className="h-10 px-3 flex items-center gap-1.5 bg-gray-800 text-green-400 hover:bg-gray-600 transition-colors text-xs font-semibold"
+                >
+                  <Circle className="h-3 w-3 fill-green-500" />
+                  <span className="hidden sm:inline">Retomar</span>
+                </button>
+              )}
+
+              {(isRecording || isPaused) && onStopRecording && (
+                <button
+                  onClick={() => setShowStopRecordingConfirm(true)}
+                  title="Parar gravação"
+                  className="h-10 w-10 flex items-center justify-center bg-red-600/20 text-red-400 hover:bg-red-600/40 transition-colors"
+                >
+                  <Square className="h-3.5 w-3.5 fill-red-500" />
+                </button>
+              )}
+
+              {isUploading && (
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-purple" />
+                  <span className="font-mono">{uploadProgress}%</span>
+                </div>
+              )}
+            </>
+          )}
+
           {/* Separator */}
           <div className="w-px h-7 bg-gray-700 mx-1" />
 
@@ -187,6 +269,35 @@ export function ControlsBar({
                 className="px-4 py-2 bg-red-600 text-white text-sm font-bold hover:bg-red-500 transition-colors"
               >
                 Terminar Live
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Stop recording confirm dialog */}
+      {showStopRecordingConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="bg-gray-900 border border-gray-800 p-6 max-w-sm w-full">
+            <h3 className="text-base font-bold text-white mb-2">Parar Gravação?</h3>
+            <p className="text-sm text-gray-400 mb-6">
+              A gravação será guardada e podes publicá-la depois como uma aula no catálogo.
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowStopRecordingConfirm(false)}
+                className="px-4 py-2 bg-gray-800 text-gray-300 text-sm font-medium hover:bg-gray-700 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  setShowStopRecordingConfirm(false);
+                  onStopRecording?.();
+                }}
+                className="px-4 py-2 bg-red-600 text-white text-sm font-bold hover:bg-red-500 transition-colors"
+              >
+                Parar Gravação
               </button>
             </div>
           </div>

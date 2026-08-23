@@ -150,14 +150,14 @@ export function OnboardingTour() {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-gray-950 animate-in fade-in duration-200"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 px-4 animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
       aria-labelledby="onboarding-title"
       onKeyDown={(e) => { if (e.key === "Escape") finish(); }}
     >
       {/* Card */}
-      <div className="relative w-full sm:max-w-md mx-0 sm:mx-4 bg-gray-950 border border-gray-800 shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
+      <div className="relative w-full max-w-md bg-gray-900 border border-gray-800 shadow-2xl animate-in zoom-in-95 duration-300">
 
         {/* Barra de progresso */}
         <div className="h-px bg-gray-800">

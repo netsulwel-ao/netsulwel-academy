@@ -264,11 +264,14 @@ export function RemoteDeviceModal({
   }, []);
 
   const addSlot = useCallback(() => {
-    if (slots.length >= 2) return; // max 2 devices
-    const newSlot = createEmptySlot();
-    setSlots(prev => [...prev, newSlot]);
-    generateToken(newSlot.id);
-  }, [slots.length, generateToken]);
+    setSlots(prev => {
+      if (prev.length >= 2) return prev;
+      const newSlot = createEmptySlot();
+      // Schedule token generation after state update
+      setTimeout(() => generateToken(newSlot.id), 0);
+      return [...prev, newSlot];
+    });
+  }, [generateToken]);
 
   const removeSlot = useCallback(async (slotId: string) => {
     const slot = slots.find(s => s.id === slotId);
@@ -343,14 +346,14 @@ export function RemoteDeviceModal({
             />
           ))}
 
-          {/* Add second device */}
-          {slots.length < 2 && (
+          {/* Add second device — only show when first slot is connected */}
+          {slots.length < 2 && slots[0]?.status === "connected" && (
             <button
               onClick={addSlot}
               className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-700 py-3 text-sm text-gray-500 hover:text-gray-300 hover:border-gray-500 transition-colors"
             >
               <Plus className="h-4 w-4" />
-              Adicionar segundo dispositivo
+              Ligar segundo dispositivo
             </button>
           )}
         </div>

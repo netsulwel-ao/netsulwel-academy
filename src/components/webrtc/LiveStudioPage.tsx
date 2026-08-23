@@ -9,12 +9,14 @@ import {
 } from "firebase/firestore";
 import { useWebRTC } from "@/hooks/useWebRTC";
 import { useMediaDevices } from "@/hooks/useMediaDevices";
+import { useLiveRecording } from "@/hooks/useLiveRecording";
 import { VideoElement } from "./VideoElement";
 import { ControlsBar } from "./ControlsBar";
 import { LiveChat } from "./LiveChat";
 import { AlunosPanel } from "./AlunosPanel";
 import { DeviceSettingsModal } from "./DeviceSettingsModal";
 import { RemoteDeviceModal } from "./RemoteDeviceModal";
+import { PublishRecordingModal } from "./PublishRecordingModal";
 import {
   MessageCircle, X, Users, ArrowLeft, Volume2, VolumeX, Hand, Mic, MicOff, Smartphone
 } from "lucide-react";
@@ -22,9 +24,12 @@ import {
 interface LiveStudioPageProps {
   liveId: string;
   role: "host" | "viewer";
+  courseId?: string;
+  moduleIndex?: number;
+  videoIndex?: number;
 }
 
-export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
+export default function LiveStudioPage({ liveId, role, courseId, moduleIndex, videoIndex }: LiveStudioPageProps) {
   const { user, isAdmin } = useAuth();
   const isHost = role === "host";
 
@@ -41,6 +46,7 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
   const [isApprovedSpeaker, setIsApprovedSpeaker] = useState(false);
   const [showDeviceSettings, setShowDeviceSettings] = useState(false);
   const [showRemoteDevice, setShowRemoteDevice] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
   const [wasEverConnected, setWasEverConnected] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const registeredRef = useRef(false);
@@ -73,6 +79,19 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
     liveId,
     user: user!,
     deviceIds: isHost ? mediaDevices.selected : undefined,
+  });
+
+  // Recording (host only)
+  const recording = useLiveRecording({
+    liveId,
+    liveTitle: liveData?.title || "Live",
+    stream: localStream,
+    createdBy: user?.uid || "",
+    institutionId: (user as Record<string, unknown>)?.institutionId as string | undefined,
+    courseId,
+    moduleIndex,
+    videoIndex,
+    onRecordingReady: courseId ? undefined : () => setShowPublishModal(true),
   });
 
   // ─── Load live data + real-time updates ────────────────────
@@ -624,6 +643,17 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
                   AO VIVO
                 </span>
               )}
+              {recording.status === "recording" && (
+                <span className="flex items-center gap-1.5 text-red-400 text-xs font-bold shrink-0">
+                  <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+                  REC {recording.formattedDuration}
+                </span>
+              )}
+              {recording.status === "uploading" && (
+                <span className="flex items-center gap-1.5 text-purple text-xs font-bold shrink-0">
+                  A gravar... {recording.uploadProgress}%
+                </span>
+              )}
               <h1 className="text-sm font-semibold text-white truncate min-w-0">{liveData?.title || "Live"}</h1>
             </div>
             <div className="flex items-center gap-3 shrink-0">
@@ -699,6 +729,13 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
             onOpenDeviceSettings={() => setShowDeviceSettings(true)}
             onOpenRemoteDevice={() => setShowRemoteDevice(true)}
             participantCount={participantCount}
+            recordingStatus={recording.status}
+            recordingDuration={recording.formattedDuration}
+            uploadProgress={recording.uploadProgress}
+            onStartRecording={recording.startRecording}
+            onPauseRecording={recording.pauseRecording}
+            onResumeRecording={recording.resumeRecording}
+            onStopRecording={recording.stopRecording}
           />
         </div>
       )}
@@ -723,6 +760,19 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
 
       {sidebarOpen && (
         <div className="md:hidden fixed inset-0 bg-black/50 z-20" onClick={() => setSidebarOpen(false)} />
+      )}
+
+      {/* Publish recording modal — only for standalone lives (not part of a course) */}
+      {!courseId && showPublishModal && recording.recordingResult && (
+        <PublishRecordingModal
+          liveId={liveId}
+          liveTitle={liveData?.title || "Live"}
+          liveDescription={liveData?.description || ""}
+          liveThumbnail={liveData?.thumbnail || ""}
+          recordingUrl={recording.recordingResult.url}
+          recordingDuration={recording.recordingResult.duration}
+          onClose={() => setShowPublishModal(false)}
+        />
       )}
     </div>
   );

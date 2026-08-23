@@ -207,12 +207,12 @@ function DirectPlayer({
   return (
     <div className="absolute inset-0 flex flex-col">
       {/* Vídeo */}
-      <div className="relative flex-1" onClick={handleTap}>
+      <div className="relative flex-1 min-h-0" onClick={handleTap}>
         <video
           ref={videoRef}
           src={source.src}
           poster={source.poster}
-          className="w-full h-full object-contain"
+          className="absolute inset-0 w-full h-full object-contain"
           style={{ pointerEvents: "none" }}
           playsInline
           preload="metadata"
@@ -220,34 +220,36 @@ function DirectPlayer({
 
         {/* Loading spinner */}
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black pointer-events-none">
-            <Loader2 className="h-8 w-8 animate-spin text-white" />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 pointer-events-none z-10">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm">
+              <Loader2 className="h-7 w-7 animate-spin text-white" />
+            </div>
           </div>
         )}
 
         {/* Play central quando pausado */}
         {!playing && !loading && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="flex h-14 w-14 items-center justify-center bg-black border border-white">
-              <Play className="h-7 w-7 text-white ml-0.5" strokeWidth={1.5} />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm border-2 border-white/80 shadow-lg shadow-black/40">
+              <Play className="h-8 w-8 sm:h-10 sm:w-10 text-white fill-white ml-1" strokeWidth={0} />
             </div>
           </div>
         )}
       </div>
 
       {/* ── Controlos ── */}
-      <div className={`absolute bottom-0 left-0 right-0 transition-opacity duration-200 ${
+      <div className={`absolute bottom-0 left-0 right-0 transition-opacity duration-200 z-20 ${
         showControls ? "opacity-100" : "opacity-0 pointer-events-none"
       }`}>
         {/* Gradiente de fundo */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
 
-        <div className="relative px-3 pb-3 sm:px-4 sm:pb-4 pt-10">
+        <div className="relative px-3 pb-2 sm:px-4 sm:pb-3 pt-8">
           {/* Barra de progresso — maior área de toque em mobile */}
           <div
             ref={progressRef}
             onClick={handleSeekClick}
-            className="relative w-full mb-3 cursor-pointer group/prog"
+            className="relative w-full mb-2 cursor-pointer group/prog"
             style={{ height: 20, display: "flex", alignItems: "center" }}
           >
             {/* Track */}

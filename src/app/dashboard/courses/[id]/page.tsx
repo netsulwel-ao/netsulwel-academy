@@ -20,7 +20,7 @@ import ExerciseBlock from "@/components/shared/ExerciseBlock";
 import { getOrCreateGroupChat, getOrCreateIndividualChat, groupChatId } from "@/lib/chat";
 import { listenQuizResults, getQuizModules } from "@/lib/quiz";
 import type { ModuleQuizResult } from "@/types/quiz";
-import type { Course, CourseType } from "@/types/course";
+import type { Course, CourseType, VideoItem } from "@/types/course";
 
 const LEVEL_LABEL: Record<string, string> = {
   beginner: "Iniciante", intermediate: "Intermédio", advanced: "Avançado",
@@ -124,7 +124,6 @@ export default function CourseDetailPage() {
   const [followed, setFollowed] = useState(false);
   const [followCount, setFollowCount] = useState(0);
   const [completed, setCompleted] = useState<Record<number, Record<number, boolean>>>({});
-  const [completedCount, setCompletedCount] = useState(0);
   const [progressLoaded, setProgressLoaded] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const currentTimeRef = useRef(0);
@@ -134,6 +133,7 @@ export default function CourseDetailPage() {
   const [accessCodeError, setAccessCodeError] = useState("");
   const [accessCodeLoading, setAccessCodeLoading] = useState(false);
   const [accessCodeSuccess, setAccessCodeSuccess] = useState(false);
+  const [liveSelectedVideo, setLiveSelectedVideo] = useState<VideoItem | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -159,7 +159,6 @@ export default function CourseDetailPage() {
           if (progressSnap.exists()) {
             const p = progressSnap.data();
             setCompleted(p.completed ?? {});
-            setCompletedCount(p.completedCount ?? 0);
             setProgressLoaded(true);
             const mi = p.currentMi ?? 0;
             const vi = p.currentVi ?? 0;
@@ -216,6 +215,10 @@ export default function CourseDetailPage() {
   const saveProgress = useCallback(async (mi: number, vi: number, time?: number) => {
     if (!user || !course?.id) return;
     const totalLessons = course.modules?.reduce((acc, m) => acc + m.videos.length, 0) ?? 0;
+    const currentCompletedCount = Object.values(completed).reduce(
+      (acc, module) => acc + Object.values(module).filter(Boolean).length,
+      0,
+    );
     await setDoc(doc(db, "progress", user.uid, "courses", course.id), {
       userId: user.uid,
       courseId: course.id,
@@ -223,11 +226,11 @@ export default function CourseDetailPage() {
       currentVi: vi,
       currentTime: time ?? currentTimeRef.current,
       completed,
-      completedCount,
+      completedCount: currentCompletedCount,
       totalCount: totalLessons,
       lastAccessedAt: serverTimestamp(),
     }, { merge: true });
-  }, [user, course?.id, course?.modules, completed, completedCount]);
+  }, [user, course?.id, course?.modules, completed]);
 
   useEffect(() => {
     if (!user || !course?.id || !activeLesson) return;
@@ -244,7 +247,13 @@ export default function CourseDetailPage() {
   const lessonCompleted = activeLesson ? completed[activeLesson.mi]?.[activeLesson.vi] ?? false : false;
 
   const totalLessons = course?.modules?.reduce((acc, m) => acc + m.videos.length, 0) ?? 0;
-  const progressPct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+
+  // Derive completedCount from the completed map (source of truth)
+  const completedCount = Object.values(completed).reduce(
+    (acc, module) => acc + Object.values(module).filter(Boolean).length,
+    0,
+  );
+  const progressPct = totalLessons > 0 ? Math.min(100, Math.round((completedCount / totalLessons) * 100)) : 0;
 
   const toggleComplete = async () => {
     if (!activeLesson || !user || !course?.id) return;
@@ -254,10 +263,14 @@ export default function CourseDetailPage() {
     const newCompleted = { ...completed };
     if (!newCompleted[mi]) newCompleted[mi] = {};
     newCompleted[mi] = { ...newCompleted[mi], [vi]: !isCompleted };
-    const delta = !isCompleted ? 1 : -1;
+
+    // Derive newCount from the updated map (no stale closure)
+    const newCount = Object.values(newCompleted).reduce(
+      (acc, module) => acc + Object.values(module).filter(Boolean).length,
+      0,
+    );
+
     setCompleted(newCompleted);
-    setCompletedCount(prev => prev + delta);
-    const newCount = completedCount + delta;
 
     // Save immediately
     await setDoc(doc(db, "progress", user.uid, "courses", course.id), {
@@ -418,6 +431,32 @@ export default function CourseDetailPage() {
           <>
             {/* LEFT: Schedule timeline */}
             <div className="flex-1 min-w-0 space-y-6">
+              {/* Recording player — shown when a completed lesson with a URL is selected */}
+              {liveSelectedVideo?.url && (
+                <div className="bg-bg-surface border border-border-default overflow-hidden">
+                  <div className="px-5 py-3 border-b border-border-default flex items-center justify-between">
+                    <p className="text-sm font-bold text-text-primary truncate">{liveSelectedVideo.title}</p>
+                    <button onClick={() => setLiveSelectedVideo(null)}
+                      className="text-sm text-text-muted hover:text-text-primary transition-colors">
+                      Fechar
+                    </button>
+                  </div>
+                  <VideoPlayer source={buildVideoSource(liveSelectedVideo.url, course.thumbnail)} />
+
+                  {/* Materials & Exercises below the player */}
+                  {hasAccess && liveSelectedVideo.materials && liveSelectedVideo.materials.length > 0 && (
+                    <div className="px-5 py-4 border-t border-border-default">
+                      <MaterialsList materials={liveSelectedVideo.materials} />
+                    </div>
+                  )}
+                  {hasAccess && liveSelectedVideo.exercises && liveSelectedVideo.exercises.length > 0 && (
+                    <div className="px-5 py-4 border-t border-border-default">
+                      <ExerciseBlock exercises={liveSelectedVideo.exercises} />
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="bg-bg-surface border border-border-default p-6">
                 <h2 className="text-lg font-bold text-text-primary mb-1">{course.title}</h2>
                 <p className="text-sm text-text-muted">{course.modules.reduce((a, m) => a + m.videos.length, 0)} aulas ao vivo</p>
@@ -432,6 +471,7 @@ export default function CourseDetailPage() {
                     <div className="divide-y divide-border-default">
                       {module.videos.map((video, vi) => {
                         const st = getLessonStatus(video.scheduledAt, video.duration);
+                        const hasRecording = st.status === "ended" && hasAccess && !!video.url;
                         return (
                           <div key={vi} className="flex items-center gap-4 px-5 py-4">
                             <div className={`flex h-10 w-10 shrink-0 items-center justify-center ${
@@ -462,6 +502,16 @@ export default function CourseDetailPage() {
                                   className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-text-primary text-sm font-bold transition-colors">
                                   <Radio className="h-4 w-4" /> Entrar
                                 </Link>
+                              )}
+                              {hasRecording && (
+                                <button onClick={() => setLiveSelectedVideo(video)}
+                                  className={`flex items-center gap-2 px-4 py-2 text-sm font-bold transition-colors ${
+                                    liveSelectedVideo === video
+                                      ? "bg-purple text-white"
+                                      : "bg-purple/15 text-purple hover:bg-purple/25 border border-purple"
+                                  }`}>
+                                  <Play className="h-4 w-4" /> Assistir
+                                </button>
                               )}
                             </div>
                           </div>

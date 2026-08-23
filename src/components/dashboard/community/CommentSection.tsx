@@ -7,6 +7,7 @@ import {
   addDoc, serverTimestamp, doc, increment, updateDoc,
 } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
+import { sendNotification, getCommentGroupKey } from "@/lib/notifications";
 import { Send, Loader2, AlertCircle } from "lucide-react";
 import type { CommunityComment } from "@/types/community";
 
@@ -58,14 +59,13 @@ export default function CommentSection({ postId, postAuthorId, postTitle }: { po
       });
 
       if (postAuthorId !== user.uid) {
-        await addDoc(collection(db, "users", postAuthorId, "notifications"), {
+        await sendNotification({
           uid: postAuthorId,
           type: "community_comment",
           title: "Novo comentário",
           message: `${user.displayName || "Alguém"} comentou no teu post "${postTitle}"`,
           link: `/dashboard/community/${postId}`,
-          read: false,
-          createdAt: serverTimestamp(),
+          groupKey: getCommentGroupKey(postId),
         });
       }
 
