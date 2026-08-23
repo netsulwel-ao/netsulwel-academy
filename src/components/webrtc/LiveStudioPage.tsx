@@ -41,6 +41,7 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
   const [isApprovedSpeaker, setIsApprovedSpeaker] = useState(false);
   const [showDeviceSettings, setShowDeviceSettings] = useState(false);
   const [showRemoteDevice, setShowRemoteDevice] = useState(false);
+  const [wasEverConnected, setWasEverConnected] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const registeredRef = useRef(false);
   const speakerAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -245,7 +246,12 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
     return () => unsub();
   }, [isHost, user, connected, liveId, pullSpeakerTracks]);
 
-  // ─── Elapsed timer ─────────────────────────────────────────
+  // ─── Track if viewer was ever connected (to show right message) ──
+  useEffect(() => {
+    if (!isHost && connected) {
+      setWasEverConnected(true);
+    }
+  }, [isHost, connected]);
   useEffect(() => {
     if (isHost && !started) return;
     if (!isHost && !connected) return;
@@ -537,14 +543,18 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
                     </div>
                     <div className="space-y-2">
                       <p className="text-white font-medium">
-                        {liveData?.status === "live"
+                        {wasEverConnected
                           ? "A aguardar que o professor volte..."
-                          : "A aguardar início..."}
+                          : liveData?.status === "live"
+                            ? "A ligar ao professor..."
+                            : "A aguardar início..."}
                       </p>
                       <p className="text-gray-500 text-sm">
-                        {liveData?.status === "live"
+                        {wasEverConnected
                           ? "A ligação será retomada automaticamente"
-                          : "O professor ainda não começou a live"}
+                          : liveData?.status === "live"
+                            ? "A transmissão será iniciada em breve"
+                            : "O professor ainda não começou a live"}
                       </p>
                     </div>
                   </div>

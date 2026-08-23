@@ -100,8 +100,14 @@ export async function POST(req: NextRequest) {
       }
       const pushData = await res.json();
 
-      // Only write hostSessionId + publishedTracks when HOST pushes (not speakers)
-      if (!isApprovedSpeaker) {
+      // Write hostSessionId + publishedTracks when the HOST pushes.
+      // Use isLiveOwner/isOwner/isAdmin/isTeacher to identify the host —
+      // NOT !isApprovedSpeaker, because a host who was also approved as speaker
+      // would wrongly skip this write.
+      const isHost = isOwner || isAdmin || isTeacher || isLiveOwner;
+      const isPureStudentSpeaker = isApprovedSpeaker && !isHost;
+
+      if (!isPureStudentSpeaker) {
         const trackNames = tracks.map((t: any) => t.trackName);
         await admin.firestore().doc(`lives/${liveId}`).update({
           hostSessionId: sessionId,
