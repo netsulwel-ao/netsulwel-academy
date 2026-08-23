@@ -614,94 +614,93 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
 
       ) : (
 
-        <div className="flex-1 flex overflow-hidden relative">
-          {/* Video area */}
-          <div className="flex-1 bg-gray-950 relative min-h-0">
-            {localStream ? (
-              <VideoElement stream={localStream} muted className="h-full w-full" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center px-6">
-                <div className="text-center space-y-4 max-w-xs">
-                  <div className="h-24 w-24 mx-auto rounded-full bg-gray-900 border border-gray-800 flex items-center justify-center">
-                    <span className="text-4xl">📡</span>
-                  </div>
-                  <p className="text-gray-500 text-sm">A preparar câmara...</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar desktop */}
-          <div className="hidden md:flex w-80 bg-gray-900 border-l border-gray-800 flex-col shrink-0">
-            <div className="flex border-b border-gray-800">
-              <button
-                onClick={() => setActiveTab("chat")}
-                className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
-                  activeTab === "chat" ? "text-white border-b-2 border-purple" : "text-gray-500 hover:text-gray-300"
-                }`}
-              >
-                Chat
-                {handRaisedCount > 0 && (
-                  <span className="absolute top-2 right-3 h-4 min-w-4 px-1 rounded-full bg-amber-500 text-[10px] font-bold text-white flex items-center justify-center">
-                    {handRaisedCount}
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={() => setActiveTab("alunos")}
-                className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "alunos" ? "text-white border-b-2 border-purple" : "text-gray-500 hover:text-gray-300"
-                }`}
-              >
-                Alunos ({participantCount})
-              </button>
+        <div className="flex flex-col h-full overflow-hidden">
+          {/* Host top bar */}
+          <div className="h-12 bg-gray-900/95 border-b border-gray-800 flex items-center justify-between px-3 shrink-0 z-10">
+            <div className="flex items-center gap-2 min-w-0">
+              {showLiveBadge && (
+                <span className="flex items-center gap-1.5 text-red-400 text-xs font-bold shrink-0">
+                  <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+                  AO VIVO
+                </span>
+              )}
+              <h1 className="text-sm font-semibold text-white truncate min-w-0">{liveData?.title || "Live"}</h1>
             </div>
-            <div className="flex-1 overflow-hidden">
-              {activeTab === "chat" ? <LiveChat liveId={liveId} role="host" /> : <AlunosPanel liveId={liveId} />}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── HOST top bar (só host) ────────────────────────── */}
-      {isHost && (
-        <div className="absolute top-0 left-0 right-0 h-12 bg-gray-900/95 backdrop-blur border-b border-gray-800 flex items-center justify-between px-3 z-20">
-          <div className="flex items-center gap-2 min-w-0">
-            {showLiveBadge && (
-              <span className="flex items-center gap-1.5 text-red-400 text-xs font-bold shrink-0">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
-                AO VIVO
+            <div className="flex items-center gap-3 shrink-0">
+              {showTimer && <span className="text-xs text-gray-400 font-mono hidden sm:inline">{fmtElapsed(elapsed)}</span>}
+              <span className="flex items-center gap-1 text-xs text-gray-400">
+                <Users className="h-3.5 w-3.5" />
+                {participantCount}
               </span>
-            )}
-            <h1 className="text-sm font-semibold text-white truncate min-w-0">{liveData?.title || "Live"}</h1>
+              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-1.5 text-gray-400">
+                {sidebarOpen ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-3 shrink-0">
-            {showTimer && <span className="text-xs text-gray-400 font-mono hidden sm:inline">{fmtElapsed(elapsed)}</span>}
-            <span className="flex items-center gap-1 text-xs text-gray-400">
-              <Users className="h-3.5 w-3.5" />
-              {participantCount}
-            </span>
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-1.5 text-gray-400">
-              {sidebarOpen ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
-            </button>
-          </div>
-        </div>
-      )}
 
-      {/* ── HOST controls ────────────────────────────────── */}
-      {isHost && (
-        <ControlsBar
-          isMicOn={isMicOn}
-          isCameraOn={isCameraOn}
-          isScreenSharing={isScreenSharing}
-          onToggleMic={toggleMic}
-          onToggleCamera={toggleCamera}
-          onToggleScreenShare={toggleScreenShare}
-          onEndLive={handleEndLive}
-          onOpenDeviceSettings={() => setShowDeviceSettings(true)}
-          onOpenRemoteDevice={() => setShowRemoteDevice(true)}
-          participantCount={participantCount}
-        />
+          {/* Video + sidebar row */}
+          <div className="flex-1 flex overflow-hidden min-h-0">
+            {/* Video area */}
+            <div className="flex-1 bg-gray-950 relative min-h-0">
+              {localStream ? (
+                <VideoElement stream={localStream} muted className="h-full w-full" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center px-6">
+                  <div className="text-center space-y-4 max-w-xs">
+                    <div className="h-24 w-24 mx-auto rounded-full bg-gray-900 border border-gray-800 flex items-center justify-center">
+                      <span className="text-4xl">📡</span>
+                    </div>
+                    <p className="text-gray-500 text-sm">A preparar câmara...</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Sidebar desktop */}
+            <div className="hidden md:flex w-80 bg-gray-900 border-l border-gray-800 flex-col shrink-0">
+              <div className="flex border-b border-gray-800">
+                <button
+                  onClick={() => setActiveTab("chat")}
+                  className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
+                    activeTab === "chat" ? "text-white border-b-2 border-purple" : "text-gray-500 hover:text-gray-300"
+                  }`}
+                >
+                  Chat
+                  {handRaisedCount > 0 && (
+                    <span className="absolute top-2 right-3 h-4 min-w-4 px-1 rounded-full bg-amber-500 text-[10px] font-bold text-white flex items-center justify-center">
+                      {handRaisedCount}
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => setActiveTab("alunos")}
+                  className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                    activeTab === "alunos" ? "text-white border-b-2 border-purple" : "text-gray-500 hover:text-gray-300"
+                  }`}
+                >
+                  Alunos ({participantCount})
+                </button>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                {activeTab === "chat" ? <LiveChat liveId={liveId} role="host" /> : <AlunosPanel liveId={liveId} />}
+              </div>
+            </div>
+          </div>
+
+          {/* Controls bar */}
+          <ControlsBar
+            isMicOn={isMicOn}
+            isCameraOn={isCameraOn}
+            isScreenSharing={isScreenSharing}
+            onToggleMic={toggleMic}
+            onToggleCamera={toggleCamera}
+            onToggleScreenShare={toggleScreenShare}
+            onEndLive={handleEndLive}
+            onOpenDeviceSettings={() => setShowDeviceSettings(true)}
+            onOpenRemoteDevice={() => setShowRemoteDevice(true)}
+            participantCount={participantCount}
+          />
+        </div>
       )}
 
       {/* ── Mobile chat drawer (viewer + host) ───────────── */}

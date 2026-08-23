@@ -628,12 +628,11 @@ export function useWebRTC({ role, liveId, user, deviceIds }: UseWebRTCOptions): 
     if (isScreenSharing) {
       screenStreamRef.current?.getTracks().forEach((t) => t.stop());
       screenStreamRef.current = null;
-      if (localStreamRef.current) {
-        const camTrack = localStreamRef.current.getVideoTracks()[0];
-        if (camTrack) {
-          const sender = pcRef.current.getSenders().find((s) => s.track?.kind === "video");
-          if (sender) sender.replaceTrack(camTrack);
-        }
+      // Restore the current local video track (could be from webcam or remote device)
+      const camTrack = localStreamRef.current?.getVideoTracks()[0];
+      if (camTrack) {
+        const sender = pcRef.current.getSenders().find((s) => s.track?.kind === "video");
+        if (sender) await sender.replaceTrack(camTrack);
       }
       setIsScreenSharing(false);
     } else {
@@ -644,7 +643,7 @@ export function useWebRTC({ role, liveId, user, deviceIds }: UseWebRTCOptions): 
       screenStreamRef.current = screenStream;
       const screenTrack = screenStream.getVideoTracks()[0];
       const sender = pcRef.current.getSenders().find((s) => s.track?.kind === "video");
-      if (sender && screenTrack) sender.replaceTrack(screenTrack);
+      if (sender && screenTrack) await sender.replaceTrack(screenTrack);
       screenTrack.onended = () => toggleScreenShare();
       setIsScreenSharing(true);
     }
