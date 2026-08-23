@@ -68,7 +68,7 @@ export default function CourseLiveStudioPage() {
           price: null,
           status: "scheduled",
           createdBy: user.uid,
-          institutionId: (user as Record<string, unknown>).institutionId || null,
+          institutionId: (user as unknown as Record<string, unknown>).institutionId || null,
           hostName: user.displayName || user.email || "Professor",
           roomName,
           participantCount: 0,
@@ -145,7 +145,7 @@ export default function CourseLiveStudioPage() {
                     <div className="flex gap-2 shrink-0">
                       {st.status !== "ended" && (
                         <button
-                          onClick={() => handleLaunch(mi, vi, video.roomName)}
+                          onClick={() => handleLaunch(mi, vi, video.roomName ?? "")}
                           disabled={isLaunching}
                           className={`flex items-center gap-2 px-4 py-2 text-sm font-bold transition-colors ${
                             st.status === "live"

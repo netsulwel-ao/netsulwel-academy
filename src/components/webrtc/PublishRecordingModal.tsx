@@ -96,7 +96,7 @@ export function PublishRecordingModal({
         lessonsCount: 1,
         status,
         createdBy: user.uid,
-        institutionId: (user as Record<string, unknown>).institutionId || null,
+        institutionId: (user as unknown as Record<string, unknown>).institutionId || null,
         sourceLiveId: liveId,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),

@@ -193,7 +193,7 @@ export default function SalesPage() {
           link: sale.type === "standalone" && sale.itemId ? `/dashboard/courses/${sale.itemId}`
             : sale.type === "live" && sale.itemId ? `/dashboard/lives/${sale.itemId}`
             : "/dashboard",
-          groupKey: getPaymentGroupKey(sale.id),
+          groupKey: getPaymentGroupKey(sale.id ?? ""),
         });
 
         // Send confirmation email (fire-and-forget — don't block the UI)

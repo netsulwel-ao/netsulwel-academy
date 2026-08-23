@@ -87,7 +87,7 @@ export default function LiveStudioPage({ liveId, role, courseId, moduleIndex, vi
     liveTitle: liveData?.title || "Live",
     stream: localStream,
     createdBy: user?.uid || "",
-    institutionId: (user as Record<string, unknown>)?.institutionId as string | undefined,
+    institutionId: (user as unknown as Record<string, unknown>)?.institutionId as string | undefined,
     courseId,
     moduleIndex,
     videoIndex,
