@@ -236,69 +236,119 @@ export function useWebRTC({ role, liveId, user, deviceIds }: UseWebRTCOptions): 
 
   // ─── VIEWER: Join + Pull host tracks ─────────────────────
   const joinViewer = useCallback(async () => {
-    const pc = createPeerConnection();
-    pcRef.current = pc;
+    // This function is called ONCE. It creates the initial session and keeps
+    // a Firestore listener alive. When the host rejoins with a new hostSessionId,
+    // we tear down the old PC and create a brand-new one transparently.
 
-    // 1. Add recvonly transceivers
-    pc.addTransceiver("video", { direction: "recvonly" });
-    pc.addTransceiver("audio", { direction: "recvonly" });
+    let currentPc: RTCPeerConnection | null = null;
+    let currentSessionId: string | null = null;
+    let lastPulledHostSessionId: string | null = null;
 
-    // 2. Create offer → create session (authenticated) → set answer
-    await pc.setLocalDescription(await pc.createOffer());
-    const sessionResult = await cfCreateSession(user, liveId, pc.localDescription!);
-    setSessionId(sessionResult.sessionId);
-    sessionIdRef.current = sessionResult.sessionId;
-    await pc.setRemoteDescription(new RTCSessionDescription(sessionResult.sessionDescription));
+    const connectToPc = async (hostSessionId: string, publishedTracks: string[]) => {
+      // Tear down the previous PC if any
+      if (currentPc) {
+        console.log("[Viewer] Tearing down old PC, reconnecting to new host session...");
+        currentPc.ontrack = null;
+        currentPc.oniceconnectionstatechange = null;
+        currentPc.close();
+        currentPc = null;
+      }
 
-    // 3. Wait for hostSessionId + publishedTracks in Firestore, then pull
+      const pc = createPeerConnection();
+      currentPc = pc;
+      pcRef.current = pc;
+
+      // Detect host disconnection
+      pc.addEventListener("iceconnectionstatechange", () => {
+        if (pc !== currentPc) return; // stale event
+        const state = pc.iceConnectionState;
+        console.log("[Viewer] ICE state:", state);
+        if (state === "failed" || state === "disconnected" || state === "closed") {
+          setConnected(false);
+          combinedStreamRef.current = null;
+          setRemoteStreams([]);
+          console.log("[Viewer] Host disconnected — waiting for host to rejoin...");
+        }
+      });
+
+      // Add recvonly transceivers
+      pc.addTransceiver("video", { direction: "recvonly" });
+      pc.addTransceiver("audio", { direction: "recvonly" });
+
+      // Create offer → new Cloudflare session → set answer
+      await pc.setLocalDescription(await pc.createOffer());
+      const sessionResult = await cfCreateSession(user, liveId, pc.localDescription!);
+
+      // Update refs so the rest of the hook can use the new session
+      currentSessionId = sessionResult.sessionId;
+      setSessionId(sessionResult.sessionId);
+      sessionIdRef.current = sessionResult.sessionId;
+
+      await pc.setRemoteDescription(new RTCSessionDescription(sessionResult.sessionDescription));
+
+      // Set ontrack BEFORE pulling
+      pc.ontrack = (event) => {
+        if (pc !== currentPc) return; // stale event
+        const track = event.track;
+        if (!track) return;
+        console.log("[Viewer] ontrack:", track.kind, track.id);
+
+        if (!combinedStreamRef.current) {
+          combinedStreamRef.current = new MediaStream([track]);
+          setRemoteStreams([combinedStreamRef.current]);
+        } else if (!combinedStreamRef.current.getTracks().find((t) => t.id === track.id)) {
+          combinedStreamRef.current.addTrack(track);
+          setRemoteStreams([combinedStreamRef.current]);
+        }
+        setConnected(true);
+      };
+
+      // Pull host tracks
+      const tracksToPull = publishedTracks.map((trackName) => ({
+        location: "remote" as const,
+        trackName,
+        sessionId: hostSessionId,
+      }));
+
+      const pullResult = await cfPullTracks(user, liveId, sessionResult.sessionId, tracksToPull);
+
+      if (pullResult.requiresImmediateRenegotiation && pullResult.sessionDescription) {
+        await pc.setRemoteDescription(new RTCSessionDescription(pullResult.sessionDescription));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        const renegResult = await cfRenegotiate(user, liveId, sessionResult.sessionId, pc.localDescription!);
+        if (renegResult.errorCode) throw new Error(renegResult.errorDescription);
+      } else if (pullResult.sessionDescription) {
+        await pc.setRemoteDescription(new RTCSessionDescription(pullResult.sessionDescription));
+      }
+
+      console.log("[Viewer] Connected to hostSessionId:", hostSessionId);
+    };
+
+    // Keep this listener alive forever — it handles both first connect and reconnects
     const unsubscribe = onSnapshot(doc(db, "lives", liveId), async (snap) => {
+      if (pcRef.current !== currentPc && currentPc !== null) {
+        // A leave() was called, stop listening
+        unsubscribe();
+        return;
+      }
+
       const data = snap.data();
-      const hostSessionId = data?.hostSessionId;
+      const hostSessionId = data?.hostSessionId as string | undefined;
       const publishedTracks = data?.publishedTracks as string[] | undefined;
 
       if (!hostSessionId || !publishedTracks || publishedTracks.length === 0) return;
-      if (pcRef.current !== pc) return;
 
-      unsubscribe();
+      // Only reconnect when the host session actually changed
+      if (hostSessionId === lastPulledHostSessionId) return;
+      lastPulledHostSessionId = hostSessionId;
 
       try {
-        // Set ontrack BEFORE pulling
-        pc.ontrack = (event) => {
-          const track = event.track;
-          if (!track) return;
-          console.log("[Viewer] ontrack:", track.kind, track.id);
-
-          if (!combinedStreamRef.current) {
-            combinedStreamRef.current = new MediaStream([track]);
-            setRemoteStreams([combinedStreamRef.current]);
-          } else if (!combinedStreamRef.current.getTracks().find((t) => t.id === track.id)) {
-            combinedStreamRef.current.addTrack(track);
-            setRemoteStreams([combinedStreamRef.current]);
-          }
-          setConnected(true);
-        };
-
-        const tracksToPull = publishedTracks.map((trackName) => ({
-          location: "remote" as const,
-          trackName,
-          sessionId: hostSessionId,
-        }));
-
-        const pullResult = await cfPullTracks(user, liveId, sessionResult.sessionId, tracksToPull);
-
-        if (pullResult.requiresImmediateRenegotiation && pullResult.sessionDescription) {
-          await pc.setRemoteDescription(new RTCSessionDescription(pullResult.sessionDescription));
-          const answer = await pc.createAnswer();
-          await pc.setLocalDescription(answer);
-          const renegResult = await cfRenegotiate(user, liveId, sessionResult.sessionId, pc.localDescription!);
-          if (renegResult.errorCode) {
-            throw new Error(renegResult.errorDescription);
-          }
-        } else if (pullResult.sessionDescription) {
-          await pc.setRemoteDescription(new RTCSessionDescription(pullResult.sessionDescription));
-        }
+        await connectToPc(hostSessionId, publishedTracks);
       } catch (err) {
-        console.error("Failed to pull host tracks:", err);
+        console.error("[Viewer] Failed to connect to host:", err);
+        // Reset so next Firestore update retries
+        lastPulledHostSessionId = null;
       }
     });
   }, [user, liveId]);

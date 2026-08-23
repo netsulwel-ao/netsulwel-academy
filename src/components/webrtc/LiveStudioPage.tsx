@@ -82,7 +82,6 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
       }
       setLoading(false);
     }, () => {
-      // on error, unblock loading anyway
       setLoading(false);
     });
     return () => unsub();
@@ -326,13 +325,17 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
 
   // ─── Join on mount ─────────────────────────────────────────
   useEffect(() => {
-    if (!user) return;
+    if (!user || !liveData) return;
     if (isHost) {
-      if (liveData && !connected && !error) join();
+      // Host joins as soon as liveData is available and not yet connected
+      if (!connected && !error) join();
     } else {
-      if (liveData && liveData.hostSessionId && !connected && !error) join();
+      // Viewer joins once — the internal Firestore listener in joinViewer
+      // handles automatic reconnect when the host rejoins with a new session
+      if (!sessionId && !error) join();
     }
-  }, [liveData, user, connected, error, join, isHost]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveData, user]);
 
   // ─── Handle live ended (viewer) ────────────────────────────
   useEffect(() => {
@@ -535,19 +538,18 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
                     <div className="space-y-2">
                       <p className="text-white font-medium">
                         {liveData?.status === "live"
-                          ? "A ligar ao professor..."
+                          ? "A aguardar que o professor volte..."
                           : "A aguardar início..."}
                       </p>
                       <p className="text-gray-500 text-sm">
                         {liveData?.status === "live"
-                          ? "A transmissão será iniciada em breve"
+                          ? "A ligação será retomada automaticamente"
                           : "O professor ainda não começou a live"}
                       </p>
                     </div>
                   </div>
                 </div>
-              )}
-            </>
+              )}            </>
           )}
         </div>
 
