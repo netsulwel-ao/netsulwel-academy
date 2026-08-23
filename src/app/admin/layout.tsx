@@ -50,8 +50,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       />
       <div className="flex flex-1 flex-col transition-all duration-300 h-full overflow-hidden">
         <Header onMenuClick={() => setMobileOpen(true)} />
-        <main id="main-content" className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-background">
-          {children}
+        <main id="main-content" className="flex-1 overflow-y-auto px-5 py-4 sm:p-6 lg:p-8 bg-background">
+          <div className="max-w-7xl mx-auto w-full">
+            {children}
+          </div>
         </main>
       </div>
     </div>
