@@ -22,7 +22,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [loading, profileLoaded, user, isAdminOrTeacher, router]);
 
-  if (!user) return null;
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/login?redirect=/admin");
+    }
+  }, [loading, user, router]);
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center bg-background h-screen overflow-hidden gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-brand-purple" />
+        <p className="text-sm text-gray-500">A redirecionar para o login...</p>
+      </div>
+    );
+  }
 
   if (loading || !profileLoaded) {
     return (
@@ -34,8 +47,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!isAdminOrTeacher) {
     return (
-      <div className="flex items-center justify-center bg-background h-screen overflow-hidden">
+      <div className="flex flex-col items-center justify-center bg-background h-screen overflow-hidden gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-brand-purple" />
+        <p className="text-sm text-gray-500">Sem permissão de acesso.</p>
       </div>
     );
   }

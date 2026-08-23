@@ -30,6 +30,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
    }
  }, [isInstitution, loading, profileLoaded, pathname, router]);
 
+ useEffect(() => {
+   if (!loading && !user) {
+     router.replace("/login?redirect=/dashboard");
+   }
+ }, [loading, user, router]);
+
  if (loading || !profileLoaded) {
    return (
      <div className="flex items-center justify-center bg-background h-screen overflow-hidden">
@@ -38,7 +44,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
    );
  }
 
- if (!user) return null;
+ if (!user) {
+   return (
+     <div className="flex flex-col items-center justify-center bg-background h-screen overflow-hidden gap-4">
+       <Loader2 className="h-8 w-8 animate-spin text-brand-purple" />
+       <p className="text-sm text-gray-500">A redirecionar para o login...</p>
+     </div>
+   );
+ }
 
   return (
   <div className="flex overflow-hidden bg-background h-screen">
