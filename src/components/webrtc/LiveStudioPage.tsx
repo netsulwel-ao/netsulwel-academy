@@ -333,15 +333,13 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
   useEffect(() => {
     if (!user || !liveData) return;
     if (isHost) {
-      // Host joins as soon as liveData is available and not yet connected
       if (!connected && !error) join();
     } else {
-      // Viewer joins once — the internal Firestore listener in joinViewer
-      // handles automatic reconnect when the host rejoins with a new session
-      if (!sessionId && !error) join();
+      // Viewer: join once — internal Firestore listener handles reconnects automatically
+      if (!sessionId) join();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [liveData, user]);
+  }, [liveData?.id, user?.uid, isHost]);
 
   // ─── Handle live ended (viewer) ────────────────────────────
   useEffect(() => {
@@ -430,149 +428,216 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
           onUseAsMic={(sessionId, trackName) => useRemoteTrack(sessionId, trackName, "audio")}
         />
       )}
-      {/* ── Top bar ──────────────────────────────────────── */}
-      <div className="h-12 bg-gray-900/95 backdrop-blur border-b border-gray-800 flex items-center justify-between px-3 shrink-0 z-20">
-        <div className="flex items-center gap-2 min-w-0">
-          {!isHost && (
-            <button
-              onClick={() => window.history.back()}
-              className="p-1.5 -ml-1 text-gray-400 hover:text-white transition-colors shrink-0"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </button>
-          )}
-          {showLiveBadge && (
-            <span className="flex items-center gap-1.5 text-red-400 text-xs font-bold shrink-0">
-              <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
-              AO VIVO
-            </span>
-          )}
-          <h1 className="text-sm font-semibold text-white truncate min-w-0">
-            {liveData?.title || "Live"}
-          </h1>
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          {showTimer && (
-            <span className="text-xs text-gray-400 font-mono hidden sm:inline">{fmtElapsed(elapsed)}</span>
-          )}
-          <span className="flex items-center gap-1 text-xs text-gray-400">
-            <Users className="h-3.5 w-3.5" />
-            {participantCount}
-          </span>
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="md:hidden p-1.5 text-gray-400 hover:text-white transition-colors"
-          >
-            {sidebarOpen ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
-          </button>
-        </div>
-      </div>
+      {/* ── VIEWER LAYOUT (mobile-first, imersivo) ──────────── */}
+      {!isHost ? (
+        <div className="flex-1 flex flex-col overflow-hidden md:flex-row">
 
-      {/* ── Main content ─────────────────────────────────── */}
-      <div className="flex-1 flex overflow-hidden relative">
-        {/* Video area */}
-        <div className="flex-1 bg-gray-950 relative min-h-0">
-          {isHost ? (
-            <>
-              {localStream ? (
-                <VideoElement stream={localStream} muted className="h-full w-full" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center px-6">
-                  <div className="text-center space-y-4 max-w-xs">
-                    <div className="h-24 w-24 mx-auto rounded-full bg-gray-900 border border-gray-800 flex items-center justify-center">
-                      <span className="text-4xl">📡</span>
-                    </div>
-                    <p className="text-gray-500 text-sm">A preparar câmara...</p>
-                  </div>
-                </div>
-              )}
-            </>
-          ) : (
-            <>
-              {hostStream ? (
-                <>
-                  <VideoElement stream={hostStream} muted={viewerMuted} className="h-full w-full" />
+          {/* Área de vídeo — ocupa tudo em mobile, parte em desktop */}
+          <div className="relative bg-black flex-1 min-h-0">
+            {hostStream ? (
+              <>
+                <VideoElement stream={hostStream} muted={viewerMuted} className="h-full w-full" />
 
-                  {viewerMuted && (
-                    <button
-                      onClick={handleUnmute}
-                      className="absolute inset-0 flex items-center justify-center bg-black/30 z-10 transition-opacity"
-                    >
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="h-16 w-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
-                          <VolumeX className="h-7 w-7 text-white" />
-                        </div>
-                        <div className="text-center">
-                          <p className="text-white font-medium text-sm">Clique para ouvir</p>
-                          <p className="text-gray-400 text-xs mt-1">Áudio desativado por segurança</p>
-                        </div>
+                {/* Overlay de mute — toque para ouvir */}
+                {viewerMuted && (
+                  <button
+                    onClick={handleUnmute}
+                    className="absolute inset-0 flex items-center justify-center bg-black/40 z-10"
+                  >
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="h-16 w-16 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                        <VolumeX className="h-7 w-7 text-white" />
                       </div>
-                    </button>
-                  )}
+                      <p className="text-white font-semibold text-sm">Toque para ouvir</p>
+                    </div>
+                  </button>
+                )}
 
-                  {!viewerMuted && (
+                {/* HUD sobreposto no vídeo */}
+                <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-3 pt-3 pointer-events-none z-10">
+                  {/* Esquerda: voltar + título */}
+                  <div className="flex items-center gap-2 min-w-0">
                     <button
-                      onClick={() => setViewerMuted(true)}
-                      className="absolute top-3 right-3 sm:hidden p-2 bg-black/50 backdrop-blur-sm rounded-full text-white/70 hover:text-white transition-colors z-10"
+                      onClick={() => window.history.back()}
+                      className="pointer-events-auto p-1.5 bg-black/50 backdrop-blur-sm rounded-full text-white"
                     >
-                      <Volume2 className="h-4 w-4" />
+                      <ArrowLeft className="h-4 w-4" />
                     </button>
-                  )}
-
-                  <div className="absolute top-3 left-3 sm:hidden">
-                    <span className="flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-red-400 text-xs font-bold px-2.5 py-1 rounded-full">
-                      <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+                    <div className="bg-black/50 backdrop-blur-sm rounded-full px-2.5 py-1 min-w-0">
+                      <p className="text-white text-xs font-semibold truncate max-w-[140px]">{liveData?.title || "Live"}</p>
+                    </div>
+                  </div>
+                  {/* Direita: AO VIVO + timer + participantes */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="flex items-center gap-1 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
                       AO VIVO
                     </span>
-                  </div>
-
-                  <div className="absolute bottom-3 left-3 sm:hidden">
-                    <span className="bg-black/60 backdrop-blur-sm text-xs text-gray-300 font-mono px-2.5 py-1 rounded-full">
-                      {fmtElapsed(elapsed)}
-                    </span>
-                  </div>
-                </>
-              ) : (
-                <div className="flex h-full w-full items-center justify-center px-6">
-                  <div className="text-center space-y-4 max-w-xs">
-                    <div className="relative mx-auto h-24 w-24">
-                      <div className="absolute inset-0 rounded-full border-2 border-purple/30 animate-ping" />
-                      <div className="relative h-24 w-24 rounded-full bg-gray-900 border border-gray-800 flex items-center justify-center">
-                        <span className="text-4xl">📡</span>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-white font-medium">
-                        {wasEverConnected
-                          ? "A aguardar que o professor volte..."
-                          : liveData?.status === "live"
-                            ? "A ligar ao professor..."
-                            : "A aguardar início..."}
-                      </p>
-                      <p className="text-gray-500 text-sm">
-                        {wasEverConnected
-                          ? "A ligação será retomada automaticamente"
-                          : liveData?.status === "live"
-                            ? "A transmissão será iniciada em breve"
-                            : "O professor ainda não começou a live"}
-                      </p>
-                    </div>
+                    {showTimer && (
+                      <span className="bg-black/50 backdrop-blur-sm text-white text-xs font-mono px-2 py-0.5 rounded-full">
+                        {fmtElapsed(elapsed)}
+                      </span>
+                    )}
+                    <button
+                      onClick={() => setSidebarOpen(true)}
+                      className="pointer-events-auto relative p-1.5 bg-black/50 backdrop-blur-sm rounded-full text-white md:hidden"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
-              )}            </>
-          )}
+
+                {/* Botão mudo no canto (quando com áudio) */}
+                {!viewerMuted && (
+                  <button
+                    onClick={() => setViewerMuted(true)}
+                    className="absolute bottom-20 right-3 p-2 bg-black/50 backdrop-blur-sm rounded-full text-white/80 z-10 md:hidden"
+                  >
+                    <Volume2 className="h-4 w-4" />
+                  </button>
+                )}
+              </>
+            ) : (
+              /* Sem stream — estado de espera */
+              <div className="flex h-full w-full items-center justify-center px-6">
+                {/* HUD de voltar em mobile */}
+                <button
+                  onClick={() => window.history.back()}
+                  className="absolute top-3 left-3 p-1.5 bg-gray-800/80 backdrop-blur-sm rounded-full text-white md:hidden z-10"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+                <div className="text-center space-y-4 max-w-xs">
+                  <div className="relative mx-auto h-20 w-20">
+                    <div className="absolute inset-0 rounded-full border-2 border-purple/30 animate-ping" />
+                    <div className="relative h-20 w-20 rounded-full bg-gray-900 border border-gray-800 flex items-center justify-center">
+                      <span className="text-3xl">📡</span>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <p className="text-white font-semibold text-sm">
+                      {wasEverConnected
+                        ? "A aguardar que o professor volte..."
+                        : liveData?.status === "live"
+                          ? "A ligar ao professor..."
+                          : "A aguardar início..."}
+                    </p>
+                    <p className="text-gray-500 text-xs">
+                      {wasEverConnected
+                        ? "A ligação retomará automaticamente"
+                        : liveData?.status === "live"
+                          ? "A transmissão será iniciada em breve"
+                          : "O professor ainda não começou a live"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Chat — coluna no desktop, drawer no mobile */}
+          <div className="hidden md:flex w-80 bg-gray-900 border-l border-gray-800 flex-col shrink-0">
+            <div className="px-4 py-3 border-b border-gray-800 shrink-0">
+              <h3 className="text-sm font-semibold text-white">Chat da Live</h3>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <LiveChat liveId={liveId} role="viewer" />
+            </div>
+          </div>
+
+          {/* Bottom bar do viewer */}
+          <div className="absolute bottom-0 left-0 right-0 md:hidden z-10">
+            <div className="bg-gray-900/90 backdrop-blur border-t border-gray-800 px-4 py-3 flex items-center justify-between gap-3">
+              {isSpeaker ? (
+                <div className="flex items-center gap-3 flex-1">
+                  <button
+                    onClick={toggleMic}
+                    className={`h-10 w-10 flex items-center justify-center rounded-full transition-colors shrink-0 ${
+                      isMicOn ? "bg-gray-700 text-white" : "bg-red-600 text-white"
+                    }`}
+                  >
+                    {isMicOn ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+                  </button>
+                  <span className="text-xs text-green-400 font-semibold">A falar</span>
+                </div>
+              ) : (
+                <button
+                  onClick={toggleHand}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all active:scale-95 ${
+                    handRaised
+                      ? "bg-amber-500 text-white"
+                      : "bg-gray-800 text-gray-300 border border-gray-700"
+                  }`}
+                >
+                  <Hand className="h-4 w-4" />
+                  {handRaised ? "Mão levantada" : "Pedir para falar"}
+                </button>
+              )}
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="h-10 w-10 flex items-center justify-center bg-gray-800 text-gray-400 rounded-full shrink-0"
+              >
+                <MessageCircle className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom bar no desktop */}
+          <div className="hidden md:block shrink-0">
+            <div className="bg-gray-900 border-t border-gray-800 px-4 py-3 flex items-center justify-center gap-3">
+              {isSpeaker ? (
+                <>
+                  <button
+                    onClick={toggleMic}
+                    className={`h-10 w-10 flex items-center justify-center rounded-full transition-colors ${
+                      isMicOn ? "bg-gray-800 text-white hover:bg-gray-700" : "bg-red-600 text-white hover:bg-red-500"
+                    }`}
+                  >
+                    {isMicOn ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+                  </button>
+                  <span className="text-xs text-green-400 font-semibold">A falar</span>
+                </>
+              ) : (
+                <button
+                  onClick={toggleHand}
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all active:scale-95 ${
+                    handRaised ? "bg-amber-500 text-white" : "bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700"
+                  }`}
+                >
+                  <Hand className="h-4 w-4" />
+                  {handRaised ? "Mão levantada" : "Pedir para falar"}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* ── Sidebar — desktop ───────────────────────────── */}
-        <div className="hidden md:flex w-80 bg-gray-900 border-l border-gray-800 flex-col shrink-0">
-          {isHost && (
+      ) : (
+
+        <div className="flex-1 flex overflow-hidden relative">
+          {/* Video area */}
+          <div className="flex-1 bg-gray-950 relative min-h-0">
+            {localStream ? (
+              <VideoElement stream={localStream} muted className="h-full w-full" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center px-6">
+                <div className="text-center space-y-4 max-w-xs">
+                  <div className="h-24 w-24 mx-auto rounded-full bg-gray-900 border border-gray-800 flex items-center justify-center">
+                    <span className="text-4xl">📡</span>
+                  </div>
+                  <p className="text-gray-500 text-sm">A preparar câmara...</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar desktop */}
+          <div className="hidden md:flex w-80 bg-gray-900 border-l border-gray-800 flex-col shrink-0">
             <div className="flex border-b border-gray-800">
               <button
                 onClick={() => setActiveTab("chat")}
                 className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
-                  activeTab === "chat"
-                    ? "text-white border-b-2 border-purple"
-                    : "text-gray-500 hover:text-gray-300"
+                  activeTab === "chat" ? "text-white border-b-2 border-purple" : "text-gray-500 hover:text-gray-300"
                 }`}
               >
                 Chat
@@ -585,36 +650,46 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
               <button
                 onClick={() => setActiveTab("alunos")}
                 className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "alunos"
-                    ? "text-white border-b-2 border-purple"
-                    : "text-gray-500 hover:text-gray-300"
+                  activeTab === "alunos" ? "text-white border-b-2 border-purple" : "text-gray-500 hover:text-gray-300"
                 }`}
               >
                 Alunos ({participantCount})
               </button>
             </div>
-          )}
-          {!isHost && (
-            <div className="p-3 border-b border-gray-800">
-              <h3 className="text-sm font-semibold text-white">Chat da Live</h3>
+            <div className="flex-1 overflow-hidden">
+              {activeTab === "chat" ? <LiveChat liveId={liveId} role="host" /> : <AlunosPanel liveId={liveId} />}
             </div>
-          )}
-          <div className="flex-1 overflow-hidden">
-            {isHost ? (
-              activeTab === "chat" ? (
-                <LiveChat liveId={liveId} role="host" />
-              ) : (
-                <AlunosPanel liveId={liveId} />
-              )
-            ) : (
-              <LiveChat liveId={liveId} role="viewer" />
-            )}
           </div>
         </div>
-      </div>
+      )}
 
-      {/* ── Controls (HOST) or Raise Hand (VIEWER) ────────── */}
-      {isHost ? (
+      {/* ── HOST top bar (só host) ────────────────────────── */}
+      {isHost && (
+        <div className="absolute top-0 left-0 right-0 h-12 bg-gray-900/95 backdrop-blur border-b border-gray-800 flex items-center justify-between px-3 z-20">
+          <div className="flex items-center gap-2 min-w-0">
+            {showLiveBadge && (
+              <span className="flex items-center gap-1.5 text-red-400 text-xs font-bold shrink-0">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+                AO VIVO
+              </span>
+            )}
+            <h1 className="text-sm font-semibold text-white truncate min-w-0">{liveData?.title || "Live"}</h1>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            {showTimer && <span className="text-xs text-gray-400 font-mono hidden sm:inline">{fmtElapsed(elapsed)}</span>}
+            <span className="flex items-center gap-1 text-xs text-gray-400">
+              <Users className="h-3.5 w-3.5" />
+              {participantCount}
+            </span>
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-1.5 text-gray-400">
+              {sidebarOpen ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── HOST controls ────────────────────────────────── */}
+      {isHost && (
         <ControlsBar
           isMicOn={isMicOn}
           isCameraOn={isCameraOn}
@@ -627,99 +702,28 @@ export default function LiveStudioPage({ liveId, role }: LiveStudioPageProps) {
           onOpenRemoteDevice={() => setShowRemoteDevice(true)}
           participantCount={participantCount}
         />
-      ) : (
-        <div className="h-14 sm:h-16 bg-gray-900/95 backdrop-blur border-t border-gray-800 flex items-center justify-center gap-3 px-4 shrink-0">
-          {isSpeaker ? (
-            <>
-              <button
-                onClick={toggleMic}
-                className={`h-10 w-10 flex items-center justify-center rounded-full transition-colors ${
-                  isMicOn
-                    ? "bg-gray-800 text-white hover:bg-gray-700"
-                    : "bg-red-500 text-white hover:bg-red-600"
-                }`}
-                title={isMicOn ? "Desligar microfone" : "Ligar microfone"}
-              >
-                {isMicOn ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
-              </button>
-              <span className="text-xs text-green-400 font-medium">A falar</span>
-            </>
-          ) : (
-            <button
-              onClick={toggleHand}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all active:scale-95 ${
-                handRaised
-                  ? "bg-amber-500 text-white shadow-lg shadow-amber-500/30"
-                  : "bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700"
-              }`}
-            >
-              <Hand className="h-4 w-4" />
-              {handRaised ? "Mão levantada" : "Pedir para falar"}
-            </button>
-          )}
-        </div>
       )}
 
-      {/* ── Mobile sidebar overlay ───────────────────────── */}
+      {/* ── Mobile chat drawer (viewer + host) ───────────── */}
       <div
-        className={`md:hidden fixed inset-x-0 bottom-0 z-20 bg-gray-900 border-t border-gray-800 transition-transform duration-300 ease-out ${
+        className={`md:hidden fixed inset-x-0 bottom-0 z-30 bg-gray-900 border-t border-gray-800 transition-transform duration-300 ease-out ${
           sidebarOpen ? "translate-y-0" : "translate-y-full"
         }`}
-        style={{ height: "65vh" }}
+        style={{ height: "70dvh" }}
       >
-        {isHost && (
-          <div className="flex border-b border-gray-800">
-            <button
-              onClick={() => setActiveTab("chat")}
-              className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
-                activeTab === "chat"
-                  ? "text-white border-b-2 border-purple"
-                  : "text-gray-500 hover:text-gray-300"
-              }`}
-            >
-              Chat
-              {handRaisedCount > 0 && (
-                <span className="absolute top-2 right-3 h-4 min-w-4 px-1 rounded-full bg-amber-500 text-[10px] font-bold text-white flex items-center justify-center">
-                  {handRaisedCount}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab("alunos")}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                activeTab === "alunos"
-                  ? "text-white border-b-2 border-purple"
-                  : "text-gray-500 hover:text-gray-300"
-              }`}
-            >
-              Alunos ({participantCount})
-            </button>
-          </div>
-        )}
-        {!isHost && (
-          <div className="p-3 border-b border-gray-800">
-            <h3 className="text-sm font-semibold text-white">Chat da Live</h3>
-          </div>
-        )}
-        <div className="h-[calc(65vh-48px)] overflow-hidden">
-          {isHost ? (
-            activeTab === "chat" ? (
-              <LiveChat liveId={liveId} role="host" />
-            ) : (
-              <AlunosPanel liveId={liveId} />
-            )
-          ) : (
-            <LiveChat liveId={liveId} role="viewer" />
-          )}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800 shrink-0">
+          <h3 className="text-sm font-semibold text-white">Chat da Live</h3>
+          <button onClick={() => setSidebarOpen(false)} className="p-1 text-gray-500">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="h-[calc(70dvh-49px)] overflow-hidden">
+          <LiveChat liveId={liveId} role={isHost ? "host" : "viewer"} />
         </div>
       </div>
 
-      {/* ── Backdrop ─────────────────────────────────────── */}
       {sidebarOpen && (
-        <div
-          className="md:hidden fixed inset-0 bg-black/40 z-10"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="md:hidden fixed inset-0 bg-black/50 z-20" onClick={() => setSidebarOpen(false)} />
       )}
     </div>
   );
