@@ -434,10 +434,10 @@ export default function CourseDetailPage() {
               {/* Recording player — shown when a completed lesson with a URL is selected */}
               {liveSelectedVideo?.url && (
                 <div className="bg-bg-surface border border-border-default overflow-hidden">
-                  <div className="px-5 py-3 border-b border-border-default flex items-center justify-between">
-                    <p className="text-sm font-bold text-text-primary truncate">{liveSelectedVideo.title}</p>
+                  <div className="px-4 sm:px-5 py-3 border-b border-border-default flex items-center justify-between gap-3">
+                    <p className="text-sm font-bold text-text-primary truncate min-w-0">{liveSelectedVideo.title}</p>
                     <button onClick={() => setLiveSelectedVideo(null)}
-                      className="text-sm text-text-muted hover:text-text-primary transition-colors">
+                      className="text-xs sm:text-sm text-text-muted hover:text-text-primary transition-colors shrink-0">
                       Fechar
                     </button>
                   </div>
@@ -465,7 +465,7 @@ export default function CourseDetailPage() {
               <div className="space-y-3">
                 {course.modules.map((module, mi) => (
                   <div key={mi} className="bg-bg-surface border border-border-default overflow-hidden">
-                    <div className="px-5 py-3 border-b border-border-default">
+                    <div className="px-4 sm:px-5 py-3 border-b border-border-default">
                       <p className="text-sm font-bold text-blue-400 uppercase tracking-wider">Módulo {mi + 1}{module.title ? ` — ${module.title}` : ""}</p>
                     </div>
                     <div className="divide-y divide-border-default">
@@ -473,44 +473,45 @@ export default function CourseDetailPage() {
                         const st = getLessonStatus(video.scheduledAt, video.duration);
                         const hasRecording = st.status === "ended" && hasAccess && !!video.url;
                         return (
-                          <div key={vi} className="flex items-center gap-4 px-5 py-4">
-                            <div className={`flex h-10 w-10 shrink-0 items-center justify-center ${
-                              st.status === "live" ? "bg-green-600 animate-pulse" :
-                              st.status === "ended" ? "bg-bg-surface-2" : "bg-bg-surface-2"
-                            }`}>
-                              {st.status === "live" ? <Radio className="h-5 w-5 text-text-primary" /> :
-                               st.status === "ended" ? <CheckCircle2 className="h-5 w-5 text-text-muted" /> :
-                               <Clock className="h-5 w-5 text-text-muted" />}
+                          <div key={vi} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-4 sm:px-5 py-4">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div className={`flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center ${
+                                st.status === "live" ? "bg-green-600 animate-pulse" :
+                                st.status === "ended" ? "bg-bg-surface-2" : "bg-bg-surface-2"
+                              }`}>
+                                {st.status === "live" ? <Radio className="h-4 w-4 sm:h-5 sm:w-5 text-text-primary" /> :
+                                 st.status === "ended" ? <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-text-muted" /> :
+                                 <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-text-muted" />}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm sm:text-base font-medium text-text-primary truncate">{video.title || `Aula ${vi + 1}`}</p>
+                                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:text-sm text-text-muted mt-0.5">
+                                  {video.scheduledAt && <span>{formatDate(video.scheduledAt)}</span>}
+                                  {video.duration && <span className="hidden sm:inline">· {video.duration} min</span>}
+                                  {video.duration && <span className="sm:hidden">{video.duration} min</span>}
+                                </div>
+                              </div>
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-base font-medium text-text-primary truncate">{video.title || `Aula ${vi + 1}`}</p>
-                              {video.scheduledAt && (
-                                <p className="text-sm text-text-muted mt-0.5">{formatDate(video.scheduledAt)}</p>
-                              )}
-                              {video.duration && (
-                                <p className="text-sm text-text-muted">Duração: {video.duration} min</p>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-3 shrink-0">
-                              <span className={`px-2.5 py-1 text-sm font-bold uppercase tracking-wider ${
+                            <div className="flex items-center gap-2 sm:gap-3 shrink-0 pl-12 sm:pl-0">
+                              <span className={`px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-bold uppercase tracking-wider ${
                                 st.status === "live" ? "bg-green-500/15 text-green-400 border border-green-500" :
                                 st.status === "ended" ? "bg-bg-surface-2 text-text-muted border border-border-strong" :
                                 "bg-blue-500/15 text-blue-400 border border-blue-500"
                               }`}>{st.label}</span>
                               {st.status === "live" && hasAccess && (
                                 <Link href={`/dashboard/courses/${course.id}/live/${mi}/${vi}`}
-                                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-text-primary text-sm font-bold transition-colors">
-                                  <Radio className="h-4 w-4" /> Entrar
+                                  className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-green-600 hover:bg-green-700 text-text-primary text-xs sm:text-sm font-bold transition-colors">
+                                  <Radio className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Entrar
                                 </Link>
                               )}
                               {hasRecording && (
                                 <button onClick={() => setLiveSelectedVideo(video)}
-                                  className={`flex items-center gap-2 px-4 py-2 text-sm font-bold transition-colors ${
+                                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold transition-colors ${
                                     liveSelectedVideo === video
                                       ? "bg-purple text-white"
                                       : "bg-purple/15 text-purple hover:bg-purple/25 border border-purple"
                                   }`}>
-                                  <Play className="h-4 w-4" /> Assistir
+                                  <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Assistir
                                 </button>
                               )}
                             </div>
