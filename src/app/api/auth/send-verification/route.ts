@@ -191,7 +191,7 @@ export async function POST(req: NextRequest) {
     try {
       admin = getFirebaseAdmin();
     } catch (initErr) {
-      console.error("Firebase Admin init error:", initErr);
+      console.error("[send-verification] Firebase Admin init error:", initErr);
       return NextResponse.json(
         { error: "Serviço de autenticação indisponível." },
         { status: 500 }
@@ -209,7 +209,7 @@ export async function POST(req: NextRequest) {
       if (msg.includes("user-not-found") || msg.includes("EMAIL_NOT_FOUND")) {
         return NextResponse.json({ success: true });
       }
-      console.error("generateEmailVerificationLink error:", msg);
+      console.error("[send-verification] generateEmailVerificationLink error:", msg);
       return NextResponse.json(
         { error: "Erro ao gerar link de verificação." },
         { status: 500 }
@@ -222,39 +222,37 @@ export async function POST(req: NextRequest) {
     const siteUrl = origin || `https://${req.headers.get("host") || "netsulwel.tech"}`;
 
     if (!smtpConfigured) {
-      console.log("SMTP não configurado. Link de verificação (dev):", verifyLink);
-      if (process.env.NODE_ENV === "development") {
-        return NextResponse.json({ success: true, devVerifyLink: verifyLink });
-      }
-      return NextResponse.json(
-        { error: "Serviço de email temporariamente indisponível." },
-        { status: 500 }
-      );
+      console.log("[send-verification] SMTP não configurado. Envio ignorado para:", email);
+      return NextResponse.json({ success: true, skipped: true, reason: "smtp_not_configured" });
     }
 
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
-      secure: true,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT || 465),
+        secure: true,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM,
-      to: email,
-      subject: "Confirme o seu email — Netsulwel Academy",
-      html: buildVerificationEmailHtml(verifyLink, siteUrl),
-    });
+      await transporter.sendMail({
+        from: process.env.EMAIL_FROM,
+        to: email,
+        subject: "Confirme o seu email — Netsulwel Academy",
+        html: buildVerificationEmailHtml(verifyLink, siteUrl),
+      });
+
+      console.log("[send-verification] Email enviado com sucesso para:", email);
+    } catch (smtpErr) {
+      console.error("[send-verification] SMTP error:", smtpErr);
+      return NextResponse.json({ success: true, skipped: true, reason: "smtp_error" });
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("Send verification error:", err);
-    return NextResponse.json(
-      { error: "Erro ao enviar email de verificação." },
-      { status: 500 }
-    );
+    console.error("[send-verification] Unexpected error:", err);
+    return NextResponse.json({ success: true, skipped: true, reason: "unknown_error" });
   }
 }
