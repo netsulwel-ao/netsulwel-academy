@@ -2,8 +2,6 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
 import {
   BookOpen, Loader2, Eye, Share2, CheckCircle2,
   ArrowRight, Search, X, UserPlus,
@@ -18,14 +16,6 @@ interface Member {
   userId: string;
   name: string;
   email: string;
-}
-
-function toDate(raw: unknown): Date {
-  if (!raw) return new Date(0);
-  if (raw instanceof Date) return raw;
-  if (typeof raw === "object" && raw !== null && "toDate" in raw)
-    return (raw as { toDate: () => Date }).toDate();
-  return new Date(0);
 }
 
 export default function InstitutionCoursesPage() {
@@ -45,41 +35,10 @@ export default function InstitutionCoursesPage() {
   const loadCourses = useCallback(async () => {
     if (!institutionId) return;
     try {
-      const membersSnap = await getDocs(
-        query(collection(db, "users"), where("institutionId", "==", institutionId))
-      );
-      const teacherUids = membersSnap.docs
-        .filter(d => d.data().institutionRole === "teacher")
-        .map(d => d.id);
-
-      // Also check institutionMembers collection
-      const instMembersSnap = await getDocs(
-        query(collection(db, "institutionMembers"),
-          where("institutionId", "==", institutionId),
-          where("status", "==", "active"),
-          where("role", "==", "teacher")
-        )
-      );
-      instMembersSnap.docs.forEach(d => {
-        const uid = d.data().userId;
-        if (!teacherUids.includes(uid)) teacherUids.push(uid);
-      });
-
-      if (teacherUids.length === 0) { setLoading(false); return; }
-
-      const chunks: string[][] = [];
-      for (let i = 0; i < teacherUids.length; i += 30) chunks.push(teacherUids.slice(i, i + 30));
-
-      const allCourses: Course[] = [];
-      await Promise.all(chunks.map(async chunk => {
-        const snap = await getDocs(
-          query(collection(db, "courses"), where("createdBy", "in", chunk))
-        );
-        snap.docs.forEach(d => allCourses.push({ id: d.id, ...d.data() } as Course));
-      }));
-
-      allCourses.sort((a, b) => toDate(b.createdAt).getTime() - toDate(a.createdAt).getTime());
-      setCourses(allCourses);
+      const res = await fetchWithAuth(`/api/institutions/${institutionId}/courses`);
+      if (!res.ok) throw new Error("Falha ao carregar cursos");
+      const data = await res.json();
+      setCourses(data.courses || []);
     } catch (err) {
       logger.error("InstitutionCourses: failed to load", err, { institutionId });
       toast.error("Erro ao carregar cursos.");
