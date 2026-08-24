@@ -35,3 +35,16 @@ export interface InstitutionUser {
   institutionId: string;
   institutionRole: InstitutionUserRole;
 }
+
+export interface InstitutionMember {
+  id?: string;
+  institutionId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userPhoto?: string;
+  role: "teacher" | "student";
+  addedBy: string;
+  addedAt?: unknown;
+  status: "active" | "inactive";
+}

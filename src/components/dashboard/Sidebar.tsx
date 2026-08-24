@@ -7,7 +7,8 @@ import {
   PanelLeftClose, PanelLeft, FileText, Award,
   Crown, GraduationCap, Building2, User,
   LayoutDashboard,
-  Video, DollarSign, TrendingUp, MessageCircle, X
+  Video, DollarSign, TrendingUp, MessageCircle, X,
+  Radio,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -51,6 +52,7 @@ const institutionNav = [
   { icon: LayoutDashboard, label: "Visão Geral", href: "/dashboard/institution" },
   { icon: Users, label: "Membros", href: "/dashboard/institution/members" },
   { icon: BookOpen, label: "Cursos", href: "/dashboard/institution/courses" },
+  { icon: Radio, label: "Lives", href: "/dashboard/institution/lives" },
   { icon: Settings, label: "Definições", href: "/dashboard/institution/settings" },
 ];
 

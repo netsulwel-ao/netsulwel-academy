@@ -15,7 +15,9 @@ export interface LiveSession {
   status: LiveStatus;
   createdBy: string;          // admin UID (consistente com courses/trails)
   institutionId?: string;     // ID da instituição a que pertence
+  assignedInstitutionId?: string; // ID da instituição que atribuiu o professor
   hostName?: string;
+  hostUid?: string;          // UID do professor anfitrião
   roomName: string;           // unique room slug
   startedAt?: string;
   endedAt?: string;

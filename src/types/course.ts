@@ -63,6 +63,9 @@ export interface Course {
   totalDuration?: string;    // calculado
   createdBy?: string;          // UID do admin que criou
   institutionId?: string;     // ID da instituição a que pertence
+  assignedInstitutionId?: string; // ID da instituição que atribuiu o professor
+  instructorName?: string;    // nome do professor atribuído
+  instructorEmail?: string;   // email do professor atribuído
   sellerId?: string;          // UID do professor/instituição que vende (para taxas)
   feePercentage?: number;     // Taxa da plataforma para este curso (ex: 10 para 10%)
   views?: number;

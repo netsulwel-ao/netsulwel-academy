@@ -94,8 +94,15 @@ const INSTITUTION_STEPS: OnboardingStep[] = [
     icon: BookOpen,
     tag: "// cursos",
     title: "Gere os cursos da instituição",
-    desc: "Em 'Cursos' vês todos os cursos criados pelos professores da tua instituição e controlas quais estão publicados.",
+    desc: "Em 'Cursos' vês todos os cursos criados pelos professores da tua instituição e controlas quais estão publicados. Podes atribuir professores a cursos específicos.",
     action: { label: "Ver cursos", href: "/dashboard/institution/courses" },
+  },
+  {
+    icon: Radio,
+    tag: "// lives",
+    title: "Crie e gerir lives",
+    desc: "Em 'Lives' podes criar sessões ao vivo, atribuir professores anfitriões e acompanhar a audiência.",
+    action: { label: "Ver lives", href: "/dashboard/institution/lives" },
   },
   {
     icon: Settings,
