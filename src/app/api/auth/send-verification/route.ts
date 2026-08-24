@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
     });
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://academia.netsulwel.tech";
-    const verifyUrl = `${siteUrl}/verify-email?token=${token}`;
+    const verifyUrl = `${siteUrl}/api/auth/verify-email?token=${token}`;
 
     try {
       const transporter = nodemailer.createTransport({

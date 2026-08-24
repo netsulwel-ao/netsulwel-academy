@@ -13,12 +13,22 @@ import { TransitionLink } from "@/components/TransitionLink";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
+async function forceTokenRefresh() {
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      const tokenResult = await user.getIdToken(true);
+      return !!tokenResult;
+    }
+  } catch { /* ignore */ }
+  return false;
+}
+
 function VerifyEmailContent() {
   const router = useRouter();
   const reduceMotion = useReducedMotion();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/dashboard";
-  const token = searchParams.get("token");
   const success = searchParams.get("success");
   const errorParam = searchParams.get("error");
   const { user, loading: authLoading } = useAuth();
@@ -41,11 +51,14 @@ function VerifyEmailContent() {
     if (!user) router.replace("/login");
   }, [authLoading, user, router]);
 
-  // Handle success from API redirect
+  // Handle success from API redirect — force token refresh to pick up emailVerified
   useEffect(() => {
     if (success === "true") {
-      setVerified(true);
-      auth.currentUser?.reload().catch(() => {});
+      (async () => {
+        await forceTokenRefresh();
+        await auth.currentUser?.reload();
+        setVerified(true);
+      })();
     }
   }, [success]);
 
@@ -61,6 +74,8 @@ function VerifyEmailContent() {
     setChecking(true);
     setError("");
     try {
+      // Force token refresh to get updated emailVerified claim
+      await forceTokenRefresh();
       await auth.currentUser.reload();
       if (auth.currentUser.emailVerified) {
         setVerified(true);
@@ -182,7 +197,7 @@ function VerifyEmailContent() {
               animate={{ opacity: 1, y: 0 }}
               className="flex items-center gap-3 bg-green-500/10 border border-green-500/20 px-4 py-3"
             >
-              <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0" />
+              <CheckCircle2 className="h-4 w-4 text-green-400" />
               <p className="text-sm text-green-300">Email reenviado com sucesso!</p>
             </motion.div>
           )}
