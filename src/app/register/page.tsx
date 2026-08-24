@@ -119,7 +119,7 @@ export default function RegisterPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
-      });
+      }).catch(() => {});
       router.push(`/verify-email${redirectTo !== "/dashboard" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`);
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code ?? "";

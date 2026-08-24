@@ -59,7 +59,7 @@ export default function TeacherRegisterPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
-      });
+      }).catch(() => {});
       router.push("/verify-email");
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code ?? "";

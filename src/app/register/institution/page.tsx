@@ -89,7 +89,7 @@ export default function InstitutionRegisterPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: adminEmail }),
-      });
+      }).catch(() => {});
       router.push("/verify-email");
     } catch (err: unknown) {
       if (createdUser) {
