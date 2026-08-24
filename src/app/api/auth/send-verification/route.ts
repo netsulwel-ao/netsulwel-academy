@@ -192,10 +192,7 @@ export async function POST(req: NextRequest) {
       admin = getFirebaseAdmin();
     } catch (initErr) {
       console.error("[send-verification] Firebase Admin init error:", initErr);
-      return NextResponse.json(
-        { error: "Serviço de autenticação indisponível." },
-        { status: 500 }
-      );
+      return NextResponse.json({ success: true, skipped: true, reason: "admin_init_error" });
     }
 
     let verifyLink: string;
@@ -210,10 +207,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true });
       }
       console.error("[send-verification] generateEmailVerificationLink error:", msg);
-      return NextResponse.json(
-        { error: "Erro ao gerar link de verificação." },
-        { status: 500 }
-      );
+      return NextResponse.json({ success: true, skipped: true, reason: "link_generation_error" });
     }
 
     const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
