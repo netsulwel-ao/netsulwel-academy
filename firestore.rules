@@ -40,6 +40,10 @@ service cloud.firestore {
       return getRole() == "institution";
     }
 
+    function isSameInstitution(institutionId) {
+      return isInstitutionAdmin() && getInstitutionId() == institutionId;
+    }
+
     // ── Data Validation ──────────────────────────────────
     function isValidEmail(email) {
       return email is string &&
@@ -90,7 +94,8 @@ service cloud.firestore {
     match /courses/{courseId} {
       allow read: if resource.data.status == "published" ||
         isAdminOrTeacher() ||
-        (isAuth() && resource.data.createdBy == request.auth.uid);
+        (isAuth() && resource.data.createdBy == request.auth.uid) ||
+        isSameInstitution(resource.data.institutionId);
       allow create: if isAdminOrTeacher();
       allow update: if isAdmin() ||
         (isTeacher() && resource.data.createdBy == request.auth.uid);
@@ -395,6 +400,18 @@ service cloud.firestore {
         (isAuth() && request.resource.data.uploadedBy == request.auth.uid);
       allow update: if isAdmin();
       allow delete: if isAdmin();
+    }
+
+    // ── institutionMembers ────────────────────────────────
+    match /institutionMembers/{memberId} {
+      allow read: if isInstitutionAdmin() && resource.data.institutionId == getInstitutionId();
+      allow write: if isInstitutionAdmin() && request.resource.data.institutionId == getInstitutionId();
+    }
+
+    // ── institutionInviteLinks ────────────────────────────
+    match /institutionInviteLinks/{linkId} {
+      allow read: if isInstitutionAdmin() && resource.data.institutionId == getInstitutionId();
+      allow create: if isInstitutionAdmin() && request.resource.data.institutionId == getInstitutionId();
     }
 
     // Bloqueia tudo o resto
